@@ -1294,6 +1294,10 @@ bool RISCVInstrInfo::verifyInstruction(const MachineInstr &MI,
         return false;
       }
     }
+    if (!RISCVII::hasSEWOp(TSFlags)) {
+      ErrInfo = "VL operand w/o SEW operand?";
+      return false;
+    }
   }
   if (RISCVII::hasSEWOp(TSFlags)) {
     unsigned OpIdx = RISCVII::getSEWOpNum(Desc);
@@ -1313,6 +1317,10 @@ bool RISCVInstrInfo::verifyInstruction(const MachineInstr &MI,
     uint64_t Policy = MI.getOperand(OpIdx).getImm();
     if (Policy > (RISCVII::TAIL_AGNOSTIC | RISCVII::MASK_AGNOSTIC)) {
       ErrInfo = "Invalid Policy Value";
+      return false;
+    }
+    if (!RISCVII::hasVLOp(TSFlags)) {
+      ErrInfo = "policy operand w/o VL operand?";
       return false;
     }
   }

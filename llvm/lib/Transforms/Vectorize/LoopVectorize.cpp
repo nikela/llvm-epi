@@ -147,6 +147,7 @@
 #include "llvm/Transforms/Vectorize/LoopVectorizationLegality.h"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <iterator>
@@ -1530,16 +1531,12 @@ public:
 
   /// Returns true if \p I is a memory instruction with consecutive memory
   /// access that can be widened.
-  bool
-  memoryInstructionCanBeWidened(Instruction *I,
-                                ElementCount VF = ElementCount::getFixed(1));
+  bool memoryInstructionCanBeWidened(Instruction *I, ElementCount VF);
 
   /// Returns true if \p I is a memory instruction in an interleaved-group
   /// of memory accesses that can be vectorized with wide vector loads/stores
   /// and shuffles.
-  bool
-  interleavedAccessCanBeWidened(Instruction *I,
-                                ElementCount VF = ElementCount::getFixed(1));
+  bool interleavedAccessCanBeWidened(Instruction *I, ElementCount VF);
 
   /// Check if \p Instr belongs to any interleaved access group.
   bool isAccessInterleaved(Instruction *Instr) {
@@ -7617,6 +7614,13 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
             // Scalarization of fixed length vectors "just works".
             return true;
 
+          // We have dedicated lowering for unpredicated uniform loads and
+          // stores.  Note that even with tail folding we know that at least
+          // one lane is active (i.e. generalized predication is not possible
+          // here), and the logic below depends on this fact.
+          if (!foldTailByMasking())
+            return true;
+
           // For scalable vectors, a uniform memop load is always
           // uniform-by-parts  and we know how to scalarize that.
           if (isa<LoadInst>(I))
@@ -7634,11 +7638,10 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
 
         // Load: Scalar load + broadcast
         // Store: Scalar store + isLoopInvariantStoreValue ? 0 : extract
-        // TODO: Avoid replicating loads and stores instead of relying on
-        // instcombine to remove them.
-        const InstructionCost ScalarizationCost =
-            isLegalToScalarize() ? getUniformMemOpCost(&I, VF)
-                                 : InstructionCost::getInvalid();
+        // FIXME: This cost is a significant under-estimate for tail folded
+        // memory ops.
+        const InstructionCost ScalarizationCost = isLegalToScalarize() ?
+          getUniformMemOpCost(&I, VF) : InstructionCost::getInvalid();
 
         // Choose better solution for the current VF,  Note that Invalid
         // costs compare as maximumal large.  If both are invalid, we get
@@ -9135,7 +9138,7 @@ VPRecipeBase *VPRecipeBuilder::tryToOptimizeInductionPHI(
         Phi, Operands[0], Step, *II,
         LoopVectorizationPlanner::getDecisionAndClampRange(
             [&](ElementCount VF) {
-              return !VF.isScalable() && CM.isScalarAfterVectorization(Phi, VF);
+              return CM.isScalarAfterVectorization(Phi, VF);
             },
             Range));
   }
@@ -10613,7 +10616,7 @@ void VPWidenPointerInductionRecipe::execute(VPTransformState &State) {
   auto *IVR = getParent()->getPlan()->getCanonicalIV();
   PHINode *CanonicalIV = cast<PHINode>(State.get(IVR, 0));
 
-  if (onlyScalarsGenerated()) {
+  if (onlyScalarsGenerated(State.VF)) {
     // This is the normalized GEP that starts counting at zero.
     Value *PtrInd = State.Builder.CreateSExtOrTrunc(
         CanonicalIV, IndDesc.getStep()->getType());
@@ -10894,6 +10897,15 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
     for (unsigned Part = 0; Part < State.UF; ++Part)
       State.ILV->scalarizeInstruction(UI, this, VPIteration(Part, 0),
                                       IsPredicated, State);
+    return;
+  }
+
+  // A store of a loop varying value to a loop invariant address only
+  // needs only the last copy of the store.
+  if (isa<StoreInst>(UI) && !getOperand(1)->getDef()) {
+    auto Lane = VPLane::getLastLaneForVF(State.VF);
+    State.ILV->scalarizeInstruction(UI, this, VPIteration(State.UF - 1, Lane), IsPredicated,
+                                    State);
     return;
   }
 

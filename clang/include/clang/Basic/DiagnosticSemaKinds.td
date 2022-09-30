@@ -562,6 +562,8 @@ def warn_cxx17_compat_using_decl_class_member_enumerator : Warning<
   "with C++ standards before C++20">, InGroup<CXXPre20Compat>, DefaultIgnore;
 def err_using_enum_is_dependent : Error<
   "using-enum cannot name a dependent type">;
+def err_using_enum_not_enum : Error<
+  "%0 is not an enumerated type">;
 def err_ambiguous_inherited_constructor : Error<
   "constructor of %0 inherited from multiple base class subobjects">;
 def note_ambiguous_inherited_constructor_using : Note<
@@ -2845,6 +2847,8 @@ def err_template_arg_list_constraints_not_satisfied : Error<
   "template template parameter|template}0 %1%2">;
 def note_substituted_constraint_expr_is_ill_formed : Note<
   "because substituted constraint expression is ill-formed%0">;
+def note_constraint_references_error
+    : Note<"constraint depends on a previously diagnosed expression">;
 def note_atomic_constraint_evaluated_to_false : Note<
   "%select{and|because}0 '%1' evaluated to false">;
 def note_concept_specialization_constraint_evaluated_to_false : Note<
@@ -5428,6 +5432,12 @@ def err_typename_refers_to_using_value_decl : Error<
   "%0 in %1">;
 def note_using_value_decl_missing_typename : Note<
   "add 'typename' to treat this using declaration as a type">;
+def warn_cxx17_compat_implicit_typename : Warning<"use of implicit 'typename' is "
+  "incompatible with C++ standards before C++20">, InGroup<CXX20Compat>,
+  DefaultIgnore;
+def ext_implicit_typename : ExtWarn<"missing 'typename' prior to dependent "
+  "type name %0%1; implicit 'typename' is a C++20 extension">,
+  InGroup<CXX20>;
 
 def err_template_kw_refers_to_non_template : Error<
   "%0%select{| following the 'template' keyword}1 "
@@ -6520,7 +6530,8 @@ def err_sizeof_alignof_function_type : Error<
 def err_openmp_default_simd_align_expr : Error<
   "invalid application of '__builtin_omp_required_simd_align' to an expression, only type is allowed">;
 def err_sizeof_alignof_typeof_bitfield : Error<
-  "invalid application of '%select{sizeof|alignof|typeof}0' to bit-field">;
+  "invalid application of '%select{sizeof|alignof|typeof|typeof_unqual}0' to "
+  "bit-field">;
 def err_alignof_member_of_incomplete_type : Error<
   "invalid application of 'alignof' to a field of a class still being defined">;
 def err_vecstep_non_scalar_vector_type : Error<
@@ -6919,7 +6930,7 @@ def err_typecheck_unary_expr : Error<
 def err_typecheck_indirection_requires_pointer : Error<
   "indirection requires pointer operand (%0 invalid)">;
 def ext_typecheck_indirection_through_void_pointer : ExtWarn<
-  "ISO C++ does not allow indirection on operand of type %0">,
+  "ISO %select{C|C++}0 does not allow indirection on operand of type %1">,
   InGroup<DiagGroup<"void-ptr-dereference">>;
 def warn_indirection_through_null : Warning<
   "indirection of non-volatile null pointer will be deleted, not trap">,
@@ -11698,6 +11709,9 @@ def err_hlsl_missing_semantic_annotation : Error<
 def err_hlsl_init_priority_unsupported : Error<
   "initializer priorities are not supported in HLSL">;
 
+def err_hlsl_unsupported_register_type : Error<"invalid resource class specifier '%0' used; expected 'b', 's', 't', or 'u'">;
+def err_hlsl_unsupported_register_number : Error<"register number should be an integer">;
+def err_hlsl_expected_space : Error<"invalid space specifier '%0' used; expected 'space' followed by an integer, like space1">;
 def err_hlsl_pointers_unsupported : Error<
   "%select{pointers|references}0 are unsupported in HLSL">;
 

@@ -490,8 +490,8 @@ def : DocEPIBuiltin<vfmacc>
   let Description = [{Use these builtins to do an elementwise floating-point
 multiply and add.
 
-At low level, the parameter `c` will be located in a vector register that will
-be overwritten by the `vfmacc` instruction.}];
+At low level, the parameter `+c+` will be located in a vector register that will
+be overwritten by the `+vfmacc+` instruction.}];
   let Instruction = "vfmacc.vv";
 
   let ParameterNames = ["c", "a", "b"];
@@ -517,8 +517,8 @@ def : DocEPIBuiltin<vfmadd>
   let Description = [{Use these builtins to do an elementwise floating-point
 multiply and add.
 
-At low level, the parameter `a` will be located in a vector register that will
-be overwritten by the `vfmadd` instruction.}];
+At low level, the parameter `+a+` will be located in a vector register that will
+be overwritten by the `+vfmadd+` instruction.}];
   let Instruction = "vfmadd.vv";
 
   let ParameterNames = ["a", "b", "c"];
@@ -604,8 +604,8 @@ def : DocEPIBuiltin<vfmsac>
   let Description = [{Use these builtins to do an elementwise floating-point
 multiply and subtract.
 
-At low level, the parameter `c` will be located in a vector register that will
-be overwritten by the `vfmsac` instruction.}];
+At low level, the parameter `+c+` will be located in a vector register that will
+be overwritten by the `+vfmsac+` instruction.}];
   let Instruction = "vfmsac.vv";
 
   let ParameterNames = ["c", "a", "b"];
@@ -631,8 +631,8 @@ def : DocEPIBuiltin<vfmsub>
   let Description = [{Use these builtins to do an elementwise floating-point
 multiply and subtract.
 
-At low level, the parameter `a` will be located in a vector register that will
-be overwritten by the `vfmsub` instruction.}];
+At low level, the parameter `+a+` will be located in a vector register that will
+be overwritten by the `+vfmsub+` instruction.}];
   let Instruction = "vfmsub.vv";
 
   let ParameterNames = ["a", "b", "c"];
@@ -794,8 +794,8 @@ def : DocEPIBuiltin<vfnmacc>
   let Description = [{Use these builtins to do an elementwise floating-point
 negate multiply and add.
 
-At low level, the parameter `c` will be located in a vector register that will
-be overwritten by the `vfnmacc` instruction.}];
+At low level, the parameter `+c+` will be located in a vector register that will
+be overwritten by the `+vfnmacc+` instruction.}];
   let Instruction = "vfnmacc.vv";
 
   let ParameterNames = ["c", "a", "b"];
@@ -821,8 +821,8 @@ def : DocEPIBuiltin<vfnmadd>
   let Description = [{Use these builtins to do an elementwise floating-point
 negate multiply and add.
 
-At low level, the parameter `a` will be located in a vector register that will
-be overwritten by the `vfnmadd` instruction.}];
+At low level, the parameter `+a+` will be located in a vector register that will
+be overwritten by the `+vfnmadd+` instruction.}];
   let Instruction = "vfnmadd.vv";
 
   let ParameterNames = ["a", "b", "c"];
@@ -848,8 +848,8 @@ def : DocEPIBuiltin<vfnmsac>
   let Description = [{Use these builtins to do an elementwise floating-point
 multiply and subtract.
 
-At low level, the parameter `c` will be located in a vector register that will
-be overwritten by the `vfnmsac` instruction.}];
+At low level, the parameter `+c+` will be located in a vector register that will
+be overwritten by the `+vfnmsac+` instruction.}];
   let Instruction = "vfnmsac.vv";
 
   let ParameterNames = ["c", "a", "b"];
@@ -875,8 +875,8 @@ def : DocEPIBuiltin<vfnmsub>
   let Description = [{Use these builtins to do an elementwise floating-point
 multiply and subtract.
 
-At low level, the parameter `a` will be located in a vector register that will
-be overwritten by the `vfnmsub` instruction.}];
+At low level, the parameter `+a+` will be located in a vector register that will
+be overwritten by the `+vfnmsub+` instruction.}];
   let Instruction = "vfnmsub.vv";
 
   let ParameterNames = ["a", "b", "c"];
@@ -901,7 +901,7 @@ def : DocEPIBuiltin<vfredmax>
   let Title = "Floating-point compute maximum of vector";
   let Description = [{Use these builtins to compute the maximum element of a
 floating-point vector. The initial maximum is taken from the first element of
-the vector `b`}];
+the vector `+b+`}];
   let Instruction = "vfredmax.vs";
 
   let Operation = [{
@@ -932,7 +932,7 @@ def : DocEPIBuiltin<vfredmin>
   let Title = "Floating-point compute minimum of vector";
   let Description = [{Use these builtins to compute the minium element of a
 floating-point vector. The initial minium is taken from the first element of
-the vector `b`}];
+the vector `+b+`}];
   let Instruction = "vfredmin.vs";
 
   let Operation = [{
@@ -963,7 +963,7 @@ def : DocEPIBuiltin<vfredosum>
   let Title = "Floating-point ordered sum of vector";
   let Description = [{Use these builtins to compute the sum of all the elements
 of a floating-point vector. The initial result of the sum is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 
 This operation preserves the order of the floating-point addition as described.
 }];
@@ -997,7 +997,7 @@ def : DocEPIBuiltin<vfredsum>
   let Title = "Floating-point unordered sum of vector";
   let Description = [{Use these builtins to compute the sum of all the elements
 of a floating-point vector. The initial result of the sum is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 
 This builtin will numerically compute the sum as described but floating point
 operations can be reassociated for efficiency reasons.
@@ -1451,7 +1451,7 @@ def : DocEPIBuiltin<vfwredosum>
   let Title = "Floating-point ordered sum of vector";
   let Description = [{Use these builtins to compute the sum of all the elements
 of a floating-point vector. The initial result of the sum is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 
 This operation preserves the order of the floating-point addition as described.
 
@@ -1488,7 +1488,7 @@ def : DocEPIBuiltin<vfwredsum>
   let Title = "Floating-point ordered sum of vector";
   let Description = [{Use these builtins to compute the sum of all the elements
 of a floating-point vector. The initial result of the sum is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 
 This builtin will compute the sum in any valid sequential order.
 }];
@@ -1682,35 +1682,6 @@ into a vector.}];
   }];
 }
 
-def : DocEPIBuiltin<vload_nt>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal load contiguous elements from memory into a vector";
-  let Description = [{Use these builtins to load elements contiguous in memory
-into a vector.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
-
-  let Instruction = "vle.v";
-
-  let ParameterNames = ["address"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      result[element] = load_element(address)
-      address = address + SEW / 8
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-       if mask[element] then
-         result[element] = load_element(address)
-         address = address + SEW / 8
-       else
-         result[element] = merge[element]
-  }];
-}
-
 def : DocEPIBuiltin<vload_indexed>
 {
   let Category = DocEPIMemory;
@@ -1719,41 +1690,8 @@ def : DocEPIBuiltin<vload_indexed>
 using an index vector. This is commonly known as a gather operation.
 
 The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
+`+address+` parameter to yield the effective address that loads the element of
 the vector.}];
-
-  let Instruction = "vlx.v";
-
-  let ParameterNames = ["address", "index"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      result[element] = load_element(address + index[element])
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-
-    for element = 0 to gvl - 1
-       if mask[element] then
-         result[element] = load_element(address + index[element])
-       else
-         result[element] = merge[element]
-  }];
-}
-
-def : DocEPIBuiltin<vload_nt_indexed>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal load elements from memory into a vector using an index vector";
-  let Description = [{Use these builtins to load elements into a vector
-using an index vector. This is commonly known as a gather operation.
-
-The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
-the vector.
-
-This intrinsic will set vtype to use a nontemporal operation.}];
 
   let Instruction = "vlx.v";
 
@@ -1783,48 +1721,12 @@ def : DocEPIBuiltin<vload_indexed_unsigned>
 a vector using an index vector. This is commonly known as a gather operation.
 
 The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
+`+address+` parameter to yield the effective address that loads the element of
 the vector.
 
 Depending on the types involved, there may not be semantic difference between
-these builtins and the corresponding `__builtin_epi_vload_indexed` builtins.
+these builtins and the corresponding `+__builtin_epi_vload_indexed+` builtins.
 }];
-
-  let Instruction = "vlx.v";
-
-  let ParameterNames = ["address", "index"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      result[element] = load_unsigned_element(address + index[element])
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-
-    for element = 0 to gvl - 1
-       if mask[element] then
-         result[element] = load_unsigned_element(address + index[element])
-       else
-         result[element] = merge[element]
-  }];
-}
-
-def : DocEPIBuiltin<vload_nt_indexed_unsigned>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal unsigned integer elements from memory into a vector using an index vector";
-  let Description = [{Use these builtins to load unsigned integer elements into
-a vector using an index vector. This is commonly known as a gather operation.
-
-The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
-the vector.
-
-Depending on the types involved, there may not be semantic difference between
-these builtins and the corresponding `__builtin_epi_vload_indexed` builtins.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vlx.v";
 
@@ -1872,40 +1774,8 @@ def : DocEPIBuiltin<vload_strided>
   let Description = [{Use these builtins to load elements into a vector
 that are separated in memory by a constant stride value, in bytes.
 
-The stride value is repeatedly added as an offset to the `address` parameter to
+The stride value is repeatedly added as an offset to the `+address+` parameter to
 yield the effective address that loads the element of the vector.}];
-
-  let Instruction = "vls.v";
-
-  let ParameterNames = ["address", "stride"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      result[element] = load_element(address)
-      address = address + stride
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-       if mask[element] then
-         result[element] = load_element(address)
-       else
-         result[element] = merge[element]
-      address = address + stride
-  }];
-}
-
-def : DocEPIBuiltin<vload_nt_strided>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal load strided elements from memory into a vector";
-  let Description = [{Use these builtins to load elements into a vector
-that are separated in memory by a constant stride value, in bytes.
-
-The stride value is repeatedly added as an offset to the `address` parameter to
-yield the effective address that loads the element of the vector.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vls.v";
 
@@ -1934,47 +1804,12 @@ def : DocEPIBuiltin<vload_strided_unsigned>
   let Description = [{Use these builtins to load elements into a vector
 that are separated in memory by a constant stride value, in bytes.
 
-The stride value is repeatedly added as an offset to the `address` parameter to
+The stride value is repeatedly added as an offset to the `+address+` parameter to
 yield the effective address that loads the element of the vector.
 
 Depending on the types involved, there may not be semantic difference between
-these builtins and the corresponding `__builtin_epi_vload_strided`.
+these builtins and the corresponding `+__builtin_epi_vload_strided+`.
 }];
-
-  let Instruction = "vls.v";
-
-  let ParameterNames = ["address", "stride"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      result[element] = load_unsigned_element(address)
-      address = address + stride
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-       if mask[element] then
-         result[element] = load_unsigned_element(address)
-       else
-         result[element] = merge[element]
-      address = address + stride
-  }];
-}
-
-def : DocEPIBuiltin<vload_nt_strided_unsigned>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal load unsigned strided elements from memory into a vector";
-  let Description = [{Use these builtins to load elements into a vector
-that are separated in memory by a constant stride value, in bytes.
-
-The stride value is repeatedly added as an offset to the `address` parameter to
-yield the effective address that loads the element of the vector.
-
-Depending on the types involved, there may not be semantic difference between
-these builtins and the corresponding `__builtin_epi_vload_strided`.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vls.v";
 
@@ -2004,40 +1839,8 @@ def : DocEPIBuiltin<vload_unsigned>
 into a vector.
 
 Depending on the types involved, there may not be semantic difference between
-these builtins and the corresponding `__builtin_epi_vload`.
+these builtins and the corresponding `+__builtin_epi_vload+`.
 }];
-
-  let Instruction = "vle.v";
-
-  let ParameterNames = ["address"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      result[element] = load_unsigned_element(address)
-      address = address + SEW / 8
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-       if mask[element] then
-         result[element] = load_unsigned_element(address)
-         address = address + SEW / 8
-       else
-         result[element] = merge[element]
-  }];
-}
-
-def : DocEPIBuiltin<vload_nt_unsigned>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal load unsigned contiguous elements from memory into a vector";
-  let Description = [{Use these builtins to load elements contiguous in memory
-into a vector.
-
-Depending on the types involved, there may not be semantic difference between
-these builtins and the corresponding `__builtin_epi_vload`.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vle.v";
 
@@ -2956,7 +2759,7 @@ def : DocEPIBuiltin<vredand>
   let Title = "Integer vector bitwise-and reduction";
   let Description = [{Use these builtins to compute the bitwise-and of all the elements
 of a integer vector. The initial result of the bitwise-and is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 }];
   let Instruction = "vredand.vs";
 
@@ -2988,7 +2791,7 @@ def : DocEPIBuiltin<vredmax>
   let Title = "Integer vector maximum reduction";
   let Description = [{Use these builtins to compute the maximum of all the
 elements of a integer vector and a given scalar value. The scalar value is
-taken from the first element of the vector `b`.
+taken from the first element of the vector `+b+`.
 }];
   let Instruction = "vredmax.vs";
 
@@ -3020,7 +2823,7 @@ def : DocEPIBuiltin<vredmaxu>
   let Title = "Unsigned integer vector maximum reduction";
   let Description = [{Use these builtins to compute the maximum of all the
 elements of a integer vector and a given scalar value. The scalar value is
-taken from the first element of the vector `b`.
+taken from the first element of the vector `+b+`.
 }];
   let Instruction = "vredmaxu.vs";
 
@@ -3052,7 +2855,7 @@ def : DocEPIBuiltin<vredmin>
   let Title = "Integer vector minimum reduction";
   let Description = [{Use these builtins to compute the minimum of all the
 elements of a integer vector and a given scalar value. The scalar value is
-taken from the first element of the vector `b`.
+taken from the first element of the vector `+b+`.
 }];
   let Instruction = "vredmin.vs";
 
@@ -3084,7 +2887,7 @@ def : DocEPIBuiltin<vredminu>
   let Title = "Unsigned integer vector minimum reduction";
   let Description = [{Use these builtins to compute the minimum of all the
 elements of a integer vector and a given scalar value. The scalar value is
-taken from the first element of the vector `b`.
+taken from the first element of the vector `+b+`.
 }];
   let Instruction = "vredminu.vs";
 
@@ -3116,7 +2919,7 @@ def : DocEPIBuiltin<vredor>
   let Title = "Integer vector bitwise-or reduction";
   let Description = [{Use these builtins to compute the bitwise-or of all the elements
 of a integer vector. The initial result of the bitwise-or is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 }];
   let Instruction = "vredor.vs";
 
@@ -3148,7 +2951,7 @@ def : DocEPIBuiltin<vredsum>
   let Title = "Sum of integer vector";
   let Description = [{Use these builtins to compute the sum of all the elements
 of an integer vector. The initial result of the sum is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 }];
   let Instruction = "vredsum.vs";
 
@@ -3180,7 +2983,7 @@ def : DocEPIBuiltin<vredxor>
   let Title = "Integer vector bitwise-xor reduction";
   let Description = [{Use these builtins to compute the bitwise-xor of all the elements
 of a integer vector. The initial result of the bitwise-or is taken from the
-first element of the vector `b`.
+first element of the vector `+b+`.
 }];
   let Instruction = "vredxor.vs";
 
@@ -3339,24 +3142,24 @@ def : DocEPIBuiltin<vsetvl>
   let Category = DocEPIVectorConfiguration;
   let Title = "Change the granted vector length";
   let Description = [{Use this builtin to set the granted vector length given a requested
-vector length (`rvl`), and single element width (`sew`) and a length multiplier (`lmul`).
+vector length (`+rvl+`), and single element width (`+sew+`) and a length multiplier (`+lmul+`).
 
 This builtin returns the granted vector length. This granted vector length is
 suitable to use in other builtins that require it.
 
-Valid values for the `sew` parameter are:
+Valid values for the `+sew+` parameter are:
 
-- `__epi_e8`, for elements of 8 bits (like `char`, `signed char`, `unsigned char`)
-- `__epi_e16`, for elements of 16 bits (like `short`, `unsigned short` or the unsupported `__float16`)
-- `__epi_e32`, for elements of 32 bits (like `int`, `unsigned int` or `float`)
-- `__epi_e64`, for elements of 64 bit (like `long`, `unsigned long` or `double`)
+- `+__epi_e8+`, for elements of 8 bits (like `+char+`, `+signed char+`, `+unsigned char+`)
+- `+__epi_e16+`, for elements of 16 bits (like `+short+`, `+unsigned short+` or the unsupported `+__float16+`)
+- `+__epi_e32+`, for elements of 32 bits (like `+int+`, `+unsigned int+` or `+float+`)
+- `+__epi_e64+`, for elements of 64 bit (like `+long+`, `+unsigned long+` or `+double+`)
 
-Valid values for the `lmul` parameter are:
+Valid values for the `+lmul+` parameter are:
 
-- `__epi_m1`, for `LMUL=1`
-- `__epi_m2`, for `LMUL=2`
-- `__epi_m4`, for `LMUL=4`
-- `__epi_m8`, for `LMUL=8`
+- `+__epi_m1+`, for `+LMUL=1+`
+- `+__epi_m2+`, for `+LMUL=2+`
+- `+__epi_m4+`, for `+LMUL=4+`
+- `+__epi_m8+`, for `+LMUL=8+`
 }];
   let Instruction = "vsetvli";
 
@@ -3373,7 +3176,7 @@ def : DocEPIBuiltin<vsetvlmax>
   let Category = DocEPIVectorConfiguration;
   let Title = "Set the granted vector length to the maximum length";
   let Description = [{Use this builtin to set the granted vector length to the maximum value
-allowed given a single element width (`sew`) and a length multiplier (`lmul`).
+allowed given a single element width (`+sew+`) and a length multiplier (`+lmul+`).
 
 This builtin returns the granted vector length. This granted vector length is suitable
 to use in other builtins that require it.}];
@@ -3383,70 +3186,6 @@ to use in other builtins that require it.}];
 
   let Operation = [{
     gvl = compute_vlmax(sew, lmul)
-    result = gvl
-  }];
-}
-
-def : DocEPIBuiltin<vsetvl_ext>
-{
-  let Category = DocEPIVectorConfiguration;
-  let Title = "Change the granted vector length and set custom bits";
-  let Description = [{Use this builtin to set the granted vector length given a requested
-vector length (`rvl`), a single element width (`sew`), a length multiplier (`lmul`) and
-an additional argument (`extra`) representing one (or more) bit to be set.
-
-This builtin returns the granted vector length. This granted vector length is
-suitable to use in other builtins that require it.
-
-The `extra` parameter can represent any value (be it a constant or the result of a computation).
-At the moment though, the following values generate a predetermined behaviour:
-
-- `0`is equivalent to invoking `vsetvl`
-- `__epi_nt` is used to set the `NonTemporal` bit
-
-In both cases, the builtin is lowered to `vsetvli`. When the `extra` parameter assumes a
-different value instead, the builtin is lowered to `vsetvl`, using as `vtype` argument
-the result of a `ori` instruction between the constant `vtype` value, generated by the `sew` and
-`lmul` parameters, and the `extra` parameter.
-}];
-  let Instruction = "vsetvl/vsetvli";
-
-  let ParameterNames = ["rvl", "sew", "lmul", "extra"];
-
-  let Operation = [{
-    gvl = compute_vector_length(rvl, sew, lmul, extra)
-    result = gvl
-  }];
-}
-
-def : DocEPIBuiltin<vsetvlmax_ext>
-{
-  let Category = DocEPIVectorConfiguration;
-  let Title = "Set the granted vector length to the maximum length and set custom bits";
-  let Description = [{Use this builtin to set the granted vector length to the maximum value
-allowed given a single element width (`sew`), a length multiplier (`lmul`) and an additional
-argument (`extra`) representing one (or more) bit to be set.
-
-This builtin returns the granted vector length. This granted vector length is suitable
-to use in other builtins that require it.
-
-The `extra` parameter can represent any value (be it a constant or the result of a computation).
-At the moment though, the following values generate a predetermined behaviour:
-
-- `0`is equivalent to invoking `vsetvl`
-- `__epi_nt` is used to set the `NonTemporal` bit
-
-In both cases, the builtin is lowered to `vsetvli`. When the `extra` parameter assumes a
-different value instead, the builtin is lowered to `vsetvl`, using as `vtype` argument
-the result of a `ori` instruction between the constant `vtype` value, generated by the `sew` and
-`lmul` parameters, and the `extra` parameter.
-}];
-  let Instruction = "vsetvl/vsetvli";
-
-  let ParameterNames = ["sew", "lmul", "extra"];
-
-  let Operation = [{
-    gvl = compute_vlmax(sew, lmul, extra)
     result = gvl
   }];
 }
@@ -3651,66 +3390,12 @@ contiguous locations in memory.}];
   }];
 }
 
-def : DocEPIBuiltin<vstore_nt>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal store vector elements into contiguous locations in memory";
-  let Description = [{Use these builtins to store the elements of a vector into
-contiguous locations in memory.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
-
-  let Instruction = "vse.v";
-
-  let ParameterNames = ["address", "value"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      store_element(address, value[element])
-      address = address + SEW / 8
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-      if mask[element] then
-        store_element(address, value[element])
-      address = address + SEW / 8
-  }];
-}
-
 def : DocEPIBuiltin<vstore_unsigned>
 {
   let Category = DocEPIMemory;
   let Title = "Store unsigned vector elements into contiguous locations in memory";
   let Description = [{Use these builtins to store the elements of a vector into
 contiguous locations in memory.}];
-
-  let Instruction = "vse.v";
-
-  let ParameterNames = ["address", "value"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      store_element(address, value[element])
-      address = address + SEW / 8
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-      if mask[element] then
-        store_element(address, value[element])
-      address = address + SEW / 8
-  }];
-}
-
-def : DocEPIBuiltin<vstore_nt_unsigned>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal store unsigned vector elements into contiguous locations in memory";
-  let Description = [{Use these builtins to store the elements of a vector into
-contiguous locations in memory.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vse.v";
 
@@ -3738,37 +3423,8 @@ def : DocEPIBuiltin<vstore_indexed>
 memory using an index vector. This is commonly known as a scatter operation.
 
 The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
+`+address+` parameter to yield the effective address that loads the element of
 the vector.}];
-
-  let Instruction = "vsx.v";
-
-  let ParameterNames = ["address", "value", "indexes"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      store_element(address + index[element], value[element])
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-      if mask[element] then
-        store_element(address + index[element], value[element])
-  }];
-}
-
-def : DocEPIBuiltin<vstore_nt_indexed>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal store vector elements into memory using an index vector";
-  let Description = [{Use these builtins to store the elements of a vector into
-memory using an index vector. This is commonly known as a scatter operation.
-
-The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
-the vector.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vsx.v";
 
@@ -3794,37 +3450,8 @@ def : DocEPIBuiltin<vstore_indexed_unsigned>
 memory using an index vector. This is commonly known as a scatter operation.
 
 The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
+`+address+` parameter to yield the effective address that loads the element of
 the vector.}];
-
-  let Instruction = "vsx.v";
-
-  let ParameterNames = ["address", "value", "indexes"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      store_element(address + index[element], value[element])
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-      if mask[element] then
-        store_element(address + index[element], value[element])
-  }];
-}
-
-def : DocEPIBuiltin<vstore_nt_indexed_unsigned>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal store unsigned vector elements into memory using an index vector";
-  let Description = [{Use these builtins to store the elements of a vector into
-memory using an index vector. This is commonly known as a scatter operation.
-
-The elements of the index vector are added as an offset of bytes to the
-`address` parameter to yield the effective address that loads the element of
-the vector.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vsx.v";
 
@@ -3868,7 +3495,7 @@ def : DocEPIBuiltin<vstore_strided>
   let Description = [{Use these builtins to store elements from a vector
 into memory locations separated by a constant stride value, in bytes.
 
-The stride value is repeatedly added as an offset to the `address` parameter to
+The stride value is repeatedly added as an offset to the `+address+` parameter to
 yield the effective address that loads the element of the vector.}];
 
   let Instruction = "vss.v";
@@ -3889,35 +3516,6 @@ yield the effective address that loads the element of the vector.}];
   }];
 }
 
-def : DocEPIBuiltin<vstore_nt_strided>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal store elements of a vector into strided locations in memory";
-  let Description = [{Use these builtins to store elements from a vector
-into memory locations separated by a constant stride value, in bytes.
-
-The stride value is repeatedly added as an offset to the `address` parameter to
-yield the effective address that loads the element of the vector.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
-
-  let Instruction = "vss.v";
-
-  let ParameterNames = ["address", "value", "stride"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      store_element(address, result[element])
-      address = address + stride
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-       if mask[element] then
-         store_element(address, result[element])
-      address = address + stride
-  }];
-}
 
 def : DocEPIBuiltin<vstore_strided_unsigned>
 {
@@ -3926,38 +3524,8 @@ def : DocEPIBuiltin<vstore_strided_unsigned>
   let Description = [{Use these builtins to store elements from a vector
 into memory locations separated by a constant stride value, in bytes.
 
-The stride value is repeatedly added as an offset to the `address` parameter to
+The stride value is repeatedly added as an offset to the `+address+` parameter to
 yield the effective address that loads the element of the vector.}];
-
-  let Instruction = "vss.v";
-
-  let ParameterNames = ["address", "value", "stride"];
-
-  let Operation = [{
-    for element = 0 to gvl - 1
-      store_element(address, result[element])
-      address = address + stride
-  }];
-
-  let OperationMask = [{
-    for element = 0 to gvl - 1
-       if mask[element] then
-         store_element(address, result[element])
-      address = address + stride
-  }];
-}
-
-def : DocEPIBuiltin<vstore_nt_strided_unsigned>
-{
-  let Category = DocEPIMemory;
-  let Title = "Non-temporal store unsigned elements of a vector into strided locations in memory";
-  let Description = [{Use these builtins to store elements from a vector
-into memory locations separated by a constant stride value, in bytes.
-
-The stride value is repeatedly added as an offset to the `address` parameter to
-yield the effective address that loads the element of the vector.
-
-This intrinsic will set vtype to use a nontemporal memory access.}];
 
   let Instruction = "vss.v";
 
@@ -4814,7 +4382,7 @@ def : DocEPIBuiltin<vlseg2_indexed>
 from memory such that component of the tuple is loaded into a different vector.
 This operation is useful to convert a memory representation of
 Array-of-Structures into a register representation of Structure-of-Arrays.
-
++
 The indexed version of these instructions are useful when the tuples are
 not consecutively found in memory but at an offset of a base address. The
 offset is represented in bytes using a vector of indices.
@@ -5726,9 +5294,9 @@ def : DocEPIBuiltin<vzip2>
 vector registers. This operation creates a pair of registers whose elements
 are pairs of the two input registers.
 
-Given two vectors `(a, b, c, d, e, f)` and `(0, 1, 2, 3, 4, 5)` the first element
-of the result tuple will be the vector `(a, 0, b, 1, c, 2)`. The second element
-of the result tuple will be the vector `(d, 3, e, 4, f, 5)`.
+Given two vectors `+(a, b, c, d, e, f)+` and `+(0, 1, 2, 3, 4, 5)+` the first element
+of the result tuple will be the vector `+(a, 0, b, 1, c, 2)+`. The second element
+of the result tuple will be the vector `+(d, 3, e, 4, f, 5)+`.
 }];
 
   let Instruction = "vzip2.vv";
@@ -5774,9 +5342,9 @@ def : DocEPIBuiltin<vunzip2>
   let Description = [{Use these builtins to "unzip" two vectors into a pair of
  vector registers. This is the dual of the zip operation.
 
-Given two vectors `(a, 0, b, 1, c, 2)` and `(d, 3, e, 4, f, 5)` the first
-element of the result tuple will be the vector `(a, b, c, d, e, f)`. The second
-element of the result tuple will be the vector `(0, 1, 2, 3, 4, 5)`.
+Given two vectors `+(a, 0, b, 1, c, 2)+` and `+(d, 3, e, 4, f, 5)+` the first
+element of the result tuple will be the vector `+(a, b, c, d, e, f)+`. The second
+element of the result tuple will be the vector `+(0, 1, 2, 3, 4, 5)+`.
 }];
 
   let Instruction = "vunzip2.vv";
@@ -5819,9 +5387,9 @@ def : DocEPIBuiltin<vtrn>
 tuple of vectors. This is similar to 'zip' but first the even-numbered elements
 of the vectors are zipped followed by the odd-numbered elements.
 
-Given two vectors `(a, 0, b, 1, c, 2)` and `(d, 3, e, 4, f, 5)` the first
-element of the result tuple will be the vector `(a, d, b, e, c, f)`. The second
-element of the result tuple will be the vector `(0, 3, 1, 4, 2, 5)`.
+Given two vectors `+(a, 0, b, 1, c, 2)+` and `+(d, 3, e, 4, f, 5)+` the first
+element of the result tuple will be the vector `+(a, d, b, e, c, f)+`. The second
+element of the result tuple will be the vector `+(0, 3, 1, 4, 2, 5)+`.
 }];
 
   let Instruction = "vtrn.vv";
@@ -5895,5 +5463,699 @@ element of the result tuple will be the vector `(0, 3, 1, 4, 2, 5)`.
             dest_element = dest_element - VLMAX
             result.v1[dest_element] = merge.v1[dest_element]
             result.v1[dest_element + 1] = merge.v1[dest_element + 1]
+  }];
+}
+
+// NT
+
+def : DocEPIBuiltin<vload_nt>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load contiguous elements from memory into a vector (non-temporal)";
+  let Description = [{Use these builtins to load elements contiguous in memory
+into a vector without loading the vector in the cache.}];
+
+  let Instruction = "vle.v";
+
+  let ParameterNames = ["address"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_element(address)
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_element(address)
+         address = address + SEW / 8
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vload_nt_indexed>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load elements from memory into a vector using an index vector (non-temporal)";
+  let Description = [{Use these builtins to load elements into a vector
+using an index vector without loading the vector in the cache. This is commonly known as a gather operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.}];
+
+  let Instruction = "vlx.v";
+
+  let ParameterNames = ["address", "index"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_element(address + index[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_element(address + index[element])
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vload_nt_indexed_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load unsigned integer elements from memory into a vector using an index vector (non-temporal)";
+  let Description = [{Use these builtins to load unsigned integer elements into
+a vector using an index vector without loading the vector in the cache. This is commonly known as a gather operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.
+
+Depending on the types involved, there may not be semantic difference between
+these builtins and the corresponding `+__builtin_epi_vload_indexed_nt+` builtins.
+}];
+
+  let Instruction = "vlx.v";
+
+  let ParameterNames = ["address", "index"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_unsigned_element(address + index[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_unsigned_element(address + index[element])
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vload_nt_strided>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load strided elements from memory into a vector (non-temporal)";
+  let Description = [{Use these builtins to load elements into a vector
+that are separated in memory by a constant stride value, in bytes, without loading the vector in the cache.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.}];
+
+  let Instruction = "vls.v";
+
+  let ParameterNames = ["address", "stride"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_element(address)
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_element(address)
+       else
+         result[element] = merge[element]
+      address = address + stride
+  }];
+}
+
+def : DocEPIBuiltin<vload_nt_strided_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load unsigned strided elements from memory into a vector (non-temporal)";
+  let Description = [{Use these builtins to load elements into a vector
+that are separated in memory by a constant stride value, in bytes, without loading the vector in the cache.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.
+
+Depending on the types involved, there may not be semantic difference between
+these builtins and the corresponding `+__builtin_epi_vload_strided_nt+`.
+}];
+
+  let Instruction = "vls.v";
+
+  let ParameterNames = ["address", "stride"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_unsigned_element(address)
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_unsigned_element(address)
+       else
+         result[element] = merge[element]
+      address = address + stride
+  }];
+}
+
+def : DocEPIBuiltin<vload_nt_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load unsigned contiguous elements from memory into a vector (non-temporal)";
+  let Description = [{Use these builtins to load elements contiguous in memory
+into a vector without loading the vector in the cache.
+
+Depending on the types involved, there may not be semantic difference between
+these builtins and the corresponding `+__builtin_epi_vload_nt+`.
+}];
+
+  let Instruction = "vle.v";
+
+  let ParameterNames = ["address"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_unsigned_element(address)
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_unsigned_element(address)
+         address = address + SEW / 8
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vstore_nt>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store vector elements into contiguous locations in memory (non-temporal)";
+  let Description = [{Use these builtins to store the elements of a vector into
+contiguous locations in memory without loading the vector in the cache.}];
+
+  let Instruction = "vse.v";
+
+  let ParameterNames = ["address", "value"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+}
+
+def : DocEPIBuiltin<vstore_nt_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store unsigned vector elements into contiguous locations in memory (non-temporal)";
+  let Description = [{Use these builtins to store the elements of a vector into
+contiguous locations in memory without loading the vector in the cache.}];
+
+  let Instruction = "vse.v";
+
+  let ParameterNames = ["address", "value"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+}
+
+def : DocEPIBuiltin<vstore_nt_indexed>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store vector elements into memory using an index vector (non-temporal)";
+  let Description = [{Use these builtins to store the elements of a vector into
+memory using an index vector without loading the vector in the cache. This is commonly known as a scatter operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.}];
+
+  let Instruction = "vsx.v";
+
+  let ParameterNames = ["address", "value", "indexes"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address + index[element], value[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address + index[element], value[element])
+  }];
+}
+
+def : DocEPIBuiltin<vstore_nt_indexed_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store unsigned vector elements into memory using an index vector (non-temporal)";
+  let Description = [{Use these builtins to store the elements of a vector into
+memory using an index vector without loading the vector in the cache. This is commonly known as a scatter operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.}];
+
+  let Instruction = "vsx.v";
+
+  let ParameterNames = ["address", "value", "indexes"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address + index[element], value[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address + index[element], value[element])
+  }];
+}
+
+def : DocEPIBuiltin<vstore_nt_strided>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store elements of a vector into strided locations in memory (non-temporal)";
+  let Description = [{Use these builtins to store elements from a vector
+into memory locations separated by a constant stride value, in bytes, without loading the vector in the cache.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.}];
+
+  let Instruction = "vss.v";
+
+  let ParameterNames = ["address", "value", "stride"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, result[element])
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         store_element(address, result[element])
+      address = address + stride
+  }];
+}
+
+def : DocEPIBuiltin<vstore_nt_strided_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store unsigned elements of a vector into strided locations in memory (non-temporal)";
+  let Description = [{Use these builtins to store elements from a vector
+into memory locations separated by a constant stride value, in bytes, without loading the vector in the cache.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.}];
+
+  let Instruction = "vss.v";
+
+  let ParameterNames = ["address", "value", "stride"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, result[element])
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         store_element(address, result[element])
+      address = address + stride
+  }];
+}
+
+// EXT
+
+def : DocEPIBuiltin<vload_ext>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load contiguous elements from memory into a vector (cache-flags)";
+  let Description = [{Use these builtins to load elements contiguous in memory
+into a vector specifying the cache behaviour in the `+flags+` parameter.}];
+
+  let Instruction = "vle.v";
+
+  let ParameterNames = ["address", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_element(address)
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_element(address)
+         address = address + SEW / 8
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vload_ext_indexed>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load elements from memory into a vector using an index vector (cache-flags)";
+  let Description = [{Use these builtins to load elements into a vector
+using an index vector specifying the cache behaviour in the `+flags+` parameter. This is commonly known as a gather operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.}];
+
+  let Instruction = "vlx.v";
+
+  let ParameterNames = ["address", "index", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_element(address + index[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_element(address + index[element])
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vload_ext_indexed_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load unsigned integer elements from memory into a vector using an index vector (cache-flags)";
+  let Description = [{Use these builtins to load unsigned integer elements into
+a vector using an index vector specifying the cache behaviour in the `+flags+` parameter. This is commonly known as a gather operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.
+
+Depending on the types involved, there may not be semantic difference between
+these builtins and the corresponding `+__builtin_epi_vload_indexed_ext+` builtins.
+}];
+
+  let Instruction = "vlx.v";
+
+  let ParameterNames = ["address", "index", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_unsigned_element(address + index[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_unsigned_element(address + index[element])
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vload_ext_strided>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load strided elements from memory into a vector (cache-flags)";
+  let Description = [{Use these builtins to load elements into a vector
+that are separated in memory by a constant stride value, in bytes, specifying the cache behaviour in the `+flags+` parameter.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.}];
+
+  let Instruction = "vls.v";
+
+  let ParameterNames = ["address", "stride", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_element(address)
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_element(address)
+       else
+         result[element] = merge[element]
+      address = address + stride
+  }];
+}
+
+def : DocEPIBuiltin<vload_ext_strided_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load unsigned strided elements from memory into a vector (cache-flags)";
+  let Description = [{Use these builtins to load elements into a vector
+that are separated in memory by a constant stride value, in bytes, specifying the cache behaviour in the `+flags+` parameter.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.
+
+Depending on the types involved, there may not be semantic difference between
+these builtins and the corresponding `+__builtin_epi_vload_strided_ext+`.
+}];
+
+  let Instruction = "vls.v";
+
+  let ParameterNames = ["address", "stride", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_unsigned_element(address)
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_unsigned_element(address)
+       else
+         result[element] = merge[element]
+      address = address + stride
+  }];
+}
+
+def : DocEPIBuiltin<vload_ext_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Load unsigned contiguous elements from memory into a vector (cache-flags)";
+  let Description = [{Use these builtins to load elements contiguous in memory
+into a vector specifying the cache behaviour in the `+flags+` parameter.
+
+Depending on the types involved, there may not be semantic difference between
+these builtins and the corresponding `+__builtin_epi_vload_ext+`.
+}];
+
+  let Instruction = "vle.v";
+
+  let ParameterNames = ["address", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      result[element] = load_unsigned_element(address)
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         result[element] = load_unsigned_element(address)
+         address = address + SEW / 8
+       else
+         result[element] = merge[element]
+  }];
+}
+
+def : DocEPIBuiltin<vstore_ext>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store vector elements into contiguous locations in memory (cache-flags)";
+  let Description = [{Use these builtins to store the elements of a vector into
+contiguous locations in memory specifying the cache behaviour in the `+flags+` parameter.}];
+
+  let Instruction = "vse.v";
+
+  let ParameterNames = ["address", "value", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+}
+
+def : DocEPIBuiltin<vstore_ext_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store unsigned vector elements into contiguous locations in memory (cache-flags)";
+  let Description = [{Use these builtins to store the elements of a vector into
+contiguous locations in memory specifying the cache behaviour in the `+flags+` parameter.}];
+
+  let Instruction = "vse.v";
+
+  let ParameterNames = ["address", "value", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address, value[element])
+      address = address + SEW / 8
+  }];
+}
+
+def : DocEPIBuiltin<vstore_ext_indexed>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store vector elements into memory using an index vector (cache-flags)";
+  let Description = [{Use these builtins to store the elements of a vector into
+memory using an index vector specifying the cache behaviour in the `+flags+` parameter. This is commonly known as a scatter operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.}];
+
+  let Instruction = "vsx.v";
+
+  let ParameterNames = ["address", "value", "indexes", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address + index[element], value[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address + index[element], value[element])
+  }];
+}
+
+def : DocEPIBuiltin<vstore_ext_indexed_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store unsigned vector elements into memory using an index vector (cache-flags)";
+  let Description = [{Use these builtins to store the elements of a vector into
+memory using an index vector specifying the cache behaviour in the `+flags+` parameter. This is commonly known as a scatter operation.
+
+The elements of the index vector are added as an offset of bytes to the
+`+address+` parameter to yield the effective address that loads the element of
+the vector.}];
+
+  let Instruction = "vsx.v";
+
+  let ParameterNames = ["address", "value", "indexes", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address + index[element], value[element])
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+      if mask[element] then
+        store_element(address + index[element], value[element])
+  }];
+}
+
+def : DocEPIBuiltin<vstore_ext_strided>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store elements of a vector into strided locations in memory (cache-flags)";
+  let Description = [{Use these builtins to store elements from a vector
+into memory locations separated by a constant stride value, in bytes, specifying the cache behaviour in the `+flags+` parameter.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.}];
+
+  let Instruction = "vss.v";
+
+  let ParameterNames = ["address", "value", "stride", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, result[element])
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         store_element(address, result[element])
+      address = address + stride
+  }];
+}
+
+def : DocEPIBuiltin<vstore_ext_strided_unsigned>
+{
+  let Category = DocEPIMemory;
+  let Title = "Store unsigned elements of a vector into strided locations in memory (cache-flags)";
+  let Description = [{Use these builtins to store elements from a vector
+into memory locations separated by a constant stride value, in bytes, specifying the cache behaviour in the `+flags+` parameter.
+
+The stride value is repeatedly added as an offset to the `+address+` parameter to
+yield the effective address that loads the element of the vector.}];
+
+  let Instruction = "vss.v";
+
+  let ParameterNames = ["address", "value", "stride", "flags"];
+
+  let Operation = [{
+    for element = 0 to gvl - 1
+      store_element(address, result[element])
+      address = address + stride
+  }];
+
+  let OperationMask = [{
+    for element = 0 to gvl - 1
+       if mask[element] then
+         store_element(address, result[element])
+      address = address + stride
   }];
 }

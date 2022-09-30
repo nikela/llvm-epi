@@ -910,7 +910,11 @@ public:
   };
 
   /// Additional properties of an operand's values.
-  enum OperandValueProperties { OP_None = 0, OP_PowerOf2 = 1 };
+  enum OperandValueProperties {
+    OP_None = 0,
+    OP_PowerOf2 = 1,
+    OP_NegatedPowerOf2 = 2,
+  };
 
   // Describe the values an operand can take.  We're in the process
   // of migrating uses of OperandValueKind and OperandValueProperties
@@ -927,6 +931,9 @@ public:
     }
     bool isPowerOf2() const {
       return Properties == OP_PowerOf2;
+    }
+    bool isNegatedPowerOf2() const {
+      return Properties == OP_NegatedPowerOf2;
     }
 
     OperandValueInfo getNoProps() const {
@@ -1161,10 +1168,10 @@ public:
                    const Instruction *I = nullptr) const;
 
   /// \return The expected cost of a sign- or zero-extended vector extract. Use
-  /// -1 to indicate that there is no information about the index value.
+  /// Index = -1 to indicate that there is no information about the index value.
   InstructionCost getExtractWithExtendCost(unsigned Opcode, Type *Dst,
                                            VectorType *VecTy,
-                                           unsigned Index = -1) const;
+                                           unsigned Index) const;
 
   /// \return The expected cost of control-flow related instructions such as
   /// Phi, Ret, Br, Switch.
