@@ -2810,6 +2810,7 @@ bool RISCVDAGToDAGISel::selectVSplat(SDValue N, SDValue &SplatVal) {
        && N.getOpcode() != ISD::SPLAT_VECTOR) ||
       !N.getOperand(0).isUndef())
     return false;
+  assert(N.getNumOperands() == 3 && "Unexpected number of operands");
   SplatVal = N.getOperand(1);
   return true;
 }
@@ -2825,6 +2826,7 @@ static bool selectVSplatSimmHelper(SDValue N, SDValue &SplatVal,
        && N.getOpcode() != ISD::SPLAT_VECTOR) ||
       !N.getOperand(0).isUndef() || !isa<ConstantSDNode>(N.getOperand(1)))
     return false;
+  assert(N.getNumOperands() == 3 && "Unexpected number of operands");
 
   int64_t SplatImm =
       cast<ConstantSDNode>(N.getOperand(1))->getSExtValue();
