@@ -376,6 +376,27 @@ multiclass VPatBinaryVL_V<SDNode vop,
                      (mask_type V0), GPR:$vl, sew, TAIL_AGNOSTIC)>;
 }
 
+multiclass VPatTiedBinaryNoMaskVL_V<SDNode vop,
+                                    string instruction_name,
+                                    string suffix,
+                                    ValueType result_type,
+                                    ValueType op2_type,
+                                    int sew,
+                                    LMULInfo vlmul,
+                                    VReg result_reg_class,
+                                    VReg op2_reg_class> {
+  def : Pat<(result_type (vop
+                         (result_type result_reg_class:$rs1),
+                         (op2_type op2_reg_class:$rs2),
+                         srcvalue,
+                         true_mask,
+                         VLOpFrag)),
+        (!cast<Instruction>(instruction_name#"_"#suffix#"_"# vlmul.MX#"_TIED")
+                     result_reg_class:$rs1,
+                     op2_reg_class:$rs2,
+                     GPR:$vl, sew, TAIL_AGNOSTIC)>;
+}
+
 multiclass VPatBinaryVL_XI<SDNode vop,
                            string instruction_name,
                            string suffix,
@@ -432,9 +453,9 @@ multiclass VPatBinaryWVL_VV_VX<SDNode vop, string instruction_name> {
     defvar vti = VtiToWti.Vti;
     defvar wti = VtiToWti.Wti;
     defm : VPatBinaryVL_V<vop, instruction_name, "VV",
-                           wti.Vector, vti.Vector, vti.Vector, vti.Mask,
-                           vti.Log2SEW, vti.LMul, wti.RegClass, vti.RegClass,
-                           vti.RegClass>;
+                          wti.Vector, vti.Vector, vti.Vector, vti.Mask,
+                          vti.Log2SEW, vti.LMul, wti.RegClass, vti.RegClass,
+                          vti.RegClass>;
     defm : VPatBinaryVL_XI<vop, instruction_name, "VX",
                            wti.Vector, vti.Vector, vti.Vector, vti.Mask,
                            vti.Log2SEW, vti.LMul, wti.RegClass, vti.RegClass,
@@ -447,10 +468,13 @@ multiclass VPatBinaryWVL_VV_VX_WV_WX<SDNode vop, SDNode vop_w,
   foreach VtiToWti = AllWidenableIntVectors in {
     defvar vti = VtiToWti.Vti;
     defvar wti = VtiToWti.Wti;
+    defm : VPatTiedBinaryNoMaskVL_V<vop_w, instruction_name, "WV",
+                                    wti.Vector, vti.Vector, vti.Log2SEW,
+                                    vti.LMul, wti.RegClass, vti.RegClass>;
     defm : VPatBinaryVL_V<vop_w, instruction_name, "WV",
-                           wti.Vector, wti.Vector, vti.Vector, vti.Mask,
-                           vti.Log2SEW, vti.LMul, wti.RegClass, wti.RegClass,
-                           vti.RegClass>;
+                          wti.Vector, wti.Vector, vti.Vector, vti.Mask,
+                          vti.Log2SEW, vti.LMul, wti.RegClass, wti.RegClass,
+                          vti.RegClass>;
     defm : VPatBinaryVL_XI<vop_w, instruction_name, "WX",
                            wti.Vector, wti.Vector, vti.Vector, vti.Mask,
                            vti.Log2SEW, vti.LMul, wti.RegClass, wti.RegClass,
@@ -463,11 +487,13 @@ multiclass VPatBinaryNVL_WV_WX_WI<SDNode vop, string instruction_name> {
     defvar vti = VtiToWti.Vti;
     defvar wti = VtiToWti.Wti;
     defm : VPatBinaryVL_V<vop, instruction_name, "WV",
-                           vti.Vector, wti.Vector, vti.Vector, vti.Mask,
-                           vti.Log2SEW, vti.LMul, vti.RegClass, wti.RegClass, vti.RegClass>;
+                          vti.Vector, wti.Vector, vti.Vector, vti.Mask,
+                          vti.Log2SEW, vti.LMul, vti.RegClass, wti.RegClass,
+                          vti.RegClass>;
     defm : VPatBinaryVL_XI<vop, instruction_name, "WX",
                            vti.Vector, wti.Vector, vti.Vector, vti.Mask,
-                           vti.Log2SEW, vti.LMul, vti.RegClass, wti.RegClass, SplatPat, GPR>;
+                           vti.Log2SEW, vti.LMul, vti.RegClass, wti.RegClass,
+                           SplatPat, GPR>;
     defm : VPatBinaryVL_XI<vop, instruction_name, "WI",
                            vti.Vector, wti.Vector, vti.Vector, vti.Mask,
                            vti.Log2SEW, vti.LMul, vti.RegClass, wti.RegClass,
@@ -895,9 +921,9 @@ multiclass VPatWidenBinaryFPVL_WV_WF<SDNode op, PatFrags extop, string instructi
                                (fwti.Vector (extop (fvti.Vector fvti.RegClass:$rs1),
                                                    (fvti.Mask true_mask), VLOpFrag)),
                                srcvalue, (fwti.Mask true_mask), VLOpFrag)),
-              (!cast<Instruction>(instruction_name#"_WV_"#fvti.LMul.MX)
+              (!cast<Instruction>(instruction_name#"_WV_"#fvti.LMul.MX#"_TIED")
                  fwti.RegClass:$rs2, fvti.RegClass:$rs1,
-                 GPR:$vl, fvti.Log2SEW)>;
+                 GPR:$vl, fvti.Log2SEW, TAIL_AGNOSTIC)>;
     def : Pat<(fwti.Vector (op (fwti.Vector fwti.RegClass:$rs2),
                                (fwti.Vector (extop (fvti.Vector (SplatFPOp fvti.ScalarRegClass:$rs1)),
                                                    (fvti.Mask true_mask), VLOpFrag)),

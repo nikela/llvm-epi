@@ -1719,8 +1719,8 @@ public:
     // It is necessary to limit this to rvalue reference to avoid calling this
     // function with a bitfield lvalue argument since non-const reference to
     // bitfield is not allowed.
-    template <typename T, typename = typename std::enable_if<
-                              !std::is_lvalue_reference<T>::value>::type>
+    template <typename T,
+              typename = std::enable_if_t<!std::is_lvalue_reference<T>::value>>
     const ImmediateDiagBuilder &operator<<(T &&V) const {
       const DiagnosticBuilder &BaseDiag = *this;
       BaseDiag << std::move(V);
@@ -1793,8 +1793,8 @@ public:
     // It is necessary to limit this to rvalue reference to avoid calling this
     // function with a bitfield lvalue argument since non-const reference to
     // bitfield is not allowed.
-    template <typename T, typename = typename std::enable_if<
-                              !std::is_lvalue_reference<T>::value>::type>
+    template <typename T,
+              typename = std::enable_if_t<!std::is_lvalue_reference<T>::value>>
     const SemaDiagnosticBuilder &operator<<(T &&V) const {
       if (ImmediateDiag)
         *ImmediateDiag << std::move(V);
@@ -7013,13 +7013,12 @@ public:
                                          LambdaCaptureDefault CaptureDefault);
 
   /// Start the definition of a lambda expression.
-  CXXMethodDecl *startLambdaDefinition(CXXRecordDecl *Class,
-                                       SourceRange IntroducerRange,
-                                       TypeSourceInfo *MethodType,
-                                       SourceLocation EndLoc,
-                                       ArrayRef<ParmVarDecl *> Params,
-                                       ConstexprSpecKind ConstexprKind,
-                                       Expr *TrailingRequiresClause);
+  CXXMethodDecl *
+  startLambdaDefinition(CXXRecordDecl *Class, SourceRange IntroducerRange,
+                        TypeSourceInfo *MethodType, SourceLocation EndLoc,
+                        ArrayRef<ParmVarDecl *> Params,
+                        ConstexprSpecKind ConstexprKind, StorageClass SC,
+                        Expr *TrailingRequiresClause);
 
   /// Number lambda for linkage purposes if necessary.
   void handleLambdaNumbering(
@@ -9054,7 +9053,7 @@ public:
   MultiLevelTemplateArgumentList getTemplateInstantiationArgs(
       const NamedDecl *D, const TemplateArgumentList *Innermost = nullptr,
       bool RelativeToPrimary = false, const FunctionDecl *Pattern = nullptr,
-      bool LookBeyondLambda = false, bool IncludeContainingStruct = false);
+      bool ForConstraintInstantiation = false);
 
   /// A context in which code is being synthesized (where a source location
   /// alone is not sufficient to identify the context). This covers template

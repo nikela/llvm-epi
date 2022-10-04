@@ -96,80 +96,42 @@ module ieee_arithmetic
 ! Define specifics with 1 or 2 INTEGER, LOGICAL, or REAL arguments for
 ! generic G.
 #define SPECIFICS_I(G) \
-  G(1) G(2) G(4) G(8) G(__FLANG_LDK)
+  G(1) G(2) G(4) G(8)
 #define SPECIFICS_L(G) \
   G(1) G(2) G(4) G(8)
-!! #define SPECIFICS_R(G) \
-!!   G(2) G(3) G(4) G(8) G(10) G(16)
 #define SPECIFICS_R(G) \
- G(4) G(8) G(__FLANG_LDK)
+ G(4) G(8)
 #define SPECIFICS_II(G) \
-  G(1,1) G(1,2) G(1,4) G(1,8) G(1,__FLANG_LDK) \
-  G(2,1) G(2,2) G(2,4) G(2,8) G(2,__FLANG_LDK) \
-  G(4,1) G(4,2) G(4,4) G(4,8) G(4,__FLANG_LDK) \
-  G(8,1) G(8,2) G(8,4) G(8,8) G(8,__FLANG_LDK) \
-  G(__FLANG_LDK,1) G(__FLANG_LDK,2) G(__FLANG_LDK,4) G(__FLANG_LDK,8) G(__FLANG_LDK,__FLANG_LDK)
-!! #define SPECIFICS_RI(G) \
-!!   G(2,1) G(2,2) G(2,4) G(2,8) G(2,16) \
-!!   G(3,1) G(3,2) G(3,4) G(3,8) G(3,16) \
-!!   G(4,1) G(4,2) G(4,4) G(4,8) G(4,16) \
-!!   G(8,1) G(8,2) G(8,4) G(8,8) G(8,16) \
-!!   G(10,1) G(10,2) G(10,4) G(10,8) G(10,16) \
-!!   G(16,1) G(16,2) G(16,4) G(16,8) G(16,16)
+  G(1,1) G(1,2) G(1,4) G(1,8) \
+  G(2,1) G(2,2) G(2,4) G(2,8) \
+  G(4,1) G(4,2) G(4,4) G(4,8) \
+  G(8,1) G(8,2) G(8,4) G(8,8)
 #define SPECIFICS_RI(G) \
-  G(4,1) G(4,2) G(4,4) G(4,8) G(4,__FLANG_LDK) \
-  G(8,1) G(8,2) G(8,4) G(8,8) G(8,__FLANG_LDK) \
-  G(__FLANG_LDK,1) G(__FLANG_LDK,2) G(__FLANG_LDK,4) G(__FLANG_LDK,8) G(__FLANG_LDK,__FLANG_LDK)
-!! #define SPECIFICS_RR(G) \
-!!   G(2,2) G(2,3) G(2,4) G(2,8) G(2,10) G(2,16) \
-!!   G(3,2) G(3,3) G(3,4) G(3,8) G(3,10) G(3,16) \
-!!   G(4,2) G(4,3) G(4,4) G(4,8) G(4,10) G(4,16) \
-!!   G(8,2) G(8,3) G(8,4) G(8,8) G(8,10) G(8,16) \
-!!   G(10,2) G(10,3) G(10,4) G(10,8) G(10,10) G(10,16) \
-!!   G(16,2) G(16,3) G(16,4) G(16,8) G(16,10) G(16,16)
+  G(4,1) G(4,2) G(4,4) G(4,8) \
+  G(8,1) G(8,2) G(8,4) G(8,8)
 #define SPECIFICS_RR(G) \
-  G(4,4) G(4,8) G(4,__FLANG_LDK) \
-  G(8,4) G(8,8) G(8,__FLANG_LDK) \
-  G(__FLANG_LDK,4) G(__FLANG_LDK,8) G(__FLANG_LDK,__FLANG_LDK)
+  G(4,4) G(4,8) \
+  G(8,4) G(8,8)
 
 ! Set PRIVATE accessibility for specifics with 1 or 2 INTEGER, LOGICAL, or REAL
 ! arguments for generic G.
 #define PRIVATE_I(G) private :: \
-  G##_i1, G##_i2, G##_i4, G##_i8, G##_i##__FLANG_LDK
+  G##_i1, G##_i2, G##_i4, G##_i8
 #define PRIVATE_L(G) private :: \
   G##_l1, G##_l2, G##_l4, G##_l8
-!! #define PRIVATE_R(G) private :: \
-!!   G##_a2, G##_a3, G##_a4, G##_a8, G##_a10, G##_a16
 #define PRIVATE_R(G) private :: \
-  G##_a4, G##_a8, G##_a##__FLANG_LDK
+  G##_a4, G##_a8
 #define PRIVATE_II(G) private :: \
-  G##_i1_i1, G##_i1_i2, G##_i1_i4, G##_i1_i8, G##_i1_i##__FLANG_LDK, \
-  G##_i2_i1, G##_i2_i2, G##_i2_i4, G##_i2_i8, G##_i2_i##__FLANG_LDK, \
-  G##_i4_i1, G##_i4_i2, G##_i4_i4, G##_i4_i8, G##_i4_i##__FLANG_LDK, \
-  G##_i8_i1, G##_i8_i2, G##_i8_i4, G##_i8_i8, G##_i8_i##__FLANG_LDK, \
-  G##_i##__FLANG_LDK##_i1, G##_i##__FLANG_LDK##_i2, G##_i##__FLANG_LDK##_i4, G##_i##__FLANG_LDK##_i8, G##_i##__FLANG_LDK##_i##__FLANG_LDK
-!! #define PRIVATE_RI(G) private :: \
-!!   G##_a2_i1, G##_a2_i2, G##_a2_i4, G##_a2_i8, G##_a2_i16, \
-!!   G##_a3_i1, G##_a3_i2, G##_a3_i4, G##_a3_i8, G##_a3_i16, \
-!!   G##_a4_i1, G##_a4_i2, G##_a4_i4, G##_a4_i8, G##_a4_i16, \
-!!   G##_a8_i1, G##_a8_i2, G##_a8_i4, G##_a8_i8, G##_a8_i16, \
-!!   G##_a10_i1, G##_a10_i2, G##_a10_i4, G##_a10_i8, G##_a10_i16, \
-!!   G##_a16_i1, G##_a16_i2, G##_a16_i4, G##_a16_i8, G##_a16_i16
+  G##_i1_i1, G##_i1_i2, G##_i1_i4, G##_i1_i8, \
+  G##_i2_i1, G##_i2_i2, G##_i2_i4, G##_i2_i8, \
+  G##_i4_i1, G##_i4_i2, G##_i4_i4, G##_i4_i8, \
+  G##_i8_i1, G##_i8_i2, G##_i8_i4, G##_i8_i8
 #define PRIVATE_RI(G) private :: \
-  G##_a4_i1, G##_a4_i2, G##_a4_i4, G##_a4_i8, G##_a4_i##__FLANG_LDK, \
-  G##_a8_i1, G##_a8_i2, G##_a8_i4, G##_a8_i8, G##_a8_i##__FLANG_LDK, \
-  G##_a##__FLANG_LDK##_i1, G##_a##__FLANG_LDK##_i2, G##_a##__FLANG_LDK##_i4, G##_a##__FLANG_LDK##_i8, G##_a##__FLANG_LDK##_i##__FLANG_LDK
-!! #define PRIVATE_RR(G) private :: \
-!!   G##_a2_a2, G##_a2_a3, G##_a2_a4, G##_a2_a8, G##_a2_a10, G##_a2_a16, \
-!!   G##_a3_a2, G##_a3_a3, G##_a3_a4, G##_a3_a8, G##_a3_a10, G##_a3_a16, \
-!!   G##_a4_a2, G##_a4_a3, G##_a4_a4, G##_a4_a8, G##_a4_a10, G##_a4_a16, \
-!!   G##_a8_a2, G##_a8_a3, G##_a8_a4, G##_a8_a8, G##_a8_a10, G##_a8_a16, \
-!!   G##_a10_a2, G##_a10_a3, G##_a10_a4, G##_a10_a8, G##_a10_a10, G##_a10_a16, \
-!!   G##_a16_a2, G##_a16_a3, G##_a16_a4, G##_a16_a8, G##_a16_a10, G##_a16_a16
+  G##_a4_i1, G##_a4_i2, G##_a4_i4, G##_a4_i8, \
+  G##_a8_i1, G##_a8_i2, G##_a8_i4, G##_a8_i8
 #define PRIVATE_RR(G) private :: \
-  G##_a4_a4, G##_a4_a8, G##_a4_a##__FLANG_LDK, \
-  G##_a8_a4, G##_a8_a8, G##_a8_a##__FLANG_LDK, \
-  G##_a##__FLANG_LDK##_a4, G##_a##__FLANG_LDK##_a8, G##_a##__FLANG_LDK##_a##__FLANG_LDK
+  G##_a4_a4, G##_a4_a8, \
+  G##_a8_a4, G##_a8_a8
 
 #define IEEE_CLASS_R(XKIND) \
   elemental type(ieee_class_type) function ieee_class_a##XKIND(x); \
@@ -230,7 +192,7 @@ module ieee_arithmetic
 #undef IEEE_GET_UNDERFLOW_MODE_L
 
 ! When kind argument is present, kind(result) is value(kind), not kind(kind).
-! That is not known here, so return integer(__FLANG_LDK).
+! That is not known here, so return integer(8).
 #define IEEE_INT_R(AKIND) \
   elemental integer function ieee_int_a##AKIND(a, round); \
     import ieee_round_type; \
@@ -238,7 +200,7 @@ module ieee_arithmetic
     type(ieee_round_type), intent(in) :: round; \
   end function ieee_int_a##AKIND;
 #define IEEE_INT_RI(AKIND, KKIND) \
-  elemental integer(__FLANG_LDK) function ieee_int_a##AKIND##_i##KKIND(a, round, kind); \
+  elemental integer(8) function ieee_int_a##AKIND##_i##KKIND(a, round, kind); \
     import ieee_round_type; \
     real(AKIND), intent(in) :: a; \
     type(ieee_round_type), intent(in) :: round; \
@@ -374,7 +336,7 @@ module ieee_arithmetic
 #undef IEEE_QUIET_NE_R
 
 ! When kind argument is present, kind(result) is value(kind), not kind(kind).
-! That is not known here, so return real(__FLANG_LDK).
+! That is not known here, so return real(8).
 #define IEEE_REAL_I(AKIND) \
   elemental real function ieee_real_i##AKIND(a); \
     integer(AKIND), intent(in) :: a; \
@@ -384,12 +346,12 @@ module ieee_arithmetic
     real(AKIND), intent(in) :: a; \
   end function ieee_real_a##AKIND;
 #define IEEE_REAL_II(AKIND, KKIND) \
-  elemental real(__FLANG_LDK) function ieee_real_i##AKIND##_i##KKIND(a, kind); \
+  elemental real(8) function ieee_real_i##AKIND##_i##KKIND(a, kind); \
     integer(AKIND), intent(in) :: a; \
     integer(KKIND), intent(in) :: kind; \
   end function ieee_real_i##AKIND##_i##KKIND;
 #define IEEE_REAL_RI(AKIND, KKIND) \
-  elemental real(__FLANG_LDK) function ieee_real_a##AKIND##_i##KKIND(a, kind); \
+  elemental real(8) function ieee_real_a##AKIND##_i##KKIND(a, kind); \
     real(AKIND), intent(in) :: a; \
     integer(KKIND), intent(in) :: kind; \
   end function ieee_real_a##AKIND##_i##KKIND;
