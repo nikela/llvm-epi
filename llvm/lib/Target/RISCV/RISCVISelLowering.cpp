@@ -297,6 +297,21 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       ISD::STRICT_FSUB,    ISD::STRICT_FMUL,   ISD::STRICT_FDIV,
       ISD::STRICT_FSQRT,   ISD::STRICT_FSETCC, ISD::STRICT_FSETCCS};
 
+  static const unsigned FPLegalNodeTypesWithPromoteableResult[] = {
+      ISD::LRINT,
+      ISD::LROUND,
+      ISD::STRICT_LRINT,
+      ISD::STRICT_LROUND,
+  };
+
+  if (Subtarget.is64Bit()) {
+    // Any integer actually, but we expect code generators be sensible
+    // with their bitwidths here.
+    setOperationAction(FPLegalNodeTypesWithPromoteableResult, MVT::i8, Custom);
+    setOperationAction(FPLegalNodeTypesWithPromoteableResult, MVT::i16, Custom);
+    setOperationAction(FPLegalNodeTypesWithPromoteableResult, MVT::i32, Custom);
+  }
+
   static const ISD::CondCode FPCCToExpand[] = {
       ISD::SETOGT, ISD::SETOGE, ISD::SETONE, ISD::SETUEQ, ISD::SETUGT,
       ISD::SETUGE, ISD::SETULT, ISD::SETULE, ISD::SETUNE, ISD::SETGT,
@@ -9589,6 +9604,28 @@ void RISCVTargetLowering::ReplaceNodeResults(SDNode *N,
     SDValue Res = DAG.getNode(ISD::FLT_ROUNDS_, DL, VTs, N->getOperand(0));
     Results.push_back(Res.getValue(0));
     Results.push_back(Res.getValue(1));
+    break;
+  }
+  case ISD::LRINT:
+  case ISD::LROUND:
+  case ISD::STRICT_LRINT:
+  case ISD::STRICT_LROUND: {
+    EVT Ty = N->getValueType(0);
+    if (Subtarget.is64Bit() && Ty != Subtarget.getXLenVT()) {
+      // Use fcvt.w.<fp> and truncate as needed.
+      assert(Ty.isInteger() &&
+             Ty.getSizeInBits() < Subtarget.getXLenVT().getSizeInBits() &&
+             "Unexpected type");
+      RISCVFPRndMode::RoundingMode FRM =
+          (N->getOpcode() == ISD::LRINT || N->getOpcode() == ISD::STRICT_LRINT)
+              ? RISCVFPRndMode::DYN
+              : RISCVFPRndMode::RMM;
+      SDValue Res =
+          DAG.getNode(RISCVISD::FCVT_W_RV64, DL, MVT::i64, N->getOperand(0),
+                      DAG.getTargetConstant(FRM, DL, Subtarget.getXLenVT()));
+      Res = DAG.getNode(ISD::TRUNCATE, DL, Ty, Res);
+      Results.push_back(Res);
+    }
     break;
   }
   }
