@@ -8658,7 +8658,7 @@ RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op,
       DAG.getNode(ISD::SUB, DL, XLenVT, Ops[2], DAG.getConstant(1, DL, XLenVT));
   SDValue VecLenSplat =
       DAG.getNode(RISCVISD::VMV_V_X_VL, DL, IndicesVT, DAG.getUNDEF(IndicesVT),
-                  VecLen, Ops[1], Ops[2]);
+                  VecLen, Ops[2]);
   SDValue VRSUB =
       DAG.getNode(RISCVISD::SUB_VL, DL, IndicesVT,
                   {VecLenSplat, VID, DAG.getUNDEF(IndicesVT), Ops[1], Ops[2]});
