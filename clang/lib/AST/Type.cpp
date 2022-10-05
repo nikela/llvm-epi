@@ -3500,7 +3500,7 @@ bool TypeOfExprType::isSugared() const {
 QualType TypeOfExprType::desugar() const {
   if (isSugared()) {
     QualType QT = getUnderlyingExpr()->getType();
-    return isUnqual() ? QT.getAtomicUnqualifiedType() : QT;
+    return TypeOfBits.IsUnqual ? QT.getAtomicUnqualifiedType() : QT;
   }
   return QualType(this, 0);
 }
