@@ -547,6 +547,8 @@ inline static bool isNontemporal(unsigned VType) {
 
 void printVType(unsigned VType, raw_ostream &OS);
 
+unsigned getSEWLMULRatio(unsigned SEW, RISCVII::VLMUL VLMul);
+
 } // namespace RISCVVType
 
 } // namespace llvm
