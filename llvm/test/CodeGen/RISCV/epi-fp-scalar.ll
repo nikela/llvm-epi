@@ -8,7 +8,7 @@
 define float @test_fp_ret_f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK-LABEL: test_fp_ret_f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-NEXT:    vfmv.f.s fa0, v8
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f killed $f10_d
@@ -21,7 +21,7 @@ define float @test_fp_ret_f32(<vscale x 2 x float> %a) nounwind {
 define double @test_fp_ret_f64(<vscale x 1 x double> %a) nounwind {
 ; CHECK-LABEL: test_fp_ret_f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vv v8, v8, v8
 ; CHECK-NEXT:    vfmv.f.s fa0, v8
 ; CHECK-NEXT:    ret

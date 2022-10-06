@@ -5,7 +5,7 @@
 define <vscale x 2 x i32> @trunc.i32.i64(<vscale x 2 x i64> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: trunc.i32.i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v10, v8, 0
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
@@ -36,9 +36,9 @@ declare <vscale x 2 x i32> @llvm.vp.trunc.nxv2i32.nxv2i64(<vscale x 2 x i64>, <v
 define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i32(<vscale x 4 x i32> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i8_nxv4i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v10, v8, 0
-; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v10, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -50,11 +50,11 @@ define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i32(<vscale x 4 x i32> %a, i3
 define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i64(<vscale x 4 x i64> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i8_nxv4i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v12, v8, 0
-; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v12, 0
-; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v8, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -66,9 +66,9 @@ define <vscale x 4 x i8> @test_vp_trunc_nxv4i8_nxv4i64(<vscale x 4 x i64> %a, i3
 define <vscale x 4 x i16> @test_vp_trunc_nxv4i16_nxv4i64(<vscale x 4 x i64> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i16_nxv4i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v12, v8, 0
-; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v12, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0

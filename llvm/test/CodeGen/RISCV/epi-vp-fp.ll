@@ -335,7 +335,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O0-NEXT:    lui a5, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a5, a5, %lo(scratch)
 ; CHECK-O0-NEXT:    sd a5, 32(sp) # 8-byte Folded Spill
-; CHECK-O0-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vle32.v v8, (a4)
 ; CHECK-O0-NEXT:    csrr a4, vlenb
 ; CHECK-O0-NEXT:    add a4, sp, a4
@@ -416,7 +416,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O0-NEXT:    add a1, sp, a1
 ; CHECK-O0-NEXT:    addi a1, a1, 48
 ; CHECK-O0-NEXT:    vl1r.v v8, (a1) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli zero, a4, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a4, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vfmadd.vv v10, v9, v16
 ; CHECK-O0-NEXT:    vfneg.v v9, v9
 ; CHECK-O0-NEXT:    vfcvt.f.x.v v8, v8
@@ -443,7 +443,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O2-NEXT:    sd s1, 8(sp) # 8-byte Folded Spill
 ; CHECK-O2-NEXT:    mv s0, a4
 ; CHECK-O2-NEXT:    lui a4, %hi(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, s0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, s0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vle32.v v16, (a0)
 ; CHECK-O2-NEXT:    vle32.v v17, (a1)
 ; CHECK-O2-NEXT:    addi s1, a4, %lo(scratch)
@@ -457,7 +457,7 @@ define void @test_vp_fp_2(<vscale x 2 x float>* %a0, <vscale x 2 x float>* %a1, 
 ; CHECK-O2-NEXT:    vmv.v.v v9, v17
 ; CHECK-O2-NEXT:    mv a0, s0
 ; CHECK-O2-NEXT:    call __epi_fmod_nxv2f32@plt
-; CHECK-O2-NEXT:    vsetvli zero, s0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, s0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vfmacc.vv v18, v16, v17
 ; CHECK-O2-NEXT:    vfneg.v v9, v16
 ; CHECK-O2-NEXT:    vfcvt.f.x.v v10, v19

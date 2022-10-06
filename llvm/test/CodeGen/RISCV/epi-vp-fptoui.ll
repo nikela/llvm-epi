@@ -6,7 +6,7 @@
 define <vscale x 2 x i32> @fptoui.i32.f32(<vscale x 2 x float> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: fptoui.i32.f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfcvt.rtz.xu.f.v v8, v8
 ; CHECK-NEXT:    ret
 {
@@ -35,7 +35,7 @@ declare <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f32(<vscale x 2 x float> 
 define <vscale x 2 x i64> @fptoui.i64.f32(<vscale x 2 x float> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: fptoui.i64.f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfwcvt.rtz.xu.f.v v10, v8
 ; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
@@ -66,7 +66,7 @@ declare <vscale x 2 x i64> @llvm.vp.fptoui.nxv2i64.nxv2f32(<vscale x 2 x float> 
 define <vscale x 2 x i32> @fptoui.i32.f64(<vscale x 2 x double> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: fptoui.i32.f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
@@ -97,9 +97,9 @@ declare <vscale x 2 x i32> @llvm.vp.fptoui.nxv2i32.nxv2f64(<vscale x 2 x double>
 define <vscale x 4 x i8> @test_vp_fptoui_nxv4i8_nxv4f32(<vscale x 4 x float> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_fptoui_nxv4i8_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, ma
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v10, v8
-; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v10, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -123,11 +123,11 @@ define <vscale x 4 x i8> @test_vp_fptoui_nxv4i8_nxv4f32_mask(<vscale x 4 x float
 define <vscale x 4 x i8> @test_vp_fptoui_nxv4i8_nxv4f64(<vscale x 4 x double> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_fptoui_nxv4i8_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v12, v8
-; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v12, 0
-; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e8, mf2, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v8, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -153,9 +153,9 @@ define <vscale x 4 x i8> @test_vp_fptoui_nxv4i8_nxv4f64_mask(<vscale x 4 x doubl
 define <vscale x 4 x i16> @test_vp_fptoui_nxv4i16_nxv4f64(<vscale x 4 x double> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_fptoui_nxv4i16_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vfncvt.rtz.xu.f.w v12, v8
-; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v8, v12, 0
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 4 x i1> undef, i1 1, i32 0

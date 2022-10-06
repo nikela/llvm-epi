@@ -8,7 +8,7 @@ define <vscale x 2 x float> @test_reverse_load_combiner(<vscale x 2 x float>* %p
 ; CHECK-NEXT:    add a0, a2, a0
 ; CHECK-NEXT:    addi a0, a0, -4
 ; CHECK-NEXT:    li a2, -4
-; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-NEXT:    vlse32.v v8, (a0), a2
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0

@@ -27,26 +27,26 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O0-NEXT:    vmfgt.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfge.vf v8, v9, fa0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vf v8, v9, fa0, v0.t
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
@@ -62,19 +62,19 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 ; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfgt.vf v9, v8, fa0, v0.t
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vf v9, v8, fa0, v0.t
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfge.vf v9, v8, fa0, v0.t
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vf v8, v8, fa0, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -124,26 +124,26 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O0-NEXT:    vmflt.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfgt.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vf v8, v9, ft0, v0.t
 ; CHECK-O0-NEXT:    addi a2, sp, 16
 ; CHECK-O0-NEXT:    vl1r.v v0, (a2) # Unknown-size Folded Reload
-; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    # implicit-def: $v8
 ; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfge.vf v8, v9, ft0, v0.t
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
@@ -161,19 +161,19 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 ; CHECK-O2-NEXT:    srli a0, a0, 32
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vf v9, v8, ft0, v0.t
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfgt.vf v9, v8, ft0, v0.t
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vf v9, v8, ft0, v0.t
-; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a2, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v9, (a1)
 ; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfge.vf v8, v8, ft0, v0.t
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*

@@ -8,7 +8,7 @@ define void @test_store_vp_reverse_nxv1f64(<vscale x 1 x double> %src, <vscale x
 ; CHECK-NEXT:    add a0, a2, a0
 ; CHECK-NEXT:    addi a0, a0, -8
 ; CHECK-NEXT:    li a2, -8
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vsse64.v v8, (a0), a2
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -23,11 +23,11 @@ define void @test_store_vp_reverse_different_evl_nxv1f64(<vscale x 1 x double> %
 ; CHECK-LABEL: test_store_vp_reverse_different_evl_nxv1f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi a3, a1, -1
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v9, v9, a3
 ; CHECK-NEXT:    vrgather.vv v10, v8, v9
-; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-NEXT:    vse64.v v10, (a0)
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -42,7 +42,7 @@ define <vscale x 1 x double> @test_store_vp_reverse_many_uses_nxv1f64(<vscale x 
 ; CHECK-LABEL: test_store_vp_reverse_many_uses_nxv1f64:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    addi a2, a1, -1
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v10, v9, a2
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10
@@ -79,7 +79,7 @@ define void @test_store_vp_reverse_nxv1f64_reversed_mask(<vscale x 1 x double> %
 ; CHECK-NEXT:    add a0, a2, a0
 ; CHECK-NEXT:    addi a0, a0, -8
 ; CHECK-NEXT:    li a2, -8
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vsse64.v v8, (a0), a2, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -107,7 +107,6 @@ define void @test_store_vp_reverse_nxv1f64_inconsistent_mask(<vscale x 1 x doubl
 ; CHECK-NEXT:    vrgather.vv v12, v10, v11, v0.t
 ; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmsne.vi v0, v12, 0, v0.t
-; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, mu
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v9, v9, a1
 ; CHECK-NEXT:    vrgather.vv v10, v8, v9

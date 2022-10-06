@@ -13,9 +13,9 @@ define void @test_vp_fcmp.oeq(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -23,9 +23,9 @@ define void @test_vp_fcmp.oeq(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -46,9 +46,9 @@ define void @test_vp_fcmp.ogt(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -56,9 +56,9 @@ define void @test_vp_fcmp.ogt(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -79,9 +79,9 @@ define void @test_vp_fcmp.oge(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -89,9 +89,9 @@ define void @test_vp_fcmp.oge(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -112,9 +112,9 @@ define void @test_vp_fcmp.olt(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -122,9 +122,9 @@ define void @test_vp_fcmp.olt(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -145,9 +145,9 @@ define void @test_vp_fcmp.ole(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -155,9 +155,9 @@ define void @test_vp_fcmp.ole(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -187,11 +187,11 @@ define void @test_vp_fcmp.one(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
@@ -203,11 +203,11 @@ define void @test_vp_fcmp.one(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmor.mm v8, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -228,11 +228,11 @@ define void @test_vp_fcmp.ord(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v9, v9, v9
 ; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v8
 ; CHECK-O0-NEXT:    vmand.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -240,11 +240,11 @@ define void @test_vp_fcmp.ord(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v9, v9, v9
 ; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -265,11 +265,11 @@ define void @test_vp_fcmp.uno(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v9, v9, v9
 ; CHECK-O0-NEXT:    vmfne.vv v8, v8, v8
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -277,11 +277,11 @@ define void @test_vp_fcmp.uno(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v9, v9, v9
 ; CHECK-O2-NEXT:    vmfne.vv v8, v8, v8
 ; CHECK-O2-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -311,11 +311,11 @@ define void @test_vp_fcmp.ueq(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
 ; CHECK-O0-NEXT:    vmnor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
@@ -327,11 +327,11 @@ define void @test_vp_fcmp.ueq(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmnor.mm v8, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -352,10 +352,10 @@ define void @test_vp_fcmp.ugt(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -363,10 +363,10 @@ define void @test_vp_fcmp.ugt(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -387,10 +387,10 @@ define void @test_vp_fcmp.uge(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -398,10 +398,10 @@ define void @test_vp_fcmp.uge(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -422,10 +422,10 @@ define void @test_vp_fcmp.ult(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -433,10 +433,10 @@ define void @test_vp_fcmp.ult(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -457,10 +457,10 @@ define void @test_vp_fcmp.ule(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -468,10 +468,10 @@ define void @test_vp_fcmp.ule(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -492,9 +492,9 @@ define void @test_vp_fcmp.une(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf8, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -502,9 +502,9 @@ define void @test_vp_fcmp.une(<vscale x 1 x double> %a, <vscale x 1 x double> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 1 x i1>*
@@ -525,9 +525,9 @@ define void @test_vp_fcmp_2.oeq(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -535,9 +535,9 @@ define void @test_vp_fcmp_2.oeq(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -557,9 +557,9 @@ define void @test_vp_fcmp_2.ogt(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -567,9 +567,9 @@ define void @test_vp_fcmp_2.ogt(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -589,9 +589,9 @@ define void @test_vp_fcmp_2.oge(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -599,9 +599,9 @@ define void @test_vp_fcmp_2.oge(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -621,9 +621,9 @@ define void @test_vp_fcmp_2.olt(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -631,9 +631,9 @@ define void @test_vp_fcmp_2.olt(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -653,9 +653,9 @@ define void @test_vp_fcmp_2.ole(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -663,9 +663,9 @@ define void @test_vp_fcmp_2.ole(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -694,11 +694,11 @@ define void @test_vp_fcmp_2.one(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
@@ -710,11 +710,11 @@ define void @test_vp_fcmp_2.one(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmor.mm v8, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -734,11 +734,11 @@ define void @test_vp_fcmp_2.ord(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v9, v9, v9
 ; CHECK-O0-NEXT:    vmfeq.vv v8, v8, v8
 ; CHECK-O0-NEXT:    vmand.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -746,11 +746,11 @@ define void @test_vp_fcmp_2.ord(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v9, v9, v9
 ; CHECK-O2-NEXT:    vmfeq.vv v8, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -770,11 +770,11 @@ define void @test_vp_fcmp_2.uno(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v9, v9, v9
 ; CHECK-O0-NEXT:    vmfne.vv v8, v8, v8
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -782,11 +782,11 @@ define void @test_vp_fcmp_2.uno(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v9, v9, v9
 ; CHECK-O2-NEXT:    vmfne.vv v8, v8, v8
 ; CHECK-O2-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -815,11 +815,11 @@ define void @test_vp_fcmp_2.ueq(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v10, v8
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v10
 ; CHECK-O0-NEXT:    vmnor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
@@ -831,11 +831,11 @@ define void @test_vp_fcmp_2.ueq(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v10, v8, v9
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmnor.mm v8, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -855,10 +855,10 @@ define void @test_vp_fcmp_2.ugt(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v8, v9
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -866,10 +866,10 @@ define void @test_vp_fcmp_2.ugt(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -889,10 +889,10 @@ define void @test_vp_fcmp_2.uge(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v8, v9
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -900,10 +900,10 @@ define void @test_vp_fcmp_2.uge(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v8, v9
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -923,10 +923,10 @@ define void @test_vp_fcmp_2.ult(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v9, v8
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -934,10 +934,10 @@ define void @test_vp_fcmp_2.ult(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -957,10 +957,10 @@ define void @test_vp_fcmp_2.ule(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -968,10 +968,10 @@ define void @test_vp_fcmp_2.ule(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v8, v9, v8
 ; CHECK-O2-NEXT:    vmnot.m v8, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -991,9 +991,9 @@ define void @test_vp_fcmp_2.une(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1001,9 +1001,9 @@ define void @test_vp_fcmp_2.une(<vscale x 2 x float> %a, <vscale x 2 x float> %b
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v8, v8, v9
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1026,9 +1026,9 @@ define void @test_vp_fcmp_3.oeq(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1036,9 +1036,9 @@ define void @test_vp_fcmp_3.oeq(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1060,9 +1060,9 @@ define void @test_vp_fcmp_3.ogt(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1070,9 +1070,9 @@ define void @test_vp_fcmp_3.ogt(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v10, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1094,9 +1094,9 @@ define void @test_vp_fcmp_3.oge(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1104,9 +1104,9 @@ define void @test_vp_fcmp_3.oge(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v10, v8
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1129,9 +1129,9 @@ define void @test_vp_fcmp_3.olt(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1139,9 +1139,9 @@ define void @test_vp_fcmp_3.olt(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1164,9 +1164,9 @@ define void @test_vp_fcmp_3.ole(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1174,9 +1174,9 @@ define void @test_vp_fcmp_3.ole(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1199,11 +1199,11 @@ define void @test_vp_fcmp_3.one(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v12, v10
 ; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1211,11 +1211,11 @@ define void @test_vp_fcmp_3.one(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
 ; CHECK-O2-NEXT:    vmflt.vv v13, v10, v8
 ; CHECK-O2-NEXT:    vmor.mm v8, v13, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1238,11 +1238,11 @@ define void @test_vp_fcmp_3.ord(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfeq.vv v9, v12, v12
 ; CHECK-O0-NEXT:    vmfeq.vv v8, v10, v10
 ; CHECK-O0-NEXT:    vmand.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1250,11 +1250,11 @@ define void @test_vp_fcmp_3.ord(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfeq.vv v12, v10, v10
 ; CHECK-O2-NEXT:    vmfeq.vv v10, v8, v8
 ; CHECK-O2-NEXT:    vmand.mm v8, v10, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1277,11 +1277,11 @@ define void @test_vp_fcmp_3.uno(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v9, v12, v12
 ; CHECK-O0-NEXT:    vmfne.vv v8, v10, v10
 ; CHECK-O0-NEXT:    vmor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1289,11 +1289,11 @@ define void @test_vp_fcmp_3.uno(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v12, v10, v10
 ; CHECK-O2-NEXT:    vmfne.vv v10, v8, v8
 ; CHECK-O2-NEXT:    vmor.mm v8, v10, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1315,11 +1315,11 @@ define void @test_vp_fcmp_3.ueq(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v9, v12, v10
 ; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vmnor.mm v8, v8, v9
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1327,11 +1327,11 @@ define void @test_vp_fcmp_3.ueq(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
 ; CHECK-O2-NEXT:    vmflt.vv v13, v10, v8
 ; CHECK-O2-NEXT:    vmnor.mm v8, v13, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1354,10 +1354,10 @@ define void @test_vp_fcmp_3.ugt(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1365,10 +1365,10 @@ define void @test_vp_fcmp_3.ugt(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v8, v10
 ; CHECK-O2-NEXT:    vmnot.m v8, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1391,10 +1391,10 @@ define void @test_vp_fcmp_3.uge(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1402,10 +1402,10 @@ define void @test_vp_fcmp_3.uge(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v8, v10
 ; CHECK-O2-NEXT:    vmnot.m v8, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1427,10 +1427,10 @@ define void @test_vp_fcmp_3.ult(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfle.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1438,10 +1438,10 @@ define void @test_vp_fcmp_3.ult(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfle.vv v12, v10, v8
 ; CHECK-O2-NEXT:    vmnot.m v8, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1463,10 +1463,10 @@ define void @test_vp_fcmp_3.ule(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmflt.vv v8, v10, v12
 ; CHECK-O0-NEXT:    vmnot.m v8, v8
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1474,10 +1474,10 @@ define void @test_vp_fcmp_3.ule(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmflt.vv v12, v10, v8
 ; CHECK-O2-NEXT:    vmnot.m v8, v12
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v8, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
@@ -1500,9 +1500,9 @@ define void @test_vp_fcmp_3.une(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O0-NEXT:    # kill: def $x10 killed $x11
 ; CHECK-O0-NEXT:    lui a0, %hi(scratch)
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vmfne.vv v8, v10, v12
-; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, mu
+; CHECK-O0-NEXT:    vsetvli a1, zero, e8, mf4, ta, ma
 ; CHECK-O0-NEXT:    vsm.v v8, (a0)
 ; CHECK-O0-NEXT:    ret
 ;
@@ -1510,9 +1510,9 @@ define void @test_vp_fcmp_3.une(<vscale x 2 x double> %a, <vscale x 2 x double> 
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    lui a1, %hi(scratch)
 ; CHECK-O2-NEXT:    addi a1, a1, %lo(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vmfne.vv v12, v8, v10
-; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, mu
+; CHECK-O2-NEXT:    vsetvli a0, zero, e8, mf4, ta, ma
 ; CHECK-O2-NEXT:    vsm.v v12, (a1)
 ; CHECK-O2-NEXT:    ret
   %store_addr = bitcast i8* @scratch to <vscale x 2 x i1>*
