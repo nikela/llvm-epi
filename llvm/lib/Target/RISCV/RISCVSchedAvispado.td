@@ -256,11 +256,13 @@ let BufferSize = 8 in {
 
 let SchedModel = AvispadoModel in {
 
-// let Latency = 1 in
-// {
-//     def : WriteRes<WriteVL, [AvispadoVSETVL]>;
-//     def : WriteRes<WriteVTYPE, [AvispadoVSETVL]>;
-// }
+let Latency = 1 in
+{
+  def : WriteRes<WriteVSETIVLI, [AvispadoVSETVL]>;
+  def : WriteRes<WriteVSETVLI,  [AvispadoVSETVL]>;
+  // FIXME: This one might stall the CPU so it needs better modelling.
+  def : WriteRes<WriteVSETVL,  [AvispadoVSETVL]>;
+}
 
 let Latency = 16, ResourceCycles = [8] in
 {
@@ -471,6 +473,9 @@ def : WriteRes<WriteVMov8V, []>;
 def : WriteRes<WriteRdVLENB, []>;
 
 // Bypasses
+
+def : ReadAdvance<ReadVSETVLI, 0>;
+def : ReadAdvance<ReadVSETVL, 0>;
 
 // 7. Vector Loads and Stores
 def : ReadAdvance<ReadVLDX, 0>;

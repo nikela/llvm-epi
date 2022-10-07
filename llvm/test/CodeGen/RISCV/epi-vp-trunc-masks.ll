@@ -10,7 +10,7 @@ declare <vscale x 8 x i1> @llvm.vp.trunc.nxv8i1.nxv8i8(<vscale x 8 x i8> %op, <v
 define <vscale x 1 x i1> @test_vp_trunc_nxv1i1_nxv1i64(<vscale x 1 x i64> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv1i1_nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
@@ -36,7 +36,7 @@ define <vscale x 1 x i1> @test_vp_trunc_masked_nxv1i1_nxv1i64(<vscale x 1 x i64>
 define <vscale x 2 x i1> @test_vp_trunc_nxv2i1_nxv2i32(<vscale x 2 x i32> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv2i1_nxv2i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
@@ -62,7 +62,7 @@ define <vscale x 2 x i1> @test_vp_trunc_masked_nxv2i1_nxv2i32(<vscale x 2 x i32>
 define <vscale x 4 x i1> @test_vp_trunc_nxv4i1_nxv4i16(<vscale x 4 x i16> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv4i1_nxv4i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret
@@ -88,7 +88,7 @@ define <vscale x 4 x i1> @test_vp_trunc_masked_nxv4i1_nxv4i16(<vscale x 4 x i16>
 define <vscale x 8 x i1> @test_vp_trunc_nxv8i1_nxv8i8(<vscale x 8 x i8> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_trunc_nxv8i1_nxv8i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v0, v8, 0
 ; CHECK-NEXT:    ret

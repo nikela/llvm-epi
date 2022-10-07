@@ -16,7 +16,7 @@ define <vscale x 2 x float> @strided_load(float *%ptr, i64 %stride, <vscale x 2 
 define <vscale x 2 x float> @strided_load_nomask(float *%ptr, i64 %stride, i32 zeroext %evl)
 ; CHECK-LABEL: strided_load_nomask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-NEXT:    vlse32.v v8, (a0), a1
 ; CHECK-NEXT:    ret
 {
@@ -31,7 +31,7 @@ declare <vscale x 2 x float> @llvm.experimental.vp.strided.load.nxv2f32.p0f32.i6
 define void @strided_store(<vscale x 2 x float> %v, float *%ptr, i64 %stride, <vscale x 2 x i1> %mask, i32 zeroext %evl)
 ; CHECK-LABEL: strided_store:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-NEXT:    vsse32.v v8, (a0), a1, v0.t
 ; CHECK-NEXT:    ret
 {
@@ -42,7 +42,7 @@ define void @strided_store(<vscale x 2 x float> %v, float *%ptr, i64 %stride, <v
 define void @strided_store_nomask(<vscale x 2 x float> %v, float *%ptr, i64 %stride, i32 zeroext %evl)
 ; CHECK-LABEL: strided_store_nomask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-NEXT:    vsse32.v v8, (a0), a1
 ; CHECK-NEXT:    ret
 {

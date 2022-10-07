@@ -6,7 +6,7 @@
 define <vscale x 1 x double> @min_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-LABEL: min_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v9
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x double> @llvm.minnum.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b)
@@ -16,7 +16,7 @@ define <vscale x 1 x double> @min_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 
 define <vscale x 2 x float> @min_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b) nounwind {
 ; CHECK-LABEL: min_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v9
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x float> @llvm.minnum.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b)
@@ -26,7 +26,7 @@ define <vscale x 2 x float> @min_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x 
 define <vscale x 2 x double> @min_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b) nounwind {
 ; CHECK-LABEL: min_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v10
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x double> @llvm.minnum.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b)
@@ -36,7 +36,7 @@ define <vscale x 2 x double> @min_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 
 define <vscale x 4 x float> @min_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b) nounwind {
 ; CHECK-LABEL: min_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v10
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x float> @llvm.minnum.nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b)
@@ -46,7 +46,7 @@ define <vscale x 4 x float> @min_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x 
 define <vscale x 4 x double> @min_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b) nounwind {
 ; CHECK-LABEL: min_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v12
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x double> @llvm.minnum.nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b)
@@ -56,7 +56,7 @@ define <vscale x 4 x double> @min_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 
 define <vscale x 8 x float> @min_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b) nounwind {
 ; CHECK-LABEL: min_nxv8f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v12
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x float> @llvm.minnum.nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b)
@@ -66,7 +66,7 @@ define <vscale x 8 x float> @min_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x 
 define <vscale x 8 x double> @min_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b) nounwind {
 ; CHECK-LABEL: min_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v16
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x double> @llvm.minnum.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b)
@@ -76,7 +76,7 @@ define <vscale x 8 x double> @min_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 
 define <vscale x 16 x float> @min_nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b) nounwind {
 ; CHECK-LABEL: min_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m8, ta, ma
 ; CHECK-NEXT:    vfmin.vv v8, v8, v16
 ; CHECK-NEXT:    ret
   %res = call <vscale x 16 x float> @llvm.minnum.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b)
@@ -86,7 +86,7 @@ define <vscale x 16 x float> @min_nxv16f32(<vscale x 16 x float> %a, <vscale x 1
 define <vscale x 1 x double> @max_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-LABEL: max_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v9
 ; CHECK-NEXT:    ret
   %res = call <vscale x 1 x double> @llvm.maxnum.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %b)
@@ -96,7 +96,7 @@ define <vscale x 1 x double> @max_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 
 define <vscale x 2 x float> @max_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b) nounwind {
 ; CHECK-LABEL: max_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v9
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x float> @llvm.maxnum.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x float> %b)
@@ -106,7 +106,7 @@ define <vscale x 2 x float> @max_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x 
 define <vscale x 2 x double> @max_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b) nounwind {
 ; CHECK-LABEL: max_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v10
 ; CHECK-NEXT:    ret
   %res = call <vscale x 2 x double> @llvm.maxnum.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x double> %b)
@@ -116,7 +116,7 @@ define <vscale x 2 x double> @max_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 
 define <vscale x 4 x float> @max_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b) nounwind {
 ; CHECK-LABEL: max_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m2, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v10
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x float> @llvm.maxnum.nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x float> %b)
@@ -126,7 +126,7 @@ define <vscale x 4 x float> @max_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x 
 define <vscale x 4 x double> @max_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b) nounwind {
 ; CHECK-LABEL: max_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m4, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v12
 ; CHECK-NEXT:    ret
   %res = call <vscale x 4 x double> @llvm.maxnum.nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x double> %b)
@@ -136,7 +136,7 @@ define <vscale x 4 x double> @max_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 
 define <vscale x 8 x float> @max_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b) nounwind {
 ; CHECK-LABEL: max_nxv8f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m4, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v12
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x float> @llvm.maxnum.nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x float> %b)
@@ -146,7 +146,7 @@ define <vscale x 8 x float> @max_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x 
 define <vscale x 8 x double> @max_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b) nounwind {
 ; CHECK-LABEL: max_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v16
 ; CHECK-NEXT:    ret
   %res = call <vscale x 8 x double> @llvm.maxnum.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x double> %b)
@@ -156,7 +156,7 @@ define <vscale x 8 x double> @max_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 
 define <vscale x 16 x float> @max_nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b) nounwind {
 ; CHECK-LABEL: max_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m8, ta, ma
 ; CHECK-NEXT:    vfmax.vv v8, v8, v16
 ; CHECK-NEXT:    ret
   %res = call <vscale x 16 x float> @llvm.maxnum.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x float> %b)

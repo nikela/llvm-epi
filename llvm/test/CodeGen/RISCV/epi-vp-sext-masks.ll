@@ -10,7 +10,7 @@ declare <vscale x 8 x i8> @llvm.vp.sext.nxv8i8.nxv8i1(<vscale x 8 x i1> %op, <vs
 define <vscale x 8 x i64> @test_vp_sext_nxv8i64_nxv8i1(<vscale x 8 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_nxv8i64_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -24,7 +24,7 @@ define <vscale x 8 x i64> @test_vp_sext_nxv8i64_nxv8i1(<vscale x 8 x i1> %op, i3
 define <vscale x 8 x i64> @test_vp_sext_masked_nxv8i64_nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i64_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -35,7 +35,7 @@ define <vscale x 8 x i64> @test_vp_sext_masked_nxv8i64_nxv8i1(<vscale x 8 x i1> 
 define <vscale x 8 x i32> @test_vp_sext_nxv8i32_nxv8i1(<vscale x 8 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_nxv8i32_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -49,7 +49,7 @@ define <vscale x 8 x i32> @test_vp_sext_nxv8i32_nxv8i1(<vscale x 8 x i1> %op, i3
 define <vscale x 8 x i32> @test_vp_sext_masked_nxv8i32_nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i32_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -60,7 +60,7 @@ define <vscale x 8 x i32> @test_vp_sext_masked_nxv8i32_nxv8i1(<vscale x 8 x i1> 
 define <vscale x 8 x i16> @test_vp_sext_nxv8i16_nxv8i1(<vscale x 8 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_nxv8i16_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -74,7 +74,7 @@ define <vscale x 8 x i16> @test_vp_sext_nxv8i16_nxv8i1(<vscale x 8 x i1> %op, i3
 define <vscale x 8 x i16> @test_vp_sext_masked_nxv8i16_nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i16_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m2, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -85,7 +85,7 @@ define <vscale x 8 x i16> @test_vp_sext_masked_nxv8i16_nxv8i1(<vscale x 8 x i1> 
 define <vscale x 8 x i8> @test_vp_sext_nxv8i8_nxv8i1(<vscale x 8 x i1> %op, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_nxv8i8_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret
@@ -99,7 +99,7 @@ define <vscale x 8 x i8> @test_vp_sext_nxv8i8_nxv8i1(<vscale x 8 x i1> %op, i32 
 define <vscale x 8 x i8> @test_vp_sext_masked_nxv8i8_nxv8i1(<vscale x 8 x i1> %op, <vscale x 8 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sext_masked_nxv8i8_nxv8i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v8, 0
 ; CHECK-NEXT:    vmerge.vim v8, v8, -1, v0
 ; CHECK-NEXT:    ret

@@ -697,6 +697,7 @@ void llvm::breakLoopBackedge(Loop *L, DominatorTree &DT, ScalarEvolution &SE,
   Loop *OutermostLoop = L->getOutermostLoop();
 
   SE.forgetLoop(L);
+  SE.forgetBlockAndLoopDispositions();
 
   std::unique_ptr<MemorySSAUpdater> MSSAU;
   if (MSSA)

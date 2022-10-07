@@ -2714,8 +2714,9 @@ private:
   /// Values used only by @llvm.assume calls.
   SmallPtrSet<const Value *, 32> EphValues;
 
-  /// Holds all of the instructions that we gathered.
-  SetVector<Instruction *> GatherShuffleSeq;
+  /// Holds all of the instructions that we gathered, shuffle instructions and
+  /// extractelements.
+  SetVector<Instruction *> GatherShuffleExtractSeq;
 
   /// A list of blocks that we are going to CSE.
   SetVector<BasicBlock *> CSEBlocks;
@@ -5784,80 +5785,6 @@ bool BoUpSLP::areAllUsersVectorized(Instruction *I,
          });
 }
 
-namespace {
-/// Helper to keep track of the extracted elements to compute an accumulated
-/// scalarization extraction cost.
-class ScalarizationOverheadBuilder {
-  /// Keep track of demanded elements by source vector or type.
-  typedef DenseMap<Value *, APInt> ExtractByClass;
-  typedef DenseMap<FixedVectorType *, APInt> ExtractByType;
-
-  /// TODO: Add getExtractWithExtendCost support to getScalarizationOverhead.
-  struct ExtractWithExtendOps {
-    unsigned Opcode;
-    VectorType *VecTy;
-    Type *SclTy;
-    unsigned Idx;
-  };
-
-  ExtractByClass m_ExtractsByClass;
-  ExtractByType m_ExtractsByType;
-  SmallVector<ExtractWithExtendOps> m_ExtractsWithExtends;
-
-public:
-  /// Add an extraction from a specific source and element index.
-  void addExtract(Value *Src, unsigned Idx) {
-    auto *Ty = cast<FixedVectorType>(Src->getType());
-    unsigned NumElts = Ty->getNumElements();
-    if (m_ExtractsByClass.count(Src)) {
-      if (Idx < NumElts)
-        m_ExtractsByClass[Src].setBit(Idx);
-      else
-        m_ExtractsByClass[Src].setAllBits();
-      return;
-    }
-    m_ExtractsByClass[Src] = Idx < NumElts ? APInt::getOneBitSet(NumElts, Idx)
-                                           : APInt::getAllOnes(NumElts);
-  }
-
-  /// Add an extraction from a vector type and specific element index.
-  /// We assume that all extractions from a given type are from the same source.
-  void addExtract(FixedVectorType *VecTy, unsigned Idx) {
-    unsigned NumElts = VecTy->getNumElements();
-    if (m_ExtractsByType.count(VecTy)) {
-      if (Idx < NumElts)
-        m_ExtractsByType[VecTy].setBit(Idx);
-      else
-        m_ExtractsByType[VecTy].setAllBits();
-      return;
-    }
-    m_ExtractsByType[VecTy] = Idx < NumElts ? APInt::getOneBitSet(NumElts, Idx)
-                                            : APInt::getAllOnes(NumElts);
-  }
-
-  /// Add an extended extraction from a specific source and element index.
-  void addExtractWithExtend(unsigned Opcode, Type *SclTy,
-                            VectorType *VecTy,
-                            unsigned Idx) {
-    m_ExtractsWithExtends.push_back({Opcode, VecTy, SclTy, Idx});
-  }
-
-  /// Determine the accumulated scalarization cost for the specified extractions.
-  InstructionCost getCost(const TargetTransformInfo *TTI) {
-    InstructionCost Cost = 0;
-    for (struct ExtractWithExtendOps &It : m_ExtractsWithExtends)
-      Cost +=
-          TTI->getExtractWithExtendCost(It.Opcode, It.SclTy, It.VecTy, It.Idx);
-    for (detail::DenseMapPair<FixedVectorType *, APInt> &It : m_ExtractsByType)
-      Cost += TTI->getScalarizationOverhead(It.first, It.second, false, true);
-    for (detail::DenseMapPair<Value *, APInt> &It : m_ExtractsByClass)
-      Cost += TTI->getScalarizationOverhead(
-          cast<VectorType>(It.first->getType()), It.second, false, true);
-    return Cost;
-  }
-};
-} // anonymous namespace
-
 static std::pair<InstructionCost, InstructionCost>
 getVectorCallCosts(CallInst *CI, FixedVectorType *VecTy,
                    TargetTransformInfo *TTI, TargetLibraryInfo *TLI) {
@@ -6085,9 +6012,9 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
   bool NeedToShuffleReuses = !E->ReuseShuffleIndices.empty();
   // FIXME: it tries to fix a problem with MSVC buildbots.
   TargetTransformInfo &TTIRef = *TTI;
-  auto &&AdjustExtractsCost = [this, &TTIRef, CostKind, VL,
+  auto &&AdjustExtractsCost = [this, &TTIRef, CostKind, VL, VecTy,
                                VectorizedVals, E](InstructionCost &Cost) {
-    ScalarizationOverheadBuilder ScalarizationCost;
+    DenseMap<Value *, int> ExtractVectorsTys;
     SmallPtrSet<Value *, 4> CheckedExtracts;
     for (auto *V : VL) {
       if (isa<UndefValue>(V))
@@ -6108,6 +6035,12 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
       if (!EEIdx)
         continue;
       unsigned Idx = *EEIdx;
+      if (TTIRef.getNumberOfParts(VecTy) !=
+          TTIRef.getNumberOfParts(EE->getVectorOperandType())) {
+        auto It =
+            ExtractVectorsTys.try_emplace(EE->getVectorOperand(), Idx).first;
+        It->getSecond() = std::min<int>(It->second, Idx);
+      }
       // Take credit for instruction that will become dead.
       if (EE->hasOneUse()) {
         Instruction *Ext = EE->user_back();
@@ -6116,9 +6049,9 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
             })) {
           // Use getExtractWithExtendCost() to calculate the cost of
           // extractelement/ext pair.
-          ScalarizationCost.addExtractWithExtend(
-              Ext->getOpcode(), Ext->getType(), EE->getVectorOperandType(),
-              Idx);
+          Cost -=
+              TTIRef.getExtractWithExtendCost(Ext->getOpcode(), Ext->getType(),
+                                              EE->getVectorOperandType(), Idx);
           // Add back the cost of s|zext which is subtracted separately.
           Cost += TTIRef.getCastInstrCost(
               Ext->getOpcode(), Ext->getType(), EE->getType(),
@@ -6126,9 +6059,36 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
           continue;
         }
       }
-      ScalarizationCost.addExtract(EE->getVectorOperand(), Idx);
+      Cost -= TTIRef.getVectorInstrCost(*EE, EE->getVectorOperandType(), Idx);
     }
-    Cost -= ScalarizationCost.getCost(&TTIRef);
+    // Add a cost for subvector extracts/inserts if required.
+    for (const auto &Data : ExtractVectorsTys) {
+      auto *EEVTy = cast<FixedVectorType>(Data.first->getType());
+      unsigned NumElts = VecTy->getNumElements();
+      if (Data.second % NumElts == 0)
+        continue;
+      if (TTIRef.getNumberOfParts(EEVTy) > TTIRef.getNumberOfParts(VecTy)) {
+        unsigned Idx = (Data.second / NumElts) * NumElts;
+        unsigned EENumElts = EEVTy->getNumElements();
+        if (Idx + NumElts <= EENumElts) {
+          Cost +=
+              TTIRef.getShuffleCost(TargetTransformInfo::SK_ExtractSubvector,
+                                    EEVTy, None, CostKind, Idx, VecTy);
+        } else {
+          // Need to round up the subvector type vectorization factor to avoid a
+          // crash in cost model functions. Make SubVT so that Idx + VF of SubVT
+          // <= EENumElts.
+          auto *SubVT =
+              FixedVectorType::get(VecTy->getElementType(), EENumElts - Idx);
+          Cost +=
+              TTIRef.getShuffleCost(TargetTransformInfo::SK_ExtractSubvector,
+                                    EEVTy, None, CostKind, Idx, SubVT);
+        }
+      } else {
+        Cost += TTIRef.getShuffleCost(TargetTransformInfo::SK_InsertSubvector,
+                                      VecTy, None, CostKind, 0, EEVTy);
+      }
+    }
   };
   if (E->State == TreeEntry::NeedToGather) {
     if (allConstant(VL))
@@ -6329,16 +6289,16 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
     case Instruction::ExtractElement: {
       // The common cost of removal ExtractElement/ExtractValue instructions +
       // the cost of shuffles, if required to resuffle the original vector.
-      ScalarizationOverheadBuilder ScalarizationCost, ReuseScalarizationCost;
       if (NeedToShuffleReuses) {
         unsigned Idx = 0;
         for (unsigned I : E->ReuseShuffleIndices) {
           if (ShuffleOrOp == Instruction::ExtractElement) {
             auto *EE = cast<ExtractElementInst>(VL[I]);
-            ReuseScalarizationCost.addExtract(EE->getVectorOperand(),
-                                              *getExtractIndex(EE));
+            CommonCost -= TTI->getVectorInstrCost(
+                *EE, EE->getVectorOperandType(), *getExtractIndex(EE));
           } else {
-            ReuseScalarizationCost.addExtract(VecTy, Idx);
+            CommonCost -= TTI->getVectorInstrCost(Instruction::ExtractElement,
+                                                  VecTy, Idx);
             ++Idx;
           }
         }
@@ -6346,18 +6306,16 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
         for (Value *V : VL) {
           if (ShuffleOrOp == Instruction::ExtractElement) {
             auto *EE = cast<ExtractElementInst>(V);
-            ScalarizationCost.addExtract(EE->getVectorOperand(),
-                                         *getExtractIndex(EE));
+            CommonCost += TTI->getVectorInstrCost(
+                *EE, EE->getVectorOperandType(), *getExtractIndex(EE));
           } else {
             --Idx;
-            ScalarizationCost.addExtract(VecTy, Idx);
+            CommonCost += TTI->getVectorInstrCost(Instruction::ExtractElement,
+                                                  VecTy, Idx);
           }
         }
-        CommonCost -= ReuseScalarizationCost.getCost(TTI);
-        CommonCost += ScalarizationCost.getCost(TTI);
       }
       if (ShuffleOrOp == Instruction::ExtractValue) {
-        ScalarizationOverheadBuilder ValueScalarizationCost;
         for (unsigned I = 0, E = VL.size(); I < E; ++I) {
           auto *EI = cast<Instruction>(VL[I]);
           // Take credit for instruction that will become dead.
@@ -6366,20 +6324,20 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
             if (isa<SExtInst, ZExtInst>(Ext) &&
                 all_of(Ext->users(),
                        [](User *U) { return isa<GetElementPtrInst>(U); })) {
-              // Use getExtractWithExtendCost() to calculate the cost of
-              // extractelement/ext pair.
-              ValueScalarizationCost.addExtractWithExtend(
-                  Ext->getOpcode(), Ext->getType(), VecTy, I);
-              // Add back the cost of s|zext which is subtracted separately.
-              CommonCost += TTI->getCastInstrCost(
-                  Ext->getOpcode(), Ext->getType(), EI->getType(),
-                  TTI::getCastContextHint(Ext), CostKind, Ext);
-              continue;
+            // Use getExtractWithExtendCost() to calculate the cost of
+            // extractelement/ext pair.
+            CommonCost -= TTI->getExtractWithExtendCost(
+                Ext->getOpcode(), Ext->getType(), VecTy, I);
+            // Add back the cost of s|zext which is subtracted separately.
+            CommonCost += TTI->getCastInstrCost(
+                Ext->getOpcode(), Ext->getType(), EI->getType(),
+                TTI::getCastContextHint(Ext), CostKind, Ext);
+            continue;
             }
           }
-          ValueScalarizationCost.addExtract(VecTy, I);
+          CommonCost -=
+              TTI->getVectorInstrCost(Instruction::ExtractElement, VecTy, I);
         }
-        CommonCost -= ValueScalarizationCost.getCost(TTI);
       } else {
         AdjustExtractsCost(CommonCost);
       }
@@ -7279,7 +7237,6 @@ InstructionCost BoUpSLP::getTreeCost(ArrayRef<Value *> VectorizedVals) {
   SmallVector<MapVector<const TreeEntry *, SmallVector<int>>> ShuffleMasks;
   SmallVector<std::pair<Value *, const TreeEntry *>> FirstUsers;
   SmallVector<APInt> DemandedElts;
-  ScalarizationOverheadBuilder ScalarizationCost;
   for (ExternalUser &EU : ExternalUses) {
     // We only add extract cost once for the same scalar.
     if (!isa_and_nonnull<InsertElementInst>(EU.User) &&
@@ -7370,20 +7327,20 @@ InstructionCost BoUpSLP::getTreeCost(ArrayRef<Value *> VectorizedVals) {
     // If we plan to rewrite the tree in a smaller type, we will need to sign
     // extend the extracted value back to the original type. Here, we account
     // for the extract and the added cost of the sign extend if needed.
+    auto *VecTy = FixedVectorType::get(EU.Scalar->getType(), BundleWidth);
     auto *ScalarRoot = VectorizableTree[0]->Scalars[0];
     if (MinBWs.count(ScalarRoot)) {
       auto *MinTy = IntegerType::get(F->getContext(), MinBWs[ScalarRoot].first);
       auto Extend =
           MinBWs[ScalarRoot].second ? Instruction::SExt : Instruction::ZExt;
-      auto *VecTy = FixedVectorType::get(MinTy, BundleWidth);
-      ScalarizationCost.addExtractWithExtend(Extend, EU.Scalar->getType(),
-                                             VecTy, EU.Lane);
+      VecTy = FixedVectorType::get(MinTy, BundleWidth);
+      ExtractCost += TTI->getExtractWithExtendCost(Extend, EU.Scalar->getType(),
+                                                   VecTy, EU.Lane);
     } else {
-      auto *VecTy = FixedVectorType::get(EU.Scalar->getType(), BundleWidth);
-      ScalarizationCost.addExtract(VecTy, EU.Lane);
+      ExtractCost +=
+          TTI->getVectorInstrCost(Instruction::ExtractElement, VecTy, EU.Lane);
     }
   }
-  ExtractCost += ScalarizationCost.getCost(TTI);
 
   InstructionCost SpillCost = getSpillCost();
   Cost += SpillCost + ExtractCost;
@@ -7832,7 +7789,7 @@ Value *BoUpSLP::gather(ArrayRef<Value *> VL) {
     auto *InsElt = dyn_cast<InsertElementInst>(Vec);
     if (!InsElt)
       return Vec;
-    GatherShuffleSeq.insert(InsElt);
+    GatherShuffleExtractSeq.insert(InsElt);
     CSEBlocks.insert(InsElt->getParent());
     // Add to our 'need-to-extract' list.
     if (TreeEntry *Entry = getTreeEntry(V)) {
@@ -7986,7 +7943,7 @@ Value *BoUpSLP::vectorizeTree(ArrayRef<Value *> VL) {
             V = Builder.CreateShuffleVector(V, UniformMask, "shrink.shuffle");
           }
           if (auto *I = dyn_cast<Instruction>(V)) {
-            GatherShuffleSeq.insert(I);
+            GatherShuffleExtractSeq.insert(I);
             CSEBlocks.insert(I->getParent());
           }
         }
@@ -8051,7 +8008,7 @@ Value *BoUpSLP::createBuildVector(ArrayRef<Value *> VL) {
     VL = UniqueValues;
   }
 
-  ShuffleInstructionBuilder ShuffleBuilder(Builder, VF, GatherShuffleSeq,
+  ShuffleInstructionBuilder ShuffleBuilder(Builder, VF, GatherShuffleExtractSeq,
                                            CSEBlocks);
   Value *Vec = gather(VL);
   if (!ReuseShuffleIndicies.empty()) {
@@ -8071,7 +8028,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
 
   bool NeedToShuffleReuses = !E->ReuseShuffleIndices.empty();
   unsigned VF = E->getVectorFactor();
-  ShuffleInstructionBuilder ShuffleBuilder(Builder, VF, GatherShuffleSeq,
+  ShuffleInstructionBuilder ShuffleBuilder(Builder, VF, GatherShuffleExtractSeq,
                                            CSEBlocks);
   if (E->State == TreeEntry::NeedToGather) {
     if (E->getMainOp())
@@ -8087,7 +8044,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       Vec = Builder.CreateShuffleVector(Entries.front()->VectorizedValue,
                                         Entries.back()->VectorizedValue, Mask);
       if (auto *I = dyn_cast<Instruction>(Vec)) {
-        GatherShuffleSeq.insert(I);
+        GatherShuffleExtractSeq.insert(I);
         CSEBlocks.insert(I->getParent());
       }
     } else {
@@ -8219,7 +8176,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       if (!IsIdentity || NumElts != NumScalars) {
         V = Builder.CreateShuffleVector(V, Mask);
         if (auto *I = dyn_cast<Instruction>(V)) {
-          GatherShuffleSeq.insert(I);
+          GatherShuffleExtractSeq.insert(I);
           CSEBlocks.insert(I->getParent());
         }
       }
@@ -8227,21 +8184,37 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       SmallVector<int> InsertMask(NumElts, UndefMaskElem);
       for (unsigned I = 0; I < NumElts; I++) {
         if (Mask[I] != UndefMaskElem)
-          InsertMask[Offset + I] = NumElts + I;
+          InsertMask[Offset + I] = I;
       }
-      if (Offset != 0 ||
-          !isUndefVector(FirstInsert->getOperand(0), InsertMask)) {
-        for (unsigned I = 0; I < NumElts; I++) {
-          if (InsertMask[I] == UndefMaskElem)
-            InsertMask[I] = I;
-        }
-
-        V = Builder.CreateShuffleVector(
-            FirstInsert->getOperand(0), V, InsertMask,
-            cast<Instruction>(E->Scalars.back())->getName());
-        if (auto *I = dyn_cast<Instruction>(V)) {
-          GatherShuffleSeq.insert(I);
-          CSEBlocks.insert(I->getParent());
+      bool IsFirstUndef = isUndefVector(FirstInsert->getOperand(0), InsertMask);
+      if ((!IsIdentity || Offset != 0 || !IsFirstUndef) &&
+          NumElts != NumScalars) {
+        if (IsFirstUndef) {
+          if (!ShuffleVectorInst::isIdentityMask(InsertMask)) {
+            V = Builder.CreateShuffleVector(
+                V, InsertMask, cast<Instruction>(E->Scalars.back())->getName());
+            if (auto *I = dyn_cast<Instruction>(V)) {
+              GatherShuffleExtractSeq.insert(I);
+              CSEBlocks.insert(I->getParent());
+            }
+            // Create freeze for undef values.
+            if (!isa<PoisonValue>(FirstInsert->getOperand(0)))
+              V = Builder.CreateFreeze(V);
+          }
+        } else {
+          for (unsigned I = 0; I < NumElts; I++) {
+            if (InsertMask[I] == UndefMaskElem)
+              InsertMask[I] = I;
+            else
+              InsertMask[I] += NumElts;
+          }
+          V = Builder.CreateShuffleVector(
+              FirstInsert->getOperand(0), V, InsertMask,
+              cast<Instruction>(E->Scalars.back())->getName());
+          if (auto *I = dyn_cast<Instruction>(V)) {
+            GatherShuffleExtractSeq.insert(I);
+            CSEBlocks.insert(I->getParent());
+          }
         }
       }
 
@@ -8617,7 +8590,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       // instruction, if any.
       for (Value *V : {V0, V1}) {
         if (auto *I = dyn_cast<Instruction>(V)) {
-          GatherShuffleSeq.insert(I);
+          GatherShuffleExtractSeq.insert(I);
           CSEBlocks.insert(I->getParent());
         }
       }
@@ -8641,7 +8614,7 @@ Value *BoUpSLP::vectorizeTree(TreeEntry *E) {
       Value *V = Builder.CreateShuffleVector(V0, V1, Mask);
       if (auto *I = dyn_cast<Instruction>(V)) {
         V = propagateMetadata(I, E->Scalars);
-        GatherShuffleSeq.insert(I);
+        GatherShuffleExtractSeq.insert(I);
         CSEBlocks.insert(I->getParent());
       }
       V = ShuffleBuilder.finalize(V);
@@ -8741,6 +8714,12 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
         } else {
           Ex = Builder.CreateExtractElement(Vec, Lane);
         }
+        // The then branch of the previous if may produce constants, since 0
+        // operand might be a constant.
+        if (auto *ExI = dyn_cast<Instruction>(Ex)) {
+          GatherShuffleExtractSeq.insert(ExI);
+          CSEBlocks.insert(ExI->getParent());
+        }
         // If necessary, sign-extend or zero-extend ScalarRoot
         // to the larger type.
         if (!MinBWs.count(ScalarRoot))
@@ -8770,7 +8749,6 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
         Builder.SetInsertPoint(&F->getEntryBlock().front());
       }
       Value *NewInst = ExtractAndExtendIfNeeded(Vec);
-      CSEBlocks.insert(cast<Instruction>(Scalar)->getParent());
       auto &NewInstLocs = ExternallyUsedValues[NewInst];
       auto It = ExternallyUsedValues.find(Scalar);
       assert(It != ExternallyUsedValues.end() &&
@@ -8862,20 +8840,17 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
               Builder.SetInsertPoint(PH->getIncomingBlock(i)->getTerminator());
             }
             Value *NewInst = ExtractAndExtendIfNeeded(Vec);
-            CSEBlocks.insert(PH->getIncomingBlock(i));
             PH->setOperand(i, NewInst);
           }
         }
       } else {
         Builder.SetInsertPoint(cast<Instruction>(User));
         Value *NewInst = ExtractAndExtendIfNeeded(Vec);
-        CSEBlocks.insert(cast<Instruction>(User)->getParent());
         User->replaceUsesOfWith(Scalar, NewInst);
       }
     } else {
       Builder.SetInsertPoint(&F->getEntryBlock().front());
       Value *NewInst = ExtractAndExtendIfNeeded(Vec);
-      CSEBlocks.insert(&F->getEntryBlock());
       User->replaceUsesOfWith(Scalar, NewInst);
     }
 
@@ -8989,7 +8964,7 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
           Op1, Op1 == Op2 ? PoisonValue::get(Op1->getType()) : Op2,
           CombinedMask1);
       if (auto *I = dyn_cast<Instruction>(Vec)) {
-        GatherShuffleSeq.insert(I);
+        GatherShuffleExtractSeq.insert(I);
         CSEBlocks.insert(I->getParent());
       }
       return Vec;
@@ -9004,7 +8979,7 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
         !IsIdentityMask(CombinedMask, cast<FixedVectorType>(Op->getType()))) {
       Value *Vec = Builder.CreateShuffleVector(Op, CombinedMask);
       if (auto *I = dyn_cast<Instruction>(Vec)) {
-        GatherShuffleSeq.insert(I);
+        GatherShuffleExtractSeq.insert(I);
         CSEBlocks.insert(I->getParent());
       }
       return Vec;
@@ -9144,10 +9119,10 @@ BoUpSLP::vectorizeTree(ExtraValueToDebugLocsMap &ExternallyUsedValues) {
 }
 
 void BoUpSLP::optimizeGatherSequence() {
-  LLVM_DEBUG(dbgs() << "SLP: Optimizing " << GatherShuffleSeq.size()
+  LLVM_DEBUG(dbgs() << "SLP: Optimizing " << GatherShuffleExtractSeq.size()
                     << " gather sequences instructions.\n");
   // LICM InsertElementInst sequences.
-  for (Instruction *I : GatherShuffleSeq) {
+  for (Instruction *I : GatherShuffleExtractSeq) {
     if (isDeleted(I))
       continue;
 
@@ -9249,7 +9224,7 @@ void BoUpSLP::optimizeGatherSequence() {
       if (isDeleted(&In))
         continue;
       if (!isa<InsertElementInst, ExtractElementInst, ShuffleVectorInst>(&In) &&
-          !GatherShuffleSeq.contains(&In))
+          !GatherShuffleExtractSeq.contains(&In))
         continue;
 
       // Check if we can replace this instruction with any of the
@@ -9268,7 +9243,7 @@ void BoUpSLP::optimizeGatherSequence() {
           break;
         }
         if (isa<ShuffleVectorInst>(In) && isa<ShuffleVectorInst>(V) &&
-            GatherShuffleSeq.contains(V) &&
+            GatherShuffleExtractSeq.contains(V) &&
             IsIdenticalOrLessDefined(V, &In, NewMask) &&
             DT->dominates(In.getParent(), V->getParent())) {
           In.moveAfter(V);
@@ -9289,7 +9264,7 @@ void BoUpSLP::optimizeGatherSequence() {
     }
   }
   CSEBlocks.clear();
-  GatherShuffleSeq.clear();
+  GatherShuffleExtractSeq.clear();
 }
 
 BoUpSLP::ScheduleData *

@@ -18,7 +18,7 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:    addi a5, a4, -1
 ; CHECK-NEXT:    and a6, a0, a5
 ; CHECK-NEXT:    sub a5, a0, a6
-; CHECK-NEXT:    vsetvli t0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli t0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    mv t0, a5
 ; CHECK-NEXT:  .LBB0_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
@@ -129,7 +129,7 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:    addi a5, a4, -1
 ; CHECK-NEXT:    and a6, a0, a5
 ; CHECK-NEXT:    sub a5, a0, a6
-; CHECK-NEXT:    vsetvli t0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli t0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    mv t0, a5
 ; CHECK-NEXT:  .LBB1_4: # %vector.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1

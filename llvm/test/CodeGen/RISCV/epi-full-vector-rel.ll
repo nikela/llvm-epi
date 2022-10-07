@@ -8,7 +8,7 @@ define void @lmul_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmseq.vv v10, v8, v9
 ; CHECK-NEXT:    vsm.v v10, (a0)
 ; CHECK-NEXT:    vmsne.vv v10, v8, v9
@@ -70,7 +70,7 @@ define void @lmul_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmseq.vv v12, v8, v10
 ; CHECK-NEXT:    vsm.v v12, (a0)
 ; CHECK-NEXT:    vmsne.vv v12, v8, v10
@@ -132,7 +132,7 @@ define void @lmul_4(<vscale x 4 x i64> %a, <vscale x 4 x i64> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m4, ta, ma
 ; CHECK-NEXT:    vmseq.vv v16, v8, v12
 ; CHECK-NEXT:    vsm.v v16, (a0)
 ; CHECK-NEXT:    vmsne.vv v16, v8, v12
@@ -194,7 +194,7 @@ define void @lmul_8(<vscale x 8 x i64> %a, <vscale x 8 x i64> %b) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vmseq.vv v24, v8, v16
 ; CHECK-NEXT:    vsm.v v24, (a0)
 ; CHECK-NEXT:    vmsne.vv v24, v8, v16
@@ -256,7 +256,7 @@ define void @lmul_8_i32(<vscale x 16 x i32> %a, <vscale x 16 x i32> %b) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e32, m8, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e32, m8, ta, ma
 ; CHECK-NEXT:    vmseq.vv v24, v8, v16
 ; CHECK-NEXT:    vsm.v v24, (a0)
 ; CHECK-NEXT:    vmsne.vv v24, v8, v16
@@ -318,7 +318,7 @@ define void @lmul_8_i16(<vscale x 32 x i16> %a, <vscale x 32 x i16> %b) nounwind
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(scratch)
 ; CHECK-NEXT:    addi a0, a0, %lo(scratch)
-; CHECK-NEXT:    vsetvli a1, zero, e16, m8, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e16, m8, ta, ma
 ; CHECK-NEXT:    vmseq.vv v24, v8, v16
 ; CHECK-NEXT:    vsm.v v24, (a0)
 ; CHECK-NEXT:    vmsne.vv v24, v8, v16

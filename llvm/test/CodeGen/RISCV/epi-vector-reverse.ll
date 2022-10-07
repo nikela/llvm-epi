@@ -8,7 +8,7 @@ define <vscale x 1 x i64> @nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 3
 ; CHECK-NEXT:    addi a0, a0, -1
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v10, v9, a0
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10
@@ -24,7 +24,7 @@ define <vscale x 2 x i32> @nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 2
 ; CHECK-NEXT:    addi a0, a0, -1
-; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v10, v9, a0
 ; CHECK-NEXT:    vrgather.vv v9, v8, v10
@@ -40,7 +40,7 @@ define <vscale x 2 x i64> @nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    csrr a0, vlenb
 ; CHECK-NEXT:    srli a0, a0, 2
 ; CHECK-NEXT:    addi a0, a0, -1
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vid.v v10
 ; CHECK-NEXT:    vrsub.vx v12, v10, a0
 ; CHECK-NEXT:    vrgather.vv v10, v8, v12

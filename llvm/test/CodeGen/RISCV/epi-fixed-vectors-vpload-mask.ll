@@ -9,7 +9,7 @@ declare <16 x i1> @llvm.vp.load.v16i1.p0v16i1(<16 x i1>*, <16 x i1>, i32)
 define <16 x i1> @vpload_v16i1(<16 x i1>* %ptr, <16 x i1> %m, i32 zeroext %evl) {
 ; CHECK-LABEL: vpload_v16i1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, ma
 ; CHECK-NEXT:    vlm.v v0, (a0)
 ; CHECK-NEXT:    ret
   %load = call <16 x i1> @llvm.vp.load.v16i1.p0v16i1(<16 x i1>* %ptr, <16 x i1> %m, i32 %evl)
@@ -19,7 +19,7 @@ define <16 x i1> @vpload_v16i1(<16 x i1>* %ptr, <16 x i1> %m, i32 zeroext %evl) 
 define <16 x i1> @vpload_v16i1_allones_mask(<16 x i1>* %ptr, i32 zeroext %evl) {
 ; CHECK-LABEL: vpload_v16i1_allones_mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, ma
 ; CHECK-NEXT:    vlm.v v0, (a0)
 ; CHECK-NEXT:    ret
   %a = insertelement <16 x i1> undef, i1 true, i32 0
