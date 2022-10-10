@@ -19,7 +19,7 @@ define <vscale x 2 x i64> @zext.i64.i32(<vscale x 2 x i32> %a, i32 zeroext %gvl)
 define <vscale x 2 x i64> @zext.i64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: zext.i64.i32.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vzext.vf2 v10, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
@@ -49,7 +49,7 @@ define <vscale x 4 x i32> @test_vp_zext_nxv4i32_nxv4i8(<vscale x 4 x i8> %a, i32
 define <vscale x 4 x i32> @test_vp_zext_masked_nxv4i32_nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_masked_nxv4i32_nxv4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vzext.vf4 v10, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
@@ -73,7 +73,7 @@ define <vscale x 4 x i64> @test_vp_zext_nxv4i64_nxv4i8(<vscale x 4 x i8> %a, i32
 define <vscale x 4 x i64> @test_vp_zext_masked_nxv4i64_nxv4i8(<vscale x 4 x i8> %a, <vscale x 4 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_masked_nxv4i64_nxv4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, ma
 ; CHECK-NEXT:    vzext.vf8 v12, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v12
 ; CHECK-NEXT:    ret

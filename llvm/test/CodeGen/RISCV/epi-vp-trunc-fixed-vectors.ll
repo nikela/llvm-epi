@@ -18,7 +18,7 @@ define <4 x i32> @test_vp_trunc_v4i32_v4i64(<4 x i64> %a, i32 zeroext %gvl) {
 define <4 x i32> @test_vp_trunc_v4i32_v4i64_mask(<4 x i64> %a, <4 x i1> %mask, i32 zeroext %gvl) {
 ; CHECK-LABEL: test_vp_trunc_v4i32_v4i64_mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vnsrl.wi v10, v8, 0, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret

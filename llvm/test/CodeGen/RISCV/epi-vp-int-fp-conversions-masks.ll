@@ -5,7 +5,7 @@
 define <vscale x 1 x double> @test_vp_sitofp_masks_nxv1f64(<vscale x 1 x i1> %src, <vscale x 1 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sitofp_masks_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v9, 0
 ; CHECK-NEXT:    vmerge.vim v9, v9, -1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v8
@@ -35,7 +35,7 @@ declare <vscale x 1 x double> @llvm.vp.sitofp.nxv1f64.nxv1i1(<vscale x 1 x i1>, 
 define <vscale x 2 x float> @test_vp_sitofp_masks_nxv2f32(<vscale x 2 x i1> %src, <vscale x 2 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sitofp_masks_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v9, 0
 ; CHECK-NEXT:    vmerge.vim v9, v9, -1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v8
@@ -65,7 +65,7 @@ declare <vscale x 2 x float> @llvm.vp.sitofp.nxv2f32.nxv2i1(<vscale x 2 x i1>, <
 define <vscale x 1 x double> @test_vp_uitofp_masks_nxv1f64(<vscale x 1 x i1> %src, <vscale x 1 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_uitofp_masks_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v9, 0
 ; CHECK-NEXT:    vmerge.vim v9, v9, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v8
@@ -95,7 +95,7 @@ declare <vscale x 1 x double> @llvm.vp.uitofp.nxv1f64.nxv1i1(<vscale x 1 x i1>, 
 define <vscale x 2 x float> @test_vp_uitofp_masks_nxv2f32(<vscale x 2 x i1> %src, <vscale x 2 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_uitofp_masks_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v9, 0
 ; CHECK-NEXT:    vmerge.vim v9, v9, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v8

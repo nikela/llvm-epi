@@ -18,7 +18,7 @@ define <vscale x 1 x double> @test_vp_fneg_nxv1f64(<vscale x 1 x double> %f0, i3
 define <vscale x 1 x double> @test_vp_fneg_nxv1f64_masked(<vscale x 1 x double> %f0, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fneg_nxv1f64_masked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vfneg.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %f = call <vscale x 1 x double> @llvm.vp.fneg.nxv1f64(<vscale x 1 x double> %f0, <vscale x 1 x i1> %m, i32 %n)
@@ -41,7 +41,7 @@ define <vscale x 2 x double> @test_vp_fneg_nxv2f64(<vscale x 2 x double> %f0, i3
 define <vscale x 2 x double> @test_vp_fneg_nxv2f64_masked(<vscale x 2 x double> %f0, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fneg_nxv2f64_masked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vfneg.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %f = call <vscale x 2 x double> @llvm.vp.fneg.nxv2f64(<vscale x 2 x double> %f0, <vscale x 2 x i1> %m, i32 %n)
@@ -64,7 +64,7 @@ define <vscale x 2 x float> @test_vp_fneg_nxv2f32(<vscale x 2 x float> %f0, i32 
 define <vscale x 2 x float> @test_vp_fneg_nxv2f32_masked(<vscale x 2 x float> %f0, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fneg_nxv2f32_masked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfneg.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %f = call <vscale x 2 x float> @llvm.vp.fneg.nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x i1> %m, i32 %n)
