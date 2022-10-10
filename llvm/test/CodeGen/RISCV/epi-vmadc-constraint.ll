@@ -404,7 +404,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v2, v0, v16
 ; CHECK-NEXT:    vadd.vi v17, v2, 8
 ; CHECK-NEXT:    vand.vi v9, v9, 1
-; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a3, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v9, v9, 1
 ; CHECK-NEXT:    vmsne.vi v9, v9, 0
 ; CHECK-NEXT:    vsetvli zero, s9, e64, m1, ta, mu
@@ -420,7 +420,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    vrgather.vv v13, v11, v12
 ; CHECK-NEXT:    vrgather.vv v19, v14, v12
 ; CHECK-NEXT:    vand.vi v10, v10, 1
-; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a3, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v10, v10, 1
 ; CHECK-NEXT:    vmsne.vi v10, v10, 0
 ; CHECK-NEXT:    vsetvli zero, s10, e32, m1, ta, mu

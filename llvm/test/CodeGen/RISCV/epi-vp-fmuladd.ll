@@ -5,7 +5,7 @@
 define <vscale x 1 x double> @test_vp_fmuladd_nxv1f64(<vscale x 1 x double> %f0, <vscale x 1 x double> %f1, <vscale x 1 x double> %f2, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fmuladd_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmadd.vv v8, v9, v10
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -29,7 +29,7 @@ define <vscale x 1 x double> @test_vp_fmuladd_nxv1f64_masked(<vscale x 1 x doubl
 define <vscale x 2 x double> @test_vp_fmuladd_nxv2f64(<vscale x 2 x double> %f0, <vscale x 2 x double> %f1, <vscale x 2 x double> %f2, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fmuladd_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vfmadd.vv v8, v10, v12
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -53,7 +53,7 @@ define <vscale x 2 x double> @test_vp_fmuladd_nxv2f64_masked(<vscale x 2 x doubl
 define <vscale x 2 x float> @test_vp_fmuladd_nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x float> %f1, <vscale x 2 x float> %f2, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fmuladd_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfmadd.vv v8, v9, v10
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -232,7 +232,7 @@ define <vscale x 1 x double> @test_vp_fmuladd_splat_op_1_neg_op_2(double %f0, <v
 define <vscale x 1 x double> @test_vp_fmuladd_neg_splat_op_1_neg_op_3(double %f0, <vscale x 1 x double> %f1, <vscale x 1 x double> %f2, <vscale x 1 x i1> %m, i32 zeroext %n) {
 ; CHECK-LABEL: test_vp_fmuladd_neg_splat_op_1_neg_op_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmv.v.f v10, fa0
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfneg.v v10, v10
@@ -258,7 +258,7 @@ define <vscale x 1 x double> @test_vp_fmuladd_neg_splat_op_1_neg_op_3(double %f0
 define <vscale x 1 x double> @test_vp_fmuladd_neg_splat_op_1(double %f0, <vscale x 1 x double> %f1, <vscale x 1 x double> %f2, <vscale x 1 x i1> %m, i32 zeroext %n) {
 ; CHECK-LABEL: test_vp_fmuladd_neg_splat_op_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmv.v.f v10, fa0
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfneg.v v10, v10

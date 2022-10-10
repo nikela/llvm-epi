@@ -9,7 +9,7 @@ declare <vscale x 1 x i1> @llvm.vp.xor.nxv1i1(<vscale x 1 x i1>, <vscale x 1 x i
 define <vscale x 1 x i1> @test_vp_and_masks(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_and_masks:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, ta, ma
 ; CHECK-NEXT:    vmand.mm v0, v0, v8
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 1 x i1> poison, i1 1, i32 0
@@ -21,7 +21,7 @@ define <vscale x 1 x i1> @test_vp_and_masks(<vscale x 1 x i1> %a, <vscale x 1 x 
 define <vscale x 1 x i1> @test_vp_or_masks(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_or_masks:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, ta, ma
 ; CHECK-NEXT:    vmor.mm v0, v0, v8
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 1 x i1> poison, i1 1, i32 0
@@ -33,7 +33,7 @@ define <vscale x 1 x i1> @test_vp_or_masks(<vscale x 1 x i1> %a, <vscale x 1 x i
 define <vscale x 1 x i1> @test_vp_xor_masks(<vscale x 1 x i1> %a, <vscale x 1 x i1> %b, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_xor_masks:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e8, mf8, ta, ma
 ; CHECK-NEXT:    vmxor.mm v0, v0, v8
 ; CHECK-NEXT:    ret
     %m.first = insertelement <vscale x 1 x i1> poison, i1 1, i32 0

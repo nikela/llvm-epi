@@ -8,7 +8,7 @@
 define <vscale x 1 x i1> @mtrunc_1(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v8, v8, 0
 ; CHECK-NEXT:    vand.vi v9, v9, 1
@@ -30,7 +30,7 @@ declare <vscale x 1 x i1> @llvm.epi.vmand.nxv1i1.nxv1i1(<vscale x 1 x i1> %a, <v
 define <vscale x 1 x i64> @mzext_1(<vscale x 1 x i1> %ma, <vscale x 1 x i1> %mb, i64 %gvl) nounwind
 ; CHECK-LABEL: mzext_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.i v9, 0
 ; CHECK-NEXT:    vmerge.vim v10, v9, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v8
@@ -52,7 +52,7 @@ declare <vscale x 1 x i64> @llvm.epi.vand.nxv1i64.nxv1i64(<vscale x 1 x i64> %a,
 define <vscale x 2 x i1> @mtrunc_2(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i64 %gvl) nounwind
 ; CHECK-LABEL: mtrunc_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vand.vi v8, v8, 1
 ; CHECK-NEXT:    vmsne.vi v12, v8, 0
 ; CHECK-NEXT:    vand.vi v8, v10, 1
@@ -74,7 +74,7 @@ declare <vscale x 2 x i1> @llvm.epi.vmand.nxv2i1.nxv2i1(<vscale x 2 x i1> %a, <v
 define <vscale x 2 x i64> @mzext_2(<vscale x 2 x i1> %ma, <vscale x 2 x i1> %mb, i64 %gvl) nounwind
 ; CHECK-LABEL: mzext_2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmv.v.i v10, 0
 ; CHECK-NEXT:    vmerge.vim v12, v10, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v8

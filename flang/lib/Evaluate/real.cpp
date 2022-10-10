@@ -757,7 +757,7 @@ template <typename W, int P> Real<W, P> Real<W, P>::SPACING() const {
 
 // 16.9.171
 template <typename W, int P>
-Real<W, P> Real<W, P>::SET_EXPONENT(int expo) const {
+Real<W, P> Real<W, P>::SET_EXPONENT(std::int64_t expo) const {
   if (IsNotANumber()) {
     return *this;
   } else if (IsInfinite()) {
@@ -765,7 +765,7 @@ Real<W, P> Real<W, P>::SET_EXPONENT(int expo) const {
   } else if (IsZero()) {
     return *this;
   } else {
-    return SCALE(Integer<32>(expo - UnbiasedExponent() - 1)).value;
+    return SCALE(Integer<64>(expo - UnbiasedExponent() - 1)).value;
   }
 }
 

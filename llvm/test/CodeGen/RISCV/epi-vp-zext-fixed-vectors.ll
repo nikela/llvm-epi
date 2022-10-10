@@ -5,7 +5,7 @@
 define <2 x i64> @zext.i64.i32(<2 x i32> %a, i32 zeroext %gvl)
 ; CHECK-LABEL: zext.i64.i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vzext.vf2 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -19,7 +19,7 @@ define <2 x i64> @zext.i64.i32(<2 x i32> %a, i32 zeroext %gvl)
 define <2 x i64> @zext.i64.i32.mask(<2 x i32> %a, <2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: zext.i64.i32.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vzext.vf2 v9, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -36,7 +36,7 @@ declare <2 x i64> @llvm.vp.zext.v2i64.v2i32(<2 x i32> %a, <2 x i1> %mask, i32 %g
 define <4 x i32> @test_vp_zext_v4i32_v4i8(<4 x i8> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_v4i32_v4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vzext.vf4 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -49,7 +49,7 @@ define <4 x i32> @test_vp_zext_v4i32_v4i8(<4 x i8> %a, i32 zeroext %evl) {
 define <4 x i32> @test_vp_zext_masked_v4i32_v4i8(<4 x i8> %a, <4 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_masked_v4i32_v4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vzext.vf4 v9, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -60,7 +60,7 @@ define <4 x i32> @test_vp_zext_masked_v4i32_v4i8(<4 x i8> %a, <4 x i1> %mask, i3
 define <4 x i64> @test_vp_zext_v4i64_v4i8(<4 x i8> %a, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_v4i64_v4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vzext.vf8 v10, v8
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
@@ -73,7 +73,7 @@ define <4 x i64> @test_vp_zext_v4i64_v4i8(<4 x i8> %a, i32 zeroext %evl) {
 define <4 x i64> @test_vp_zext_masked_v4i64_v4i8(<4 x i8> %a, <4 x i1> %mask, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_zext_masked_v4i64_v4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vzext.vf8 v10, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret

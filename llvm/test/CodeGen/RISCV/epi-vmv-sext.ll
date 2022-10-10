@@ -23,7 +23,7 @@ declare i32 @llvm.epi.vmv.x.s.nxv2i32(<vscale x 2 x i32>)
 define signext i32 @sext_i32(<vscale x 2 x i32> %a)
 ; CHECK-LABEL: sext_i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetivli zero, 0, e32, m1, ta, ma
 ; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
@@ -36,7 +36,7 @@ declare i16 @llvm.epi.vmv.x.s.nxv4i16(<vscale x 4 x i16>)
 define signext i16 @sext_i16(<vscale x 4 x i16> %a)
 ; CHECK-LABEL: sext_i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 0, e16, m1, ta, mu
+; CHECK-NEXT:    vsetivli zero, 0, e16, m1, ta, ma
 ; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {
@@ -49,7 +49,7 @@ declare i8 @llvm.epi.vmv.x.s.nxv8i8(<vscale x 8 x i8>)
 define signext i8 @sext_i8(<vscale x 8 x i8> %a)
 ; CHECK-LABEL: sext_i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 0, e8, m1, ta, mu
+; CHECK-NEXT:    vsetivli zero, 0, e8, m1, ta, ma
 ; CHECK-NEXT:    vmv.x.s a0, v8
 ; CHECK-NEXT:    ret
 {

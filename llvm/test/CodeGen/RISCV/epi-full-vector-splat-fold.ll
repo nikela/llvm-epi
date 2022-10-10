@@ -5,7 +5,7 @@
 define <vscale x 1 x i64> @binary_nxv1i64(<vscale x 1 x i64> %a, i64 %b) nounwind {
 ; CHECK-LABEL: binary_nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vadd.vx v8, v8, a0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64> undef, i64 %b, i32 0
@@ -17,7 +17,7 @@ define <vscale x 1 x i64> @binary_nxv1i64(<vscale x 1 x i64> %a, i64 %b) nounwin
 define <vscale x 1 x i64> @binary_nxv1i64_imm(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-LABEL: binary_nxv1i64_imm:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vadd.vi v8, v8, 3
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64> undef, i64 3, i32 0
@@ -29,7 +29,7 @@ define <vscale x 1 x i64> @binary_nxv1i64_imm(<vscale x 1 x i64> %a) nounwind {
 define <vscale x 1 x i64> @binary_nxv1i64_rev(i64 %a, <vscale x 1 x i64> %b) nounwind {
 ; CHECK-LABEL: binary_nxv1i64_rev:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vadd.vx v8, v8, a0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64> undef, i64 %a, i32 0
@@ -41,7 +41,7 @@ define <vscale x 1 x i64> @binary_nxv1i64_rev(i64 %a, <vscale x 1 x i64> %b) nou
 define <vscale x 1 x i64> @binary_nxv1i64_imm_rev(<vscale x 1 x i64> %b) nounwind {
 ; CHECK-LABEL: binary_nxv1i64_imm_rev:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vadd.vi v8, v8, 3
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64> undef, i64 3, i32 0
@@ -53,7 +53,7 @@ define <vscale x 1 x i64> @binary_nxv1i64_imm_rev(<vscale x 1 x i64> %b) nounwin
 define <vscale x 1 x double> @binary_nxv1f64(<vscale x 1 x double> %a, double %b) nounwind {
 ; CHECK-LABEL: binary_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, fa0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double %b, i32 0
@@ -67,7 +67,7 @@ define <vscale x 1 x double> @binary_nxv1f64_imm(<vscale x 1 x double> %a) nounw
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI5_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, ft0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double 3.0, i32 0
@@ -79,7 +79,7 @@ define <vscale x 1 x double> @binary_nxv1f64_imm(<vscale x 1 x double> %a) nounw
 define <vscale x 1 x double> @binary_nxv1f64_rev(double %a, <vscale x 1 x double> %b) nounwind {
 ; CHECK-LABEL: binary_nxv1f64_rev:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, fa0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double %a, i32 0
@@ -93,7 +93,7 @@ define <vscale x 1 x double> @binary_nxv1f64_imm_rev(<vscale x 1 x double> %b) n
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI7_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI7_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, ft0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double 3.0, i32 0
@@ -105,7 +105,7 @@ define <vscale x 1 x double> @binary_nxv1f64_imm_rev(<vscale x 1 x double> %b) n
 define <vscale x 2 x i32> @binary_nxv1i32(<vscale x 2 x i32> %a, i32 %b) nounwind {
 ; CHECK-LABEL: binary_nxv1i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vadd.vx v8, v8, a0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i32> undef, i32 %b, i32 0
@@ -117,7 +117,7 @@ define <vscale x 2 x i32> @binary_nxv1i32(<vscale x 2 x i32> %a, i32 %b) nounwin
 define <vscale x 2 x i32> @binary_nxv1i32_imm(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-LABEL: binary_nxv1i32_imm:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vadd.vi v8, v8, 3
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i32> undef, i32 3, i32 0
@@ -129,7 +129,7 @@ define <vscale x 2 x i32> @binary_nxv1i32_imm(<vscale x 2 x i32> %a) nounwind {
 define <vscale x 2 x float> @binary_nxv1f32(<vscale x 2 x float> %a, float %b) nounwind {
 ; CHECK-LABEL: binary_nxv1f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, fa0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float> undef, float %b, i32 0
@@ -143,7 +143,7 @@ define <vscale x 2 x float> @binary_nxv1f32_imm(<vscale x 2 x float> %a) nounwin
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI11_0)
 ; CHECK-NEXT:    flw ft0, %lo(.LCPI11_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, ft0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float> undef, float 3.0, i32 0
@@ -155,7 +155,7 @@ define <vscale x 2 x float> @binary_nxv1f32_imm(<vscale x 2 x float> %a) nounwin
 define <vscale x 1 x double> @ternary_nxv1f64(<vscale x 1 x double> %a, double %b, <vscale x 1 x double> %c) nounwind {
 ; CHECK-LABEL: ternary_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmadd.vf v8, fa0, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double %b, i32 0
@@ -167,7 +167,7 @@ define <vscale x 1 x double> @ternary_nxv1f64(<vscale x 1 x double> %a, double %
 define <vscale x 1 x double> @ternary_nxv1f64_rev(double %a, <vscale x 1 x double> %b, <vscale x 1 x double> %c) nounwind {
 ; CHECK-LABEL: ternary_nxv1f64_rev:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmadd.vf v8, fa0, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x double> undef, double %a, i32 0
@@ -179,7 +179,7 @@ define <vscale x 1 x double> @ternary_nxv1f64_rev(double %a, <vscale x 1 x doubl
 define <vscale x 2 x float> @ternary_nxv2f32(<vscale x 2 x float> %a, float %b, <vscale x 2 x float> %c) nounwind {
 ; CHECK-LABEL: ternary_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfmadd.vf v8, fa0, v9
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float> undef, float %b, i32 0
@@ -191,7 +191,7 @@ define <vscale x 2 x float> @ternary_nxv2f32(<vscale x 2 x float> %a, float %b, 
 define <vscale x 1 x i1> @relational_nxv1i64(<vscale x 1 x i64> %a, i64 %b) nounwind {
 ; CHECK-LABEL: relational_nxv1i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmseq.vx v0, v8, a0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64> undef, i64 %b, i32 0
@@ -203,7 +203,7 @@ define <vscale x 1 x i1> @relational_nxv1i64(<vscale x 1 x i64> %a, i64 %b) noun
 define <vscale x 1 x i1> @relational_nxv1i64_imm(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-LABEL: relational_nxv1i64_imm:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmseq.vi v0, v8, 3
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64> undef, i64 3, i32 0
@@ -215,7 +215,7 @@ define <vscale x 1 x i1> @relational_nxv1i64_imm(<vscale x 1 x i64> %a) nounwind
 define <vscale x 2 x i1> @relational_nxv2i32(<vscale x 2 x i64> %a, i64 %b) nounwind {
 ; CHECK-LABEL: relational_nxv2i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmseq.vx v0, v8, a0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i64> undef, i64 %b, i32 0
@@ -227,7 +227,7 @@ define <vscale x 2 x i1> @relational_nxv2i32(<vscale x 2 x i64> %a, i64 %b) noun
 define <vscale x 2 x i1> @relational_nxv2i32_imm(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-LABEL: relational_nxv2i32_imm:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmseq.vi v0, v8, 3
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i64> undef, i64 3, i32 0

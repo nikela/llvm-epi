@@ -23,7 +23,7 @@
 define <vscale x 1 x i64> @sext_nxv1i8(<vscale x 1 x i8> %v)
 ; CHECK-LABEL: sext_nxv1i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf8 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -34,7 +34,7 @@ define <vscale x 1 x i64> @sext_nxv1i8(<vscale x 1 x i8> %v)
 define <vscale x 2 x i32> @sext_nxv2i8(<vscale x 2 x i8> %v)
 ; CHECK-LABEL: sext_nxv2i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf4 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -45,7 +45,7 @@ define <vscale x 2 x i32> @sext_nxv2i8(<vscale x 2 x i8> %v)
 define <vscale x 4 x i16> @sext_nxv4i8(<vscale x 4 x i8> %v)
 ; CHECK-LABEL: sext_nxv4i8:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e16, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf2 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -58,7 +58,7 @@ define <vscale x 4 x i16> @sext_nxv4i8(<vscale x 4 x i8> %v)
 define <vscale x 1 x i64> @sext_nxv1i16(<vscale x 1 x i16> %v)
 ; CHECK-LABEL: sext_nxv1i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf4 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -69,7 +69,7 @@ define <vscale x 1 x i64> @sext_nxv1i16(<vscale x 1 x i16> %v)
 define <vscale x 2 x i32> @sext_nxv2i16(<vscale x 2 x i16> %v)
 ; CHECK-LABEL: sext_nxv2i16:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf2 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret
@@ -82,7 +82,7 @@ define <vscale x 2 x i32> @sext_nxv2i16(<vscale x 2 x i16> %v)
 define <vscale x 1 x i64> @sext_nxv1i32(<vscale x 1 x i32> %v)
 ; CHECK-LABEL: sext_nxv1i32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf2 v9, v8
 ; CHECK-NEXT:    vmv.v.v v8, v9
 ; CHECK-NEXT:    ret

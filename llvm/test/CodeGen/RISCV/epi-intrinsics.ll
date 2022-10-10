@@ -111,21 +111,21 @@ define void @test_greater_comparisons(<vscale x 1 x i64>* %pia,
 ; CHECK-NEXT:    vle64.v v8, (a0)
 ; CHECK-NEXT:    vle64.v v9, (a1)
 ; CHECK-NEXT:    vmslt.vv v10, v9, v8
-; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-NEXT:    vsm.v v10, (a2)
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vmsltu.vv v8, v9, v8
-; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-NEXT:    vsm.v v8, (a2)
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vle64.v v8, (a3)
 ; CHECK-NEXT:    vle64.v v9, (a4)
 ; CHECK-NEXT:    vmflt.vv v10, v9, v8
-; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-NEXT:    vsm.v v10, (a2)
 ; CHECK-NEXT:    vsetvli zero, a5, e64, m1, ta, mu
 ; CHECK-NEXT:    vmfle.vv v8, v9, v8
-; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, mu
+; CHECK-NEXT:    vsetvli a0, zero, e8, mf8, ta, ma
 ; CHECK-NEXT:    vsm.v v8, (a2)
 ; CHECK-NEXT:    ret
                                       <vscale x 1 x i64>* %pib,

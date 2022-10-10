@@ -5,7 +5,7 @@
 define void @masked_load_f32_m1(<vscale x 2 x float>* %addr, <vscale x 2 x float> %value, <vscale x 2 x i1> %mask)
 ; CHECK-LABEL: masked_load_f32_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vse32.v v8, (a0), v0.t
 ; CHECK-NEXT:    ret
 {
@@ -17,7 +17,7 @@ declare void @llvm.masked.store.nxv2f32.p0nxv2f32(<vscale x 2 x float> %value, <
 define void @masked_load_f64_m1(<vscale x 1 x double>* %addr, <vscale x 1 x double> %value, <vscale x 1 x i1> %mask)
 ; CHECK-LABEL: masked_load_f64_m1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vse64.v v8, (a0), v0.t
 ; CHECK-NEXT:    ret
 {
@@ -29,7 +29,7 @@ declare void @llvm.masked.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> %value, 
 define void @masked_load_f64_m2(<vscale x 2 x double>* %addr, <vscale x 2 x double> %value, <vscale x 2 x i1> %mask)
 ; CHECK-LABEL: masked_load_f64_m2:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vse64.v v8, (a0), v0.t
 ; CHECK-NEXT:    ret
 {

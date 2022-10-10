@@ -4,7 +4,7 @@
 define <vscale x 1 x double> @vp_sqrt_nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 1 x double> @llvm.vp.sqrt.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x i1> %mask, i32 %evl)
@@ -14,7 +14,7 @@ define <vscale x 1 x double> @vp_sqrt_nxv1f64(<vscale x 1 x double> %a, <vscale 
 define <vscale x 1 x double> @vp_sqrt_nxv1f64_unmasked(<vscale x 1 x double> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv1f64_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -27,7 +27,7 @@ define <vscale x 1 x double> @vp_sqrt_nxv1f64_unmasked(<vscale x 1 x double> %a,
 define <vscale x 2 x double> @vp_sqrt_nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 2 x double> @llvm.vp.sqrt.nxv2f64(<vscale x 2 x double> %a, <vscale x 2 x i1> %mask, i32 %evl)
@@ -37,7 +37,7 @@ define <vscale x 2 x double> @vp_sqrt_nxv2f64(<vscale x 2 x double> %a, <vscale 
 define <vscale x 2 x double> @vp_sqrt_nxv2f64_unmasked(<vscale x 2 x double> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv2f64_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -50,7 +50,7 @@ define <vscale x 2 x double> @vp_sqrt_nxv2f64_unmasked(<vscale x 2 x double> %a,
 define <vscale x 4 x double> @vp_sqrt_nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 4 x double> @llvm.vp.sqrt.nxv4f64(<vscale x 4 x double> %a, <vscale x 4 x i1> %mask, i32 %evl)
@@ -60,7 +60,7 @@ define <vscale x 4 x double> @vp_sqrt_nxv4f64(<vscale x 4 x double> %a, <vscale 
 define <vscale x 4 x double> @vp_sqrt_nxv4f64_unmasked(<vscale x 4 x double> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv4f64_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -73,7 +73,7 @@ define <vscale x 4 x double> @vp_sqrt_nxv4f64_unmasked(<vscale x 4 x double> %a,
 define <vscale x 8 x double> @vp_sqrt_nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 8 x double> @llvm.vp.sqrt.nxv8f64(<vscale x 8 x double> %a, <vscale x 8 x i1> %mask, i32 %evl)
@@ -83,7 +83,7 @@ define <vscale x 8 x double> @vp_sqrt_nxv8f64(<vscale x 8 x double> %a, <vscale 
 define <vscale x 8 x double> @vp_sqrt_nxv8f64_unmasked(<vscale x 8 x double> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv8f64_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
@@ -96,7 +96,7 @@ define <vscale x 8 x double> @vp_sqrt_nxv8f64_unmasked(<vscale x 8 x double> %a,
 define <vscale x 1 x float> @vp_sqrt_nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv1f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 1 x float> @llvm.vp.sqrt.nxv1f32(<vscale x 1 x float> %a, <vscale x 1 x i1> %mask, i32 %evl)
@@ -106,7 +106,7 @@ define <vscale x 1 x float> @vp_sqrt_nxv1f32(<vscale x 1 x float> %a, <vscale x 
 define <vscale x 1 x float> @vp_sqrt_nxv1f32_unmasked(<vscale x 1 x float> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv1f32_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -119,7 +119,7 @@ define <vscale x 1 x float> @vp_sqrt_nxv1f32_unmasked(<vscale x 1 x float> %a, i
 define <vscale x 2 x float> @vp_sqrt_nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 2 x float> @llvm.vp.sqrt.nxv2f32(<vscale x 2 x float> %a, <vscale x 2 x i1> %mask, i32 %evl)
@@ -129,7 +129,7 @@ define <vscale x 2 x float> @vp_sqrt_nxv2f32(<vscale x 2 x float> %a, <vscale x 
 define <vscale x 2 x float> @vp_sqrt_nxv2f32_unmasked(<vscale x 2 x float> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv2f32_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -142,7 +142,7 @@ define <vscale x 2 x float> @vp_sqrt_nxv2f32_unmasked(<vscale x 2 x float> %a, i
 define <vscale x 4 x float> @vp_sqrt_nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 4 x float> @llvm.vp.sqrt.nxv4f32(<vscale x 4 x float> %a, <vscale x 4 x i1> %mask, i32 %evl)
@@ -152,7 +152,7 @@ define <vscale x 4 x float> @vp_sqrt_nxv4f32(<vscale x 4 x float> %a, <vscale x 
 define <vscale x 4 x float> @vp_sqrt_nxv4f32_unmasked(<vscale x 4 x float> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv4f32_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -165,7 +165,7 @@ define <vscale x 4 x float> @vp_sqrt_nxv4f32_unmasked(<vscale x 4 x float> %a, i
 define <vscale x 8 x float> @vp_sqrt_nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv8f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 8 x float> @llvm.vp.sqrt.nxv8f32(<vscale x 8 x float> %a, <vscale x 8 x i1> %mask, i32 %evl)
@@ -175,7 +175,7 @@ define <vscale x 8 x float> @vp_sqrt_nxv8f32(<vscale x 8 x float> %a, <vscale x 
 define <vscale x 8 x float> @vp_sqrt_nxv8f32_unmasked(<vscale x 8 x float> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv8f32_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
@@ -188,7 +188,7 @@ define <vscale x 8 x float> @vp_sqrt_nxv8f32_unmasked(<vscale x 8 x float> %a, i
 define <vscale x 16 x float> @vp_sqrt_nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x i1> %mask, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
   %1 = call <vscale x 16 x float> @llvm.vp.sqrt.nxv16f32(<vscale x 16 x float> %a, <vscale x 16 x i1> %mask, i32 %evl)
@@ -198,7 +198,7 @@ define <vscale x 16 x float> @vp_sqrt_nxv16f32(<vscale x 16 x float> %a, <vscale
 define <vscale x 16 x float> @vp_sqrt_nxv16f32_unmasked(<vscale x 16 x float> %a, i32 zeroext %evl) nounwind {
 ; CHECK-LABEL: vp_sqrt_nxv16f32_unmasked:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, ta, ma
 ; CHECK-NEXT:    vfsqrt.v v8, v8
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 16 x i1> undef, i1 1, i32 0

@@ -208,7 +208,7 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O0-NEXT:    addi a0, a0, %lo(scratch)
 ; CHECK-O0-NEXT:    slli a3, a3, 32
 ; CHECK-O0-NEXT:    srli a3, a3, 32
-; CHECK-O0-NEXT:    vsetvli zero, a3, e32, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a3, e32, m1, ta, ma
 ; CHECK-O0-NEXT:    vle32.v v8, (a2)
 ; CHECK-O0-NEXT:    vle32.v v21, (a1)
 ; CHECK-O0-NEXT:    vadd.vv v20, v8, v21
@@ -243,7 +243,7 @@ define void @test_vp_int_2(<vscale x 2 x i32>* %a0, <vscale x 2 x i32>* %a1, i32
 ; CHECK-O2:       # %bb.0:
 ; CHECK-O2-NEXT:    slli a2, a2, 32
 ; CHECK-O2-NEXT:    srli a2, a2, 32
-; CHECK-O2-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-O2-NEXT:    vle32.v v8, (a0)
 ; CHECK-O2-NEXT:    vle32.v v9, (a1)
 ; CHECK-O2-NEXT:    lui a0, %hi(scratch)

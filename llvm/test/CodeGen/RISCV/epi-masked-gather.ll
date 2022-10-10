@@ -51,7 +51,7 @@ define <vscale x 8 x double> @nxv8f64(double* %ptr, <vscale x 8 x i64> %indices,
 define <vscale x 2 x i32> @nxv2xi32(i32* %ptr, <vscale x 2 x i64> %indices, <vscale x 2 x i1> %mask, <vscale x 2 x i32> %passthru) {
 ; CHECK-LABEL: nxv2xi32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vsll.vi v8, v8, 2
 ; CHECK-NEXT:    vsetvli zero, zero, e32, m1, ta, mu
 ; CHECK-NEXT:    vluxei64.v v10, (a0), v8, v0.t

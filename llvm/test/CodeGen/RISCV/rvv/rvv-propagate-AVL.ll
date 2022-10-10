@@ -15,6 +15,7 @@ define void @rvv_propagate_AVL(i64 %N, double* %c, double* %a, double* %b) {
 ; CHECK-NEXT:  .LBB0_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add t0, a2, a5
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vle64.v v8, (t0)
 ; CHECK-NEXT:    add t0, a3, a5
 ; CHECK-NEXT:    vle64.v v9, (t0)
@@ -63,6 +64,7 @@ define void @rvv_propagate_AVL_vlmax(i64 %N, double* %c, double* %a, double* %b)
 ; CHECK-NEXT:  .LBB1_2: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add t0, a2, a5
+; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vle64.v v8, (t0)
 ; CHECK-NEXT:    add t0, a3, a5
 ; CHECK-NEXT:    vle64.v v9, (t0)

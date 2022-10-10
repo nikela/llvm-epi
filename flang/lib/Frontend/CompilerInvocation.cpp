@@ -145,9 +145,6 @@ static bool parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
                                   clang::driver::options::OPT_fno_unroll_loops,
                                   (opts.OptimizationLevel > 1));
 
-  for (auto *a : args.filtered(clang::driver::options::OPT_fpass_plugin_EQ))
-    opts.LLVMPassPlugins.push_back(a->getValue());
-
   // -mrelocation-model option.
   if (const llvm::opt::Arg *A =
           args.getLastArg(clang::driver::options::OPT_mrelocation_model)) {

@@ -5,11 +5,11 @@
 define void @nxv1i64_1(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i64> %indices, <vscale x 1 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv1i64_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vsll.vi v9, v9, 3
 ; CHECK-NEXT:    slli a1, a1, 32
 ; CHECK-NEXT:    srli a1, a1, 32
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (a0), v9, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr i64, i64* %ptr, <vscale x 1 x i64> %indices
@@ -22,7 +22,7 @@ define void @nxv1i64_2(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, <vsc
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v9, v0.t
 ; CHECK-NEXT:    ret
   call void @llvm.vp.scatter.nxv1i64.nxv1p0i64(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, <vscale x 1 x i1> %mask, i32 %evl)
@@ -32,11 +32,11 @@ define void @nxv1i64_2(<vscale x 1 x i64> %data, <vscale x 1 x i64*> %ptrs, <vsc
 define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv1i64_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.x v9, a0
 ; CHECK-NEXT:    slli a0, a1, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v9, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64*> undef, i64* %ptr, i32 0
@@ -48,12 +48,12 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
 define void @nxv2f32_1(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i32> %indices, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv2f32_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vsext.vf2 v10, v9
 ; CHECK-NEXT:    vsll.vi v10, v10, 2
 ; CHECK-NEXT:    slli a1, a1, 32
 ; CHECK-NEXT:    srli a1, a1, 32
-; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (a0), v10, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr float, float* %ptr, <vscale x 2 x i32> %indices
@@ -66,7 +66,7 @@ define void @nxv2f32_2(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
   call void @llvm.vp.scatter.nxv2f32.nxv2p0f32(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, <vscale x 2 x i1> %mask, i32 %evl)
@@ -76,11 +76,11 @@ define void @nxv2f32_2(<vscale x 2 x float> %data, <vscale x 2 x float*> %ptrs, 
 define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv2f32_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmv.v.x v10, a0
 ; CHECK-NEXT:    slli a0, a1, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float*> undef, float* %ptr, i32 0
@@ -130,11 +130,11 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 define void @nxv8f64_1(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i64> %indices, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv8f64_1:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vsll.vi v16, v16, 3
 ; CHECK-NEXT:    slli a1, a1, 32
 ; CHECK-NEXT:    srli a1, a1, 32
-; CHECK-NEXT:    vsetvli zero, a1, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m8, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (a0), v16, v0.t
 ; CHECK-NEXT:    ret
   %1 = getelementptr double, double* %ptr, <vscale x 8 x i64> %indices
@@ -147,7 +147,7 @@ define void @nxv8f64_2(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    slli a0, a0, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v16, v0.t
 ; CHECK-NEXT:    ret
   call void @llvm.vp.scatter.nxv8f64.nxv8p0f64(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs, <vscale x 8 x i1> %mask, i32 %evl)
@@ -157,11 +157,11 @@ define void @nxv8f64_2(<vscale x 8 x double> %data, <vscale x 8 x double*> %ptrs
 define void @nxv8f64_3(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x i1> %mask, i32 %evl) nounwind {
 ; CHECK-LABEL: nxv8f64_3:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vmv.v.x v16, a0
 ; CHECK-NEXT:    slli a0, a1, 32
 ; CHECK-NEXT:    srli a0, a0, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v16, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x double*> undef, double* %ptr, i32 0
