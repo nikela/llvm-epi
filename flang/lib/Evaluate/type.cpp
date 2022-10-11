@@ -19,7 +19,6 @@
 #include <algorithm>
 #include <optional>
 #include <string>
-#include <cfloat>
 
 // IsDescriptor() predicate: true when a symbol is implemented
 // at runtime with a descriptor.

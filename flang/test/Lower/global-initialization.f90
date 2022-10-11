@@ -24,11 +24,11 @@ end subroutine
 ! CHECK-LABEL: func @_QFPfoo3
 subroutine foo3()
 ! CHECK-DAG: fir.address_of(@[[name4:.*foo3.*idata]]){{.*}}fir.array<5xi32>
-! CHECK-DAG: fir.address_of(@[[name5:.*foo3.*rdata]]){{.*}}fir.array<3xf32>
+! CHECK-DAG: fir.address_of(@[[name5:.*foo3.*rdata]]){{.*}}fir.array<3xf16>
 ! CHECK-DAG: fir.address_of(@[[name6:.*foo3.*my_data]]){{.*}}fir.array<2x4xi64>
   integer*4, dimension(5), save :: idata = (/ (i*i, i=1,5) /)
   integer*8, dimension(2, 10:13), save :: my_data = reshape((/1,2,3,4,5,6,7,8/), shape(my_data))
-  real*4, dimension(7:9), save :: rdata = (/100., 99., 98./)
+  real*2, dimension(7:9), save :: rdata = (/100., 99., 98./)
   print *, rdata(9)
   print *, idata(3)
   print *, my_data(1,11)
@@ -39,5 +39,5 @@ end program
 ! CHECK: fir.global internal @[[name2]]
 ! CHECK: fir.global internal @[[name3]]
 ! CHECK-DAG: fir.global internal @[[name4]]{{.*}}fir.array<5xi32>
-! CHECK-DAG: fir.global internal @[[name5]]{{.*}}fir.array<3xf32>
+! CHECK-DAG: fir.global internal @[[name5]]{{.*}}fir.array<3xf16>
 ! CHECK-DAG: fir.global internal @[[name6]]{{.*}}fir.array<2x4xi64>

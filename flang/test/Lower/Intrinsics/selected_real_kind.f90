@@ -88,6 +88,28 @@ subroutine selected_real_kind_test8(p, r, d)
   res = selected_real_kind(P=p, R=r, RADIX=d)
 end
 
+! CHECK-LABEL: func.func @_QPselected_real_kind_test16(
+! CHECK-SAME:                                          %[[VAL_0:.*]]: !fir.ref<i128> {fir.bindc_name = "p"},
+! CHECK-SAME:                                          %[[VAL_1:.*]]: !fir.ref<i128> {fir.bindc_name = "r"},
+! CHECK-SAME:                                          %[[VAL_2:.*]]: !fir.ref<i128> {fir.bindc_name = "d"}) {
+! CHECK:         %[[VAL_3:.*]] = fir.alloca i128 {bindc_name = "res", uniq_name = "_QFselected_real_kind_test16Eres"}
+! CHECK:         %[[VAL_6:.*]] = arith.constant 16 : i32
+! CHECK:         %[[VAL_7:.*]] = arith.constant 16 : i32
+! CHECK:         %[[VAL_8:.*]] = arith.constant 16 : i32
+! CHECK:         %[[VAL_10:.*]] = fir.convert %[[VAL_0]] : (!fir.ref<i128>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_11:.*]] = fir.convert %[[VAL_1]] : (!fir.ref<i128>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_12:.*]] = fir.convert %[[VAL_2]] : (!fir.ref<i128>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_13:.*]] = fir.call @_FortranASelectedRealKind(%{{.*}}, %{{.*}}, %[[VAL_10]], %[[VAL_6]], %[[VAL_11]], %[[VAL_7]], %[[VAL_12]], %[[VAL_8]]) : (!fir.ref<i8>, i32, !fir.llvm_ptr<i8>, i32, !fir.llvm_ptr<i8>, i32, !fir.llvm_ptr<i8>, i32) -> i32
+! CHECK:         %[[VAL_14:.*]] = fir.convert %[[VAL_13]] : (i32) -> i128
+! CHECK:         fir.store %[[VAL_14]] to %[[VAL_3]] : !fir.ref<i128>
+! CHECK:         return
+! CHECK:       }
+
+subroutine selected_real_kind_test16(p, r, d)
+  integer(16) :: p, r, d, res
+  res = selected_real_kind(P=p, R=r, RADIX=d)
+end
+
 ! CHECK-LABEL: func.func @_QPselected_real_kind_test_rd(
 ! CHECK-SAME:                                           %[[VAL_0:.*]]: !fir.ref<i32> {fir.bindc_name = "r"},
 ! CHECK-SAME:                                           %[[VAL_1:.*]]: !fir.ref<i32> {fir.bindc_name = "d"}) {

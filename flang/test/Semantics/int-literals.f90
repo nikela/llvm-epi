@@ -40,5 +40,14 @@ complex, parameter :: okj8 = 9223372036854775807_8, okz8 = (+9223372036854775807
 complex, parameter :: badj8 = 9223372036854775808_8
 !ERROR: Integer literal is too large for INTEGER(KIND=8)
 complex, parameter :: badz8 = (+9223372036854775808_8, 0)
+complex, parameter :: okj8a = 9223372036854775808_16
+complex, parameter :: okz8a = (+9223372036854775808_16, 0)
+
+complex, parameter :: okj16 = 170141183460469231731687303715884105727_16
+complex, parameter :: okz16 = (+170141183460469231731687303715884105727_16, -170141183460469231731687303715884105728_16)
+!ERROR: Integer literal is too large for INTEGER(KIND=16)
+complex, parameter :: badj16 = 170141183460469231731687303715884105728_16
+!ERROR: Integer literal is too large for INTEGER(KIND=16)
+complex, parameter :: badz16 = (+170141183460469231731687303715884105728_16, 0)
 
 end

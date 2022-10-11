@@ -13,7 +13,6 @@
 #include "flang/Parser/characters.h"
 #include "llvm/Support/raw_ostream.h"
 #include <limits>
-#include <cfloat>
 
 namespace Fortran::evaluate::value {
 
@@ -774,15 +773,10 @@ template <typename W, int P> Real<W, P> Real<W, P>::FRACTION() const {
   return SET_EXPONENT(0);
 }
 
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Real<Integer<16>, 11>;
 template class Real<Integer<16>, 8>;
-#endif
 template class Real<Integer<32>, 24>;
 template class Real<Integer<64>, 53>;
-#if LDBL_MANT_DIG == 64
 template class Real<Integer<80>, 64>;
-#elif LDBL_MANT_DIG == 113
 template class Real<Integer<128>, 113>;
-#endif
 } // namespace Fortran::evaluate::value

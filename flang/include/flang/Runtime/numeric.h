@@ -14,7 +14,6 @@
 
 #include "flang/Runtime/cpp-type.h"
 #include "flang/Runtime/entry-names.h"
-#include <cfloat>
 
 namespace Fortran::runtime {
 extern "C" {

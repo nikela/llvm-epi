@@ -83,3 +83,24 @@ subroutine shifta8_test(a, b, c)
   ! CHECK: %[[SHIFTED:.*]] = arith.shrsi %[[A_VAL]], %[[B_CONV]] : i64
   ! CHECK: %{{.*}} = arith.select %[[SHIFT_IS_BITWIDTH]], %[[RES]], %[[SHIFTED]] : i64
 end subroutine shifta8_test
+
+! CHECK-LABEL: shifta16_test
+! CHECK-SAME: %[[A:.*]]: !fir.ref<i128>{{.*}}, %[[B:.*]]: !fir.ref<i32>{{.*}}, %[[C:.*]]: !fir.ref<i128>{{.*}}
+subroutine shifta16_test(a, b, c)
+  integer(kind=16) :: a
+  integer :: b
+  integer(kind=16) :: c
+
+  ! CHECK: %[[A_VAL:.*]] = fir.load %[[A]] : !fir.ref<i128>
+  ! CHECK: %[[B_VAL:.*]] = fir.load %[[B]] : !fir.ref<i32>
+  c = shifta(a, b)
+  ! CHECK: %[[C_BITS:.*]] = arith.constant 128 : i128
+  ! CHECK: %[[B_CONV:.*]] = fir.convert %[[B_VAL]] : (i32) -> i128
+  ! CHECK: %[[SHIFT_IS_BITWIDTH:.*]] = arith.cmpi eq, %[[B_CONV]], %[[C_BITS]] : i128
+  ! CHECK: %[[C0:.*]] = arith.constant 0 : i128
+  ! CHECK: %[[CM1:.*]] = arith.constant {{.*}} : i128
+  ! CHECK: %[[IS_NEG:.*]] = arith.cmpi slt, %[[A_VAL]], %[[C0]] : i128
+  ! CHECK: %[[RES:.*]] = arith.select %[[IS_NEG]], %[[CM1]], %[[C0]] : i128
+  ! CHECK: %[[SHIFTED:.*]] = arith.shrsi %[[A_VAL]], %[[B_CONV]] : i128
+  ! CHECK: %{{.*}} = arith.select %[[SHIFT_IS_BITWIDTH]], %[[RES]], %[[SHIFTED]] : i128
+end subroutine shifta16_test

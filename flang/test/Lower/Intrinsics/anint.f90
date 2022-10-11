@@ -41,3 +41,9 @@ subroutine anint_test_real10(a, b)
   real(10) :: a, b
   b = anint(a)
 end subroutine
+
+! TODO: wait until fp128 is supported well in llvm.round
+!subroutine anint_test_real16(a, b)
+!  real(16) :: a, b
+!  b = anint(a)
+!end subroutine

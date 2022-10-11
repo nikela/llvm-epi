@@ -55,6 +55,17 @@ subroutine iand_test4(a, b, c)
 ! CHECK: fir.store %[[C_VAL]] to %[[C]] : !fir.ref<i64>
 end subroutine iand_test4
 
+! CHECK-LABEL: iand_test5
+! CHECK-SAME: %[[A:.*]]: !fir.ref<i128>{{.*}}, %[[B:.*]]: !fir.ref<i128>{{.*}}, %[[C:.*]]: !fir.ref<i128>{{.*}}
+subroutine iand_test5(a, b, c)
+  integer(kind=16) :: a, b, c
+! CHECK: %[[A_VAL:.*]] = fir.load %[[A]] : !fir.ref<i128>
+! CHECK: %[[B_VAL:.*]] = fir.load %[[B]] : !fir.ref<i128>
+  c = iand(a, b)
+! CHECK: %[[C_VAL:.*]] = arith.andi %[[A_VAL]], %[[B_VAL]] : i128
+! CHECK: fir.store %[[C_VAL]] to %[[C]] : !fir.ref<i128>
+end subroutine iand_test5
+
 ! CHECK-LABEL: iand_test6
 ! CHECK-SAME: %[[S1:.*]]: !fir.ref<i32>{{.*}}, %[[S2:.*]]: !fir.ref<i32>{{.*}}
 subroutine iand_test6(s1, s2)

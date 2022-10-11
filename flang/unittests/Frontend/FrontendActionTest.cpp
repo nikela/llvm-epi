@@ -167,10 +167,6 @@ TEST_F(FrontendActionTest, ParseSyntaxOnly) {
 }
 
 TEST_F(FrontendActionTest, EmitLLVM) {
-  llvm::InitializeAllTargets();
-  llvm::InitializeAllTargetMCs();
-  llvm::InitializeAllAsmPrinters();
-
   // Populate the input file with the pre-defined input and flush it.
   *(inputFileOs) << "end program";
   inputFileOs.reset();

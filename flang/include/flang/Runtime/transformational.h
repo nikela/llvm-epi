@@ -58,10 +58,6 @@ void RTNAME(Unpack)(Descriptor &result, const Descriptor &vector,
     const Descriptor &mask, const Descriptor &field,
     const char *sourceFile = nullptr, int line = 0);
 
-std::int32_t RTNAME(SelectedIntKind)(std::int32_t precision);
-std::int32_t RTNAME(SelectedRealKind)(
-    std::int32_t p, std::int32_t r, std::int32_t radix);
-
 } // extern "C"
 } // namespace Fortran::runtime
 #endif // FORTRAN_RUNTIME_TRANSFORMATIONAL_H_

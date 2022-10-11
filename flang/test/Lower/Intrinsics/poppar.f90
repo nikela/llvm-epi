@@ -59,3 +59,18 @@ subroutine poppar8_test(a, b)
   ! CHECK:  %[[RESULT:.*]] = arith.andi %[[CONV]], %[[C1]] : i32
   ! CHECK:  fir.store %[[RESULT]] to %[[BREF]] : !fir.ref<i32>
 end subroutine poppar8_test
+
+! CHECK-LABEL: poppar16_test
+! CHECK-SAME: %[[AREF:.*]]: !fir.ref<i128>{{.*}}, %[[BREF:.*]]: !fir.ref<i32>{{.*}}
+subroutine poppar16_test(a, b)
+  integer(16) :: a
+  integer :: b
+
+  ! CHECK:  %[[AVAL:.*]] = fir.load %[[AREF]] : !fir.ref<i128>
+  b = poppar(a)
+  ! CHECK:  %[[COUNT:.*]] = math.ctpop %[[AVAL]] : i128
+  ! CHECK:  %[[CONV:.*]] = fir.convert %[[COUNT]] : (i128) -> i32
+  ! CHECK:  %[[C1:.*]] = arith.constant 1 : i32
+  ! CHECK:  %[[RESULT:.*]] = arith.andi %[[CONV]], %[[C1]] : i32
+  ! CHECK:  fir.store %[[RESULT]] to %[[BREF]] : !fir.ref<i32>
+end subroutine poppar16_test

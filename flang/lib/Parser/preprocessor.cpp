@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <cinttypes>
 #include <cstddef>
-#include <cfloat>
 #include <ctime>
 #include <map>
 #include <memory>
@@ -246,13 +245,6 @@ void Preprocessor::DefineStandardMacros() {
   // The values of these predefined macros depend on their invocation sites.
   Define("__FILE__"s, "__FILE__"s);
   Define("__LINE__"s, "__LINE__"s);
-
-  // Flang long double kind. Used by modules.
-#if LDBL_MANT_DIG == 64
-  Define("__FLANG_LDK"s, "10");
-#elif LDBL_MANT_DIG == 113
-  Define("__FLANG_LDK"s, "16");
-#endif
 }
 
 void Preprocessor::Define(std::string macro, std::string value) {

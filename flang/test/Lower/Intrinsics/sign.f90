@@ -22,8 +22,8 @@ end subroutine
 
 ! CHECK-LABEL: sign_testr2
 subroutine sign_testr2(a, b, c)
-  real(KIND=8) a, b, c
+  real(KIND=16) a, b, c
   ! CHECK-NOT: fir.call @{{.*}}fabs
-  ! CHECK: math.copysign{{.*}} : f64
+  ! CHECK: math.copysign{{.*}} : f128
   c = sign(a, b)
 end subroutine

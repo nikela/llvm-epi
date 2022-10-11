@@ -67,6 +67,19 @@ subroutine dot_prod_int_kind_8 (x, y, z)
   z = dot_product(x,y)
 end subroutine
 
+! CHECK-LABEL: dot_prod_int_kind_16
+! CHECK-SAME: %[[x:arg0]]: !fir.box<!fir.array<?xi128>>
+! CHECK-SAME: %[[y:arg1]]: !fir.box<!fir.array<?xi128>>
+! CHECK-SAME: %[[z:arg2]]: !fir.box<!fir.array<?xi128>>
+subroutine dot_prod_int_kind_16 (x, y, z)
+  integer(kind=16), dimension(1:) :: x,y
+  integer(kind=16), dimension(1:) :: z
+  ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?xi128>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?xi128>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[res:.*]] = fir.call @_FortranADotProductInteger16(%[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> i128
+  z = dot_product(x,y)
+end subroutine
+
 ! CHECK-LABEL: dot_prod_real_kind_default
 ! CHECK-SAME: %[[x:arg0]]: !fir.box<!fir.array<?xf32>>
 ! CHECK-SAME: %[[y:arg1]]: !fir.box<!fir.array<?xf32>>
@@ -103,6 +116,32 @@ subroutine dot_prod_real_kind_8 (x, y, z)
   ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?xf64>>) -> !fir.box<none>
   ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?xf64>>) -> !fir.box<none>
   ! CHECK-DAG: %[[res:.*]] = fir.call @_FortranADotProductReal8(%[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> f64
+  z = dot_product(x,y)
+end subroutine
+
+! CHECK-LABEL: dot_prod_real_kind_10
+! CHECK-SAME: %[[x:arg0]]: !fir.box<!fir.array<?xf80>>
+! CHECK-SAME: %[[y:arg1]]: !fir.box<!fir.array<?xf80>>
+! CHECK-SAME: %[[z:arg2]]: !fir.box<!fir.array<?xf80>>
+subroutine dot_prod_real_kind_10 (x, y, z)
+  real(kind=10), dimension(1:) :: x,y
+  real(kind=10), dimension(1:) :: z
+  ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?xf80>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?xf80>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[res:.*]] = fir.call @_FortranADotProductReal10(%[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> f80
+  z = dot_product(x,y)
+end subroutine
+
+! CHECK-LABEL: dot_prod_real_kind_16
+! CHECK-SAME: %[[x:arg0]]: !fir.box<!fir.array<?xf128>>
+! CHECK-SAME: %[[y:arg1]]: !fir.box<!fir.array<?xf128>>
+! CHECK-SAME: %[[z:arg2]]: !fir.box<!fir.array<?xf128>>
+subroutine dot_prod_real_kind_16 (x, y, z)
+  real(kind=16), dimension(1:) :: x,y
+  real(kind=16), dimension(1:) :: z
+  ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?xf128>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?xf128>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[res:.*]] = fir.call @_FortranADotProductReal16(%[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> f128
   z = dot_product(x,y)
 end subroutine
 
@@ -161,6 +200,36 @@ subroutine dot_prod_complex_kind_8 (x, y, z)
   ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?x!fir.complex<8>>>) -> !fir.box<none>
   ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?x!fir.complex<8>>>) -> !fir.box<none>
   ! CHECK-DAG: fir.call @_FortranACppDotProductComplex8(%[[res_conv]], %[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.ref<complex<f64>>, !fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> none
+  z = dot_product(x,y)
+end subroutine
+
+! CHECK-LABEL: dot_prod_complex_kind_10
+! CHECK-SAME: %[[x:arg0]]: !fir.box<!fir.array<?x!fir.complex<10>>>
+! CHECK-SAME: %[[y:arg1]]: !fir.box<!fir.array<?x!fir.complex<10>>>
+! CHECK-SAME: %[[z:arg2]]: !fir.box<!fir.array<?x!fir.complex<10>>>
+subroutine dot_prod_complex_kind_10 (x, y, z)
+  complex(kind=10), dimension(1:) :: x,y
+  complex(kind=10), dimension(1:) :: z
+  ! CHECK-DAG: %0 = fir.alloca !fir.complex<10>
+  ! CHECK-DAG: %[[res_conv:[0-9]+]] = fir.convert %0 : (!fir.ref<!fir.complex<10>>) -> !fir.ref<complex<f80>>
+  ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?x!fir.complex<10>>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?x!fir.complex<10>>>) -> !fir.box<none>
+  ! CHECK-DAG: fir.call @_FortranACppDotProductComplex10(%[[res_conv]], %[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.ref<complex<f80>>, !fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> ()
+  z = dot_product(x,y)
+end subroutine
+
+! CHECK-LABEL: dot_prod_complex_kind_16
+! CHECK-SAME: %[[x:arg0]]: !fir.box<!fir.array<?x!fir.complex<16>>>
+! CHECK-SAME: %[[y:arg1]]: !fir.box<!fir.array<?x!fir.complex<16>>>
+! CHECK-SAME: %[[z:arg2]]: !fir.box<!fir.array<?x!fir.complex<16>>>
+subroutine dot_prod_complex_kind_16 (x, y, z)
+  complex(kind=16), dimension(1:) :: x,y
+  complex(kind=16), dimension(1:) :: z
+  ! CHECK-DAG: %0 = fir.alloca !fir.complex<16>
+  ! CHECK-DAG: %[[res_conv:[0-9]+]] = fir.convert %0 : (!fir.ref<!fir.complex<16>>) -> !fir.ref<complex<f128>>
+  ! CHECK-DAG: %[[x_conv:.*]] = fir.convert %[[x]] : (!fir.box<!fir.array<?x!fir.complex<16>>>) -> !fir.box<none>
+  ! CHECK-DAG: %[[y_conv:.*]] = fir.convert %[[y]] : (!fir.box<!fir.array<?x!fir.complex<16>>>) -> !fir.box<none>
+  ! CHECK-DAG: fir.call @_FortranACppDotProductComplex16(%[[res_conv]], %[[x_conv]], %[[y_conv]], %{{[0-9]+}}, %{{.*}}) : (!fir.ref<complex<f128>>, !fir.box<none>, !fir.box<none>, !fir.ref<i8>, i32) -> ()
   z = dot_product(x,y)
 end subroutine
 

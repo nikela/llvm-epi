@@ -153,10 +153,10 @@ inline CppTypeFor<TypeCategory::Integer, 4> SelectedIntKind(T x) {
     return 4;
   } else if (x <= 18) {
     return 8;
-// #ifdef __SIZEOF_INT128__
-//   } else if (x <= 38) {
-//     return 16;
-// #endif
+#ifdef __SIZEOF_INT128__
+  } else if (x <= 38) {
+    return 16;
+#endif
   }
   return -1;
 }
@@ -170,51 +170,44 @@ inline CppTypeFor<TypeCategory::Integer, 4> SelectedRealKind(P p, R r, D d) {
 
   int error{0};
   int kind{0};
-  /* if (p <= 3) {
+#if !defined(__riscv)
+  if (p <= 3) {
     kind = 2;
-  } else */ if (p <= 6) {
+  } else
+#endif // __riscv
+  if (p <= 6) {
     kind = 4;
   } else if (p <= 15) {
     kind = 8;
-// #if LDBL_MANT_DIG == 64
-//   } else if (p <= 18) {
-//     kind = 10;
-//   } else if (p <= 33) {
-//     kind = 16;
-// #elif LDBL_MANT_DIG == 113
-//   } else if (p <= 33) {
-//     kind = 16;
-// #endif
+#if LDBL_MANT_DIG == 64
+  } else if (p <= 18) {
+    kind = 10;
+  } else if (p <= 33) {
+    kind = 16;
+#elif LDBL_MANT_DIG == 113
+  } else if (p <= 33) {
+    kind = 16;
+#endif
   } else {
     error -= 1;
   }
 
   if (r <= 4) {
-    kind = kind < 4 ? 4 : kind;
+    kind = kind < 2 ? 2 : kind;
   } else if (r <= 37) {
-    kind = kind < 4 ? (p == 3 ? 4 : 4) : kind;
+    kind = kind < 3 ? (p == 3 ? 4 : 3) : kind;
   } else if (r <= 307) {
     kind = kind < 8 ? 8 : kind;
+#if LDBL_MANT_DIG == 64
+  } else if (r <= 4931) {
+    kind = kind < 10 ? 10 : kind;
+#elif LDBL_MANT_DIG == 113
+  } else if (r <= 4931) {
+    kind = kind < 16 ? 16 : kind;
+#endif
   } else {
     error -= 2;
   }
-
-//   if (r <= 4) {
-//     kind = kind < 2 ? 2 : kind;
-//   } else if (r <= 37) {
-//     kind = kind < 3 ? (p == 3 ? 4 : 3) : kind;
-//   } else if (r <= 307) {
-//     kind = kind < 8 ? 8 : kind;
-// #if LDBL_MANT_DIG == 64
-//   } else if (r <= 4931) {
-//     kind = kind < 10 ? 10 : kind;
-// #elif LDBL_MANT_DIG == 113
-//   } else if (r <= 4931) {
-//     kind = kind < 16 ? 16 : kind;
-// #endif
-//   } else {
-//     error -= 2;
-//   }
 
   return error ? error : kind;
 }

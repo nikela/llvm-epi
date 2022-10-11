@@ -51,3 +51,16 @@ subroutine trailz8_test(a, b)
   ! CHECK:  %[[RESULT:.*]] = fir.convert %[[COUNT]] : (i64) -> i32
   ! CHECK:  fir.store %[[RESULT]] to %[[BREF]] : !fir.ref<i32>
 end subroutine trailz8_test
+
+! CHECK-LABEL: trailz16_test
+! CHECK-SAME: %[[AREF:.*]]: !fir.ref<i128>{{.*}}, %[[BREF:.*]]: !fir.ref<i32>{{.*}}
+subroutine trailz16_test(a, b)
+  integer(16) :: a
+  integer :: b
+
+  ! CHECK:  %[[AVAL:.*]] = fir.load %[[AREF]] : !fir.ref<i128>
+  b = trailz(a)
+  ! CHECK:  %[[COUNT:.*]] = math.cttz %[[AVAL]] : i128
+  ! CHECK:  %[[RESULT:.*]] = fir.convert %[[COUNT]] : (i128) -> i32
+  ! CHECK:  fir.store %[[RESULT]] to %[[BREF]] : !fir.ref<i32>
+end subroutine trailz16_test

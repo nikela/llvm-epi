@@ -38,3 +38,9 @@ subroutine aint_test_real10(a, b)
   real(10) :: a, b
   b = aint(a)
 end subroutine
+
+! TODO: wait until fp128 is supported well in llvm.trunc
+!subroutine aint_test_real16(a, b)
+!  real(16) :: a, b
+!  b = aint(a)
+!end subroutine

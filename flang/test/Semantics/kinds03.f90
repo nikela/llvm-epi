@@ -47,18 +47,33 @@
  !REF: /MainProgram1/ipdt
  !DEF: /MainProgram1/i8 ObjectEntity TYPE(ipdt(k=8_4))
  type(ipdt(8)) :: i8
+ !REF: /MainProgram1/ipdt
+ !DEF: /MainProgram1/i16 ObjectEntity TYPE(ipdt(k=16_4))
+ type(ipdt(16)) :: i16
+ !REF: /MainProgram1/rpdt
+ !DEF: /MainProgram1/a2 ObjectEntity TYPE(rpdt(k=2_4))
+ type(rpdt(2)) :: a2
  !REF: /MainProgram1/rpdt
  !DEF: /MainProgram1/a4 ObjectEntity TYPE(rpdt(k=4_4))
  type(rpdt(4)) :: a4
  !REF: /MainProgram1/rpdt
  !DEF: /MainProgram1/a8 ObjectEntity TYPE(rpdt(k=8_4))
  type(rpdt(8)) :: a8
+ !REF: /MainProgram1/rpdt
+ !DEF: /MainProgram1/a16 ObjectEntity TYPE(rpdt(k=16_4))
+ type(rpdt(16)) :: a16
+ !REF: /MainProgram1/zpdt
+ !DEF: /MainProgram1/z2 ObjectEntity TYPE(zpdt(k=2_4))
+ type(zpdt(2)) :: z2
  !REF: /MainProgram1/zpdt
  !DEF: /MainProgram1/z4 ObjectEntity TYPE(zpdt(k=4_4))
  type(zpdt(4)) :: z4
  !REF: /MainProgram1/zpdt
  !DEF: /MainProgram1/z8 ObjectEntity TYPE(zpdt(k=8_4))
  type(zpdt(8)) :: z8
+ !REF: /MainProgram1/zpdt
+ !DEF: /MainProgram1/z16 ObjectEntity TYPE(zpdt(k=16_4))
+ type(zpdt(16)) :: z16
  !REF: /MainProgram1/lpdt
  !DEF: /MainProgram1/l1 ObjectEntity TYPE(lpdt(k=1_4))
  type(lpdt(1)) :: l1

@@ -1,6 +1,5 @@
 set(LLVM_LINK_COMPONENTS
   ${LLVM_TARGETS_TO_BUILD}
-  Target
 )
 
 add_flang_unittest(FlangFrontendTests

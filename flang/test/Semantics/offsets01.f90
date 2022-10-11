@@ -2,13 +2,15 @@
 
 ! Size and alignment of intrinsic types
 subroutine s1
-  integer(1) :: a_i1  ! a_i1 size=1 offset=0: ObjectEntity type: INTEGER(1)
-  integer(8) :: b_i8  ! b_i8 size=8 offset=8: ObjectEntity type: INTEGER(8)
-  real(8)    :: e_r8  ! e_r8 size=8 offset=16: ObjectEntity type: REAL(8)
-  real(4)    :: f_r4  ! f_r4 size=4 offset=24: ObjectEntity type: REAL(4)
-  complex(8) :: g_c8  ! g_c8 size=16 offset=32: ObjectEntity type: COMPLEX(8)
-  complex(4) :: h_c4  ! h_c4 size=8 offset=48: ObjectEntity type: COMPLEX(4)
-  logical    :: i_l4  ! i_l4 size=4 offset=56: ObjectEntity type: LOGICAL(4)
+  integer(1) :: a_i1  !CHECK: a_i1 size=1 offset=0:
+  integer(8) :: b_i8  !CHECK: b_i8 size=8 offset=8:
+  real(2)    :: c_r2  !CHECK: c_r2 size=2 offset=16:
+  real(2)    :: d_r2  !CHECK: d_r2 size=2 offset=18:
+  real(8)    :: e_r8  !CHECK: e_r8 size=8 offset=24:
+  real(4)    :: f_r4  !CHECK: f_r4 size=4 offset=32:
+  complex(8) :: g_c8  !CHECK: g_c8 size=16 offset=40:
+  complex(4) :: h_c4  !CHECK: h_c4 size=8 offset=56:
+  logical    :: i_l4  !CHECK: i_l4 size=4 offset=64:
 end
 
 ! Character

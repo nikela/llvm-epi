@@ -120,7 +120,8 @@ subroutine boz
   ! CHECK: fir.call @_FortranAioOutputInteger16(%{{.*}}, %{{.*}}) : (!fir.ref<i8>, i16) -> i1
   ! CHECK: fir.call @_FortranAioOutputInteger32(%{{.*}}, %{{.*}}) : (!fir.ref<i8>, i32) -> i1
   ! CHECK: fir.call @_FortranAioOutputInteger64(%{{.*}}, %{{.*}}) : (!fir.ref<i8>, i64) -> i1
-  print '(*(Z3))', 96_1, 96_2, 96_4, 96_8
+  ! CHECK: fir.call @_FortranAioOutputInteger128(%{{.*}}, %{{.*}}) : (!fir.ref<i8>, i128) -> i1
+  print '(*(Z3))', 96_1, 96_2, 96_4, 96_8, 96_16
 
   ! CHECK: fir.call @_FortranAioOutputInteger32(%{{.*}}, %{{.*}}) : (!fir.ref<i8>, i32) -> i1
   ! CHECK: fir.call @_FortranAioOutputInteger64(%{{.*}}, %{{.*}}) : (!fir.ref<i8>, i64) -> i1

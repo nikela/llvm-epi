@@ -35,13 +35,13 @@ module leadz_tests
   logical, parameter :: test_m82 = leadz(-2_8) .EQ. 0
   logical, parameter :: test_mb8 = leadz(-9223372034707292160_8) .EQ. 0
 
-  ! logical, parameter :: test_z16 = leadz(0_16) .EQ. 128
-  ! logical, parameter :: test_o16 = leadz(1_16) .EQ. 127
-  ! logical, parameter :: test_t16 = leadz(2_16) .EQ. 126
-  ! logical, parameter :: test_f16 = leadz(15_16) .EQ. 124
-  ! logical, parameter :: test_m161 = leadz(-1_16) .EQ. 0
-  ! logical, parameter :: test_m162 = leadz(-2_16) .EQ. 0
-  ! logical, parameter :: test_mb16 = leadz(18446744073709551616_16) .EQ. 63
+  logical, parameter :: test_z16 = leadz(0_16) .EQ. 128
+  logical, parameter :: test_o16 = leadz(1_16) .EQ. 127
+  logical, parameter :: test_t16 = leadz(2_16) .EQ. 126
+  logical, parameter :: test_f16 = leadz(15_16) .EQ. 124
+  logical, parameter :: test_m161 = leadz(-1_16) .EQ. 0
+  logical, parameter :: test_m162 = leadz(-2_16) .EQ. 0
+  logical, parameter :: test_mb16 = leadz(18446744073709551616_16) .EQ. 63
 end module leadz_tests
 
 module trailz_tests
@@ -78,13 +78,13 @@ module trailz_tests
   logical, parameter :: test_m82 = trailz(-2_8) .EQ. 1
   logical, parameter :: test_mb8 = trailz(-9223372034707292160_8) .EQ. 31
 
-  ! logical, parameter :: test_z16 = trailz(0_16) .EQ. 128
-  ! logical, parameter :: test_o16 = trailz(1_16) .EQ. 0
-  ! logical, parameter :: test_t16 = trailz(2_16) .EQ. 1
-  ! logical, parameter :: test_f16 = trailz(15_16) .EQ. 0
-  ! logical, parameter :: test_m161 = trailz(-1_16) .EQ. 0
-  ! logical, parameter :: test_m162 = trailz(-2_16) .EQ. 1
-  ! logical, parameter :: test_mb16 = trailz(18446744073709551616_16) .EQ. 64
+  logical, parameter :: test_z16 = trailz(0_16) .EQ. 128
+  logical, parameter :: test_o16 = trailz(1_16) .EQ. 0
+  logical, parameter :: test_t16 = trailz(2_16) .EQ. 1
+  logical, parameter :: test_f16 = trailz(15_16) .EQ. 0
+  logical, parameter :: test_m161 = trailz(-1_16) .EQ. 0
+  logical, parameter :: test_m162 = trailz(-2_16) .EQ. 1
+  logical, parameter :: test_mb16 = trailz(18446744073709551616_16) .EQ. 64
 end module trailz_tests
 
 module popcnt_tests
@@ -121,13 +121,13 @@ module popcnt_tests
   logical, parameter :: test_m82 = popcnt(-2_8) .EQ. 63
   logical, parameter :: test_mb8 = popcnt(-9223372034707292160_8) .EQ. 2
 
-  ! logical, parameter :: test_z16 = popcnt(0_16) .EQ. 0
-  ! logical, parameter :: test_o16 = popcnt(1_16) .EQ. 1
-  ! logical, parameter :: test_t16 = popcnt(2_16) .EQ. 1
-  ! logical, parameter :: test_f16 = popcnt(15_16) .EQ. 4
-  ! logical, parameter :: test_m161 = popcnt(-1_16) .EQ. 128
-  ! logical, parameter :: test_m162 = popcnt(-2_16) .EQ. 127
-  ! logical, parameter :: test_mb16 = popcnt(18446744073709551616_16) .EQ. 1
+  logical, parameter :: test_z16 = popcnt(0_16) .EQ. 0
+  logical, parameter :: test_o16 = popcnt(1_16) .EQ. 1
+  logical, parameter :: test_t16 = popcnt(2_16) .EQ. 1
+  logical, parameter :: test_f16 = popcnt(15_16) .EQ. 4
+  logical, parameter :: test_m161 = popcnt(-1_16) .EQ. 128
+  logical, parameter :: test_m162 = popcnt(-2_16) .EQ. 127
+  logical, parameter :: test_mb16 = popcnt(18446744073709551616_16) .EQ. 1
 end module popcnt_tests
 
 module poppar_tests
@@ -164,11 +164,11 @@ module poppar_tests
   logical, parameter :: test_m82 = poppar(-2_8) .EQ. 1
   logical, parameter :: test_mb8 = poppar(-9223372034707292160_8) .EQ. 0
 
-  ! logical, parameter :: test_z16 = poppar(0_16) .EQ. 0
-  ! logical, parameter :: test_o16 = poppar(1_16) .EQ. 1
-  ! logical, parameter :: test_t16 = poppar(2_16) .EQ. 1
-  ! logical, parameter :: test_f16 = poppar(15_16) .EQ. 0
-  ! logical, parameter :: test_m161 = poppar(-1_16) .EQ. 0
-  ! logical, parameter :: test_m162 = poppar(-2_16) .EQ. 1
-  ! logical, parameter :: test_mb16 = poppar(18446744073709551616_16) .EQ. 1
+  logical, parameter :: test_z16 = poppar(0_16) .EQ. 0
+  logical, parameter :: test_o16 = poppar(1_16) .EQ. 1
+  logical, parameter :: test_t16 = poppar(2_16) .EQ. 1
+  logical, parameter :: test_f16 = poppar(15_16) .EQ. 0
+  logical, parameter :: test_m161 = poppar(-1_16) .EQ. 0
+  logical, parameter :: test_m162 = poppar(-2_16) .EQ. 1
+  logical, parameter :: test_mb16 = poppar(18446744073709551616_16) .EQ. 1
 end module poppar_tests

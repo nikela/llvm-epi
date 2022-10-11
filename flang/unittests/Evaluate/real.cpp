@@ -3,7 +3,6 @@
 #include "flang/Evaluate/type.h"
 #include "llvm/Support/raw_ostream.h"
 #include <cmath>
-#include <cfloat>
 #include <cstdio>
 #include <cstdlib>
 #include <type_traits>
@@ -528,17 +527,12 @@ void subsetTests(int pass, Rounding rounding, std::uint32_t opds) {
 }
 
 void roundTest(int rm, Rounding rounding, std::uint32_t opds) {
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   basicTests<Real2>(rm, rounding);
   basicTests<Real3>(rm, rounding);
-#endif
   basicTests<Real4>(rm, rounding);
   basicTests<Real8>(rm, rounding);
-#if LDBL_MANT_DIG == 64
   basicTests<Real10>(rm, rounding);
-#elif LDBL_MANT_DIG == 113
   basicTests<Real16>(rm, rounding);
-#endif
   ScopedHostFloatingPointEnvironment::SetRounding(rounding);
   subsetTests<std::uint32_t, float, Real4>(rm, rounding, opds);
   subsetTests<std::uint64_t, double, Real8>(rm, rounding, opds);

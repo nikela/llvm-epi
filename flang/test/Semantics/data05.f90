@@ -49,6 +49,11 @@ module m
     character(len=8) :: ssd ! CHECK: ssd (InDataStmt) size=8 offset=0: ObjectEntity type: CHARACTER(8_4,1) init:"abcdefgh"
     data ssd(1:4)/'abcd'/,ssd(5:8)/'efgh'/
   end subroutine
+  subroutine s7
+    complex(kind=16) :: zv(-1:1) ! CHECK: zv (InDataStmt) size=96 offset=0: ObjectEntity type: COMPLEX(16) shape: -1_8:1_8 init:[COMPLEX(16)::(1._16,2._16),(3._16,4._16),(5._16,6._16)]
+    data (zv(j), j=1,0,-1)/(5,6),(3,4)/
+    data (zv(j)%im, zv(j)%re, j=-1,-1,-9)/2,1/
+  end subroutine
   real function rfunc2(x)
     real, intent(in) :: x
     rfunc2 = x + 1.

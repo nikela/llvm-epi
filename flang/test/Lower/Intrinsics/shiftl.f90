@@ -79,3 +79,23 @@ subroutine shiftl8_test(a, b, c)
   ! CHECK: %[[SHIFT:.*]] = arith.shli %[[A_VAL]], %[[B_CONV]] : i64
   ! CHECK: %[[RES:.*]] = arith.select %[[INVALID]], %[[C_0]], %[[SHIFT]] : i64
 end subroutine shiftl8_test
+
+! CHECK-LABEL: shiftl16_test
+! CHECK-SAME: %[[A:.*]]: !fir.ref<i128>{{.*}}, %[[B:.*]]: !fir.ref<i32>{{.*}}, %[[C:.*]]: !fir.ref<i128>{{.*}}
+subroutine shiftl16_test(a, b, c)
+  integer(kind=16) :: a
+  integer :: b
+  integer(kind=16) :: c
+
+  ! CHECK: %[[A_VAL:.*]] = fir.load %[[A]] : !fir.ref<i128>
+  ! CHECK: %[[B_VAL:.*]] = fir.load %[[B]] : !fir.ref<i32>
+  c = shiftl(a, b)
+  ! CHECK: %[[C_BITS:.*]] = arith.constant 128 : i128
+  ! CHECK: %[[C_0:.*]] = arith.constant 0 : i128
+  ! CHECK: %[[B_CONV:.*]] = fir.convert %[[B_VAL]] : (i32) -> i128
+  ! CHECK: %[[UNDER:.*]] = arith.cmpi slt, %[[B_CONV]], %[[C_0]] : i128
+  ! CHECK: %[[OVER:.*]] = arith.cmpi sge, %[[B_CONV]], %[[C_BITS]] : i128
+  ! CHECK: %[[INVALID:.*]] = arith.ori %[[UNDER]], %[[OVER]] : i1
+  ! CHECK: %[[SHIFT:.*]] = arith.shli %[[A_VAL]], %[[B_CONV]] : i128
+  ! CHECK: %[[RES:.*]] = arith.select %[[INVALID]], %[[C_0]], %[[SHIFT]] : i128
+end subroutine shiftl16_test

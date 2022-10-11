@@ -36,11 +36,19 @@ module maskltest
   logical, parameter :: test_lo_4 = maskl(33, 4) .EQ. -1_4
 
   logical, parameter :: test_l0_8 = maskl(0, 8) .EQ. 0_8
+  logical, parameter :: test_l1_8 = maskl(1, 8) .EQ. -9223372036854775808_16
   logical, parameter :: test_l2_8 = maskl(2, 8) .EQ. -4611686018427387904_8
   logical, parameter :: test_lm_8 = maskl(32, 8) .EQ. -4294967296_8
   logical, parameter :: test_le1_8 = maskl(63, 8) .EQ. -2_8
   logical, parameter :: test_le_8 = maskl(64, 8) .EQ. -1_8
   logical, parameter :: test_lo_8 = maskl(65, 8) .EQ. -1_8
+
+  logical, parameter :: test_l0_16 = maskl(0, 16) .EQ. 0_16
+  logical, parameter :: test_l2_16 = maskl(2, 16) .EQ. -85070591730234615865843651857942052864_16
+  logical, parameter :: test_lm_16 = maskl(64, 16) .EQ. -18446744073709551616_16
+  logical, parameter :: test_le1_16 = maskl(127, 16) .EQ. -2_16
+  logical, parameter :: test_le_16 = maskl(128, 16) .EQ. -1_16
+  logical, parameter :: test_lo_16 = maskl(129, 16) .EQ. -1_16
 end module maskltest
 
 module maskrtest
@@ -83,4 +91,12 @@ module maskrtest
   logical, parameter :: test_re1_8 = maskr(63, 8) .EQ. 9223372036854775807_8
   logical, parameter :: test_re_8 = maskr(64, 8) .EQ. -1_8
   logical, parameter :: test_ro_8 = maskr(65, 8) .EQ. -1_8
+
+  logical, parameter :: test_r0_16 = maskr(0, 16) .EQ. 0_16
+  logical, parameter :: test_r1_16 = maskr(1, 16) .EQ. 1_16
+  logical, parameter :: test_r2_16 = maskr(2, 16) .EQ. 3_16
+  logical, parameter :: test_rm_16 = maskr(64, 16) .EQ. 18446744073709551615_16
+  logical, parameter :: test_re1_16 = maskr(127, 16) .EQ. 170141183460469231731687303715884105727_16
+  logical, parameter :: test_re_16 = maskr(128, 16) .EQ. -1_16
+  logical, parameter :: test_ro_16 = maskr(129, 16) .EQ. -1_16
 end module maskrtest

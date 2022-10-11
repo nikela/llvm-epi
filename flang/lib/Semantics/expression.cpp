@@ -3212,7 +3212,7 @@ bool ExpressionAnalyzer::CheckIntrinsicKind(
     return true;
   } else if (foldingContext_.targetCharacteristics().CanSupportType(
                  category, kind)) {
-    Say("%s(KIND=%jd) is not an enabled type for this targe"_warn_en_US,
+    Say("%s(KIND=%jd) is not an enabled type for this target"_err_en_US,
         ToUpperCase(EnumToString(category)), kind);
     return true;
   } else {
@@ -3239,7 +3239,7 @@ bool ExpressionAnalyzer::CheckIntrinsicSize(
     return true;
   } else if (foldingContext_.targetCharacteristics().CanSupportType(
                  category, kind)) {
-    Say("%s*%jd is not an enabled type for this target"_warn_en_US,
+    Say("%s*%jd is not an enabled type for this target"_err_en_US,
         ToUpperCase(EnumToString(category)), size);
     return true;
   } else {

@@ -63,3 +63,19 @@ subroutine selected_int_kind_test8(a)
   integer(8) :: a, res
   res = selected_int_kind(a)
 end
+
+! CHECK-LABEL: func.func @_QPselected_int_kind_test16(
+! CHECK-SAME:                                         %[[VAL_0:.*]]: !fir.ref<i128> {fir.bindc_name = "a"}) {
+! CHECK:         %[[VAL_1:.*]] = fir.alloca i128 {bindc_name = "res", uniq_name = "_QFselected_int_kind_test16Eres"}
+! CHECK:         %[[VAL_4:.*]] = arith.constant 16 : i32
+! CHECK:         %[[VAL_6:.*]] = fir.convert %[[VAL_0]] : (!fir.ref<i128>) -> !fir.llvm_ptr<i8>
+! CHECK:         %[[VAL_7:.*]] = fir.call @_FortranASelectedIntKind(%{{.*}}, %{{.*}}, %[[VAL_6]], %[[VAL_4]]) : (!fir.ref<i8>, i32, !fir.llvm_ptr<i8>, i32) -> i32
+! CHECK:         %[[VAL_8:.*]] = fir.convert %[[VAL_7]] : (i32) -> i128
+! CHECK:         fir.store %[[VAL_8]] to %[[VAL_1]] : !fir.ref<i128>
+! CHECK:         return
+! CHECK:       }
+
+subroutine selected_int_kind_test16(a)
+  integer(16) :: a, res
+  res = selected_int_kind(a)
+end

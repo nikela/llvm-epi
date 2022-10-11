@@ -123,3 +123,34 @@ subroutine dshiftr8_test(a, b, s, c)
   ! CHECK: %[[RGT:.*]] = arith.select %[[INV_R]], %[[C_0_R]], %[[SHR]] : i64
   ! CHECK: %[[SHIFT:.*]] = arith.ori %[[LFT]], %[[RGT]] : i64
 end subroutine dshiftr8_test
+
+! CHECK-LABEL: dshiftr16_test
+! CHECK-SAME: %[[A:.*]]: !fir.ref<i128>{{.*}}, %[[B:.*]]: !fir.ref<i128>{{.*}}, %[[S:.*]]: !fir.ref<i32>{{.*}}, %[[C:.*]]: !fir.ref<i128>{{.*}}
+subroutine dshiftr16_test(a, b, s, c)
+  integer(kind=16) :: a, b
+  integer :: s
+  integer(kind=16) :: c
+
+  ! CHECK: %[[A_VAL:.*]] = fir.load %[[A]] : !fir.ref<i128>
+  ! CHECK: %[[B_VAL:.*]] = fir.load %[[B]] : !fir.ref<i128>
+  ! CHECK: %[[S_VAL:.*]] = fir.load %[[S]] : !fir.ref<i32>
+  c = dshiftr(a, b, s)
+  ! CHECK: %[[S_CONV:.*]] = fir.convert %[[S_VAL]] : (i32) -> i128
+  ! CHECK: %[[C_BITS:.*]] = arith.constant 128 : i128
+  ! CHECK: %[[DIFF:.*]] = arith.subi %[[C_BITS]], %[[S_CONV]] : i128
+  ! CHECK: %[[C_BITS_L:.*]] = arith.constant 128 : i128
+  ! CHECK: %[[C_0_L:.*]] = arith.constant 0 : i128
+  ! CHECK: %[[UNDER_L:.*]] = arith.cmpi slt, %[[DIFF]], %[[C_0_L]] : i128
+  ! CHECK: %[[OVER_L:.*]] = arith.cmpi sge, %[[DIFF]], %[[C_BITS_L]] : i128
+  ! CHECK: %[[INV_L:.*]] = arith.ori %[[UNDER_L]], %[[OVER_L]] : i1
+  ! CHECK: %[[SHL:.*]] = arith.shli %[[A_VAL]], %[[DIFF]] : i128
+  ! CHECK: %[[LFT:.*]] = arith.select %[[INV_L]], %[[C_0_L]], %[[SHL]] : i128
+  ! CHECK: %[[C_BITS_R:.*]] = arith.constant 128 : i128
+  ! CHECK: %[[C_0_R:.*]] = arith.constant 0 : i128
+  ! CHECK: %[[UNDER_R:.*]] = arith.cmpi slt, %[[S_CONV]], %[[C_0_R]] : i128
+  ! CHECK: %[[OVER_R:.*]] = arith.cmpi sge, %[[S_CONV]], %[[C_BITS_R]] : i128
+  ! CHECK: %[[INV_R:.*]] = arith.ori %[[UNDER_R]], %[[OVER_R]] : i1
+  ! CHECK: %[[SHR:.*]] = arith.shrui %[[B_VAL]], %[[S_CONV]] : i128
+  ! CHECK: %[[RGT:.*]] = arith.select %[[INV_R]], %[[C_0_R]], %[[SHR]] : i128
+  ! CHECK: %[[SHIFT:.*]] = arith.ori %[[LFT]], %[[RGT]] : i128
+end subroutine dshiftr16_test

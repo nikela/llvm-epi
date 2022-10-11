@@ -8,15 +8,12 @@
 
 #include "flang/Common/default-kinds.h"
 #include "flang/Common/idioms.h"
-#include <cfloat>
 
 namespace Fortran::common {
 
 IntrinsicTypeDefaultKinds::IntrinsicTypeDefaultKinds() {
-#if LDBL_MANT_DIG == 64
+#if __x86_64__
   quadPrecisionKind_ = 10;
-#elif LDBL_MANT_DIG == 113
-  quadPrecisionKind_ = 16;
 #endif
 }
 

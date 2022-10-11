@@ -22,7 +22,6 @@
 #include "tools.h"
 #include "flang/Runtime/descriptor.h"
 #include <algorithm>
-#include <cfloat>
 
 namespace Fortran::runtime {
 

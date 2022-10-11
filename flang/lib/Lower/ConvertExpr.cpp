@@ -55,7 +55,6 @@
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
-#include <cfloat>
 
 #define DEBUG_TYPE "flang-lower-expr"
 
@@ -1479,28 +1478,22 @@ public:
       return genBoolConstant(value.IsTrue());
     } else if constexpr (TC == Fortran::common::TypeCategory::Real) {
       std::string str = value.DumpHexadecimal();
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
       if constexpr (KIND == 2) {
         auto floatVal = consAPFloat(llvm::APFloatBase::IEEEhalf(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
       } else if constexpr (KIND == 3) {
         auto floatVal = consAPFloat(llvm::APFloatBase::BFloat(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-      } else
-#endif
-      if constexpr (KIND == 4) {
-        llvm::APFloat floatVal{llvm::APFloatBase::IEEEsingle(), str};
+      } else if constexpr (KIND == 4) {
+        auto floatVal = consAPFloat(llvm::APFloatBase::IEEEsingle(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-#if LDBL_MANT_DIG == 64
       } else if constexpr (KIND == 10) {
         auto floatVal =
             consAPFloat(llvm::APFloatBase::x87DoubleExtended(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-#elif LDBL_MANT_DIG == 113
       } else if constexpr (KIND == 16) {
         auto floatVal = consAPFloat(llvm::APFloatBase::IEEEquad(), str);
         return genRealConstant<KIND>(builder.getContext(), floatVal);
-#endif
       } else {
         // convert everything else to double
         auto floatVal = consAPFloat(llvm::APFloatBase::IEEEdouble(), str);

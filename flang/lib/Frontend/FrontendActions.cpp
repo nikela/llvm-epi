@@ -648,16 +648,17 @@ void CodeGenAction::setUpTargetMachine() {
   std::string error;
   const llvm::Target *theTarget =
       llvm::TargetRegistry::lookupTarget(theTriple, error);
-  assert(theTarget && "Failed to create Target");
 
-  // Create `TargetMachine`
-  const auto &CGOpts = ci.getInvocation().getCodeGenOpts();
-  llvm::CodeGenOpt::Level OptLevel = getCGOptLevel(CGOpts);
-  tm.reset(theTarget->createTargetMachine(
-      theTriple, /*CPU=*/"", Features, TargetOpts,
-      /*Reloc::Model=*/CGOpts.getRelocationModel(),
-      /*CodeModel::Model=*/llvm::None, OptLevel));
-  assert(tm && "Failed to create TargetMachine");
+  if (theTarget) {
+    // Create `TargetMachine`
+    const auto &CGOpts = ci.getInvocation().getCodeGenOpts();
+    llvm::CodeGenOpt::Level OptLevel = getCGOptLevel(CGOpts);
+    tm.reset(theTarget->createTargetMachine(
+        theTriple, /*CPU=*/"", Features, TargetOpts,
+        /*Reloc::Model=*/CGOpts.getRelocationModel(),
+        /*CodeModel::Model=*/llvm::None, OptLevel));
+    assert(tm && "Failed to create TargetMachine");
+  }
 }
 
 static std::unique_ptr<llvm::raw_pwrite_stream>
@@ -842,6 +843,7 @@ void CodeGenAction::executeAction() {
     return;
   }
 
+  assert(tm && "Target machine was not created");
   llvmModule->setDataLayout(tm->createDataLayout());
 
   if (action == BackendActionTy::Backend_EmitBC) {

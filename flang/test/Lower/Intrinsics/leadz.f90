@@ -51,3 +51,16 @@ subroutine leadz8_test(a, b)
   ! CHECK:  %[[RESULT:.*]] = fir.convert %[[COUNT]] : (i64) -> i32
   ! CHECK:  fir.store %[[RESULT]] to %[[BREF]] : !fir.ref<i32>
 end subroutine leadz8_test
+
+! CHECK-LABEL: leadz16_test
+! CHECK-SAME: %[[AREF:.*]]: !fir.ref<i128>{{.*}}, %[[BREF:.*]]: !fir.ref<i32>{{.*}}
+subroutine leadz16_test(a, b)
+  integer(16) :: a
+  integer :: b
+
+  ! CHECK:  %[[AVAL:.*]] = fir.load %[[AREF]] : !fir.ref<i128>
+  b = leadz(a)
+  ! CHECK:  %[[COUNT:.*]] = math.ctlz %[[AVAL]] : i128
+  ! CHECK:  %[[RESULT:.*]] = fir.convert %[[COUNT]] : (i128) -> i32
+  ! CHECK:  fir.store %[[RESULT]] to %[[BREF]] : !fir.ref<i32>
+end subroutine leadz16_test

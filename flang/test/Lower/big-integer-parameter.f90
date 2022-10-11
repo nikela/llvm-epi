@@ -1,7 +1,5 @@
 ! Test correct lowering of 128 bit integer parameters.
-! We don't support i128 in EPI, yet
-! RUN  bbc -emit-fir %s -o - | FileCheck %s
-! RUN: not bbc -emit-fir %s -o -
+! RUN: bbc -emit-fir %s -o - | FileCheck %s
 
 program i128
   integer(16), parameter :: maxi64 = 9223372036854775807_16

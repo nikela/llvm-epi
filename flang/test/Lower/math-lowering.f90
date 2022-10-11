@@ -28,6 +28,15 @@ end function
 ! RELAXED: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f64
 ! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @fabs({{%[A-Za-z0-9._]+}}) : (f64) -> f64
 
+function test_real16(x)
+  real(16) :: x, test_real16
+  test_real16 = abs(x)
+end function
+! ALL-LABEL: @_QPtest_real16
+! FAST: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f128
+! RELAXED: {{%[A-Za-z0-9._]+}} = math.absf {{%[A-Za-z0-9._]+}} : f128
+! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @llvm.fabs.f128({{%[A-Za-z0-9._]+}}) : (f128) -> f128
+
 function test_complex4(c)
   complex(4) :: c, test_complex4
   test_complex4 = abs(c)
@@ -76,6 +85,12 @@ end function
 ! ALL-LABEL: @_QPtest_real10
 ! ALL: {{%[A-Za-z0-9._]+}} = fir.call @llvm.trunc.f80({{%[A-Za-z0-9._]+}}) : (f80) -> f80
 
+! TODO: wait until fp128 is supported well in llvm.trunc
+!function test_real16(x)
+!  real(16) :: x, test_real16
+!  test_real16 = aint(x)
+!end function
+
 //--- anint.f90
 ! RUN: bbc -emit-fir %t/anint.f90 -o - --math-runtime=fast | FileCheck --check-prefixes=ALL,FAST %t/anint.f90
 ! RUN: %flang_fc1 -emit-fir -mllvm -math-runtime=fast %t/anint.f90 -o - | FileCheck --check-prefixes=ALL,FAST %t/anint.f90
@@ -113,6 +128,12 @@ end function
 ! FAST: {{%[A-Za-z0-9._]+}} = "llvm.intr.round"({{%[A-Za-z0-9._]+}}) : (f80) -> f80
 ! RELAXED: {{%[A-Za-z0-9._]+}} = "llvm.intr.round"({{%[A-Za-z0-9._]+}}) : (f80) -> f80
 ! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @llvm.round.f80({{%[A-Za-z0-9._]+}}) : (f80) -> f80
+
+! TODO: wait until fp128 is supported well in llvm.round
+!function test_real16(x)
+!  real(16) :: x, test_real16
+!  test_real16 = anint(x)
+!end function
 
 //--- atan.f90
 ! RUN: bbc -emit-fir %t/atan.f90 -o - --math-runtime=fast | FileCheck --check-prefixes=ALL,FAST %t/atan.f90
@@ -491,6 +512,16 @@ end function
 ! FAST: {{%[A-Za-z0-9._]+}} = math.copysign {{%[A-Za-z0-9._]+}}, {{%[A-Za-z0-9._]+}} : f80
 ! RELAXED: {{%[A-Za-z0-9._]+}} = math.copysign {{%[A-Za-z0-9._]+}}, {{%[A-Za-z0-9._]+}} : f80
 ! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @copysignl({{%[A-Za-z0-9._]+}}, {{%[A-Za-z0-9._]+}}) : (f80, f80) -> f80
+
+function test_real16(x, y)
+  real(16) :: x, y, test_real16
+  test_real16 = sign(x, y)
+end function
+
+! ALL-LABEL: @_QPtest_real16
+! FAST: {{%[A-Za-z0-9._]+}} = math.copysign {{%[A-Za-z0-9._]+}}, {{%[A-Za-z0-9._]+}} : f128
+! RELAXED: {{%[A-Za-z0-9._]+}} = math.copysign {{%[A-Za-z0-9._]+}}, {{%[A-Za-z0-9._]+}} : f128
+! PRECISE: {{%[A-Za-z0-9._]+}} = fir.call @llvm.copysign.f128({{%[A-Za-z0-9._]+}}, {{%[A-Za-z0-9._]+}}) : (f128, f128) -> f128
 
 //--- sin.f90
 ! RUN: bbc -emit-fir %t/sin.f90 -o - --math-runtime=fast | FileCheck --check-prefixes=ALL,FAST %t/sin.f90

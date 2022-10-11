@@ -27,7 +27,6 @@
 #include "flang/Common/real.h"
 #include "flang/Common/template.h"
 #include <cinttypes>
-#include <cfloat>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -52,17 +51,9 @@ template <TypeCategory CATEGORY, int KIND = 0> class Type;
 
 using SubscriptInteger = Type<TypeCategory::Integer, 8>;
 using CInteger = Type<TypeCategory::Integer, 4>;
-#if LDBL_MANT_DIG == 64
-using LargestInt = Type<TypeCategory::Integer, 10>;
-#elif LDBL_MANT_DIG == 113
 using LargestInt = Type<TypeCategory::Integer, 16>;
-#endif
 using LogicalResult = Type<TypeCategory::Logical, 4>;
-#if LDBL_MANT_DIG == 64
-using LargestReal = Type<TypeCategory::Real, 10>;
-#elif LDBL_MANT_DIG == 113
 using LargestReal = Type<TypeCategory::Real, 16>;
-#endif
 using Ascii = Type<TypeCategory::Character, 1>;
 
 // A predicate that is true when a kind value is a kind that could possibly
@@ -72,26 +63,11 @@ static constexpr bool IsValidKindOfIntrinsicType(
     TypeCategory category, std::int64_t kind) {
   switch (category) {
   case TypeCategory::Integer:
-    return kind == 1 || kind == 2 || kind == 4 || kind == 8
-#if LDBL_MANT_DIG == 64
-      || kind == 10
-#elif LDBL_MANT_DIG == 113
-      || kind == 16
-#endif
-      ;
+    return kind == 1 || kind == 2 || kind == 4 || kind == 8 || kind == 16;
   case TypeCategory::Real:
   case TypeCategory::Complex:
-    return
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
-        kind == 2 || kind == 3 ||
-#endif
-        kind == 4 || kind == 8
-#if LDBL_MANT_DIG == 64
-        || kind == 10
-#elif LDBL_MANT_DIG == 113
-        || kind == 16
-#endif
-        ;
+    return kind == 2 || kind == 3 || kind == 4 || kind == 8 || kind == 10 ||
+        kind == 16;
   case TypeCategory::Character:
     return kind == 1 || kind == 2 || kind == 4;
   case TypeCategory::Logical:
@@ -359,20 +335,7 @@ using CategoryTypesHelper =
     common::CombineTuples<CategoryKindTuple<CATEGORY, KINDS>...>;
 
 template <TypeCategory CATEGORY>
-using CategoryTypes = CategoryTypesHelper<CATEGORY, 1, 2,
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
-    3,
-#endif
-    4, 8
-#if LDBL_MANT_DIG == 64
-    ,10
-#elif LDBL_MANT_DIG == 113
-    ,16
-#endif
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
-    ,32
-#endif
-    >;
+using CategoryTypes = CategoryTypesHelper<CATEGORY, 1, 2, 3, 4, 8, 10, 16, 32>;
 
 using IntegerTypes = CategoryTypes<TypeCategory::Integer>;
 using RealTypes = CategoryTypes<TypeCategory::Real>;
@@ -498,25 +461,10 @@ std::optional<DynamicType> ComparisonType(
     const DynamicType &, const DynamicType &);
 
 // For generating "[extern] template class", &c. boilerplate
-#if LDBL_MANT_DIG == 64
-#define EXPAND_FOR_EACH_INTEGER_KIND(M, P, S) \
-  M(P, S, 1) M(P, S, 2) M(P, S, 4) M(P, S, 8) M(P, S, 10)
-#elif LDBL_MANT_DIG == 113
 #define EXPAND_FOR_EACH_INTEGER_KIND(M, P, S) \
   M(P, S, 1) M(P, S, 2) M(P, S, 4) M(P, S, 8) M(P, S, 16)
-#endif
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 #define EXPAND_FOR_EACH_REAL_KIND(M, P, S) \
   M(P, S, 2) M(P, S, 3) M(P, S, 4) M(P, S, 8) M(P, S, 10) M(P, S, 16)
-#else
-#if LDBL_MANT_DIG == 64
-#define EXPAND_FOR_EACH_REAL_KIND(M, P, S) \
-  M(P, S, 4) M(P, S, 8) M(P, S, 10)
-#elif LDBL_MANT_DIG == 113
-#define EXPAND_FOR_EACH_REAL_KIND(M, P, S) \
-  M(P, S, 4) M(P, S, 8) M(P, S, 16)
-#endif
-#endif
 #define EXPAND_FOR_EACH_COMPLEX_KIND(M, P, S) EXPAND_FOR_EACH_REAL_KIND(M, P, S)
 #define EXPAND_FOR_EACH_CHARACTER_KIND(M, P, S) M(P, S, 1) M(P, S, 2) M(P, S, 4)
 #define EXPAND_FOR_EACH_LOGICAL_KIND(M, P, S) \

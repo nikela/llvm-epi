@@ -3,8 +3,8 @@
 ! Check intrinsic function folding with host runtime library
 
 module m
-  ! real(2), parameter :: eps2 = 0.001_2
-  ! real(2), parameter :: eps3 = 0.001_3
+  real(2), parameter :: eps2 = 0.001_2
+  real(2), parameter :: eps3 = 0.001_3
   real(4), parameter :: eps4 = 0.000001_4
   real(8), parameter :: eps8 = 0.000000000000001_8
 
@@ -31,8 +31,8 @@ module m
   t(kind = k), parameter ::exp_##name##_##t##k = expected; \
   logical, parameter ::test_##name##_##t##k = abs(res_##name##_##t##k - exp_##name##_##t##k).LE.(eps##k)
 
-! #define TEST_R2(name, result, expected) TEST_FLOATING(name, result, expected, real, 2)
-! #define TEST_R3(name, result, expected) TEST_FLOATING(name, result, expected, real, 3)
+#define TEST_R2(name, result, expected) TEST_FLOATING(name, result, expected, real, 2)
+#define TEST_R3(name, result, expected) TEST_FLOATING(name, result, expected, real, 3)
 #define TEST_R4(name, result, expected) TEST_FLOATING(name, result, expected, real, 4)
 #define TEST_R8(name, result, expected) TEST_FLOATING(name, result, expected, real, 8)
 #define TEST_C4(name, result, expected) TEST_FLOATING(name, result, expected, complex, 4)
@@ -218,11 +218,11 @@ module m
 
   ! Only test a few REAL(2)/REAL(3) cases since they anyway use the real 4
   ! runtime mapping.
-  ! TEST_R2(acos, acos(0.5_2), 1.046875_2)
-  ! TEST_R2(atan2, atan2(1.5_2, 1._2), 9.8291015625e-1_2)
+  TEST_R2(acos, acos(0.5_2), 1.046875_2)
+  TEST_R2(atan2, atan2(1.5_2, 1._2), 9.8291015625e-1_2)
 
-  ! TEST_R3(acos, acos(0.5_3), 1.046875_3)
-  ! TEST_R3(atan2, atan2(1.3_2, 1._3), 9.140625e-1_3)
+  TEST_R3(acos, acos(0.5_3), 1.046875_3)
+  TEST_R3(atan2, atan2(1.3_2, 1._3), 9.140625e-1_3)
 
 #ifdef TEST_LIBPGMATH
 ! Bessel functions and erfc_scaled can only be folded if libpgmath

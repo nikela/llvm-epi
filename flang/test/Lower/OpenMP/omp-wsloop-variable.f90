@@ -3,8 +3,6 @@
 
 !REQUIRES: shell
 !RUN: bbc -fopenmp -emit-fir %s -o - 2>&1 | FileCheck %s
-!We do not support i128 everywhere, so don't bother testing this one.
-!XFAIL: *
 
 !CHECK:  OpenMP loop iteration variable cannot have more than 64 bits size and will be narrowed into 64 bits.
 

@@ -15,6 +15,14 @@
  integer(kind=8) jk8
  !DEF: /MainProgram1/js8 ObjectEntity INTEGER(8)
  integer*8 js8
+ !DEF: /MainProgram1/jk16 ObjectEntity INTEGER(16)
+ integer(kind=16) jk16
+ !DEF: /MainProgram1/js16 ObjectEntity INTEGER(16)
+ integer*16 js16
+ !DEF: /MainProgram1/ak2 ObjectEntity REAL(2)
+ real(kind=2) ak2
+ !DEF: /MainProgram1/as2 ObjectEntity REAL(2)
+ real*2 as2
  !DEF: /MainProgram1/ak4 ObjectEntity REAL(4)
  real(kind=4) ak4
  !DEF: /MainProgram1/as4 ObjectEntity REAL(4)
@@ -25,6 +33,18 @@
  real*8 as8
  !DEF: /MainProgram1/dp ObjectEntity REAL(8)
  double precision dp
+ !DEF: /MainProgram1/ak10 ObjectEntity REAL(10)
+ real(kind=10) ak10
+ !DEF: /MainProgram1/as10 ObjectEntity REAL(10)
+ real*10 as10
+ !DEF: /MainProgram1/ak16 ObjectEntity REAL(16)
+ real(kind=16) ak16
+ !DEF: /MainProgram1/as16 ObjectEntity REAL(16)
+ real*16 as16
+ !DEF: /MainProgram1/zk2 ObjectEntity COMPLEX(2)
+ complex(kind=2) zk2
+ !DEF: /MainProgram1/zs2 ObjectEntity COMPLEX(2)
+ complex*4 zs2
  !DEF: /MainProgram1/zk4 ObjectEntity COMPLEX(4)
  complex(kind=4) zk4
  !DEF: /MainProgram1/zs4 ObjectEntity COMPLEX(4)
@@ -35,6 +55,14 @@
  complex*16 zs8
  !DEF: /MainProgram1/zdp ObjectEntity COMPLEX(8)
  double complex zdp
+ !DEF: /MainProgram1/zk10 ObjectEntity COMPLEX(10)
+ complex(kind=10) zk10
+ !DEF: /MainProgram1/zs10 ObjectEntity COMPLEX(10)
+ complex*20 zs10
+ !DEF: /MainProgram1/zk16 ObjectEntity COMPLEX(16)
+ complex(kind=16) zk16
+ !DEF: /MainProgram1/zs16 ObjectEntity COMPLEX(16)
+ complex*32 zs16
  !DEF: /MainProgram1/lk1 ObjectEntity LOGICAL(1)
  logical(kind=1) lk1
  !DEF: /MainProgram1/ls1 ObjectEntity LOGICAL(1)

@@ -33,9 +33,17 @@ module consts
 
   integer(8), parameter :: z40_8 = 4611686018427387904_8
   integer(8), parameter :: z60_8 = 6917529027641081856_8
+  integer(8), parameter :: z80_8 = -9223372036854775808_16
   integer(8), parameter :: zC0_8 = -4611686018427387904_8
   integer(8), parameter :: zE0_8 = -2305843009213693952_8
   integer(8), parameter :: ZF0_8 = -1152921504606846976_8
+
+  integer(16), parameter :: z40_16 = 85070591730234615865843651857942052864_16
+  integer(16), parameter :: z60_16 = 127605887595351923798765477786913079296_16
+  integer(16), parameter :: zC0_16 = -85070591730234615865843651857942052864_16
+  integer(16), parameter :: zE0_16 = -42535295865117307932921825928971026432_16
+  integer(16), parameter :: ZF0_16 = -21267647932558653966460912964485513216_16
+
 end module consts
 
 module shiftltest
@@ -77,7 +85,15 @@ module shiftltest
   logical, parameter :: test_l1_8 = shiftl(1_8, 1) .EQ. 2_8
   logical, parameter :: test_lm_8 = shiftl(1_8, 16) .EQ. 65536
   logical, parameter :: test_l3e2_8 = shiftl(3_8, 62) .EQ. zC0_8
+  logical, parameter :: test_l3e1_8 = shiftl(3_8, 63) .EQ. z80_8
+  logical, parameter :: test_le1_8 = shiftl(1_8, 63) .EQ. z80_8
   logical, parameter :: test_le_8 = shiftl(1_8, 64) .EQ. 0_8
+
+  logical, parameter :: test_l0_16 = shiftl(1_16, 0) .EQ. 1_16
+  logical, parameter :: test_l1_16 = shiftl(1_16, 1) .EQ. 2_16
+  logical, parameter :: test_lm_16 = shiftl(1_16, 64) .EQ. 18446744073709551616_16
+  logical, parameter :: test_l3e2_16 = shiftl(3_16, 126) .EQ. zC0_16
+  logical, parameter :: test_le_16 = shiftl(1_16, 128) .EQ. 0_16
 end module shiftltest
 
 module shiftrtest
@@ -116,6 +132,14 @@ module shiftrtest
   logical, parameter :: test_rm_8 = shiftr(z40_8, 32) .EQ. 1073741824_8
   logical, parameter :: test_r3e2_8 = shiftr(zC0_8, 62) .EQ. 3_8
   logical, parameter :: test_r3e1_8 = shiftr(zC0_8, 63) .EQ. 1_8
+  logical, parameter :: test_re_8 = shiftr(z80_8, 64) .EQ. 0_8
+
+  logical, parameter :: test_r0_16 = shiftr(zC0_16, 0) .EQ. zC0_16
+  logical, parameter :: test_r1_16 = shiftr(zC0_16, 1) .EQ. z60_16
+  logical, parameter :: test_rm_16 = shiftr(z40_16, 64) .EQ. 4611686018427387904_16
+  logical, parameter :: test_r3e2_16 = shiftr(zC0_16, 126) .EQ. 3_16
+  logical, parameter :: test_r3e1_16 = shiftr(zC0_16, 127) .EQ. 1_16
+  logical, parameter :: test_re_16 = shiftr(z40_16, 128) .EQ. 0_16
 end module shiftrtest
 
 module shiftatest
@@ -154,4 +178,12 @@ module shiftatest
   logical, parameter :: test_a2_8 = shifta(zC0_8, 2) .EQ. zF0_8
   logical, parameter :: test_a3e2_8 = shifta(zC0_8, 61) .EQ. -2_8
   logical, parameter :: test_a3e1_8 = shifta(zC0_8, 63) .EQ. -1_8
+  logical, parameter :: test_ae_8 = shifta(z80_8, 64) .EQ. -1_8
+
+  logical, parameter :: test_a0_16 = shifta(zC0_16, 0) .EQ. zC0_16
+  logical, parameter :: test_a1_16 = shifta(zC0_16, 1) .EQ. zE0_16
+  logical, parameter :: test_a2_16 = shifta(zC0_16, 2) .EQ. zF0_16
+  logical, parameter :: test_a3e2_16 = shifta(zC0_16, 125) .EQ. -2_16
+  logical, parameter :: test_a3e1_16 = shifta(zC0_16, 127) .EQ. -1_16
+  logical, parameter :: test_ae_16 = shifta(zC0_16, 128) .EQ. -1_16
 end module shiftatest

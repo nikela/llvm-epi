@@ -152,12 +152,10 @@ inline RESULT ApplyType(
         return FUNC<TypeCategory::Real, 10>{}(std::forward<A>(x)...);
       }
       break;
-#if 0
     case 16:
       if constexpr (HasCppTypeFor<TypeCategory::Real, 16>) {
         return FUNC<TypeCategory::Real, 16>{}(std::forward<A>(x)...);
       }
-#endif
       break;
     }
     terminator.Crash("not yet implemented: REAL(KIND=%d)", kind);
@@ -178,13 +176,11 @@ inline RESULT ApplyType(
         return FUNC<TypeCategory::Complex, 10>{}(std::forward<A>(x)...);
       }
       break;
-#if 0
     case 16:
       if constexpr (HasCppTypeFor<TypeCategory::Real, 16>) {
         return FUNC<TypeCategory::Complex, 16>{}(std::forward<A>(x)...);
       }
       break;
-#endif
     }
     terminator.Crash("not yet implemented: COMPLEX(KIND=%d)", kind);
   case TypeCategory::Character:
@@ -258,13 +254,11 @@ inline RESULT ApplyFloatingPointKind(
       return FUNC<10>{}(std::forward<A>(x)...);
     }
     break;
-#if 0
   case 16:
     if constexpr (HasCppTypeFor<TypeCategory::Real, 16>) {
       return FUNC<16>{}(std::forward<A>(x)...);
     }
     break;
-#endif
   }
   terminator.Crash("not yet implemented: REAL/COMPLEX(KIND=%d)", kind);
 }

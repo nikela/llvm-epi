@@ -66,6 +66,19 @@ subroutine bgt_test4(a, b, c)
   ! CHECK: fir.store %[[C_VAL]] to %[[C]] : !fir.ref<!fir.logical<4>>
 end subroutine bgt_test4
 
+! CHECK-LABEL: bgt_test5
+! CHECK-SAME: %[[A:.*]]: !fir.ref<i128>{{.*}}, %[[B:.*]]: !fir.ref<i128>{{.*}}, %[[C:.*]]: !fir.ref<!fir.logical<4>>{{.*}}
+subroutine bgt_test5(a, b, c)
+  integer(kind=16) :: a, b
+  logical :: c
+  ! CHECK: %[[A_VAL:.*]] = fir.load %[[A]] : !fir.ref<i128>
+  ! CHECK: %[[B_VAL:.*]] = fir.load %[[B]] : !fir.ref<i128>
+  c = bgt(a, b)
+  ! CHECK: %[[C_CMP:.*]] = arith.cmpi ugt, %[[A_VAL]], %[[B_VAL]] : i128
+  ! CHECK: %[[C_VAL:.*]] = fir.convert %[[C_CMP]] : (i1) -> !fir.logical<4>
+  ! CHECK: fir.store %[[C_VAL]] to %[[C]] : !fir.ref<!fir.logical<4>>
+end subroutine bgt_test5
+
 ! CHECK-LABEL: bgt_test6
 ! CHECK-SAME: %[[A:.*]]: !fir.ref<i16>{{.*}}, %[[B:.*]]: !fir.ref<i32>{{.*}}, %[[C:.*]]: !fir.ref<!fir.logical<4>>{{.*}}
 subroutine bgt_test6(a, b, c)

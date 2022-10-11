@@ -10,7 +10,6 @@
 #include "emit-encoded.h"
 #include "utf.h"
 #include "flang/Common/uint128.h"
-#include <cfloat>
 #include <algorithm>
 
 namespace Fortran::runtime::io {
@@ -724,18 +723,13 @@ template bool EditIntegerOutput<8>(
 template bool EditIntegerOutput<16>(
     IoStatementState &, const DataEdit &, common::int128_t);
 
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class RealOutputEditing<2>;
 template class RealOutputEditing<3>;
-#endif
 template class RealOutputEditing<4>;
 template class RealOutputEditing<8>;
-#if LDBL_MANT_DIG == 64
 template class RealOutputEditing<10>;
-#elif LDBL_MANT_DIG == 113
 // TODO: double/double
 template class RealOutputEditing<16>;
-#endif
 
 template bool ListDirectedCharacterOutput(IoStatementState &,
     ListDirectedStatementState<Direction::Output> &, const char *,

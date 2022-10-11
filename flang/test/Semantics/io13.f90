@@ -5,7 +5,7 @@ module m1
   character(20), target :: ctarget
   logical, target :: ltarget
   interface gf
-    module procedure :: intf, pintf, pchf, logf
+    module procedure :: intf, pintf, pchf, logf, plogf
   end interface
  contains
   integer function intf(n)
@@ -27,6 +27,11 @@ module m1
     integer(8), intent(in) :: n
     logf = .true.
   end function
+  function plogf(n)
+    integer(16), intent(in) :: n
+    logical, pointer :: plf
+    plf => ltarget
+  end function
   subroutine test
     write(intf(6_1),"('hi')")
     write(pintf(6_2),"('hi')")
@@ -37,7 +42,11 @@ module m1
     !ERROR: I/O unit must be a character variable or a scalar integer expression
     write(logf(666_8),"('hi')")
     !ERROR: I/O unit must be a character variable or a scalar integer expression
+    write(plogf(666_16),"('hi')")
+    !ERROR: I/O unit must be a character variable or a scalar integer expression
     write(gf(666_8),"('hi')")
+    !ERROR: I/O unit must be a character variable or a scalar integer expression
+    write(gf(666_16),"('hi')")
     !ERROR: I/O unit must be a character variable or a scalar integer expression
     write(null(),"('hi')")
   end subroutine

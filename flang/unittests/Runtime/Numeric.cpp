@@ -152,13 +152,13 @@ TEST(Numeric, SelectedRealKind) {
   std::int64_t d[11] = {2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2};
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[0], 2, &r[0], 4, &d[0], 8),
-      4);
+      2);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[1], 2, &r[1], 4, &d[1], 8),
       -5);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[2], 2, &r[2], 4, &d[2], 8),
-      4);
+      2);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[3], 2, &r[3], 4, &d[3], 8),
       4);
@@ -167,10 +167,10 @@ TEST(Numeric, SelectedRealKind) {
       -1);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[5], 2, &r[5], 4, &d[5], 8),
-      4);
+      2);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[6], 2, &r[6], 4, &d[6], 8),
-      4);
+      3);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[7], 2, &r[7], 4, &d[7], 8),
       4);
@@ -185,16 +185,16 @@ TEST(Numeric, SelectedRealKind) {
       -3);
   EXPECT_EQ(
       RTNAME(SelectedRealKind)(__FILE__, __LINE__, &p_s, 1, &r[0], 4, &d[0], 8),
-      4);
+      2);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, nullptr, 0, &r[0], 4, &d[0], 8),
-      4);
+      2);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[0], 2, nullptr, 0, &d[0], 8),
-      4);
+      2);
   EXPECT_EQ(RTNAME(SelectedRealKind)(
                 __FILE__, __LINE__, &p[0], 2, &r[0], 4, nullptr, 0),
-      4);
+      2);
 }
 
 TEST(Numeric, Spacing) {

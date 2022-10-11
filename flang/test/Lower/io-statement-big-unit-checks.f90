@@ -139,6 +139,18 @@ subroutine read_8(n, var)
   read(n, *) var
 end subroutine
 
+! CHECK-LABEL: func @_QPopen_16(
+! CHECK-SAME:  %[[VAL_0:.*]]: !fir.ref<i128>
+subroutine open_16(n)
+  integer(16) :: n
+! CHECK:  %[[VAL_1:.*]] = fir.load %[[VAL_0]] : !fir.ref<i128>
+! CHECK:  %[[VAL_2:.*]] = arith.constant false
+! CHECK:  %[[VAL_3:.*]] = fir.zero_bits !fir.ref<i8>
+! CHECK:  %[[VAL_4:.*]] = arith.constant 0 : i64
+! CHECK:  %[[VAL_8:.*]] = fir.call @_FortranAioCheckUnitNumberInRange128(%[[VAL_1]], %[[VAL_2]], %[[VAL_3]], %[[VAL_4]], %{{.*}}, %{{.*}}) : (i128, i1, !fir.ref<i8>, i64, !fir.ref<i8>, i32) -> i32
+  open(n)
+end subroutine
+
 ! -----------------------------------------------------------------------------
 !     Test generation of user error recovery if-nests with INTEGER(8/16)
 !     unit numbers.

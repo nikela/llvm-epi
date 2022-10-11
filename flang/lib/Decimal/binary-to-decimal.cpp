@@ -316,29 +316,24 @@ ConversionToDecimalResult ConvertToDecimal(char *buffer, std::size_t size,
   }
 }
 
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template ConversionToDecimalResult ConvertToDecimal<8>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<8>);
 template ConversionToDecimalResult ConvertToDecimal<11>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<11>);
-#endif
 template ConversionToDecimalResult ConvertToDecimal<24>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<24>);
 template ConversionToDecimalResult ConvertToDecimal<53>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<53>);
-#if LDBL_MANT_DIG == 64
 template ConversionToDecimalResult ConvertToDecimal<64>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<64>);
-#elif LDBL_MANT_DIG == 113
 template ConversionToDecimalResult ConvertToDecimal<113>(char *, std::size_t,
     enum DecimalConversionFlags, int, enum FortranRounding,
     BinaryFloatingPointNumber<113>);
-#endif
 
 extern "C" {
 ConversionToDecimalResult ConvertFloatToDecimal(char *buffer, std::size_t size,

@@ -8,7 +8,6 @@
 
 #include "flang/Evaluate/complex.h"
 #include "llvm/Support/raw_ostream.h"
-#include <cfloat>
 
 namespace Fortran::evaluate::value {
 
@@ -117,15 +116,10 @@ llvm::raw_ostream &Complex<R>::AsFortran(llvm::raw_ostream &o, int kind) const {
   return o << ')';
 }
 
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
 template class Complex<Real<Integer<16>, 11>>;
 template class Complex<Real<Integer<16>, 8>>;
-#endif
 template class Complex<Real<Integer<32>, 24>>;
 template class Complex<Real<Integer<64>, 53>>;
-#if LDBL_MANT_DIG == 64
 template class Complex<Real<Integer<80>, 64>>;
-#elif LDBL_MANT_DIG == 113
 template class Complex<Real<Integer<128>, 113>>;
-#endif
 } // namespace Fortran::evaluate::value

@@ -14,7 +14,6 @@
 #include "flang/Evaluate/type.h"
 #include "flang/Semantics/symbol.h"
 #include "flang/Semantics/tools.h"
-#include "llvm/Support/Debug.h"
 #include <set>
 #include <string>
 

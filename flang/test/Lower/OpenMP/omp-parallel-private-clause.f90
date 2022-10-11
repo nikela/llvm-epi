@@ -46,6 +46,7 @@ end subroutine
 !FIRDialect: func @_QPprivate_clause_scalar() {
 !FIRDialect-DAG:   {{.*}} = fir.alloca !fir.complex<4> {bindc_name = "c", uniq_name = "{{.*}}Ec"}
 !FIRDialect-DAG:   {{.*}} = fir.alloca i8 {bindc_name = "i1", uniq_name = "{{.*}}Ei1"}
+!FIRDialect-DAG:   {{.*}} = fir.alloca i128 {bindc_name = "i16", uniq_name = "{{.*}}Ei16"}
 !FIRDialect-DAG:   {{.*}} = fir.alloca i16 {bindc_name = "i2", uniq_name = "{{.*}}Ei2"}
 !FIRDialect-DAG:   {{.*}} = fir.alloca i32 {bindc_name = "i4", uniq_name = "{{.*}}Ei4"}
 !FIRDialect-DAG:   {{.*}} = fir.alloca i64 {bindc_name = "i8", uniq_name = "{{.*}}Ei8"}
@@ -57,6 +58,7 @@ end subroutine
 !FIRDialect-DAG:     {{.*}} = fir.alloca i16 {bindc_name = "i2", pinned, uniq_name = "{{.*}}Ei2"}
 !FIRDialect-DAG:     {{.*}} = fir.alloca i32 {bindc_name = "i4", pinned, uniq_name = "{{.*}}Ei4"}
 !FIRDialect-DAG:     {{.*}} = fir.alloca i64 {bindc_name = "i8", pinned, uniq_name = "{{.*}}Ei8"}
+!FIRDialect-DAG:     {{.*}} = fir.alloca i128 {bindc_name = "i16", pinned, uniq_name = "{{.*}}Ei16"}
 !FIRDialect-DAG:     {{.*}} = fir.alloca !fir.complex<4> {bindc_name = "c", pinned, uniq_name = "{{.*}}Ec"}
 !FIRDialect-DAG:     {{.*}} = fir.alloca !fir.logical<4> {bindc_name = "l", pinned, uniq_name = "{{.*}}El"}
 !FIRDialect-DAG:     {{.*}} = fir.alloca f32 {bindc_name = "r", pinned, uniq_name = "{{.*}}Er"}
@@ -67,12 +69,13 @@ subroutine private_clause_scalar()
         integer(kind=2) :: i2
         integer(kind=4) :: i4
         integer(kind=8) :: i8
+        integer(kind=16) :: i16
         complex :: c
         logical :: l
         real :: r
 
-!$OMP PARALLEL PRIVATE(i1, i2, i4, i8, c, l, r)
-        print *, i1, i2, i4, i8, c, l, r
+!$OMP PARALLEL PRIVATE(i1, i2, i4, i8, i16, c, l, r)
+        print *, i1, i2, i4, i8, i16, c, l, r
 !$OMP END PARALLEL
 
 end subroutine

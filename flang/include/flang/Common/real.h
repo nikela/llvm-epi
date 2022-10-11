@@ -14,35 +14,26 @@
 // (number of explicit significand bits and any implicit MSB in the fraction).
 
 #include <cinttypes>
-#include <cfloat>
 
 namespace Fortran::common {
 
 // Total representation size in bits for each type
 static constexpr int BitsForBinaryPrecision(int binaryPrecision) {
   switch (binaryPrecision) {
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   case 8: // IEEE single (truncated): 1+8+7 with implicit bit
     return 16;
   case 11: // IEEE half precision: 1+5+10 with implicit bit
     return 16;
-#endif
   case 24: // IEEE single precision: 1+8+23 with implicit bit
     return 32;
   case 53: // IEEE double precision: 1+11+52 with implicit bit
     return 64;
-#if LDBL_MANT_DIG == 64
   case 64: // x87 extended precision: 1+15+64, no implicit bit
     return 80;
-#endif
-#ifdef FLANG_ENABLE_UNUSUAL_REAL_KINDS
   case 106: // "double-double": 2*(1+11+52 with implicit bit)
     return 128;
-#endif
-#if LDBL_MANT_DIG == 113
   case 113: // IEEE quad precision: 1+15+112 with implicit bit
     return 128;
-#endif
   default:
     return -1;
   }
@@ -82,14 +73,11 @@ static constexpr int RealKindForPrecision(int binaryPrecision) {
     return 4;
   case 53: // IEEE double precision: 1+11+52 with implicit bit
     return 8;
-#if LDBL_MANT_DIG == 64
   case 64: // x87 extended precision: 1+15+64, no implicit bit
     return 10;
-#elif LDBL_MANT_DIG == 113
   // TODO: case 106: return kind for double/double
   case 113: // IEEE quad precision: 1+15+112 with implicit bit
     return 16;
-#endif
   default:
     return -1;
   }
@@ -105,14 +93,11 @@ static constexpr int PrecisionOfRealKind(int kind) {
     return 24;
   case 8: // IEEE double precision: 1+11+52 with implicit bit
     return 53;
-#if LDBL_MANT_DIG == 64
   case 10: // x87 extended precision: 1+15+64, no implicit bit
     return 64;
-#elif LDBL_MANT_DIG == 113
   // TODO: case kind for double/double: return 106;
   case 16: // IEEE quad precision: 1+15+112 with implicit bit
     return 113;
-#endif
   default:
     return -1;
   }

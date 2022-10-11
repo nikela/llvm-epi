@@ -646,13 +646,7 @@ static bool parseDialectArgs(CompilerInvocation &res, llvm::opt::ArgList &args,
   // -fdefault* family
   if (args.hasArg(clang::driver::options::OPT_fdefault_real_8)) {
     res.getDefaultKinds().set_defaultRealKind(8);
-#if LDBL_MANT_DIG == 64
-    res.getDefaultKinds().set_doublePrecisionKind(10);
-#elif LDBL_MANT_DIG == 113
     res.getDefaultKinds().set_doublePrecisionKind(16);
-#else
-#error Unhandled LDBL_MANT_DIG case
-#endif
   }
   if (args.hasArg(clang::driver::options::OPT_fdefault_integer_8)) {
     res.getDefaultKinds().set_defaultIntegerKind(8);
@@ -832,10 +826,18 @@ void CompilerInvocation::setDefaultPredefinitions() {
           Fortran::common::LanguageFeature::OpenMP)) {
     fortranOptions.predefinitions.emplace_back("_OPENMP", "201511");
   }
+  // FIXME: This is transient.
   llvm::Triple targetTriple{llvm::Triple(this->targetOpts.triple)};
-  if (targetTriple.getArch() == llvm::Triple::ArchType::x86_64) {
-    fortranOptions.predefinitions.emplace_back("__x86_64__", "1");
-    fortranOptions.predefinitions.emplace_back("__x86_64", "1");
+  switch (targetTriple.getArch()) {
+    default: break;
+    case llvm::Triple::ArchType::x86_64:
+      fortranOptions.predefinitions.emplace_back("__x86_64__", "1");
+      fortranOptions.predefinitions.emplace_back("__x86_64", "1");
+      break;
+    case llvm::Triple::ArchType::riscv64:
+      fortranOptions.predefinitions.emplace_back("__riscv", "1");
+      fortranOptions.predefinitions.emplace_back("__riscv_xlen", "64");
+      break;
   }
 }
 
@@ -907,6 +909,15 @@ void CompilerInvocation::setSemanticsOpts(
   if (targetTriple.getArch() != llvm::Triple::ArchType::x86_64) {
     semanticsContext->targetCharacteristics().DisableType(
         Fortran::common::TypeCategory::Real, /*kind=*/10);
+  }
+  // RISC-V
+  if (targetTriple.getArch() == llvm::Triple::ArchType::riscv64) {
+    // FIXME: We should know if Zfh is available
+    semanticsContext->targetCharacteristics().DisableType(
+        Fortran::common::TypeCategory::Real, /*kind=*/2);
+    // FIXME: bfloat16, not sure if there is Zfbf16 or the likes yet.
+    semanticsContext->targetCharacteristics().DisableType(
+        Fortran::common::TypeCategory::Real, /*kind=*/3);
   }
 }
 
