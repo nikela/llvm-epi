@@ -6379,7 +6379,8 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
   // 3. We don't interleave if we think that we will spill registers to memory
   // due to the increased register pressure.
 
-  if (!isScalarEpilogueAllowed())
+  if (!isScalarEpilogueAllowed() &&
+      !(foldTailByMasking() && Legal->preferPredicatedVectorOps()))
     return 1;
 
   // We used the distance for the interleave count.
