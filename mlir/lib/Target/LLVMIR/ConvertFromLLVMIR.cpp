@@ -18,6 +18,7 @@
 #include "mlir/IR/BuiltinOps.h"
 #include "mlir/IR/BuiltinTypes.h"
 #include "mlir/IR/MLIRContext.h"
+#include "mlir/IR/Matchers.h"
 #include "mlir/Interfaces/DataLayoutInterfaces.h"
 #include "mlir/Target/LLVMIR/TypeFromLLVM.h"
 #include "mlir/Tools/mlir-translate/Translation.h"
@@ -31,6 +32,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/IR/InlineAsm.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/IntrinsicInst.h"
 #include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IRReader/IRReader.h"
@@ -41,6 +43,15 @@ using namespace mlir;
 using namespace mlir::LLVM;
 
 #include "mlir/Dialect/LLVMIR/LLVMConversionEnumsFromLLVM.inc"
+
+/// Returns true if the LLVM IR intrinsic is convertible to an MLIR LLVM dialect
+/// intrinsic, or false if no counterpart exists.
+static bool isConvertibleIntrinsic(llvm::Intrinsic::ID id) {
+  static const DenseSet<unsigned> convertibleIntrinsics = {
+#include "mlir/Dialect/LLVMIR/LLVMConvertibleLLVMIRIntrinsics.inc"
+  };
+  return convertibleIntrinsics.contains(id);
+}
 
 // Utility to print an LLVM value as a string for passing to emitError().
 // FIXME: Diagnostic should be able to natively handle types that have
@@ -164,6 +175,18 @@ public:
     b.setInsertionPointToStart(module.getBody());
   }
 
+  /// Stores the mapping between an LLVM value and its MLIR counterpart.
+  void mapValue(llvm::Value *llvm, Value mlir) { mapValue(llvm) = mlir; }
+
+  /// Provides write-once access to store the MLIR value corresponding to the
+  /// given LLVM value.
+  Value &mapValue(llvm::Value *value) {
+    Value &mlir = valueMapping[value];
+    assert(mlir == nullptr &&
+           "attempting to map a value that is already mapped");
+    return mlir;
+  }
+
   /// Returns the remapped version of `value` or a placeholder that will be
   /// remapped later if the defining instruction has not yet been visited.
   Value processValue(llvm::Value *value);
@@ -173,12 +196,19 @@ public:
   /// visited.
   SmallVector<Value> processValues(ArrayRef<llvm::Value *> values);
 
+  /// Converts `value` to an integer attribute. Asserts if the conversion fails.
+  IntegerAttr matchIntegerAttr(Value value);
+
   /// Translate the debug location to a FileLineColLoc, if `loc` is non-null.
   /// Otherwise, return UnknownLoc.
   Location translateLoc(llvm::DILocation *loc);
 
   /// Converts the type from LLVM to MLIR LLVM dialect.
   Type convertType(llvm::Type *type);
+
+  /// Converts an LLVM intrinsic to an MLIR LLVM dialect operation if an MLIR
+  /// counterpart exists. Otherwise, returns failure.
+  LogicalResult convertIntrinsic(OpBuilder &odsBuilder, llvm::CallInst *inst);
 
   /// Imports `f` into the current module.
   LogicalResult processFunction(llvm::Function *f);
@@ -195,7 +225,8 @@ private:
   FlatSymbolRefAttr getPersonalityAsAttr(llvm::Function *f);
   /// Imports `bb` into `block`, which must be initially empty.
   LogicalResult processBasicBlock(llvm::BasicBlock *bb, Block *block);
-  /// Imports `inst` and populates instMap[inst] with the imported Value.
+  /// Imports `inst` and populates valueMapping[inst] with the result of the
+  /// imported operation.
   LogicalResult processInstruction(llvm::Instruction *inst);
   /// `br` branches to `target`. Append the block arguments to attach to the
   /// generated branch op to `blockArguments`. These should be in the same order
@@ -239,8 +270,8 @@ private:
 
   /// Remapped blocks, for the current function.
   DenseMap<llvm::BasicBlock *, Block *> blocks;
-  /// Remapped values. These are function-local.
-  DenseMap<llvm::Value *, Value> instMap;
+  /// Mappings between original and imported values. These are function-local.
+  DenseMap<llvm::Value *, Value> valueMapping;
   /// Instructions that had not been defined when first encountered as a use.
   /// Maps to the dummy Operation that was created in processValue().
   DenseMap<llvm::Value *, Operation *> unknownInstMap;
@@ -261,6 +292,25 @@ Location Importer::translateLoc(llvm::DILocation *loc) {
 
 Type Importer::convertType(llvm::Type *type) {
   return typeTranslator.translateType(type);
+}
+
+LogicalResult Importer::convertIntrinsic(OpBuilder &odsBuilder,
+                                         llvm::CallInst *inst) {
+  // Check if the callee is an intrinsic.
+  llvm::Function *callee = inst->getCalledFunction();
+  if (!callee || !callee->isIntrinsic())
+    return failure();
+
+  // Check if the intrinsic is convertible to an MLIR dialect counterpart.
+  llvm::Intrinsic::ID intrinsicID = callee->getIntrinsicID();
+  if (!isConvertibleIntrinsic(intrinsicID))
+    return failure();
+
+  // Copy the call arguments to an operands array used by the conversion.
+  SmallVector<llvm::Value *> llvmOperands(inst->args());
+#include "mlir/Dialect/LLVMIR/LLVMIntrinsicFromLLVMIRConversions.inc"
+
+  return failure();
 }
 
 // We only need integers, floats, doubles, and vectors and tensors thereof for
@@ -469,7 +519,7 @@ Value Importer::processConstant(llvm::Constant *c) {
     b.setInsertionPoint(currentEntryBlock, currentEntryBlock->begin());
     if (failed(processInstruction(i)))
       return nullptr;
-    assert(instMap.count(i));
+    assert(valueMapping.count(i));
 
     // If we don't remove entry of `i` here, it's totally possible that the
     // next time llvm::ConstantExpr::getAsInstruction is called again, which
@@ -477,8 +527,8 @@ Value Importer::processConstant(llvm::Constant *c) {
     // created Instruction might be the same as `i`. Making processInstruction
     // falsely believe that the new Instruction has been processed before
     // and raised an assertion error.
-    Value value = instMap[i];
-    instMap.erase(i);
+    Value value = valueMapping[i];
+    valueMapping.erase(i);
     // Remove this zombie LLVM instruction now, leaving us only with the MLIR
     // op.
     i->deleteValue();
@@ -539,8 +589,8 @@ Value Importer::processConstant(llvm::Constant *c) {
 }
 
 Value Importer::processValue(llvm::Value *value) {
-  auto it = instMap.find(value);
-  if (it != instMap.end())
+  auto it = valueMapping.find(value);
+  if (it != valueMapping.end())
     return it->second;
 
   // We don't expect to see instructions in dominator order. If we haven't seen
@@ -566,6 +616,14 @@ SmallVector<Value> Importer::processValues(ArrayRef<llvm::Value *> values) {
   for (llvm::Value *value : values)
     remapped.push_back(processValue(value));
   return remapped;
+}
+
+IntegerAttr Importer::matchIntegerAttr(Value value) {
+  IntegerAttr integerAttr;
+  bool success = matchPattern(value, m_Constant(&integerAttr));
+  assert(success && "expected a constant value");
+  (void)success;
+  return integerAttr;
 }
 
 /// Return the MLIR OperationName for the given LLVM opcode.
@@ -647,15 +705,6 @@ static StringRef lookupOperationNameFromOpcode(unsigned opcode) {
 #undef INST
 
   return opcMap.lookup(opcode);
-}
-
-/// Return the MLIR OperationName for the given LLVM intrinsic ID.
-static StringRef lookupOperationNameFromIntrinsicID(unsigned id) {
-  // Maps from LLVM intrinsic ID to MLIR OperationName.
-  static const DenseMap<unsigned, StringRef> intrMap = {
-#include "mlir/Dialect/LLVMIR/LLVMIntrinsicToLLVMIROpPairs.inc"
-  };
-  return intrMap.lookup(id);
 }
 
 static ICmpPredicate getICmpPredicate(llvm::CmpInst::Predicate p) {
@@ -795,9 +844,13 @@ Importer::processBranchArgs(llvm::Instruction *br, llvm::BasicBlock *target,
 LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
   // FIXME: Support uses of SubtargetData. Currently inbounds GEPs, fast-math
   // flags and call / operand attributes are not supported.
+
+  // Convert all intrinsics that provide an MLIR builder.
+  if (auto callInst = dyn_cast<llvm::CallInst>(inst))
+    if (succeeded(convertIntrinsic(b, callInst)))
+      return success();
+
   Location loc = translateLoc(inst->getDebugLoc());
-  assert(!instMap.count(inst) &&
-         "processInstruction must be called only once per instruction!");
   switch (inst->getOpcode()) {
   default:
     return emitError(loc) << "unknown instruction: " << diag(*inst);
@@ -852,24 +905,25 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
     state.addOperands(ops);
     Operation *op = b.create(state);
     if (!inst->getType()->isVoidTy())
-      instMap[inst] = op->getResult(0);
+      mapValue(inst, op->getResult(0));
     return success();
   }
   case llvm::Instruction::Alloca: {
     Value size = processValue(inst->getOperand(0));
     auto *allocaInst = cast<llvm::AllocaInst>(inst);
-    instMap[inst] =
-        b.create<AllocaOp>(loc, convertType(inst->getType()),
-                           convertType(allocaInst->getAllocatedType()), size,
-                           allocaInst->getAlign().value());
+    Value res = b.create<AllocaOp>(loc, convertType(inst->getType()),
+                                   convertType(allocaInst->getAllocatedType()),
+                                   size, allocaInst->getAlign().value());
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::ICmp: {
     Value lhs = processValue(inst->getOperand(0));
     Value rhs = processValue(inst->getOperand(1));
-    instMap[inst] = b.create<ICmpOp>(
+    Value res = b.create<ICmpOp>(
         loc, getICmpPredicate(cast<llvm::ICmpInst>(inst)->getPredicate()), lhs,
         rhs);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::FCmp: {
@@ -887,9 +941,10 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
       resType = VectorType::get({numElements}, boolType);
     }
 
-    instMap[inst] = b.create<FCmpOp>(
+    Value res = b.create<FCmpOp>(
         loc, resType,
         getFCmpPredicate(cast<llvm::FCmpInst>(inst)->getPredicate()), lhs, rhs);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::Br: {
@@ -953,8 +1008,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
   }
   case llvm::Instruction::PHI: {
     Type type = convertType(inst->getType());
-    instMap[inst] = b.getInsertionBlock()->addArgument(
-        type, translateLoc(inst->getDebugLoc()));
+    mapValue(inst, b.getInsertionBlock()->addArgument(
+                       type, translateLoc(inst->getDebugLoc())));
     return success();
   }
   case llvm::Instruction::Call: {
@@ -968,20 +1023,6 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
     }
     Operation *op;
     if (llvm::Function *callee = ci->getCalledFunction()) {
-      // For all intrinsics, try to generate to the corresponding op.
-      if (callee->isIntrinsic()) {
-        auto id = callee->getIntrinsicID();
-        StringRef opName = lookupOperationNameFromIntrinsicID(id);
-        if (!opName.empty()) {
-          OperationState state(loc, opName);
-          state.addOperands(ops);
-          state.addTypes(tys);
-          Operation *op = b.create(state);
-          if (!inst->getType()->isVoidTy())
-            instMap[inst] = op->getResult(0);
-          return success();
-        }
-      }
       op = b.create<CallOp>(
           loc, tys, SymbolRefAttr::get(b.getContext(), callee->getName()), ops);
     } else {
@@ -990,7 +1031,7 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
       op = b.create<CallOp>(loc, tys, ops);
     }
     if (!ci->getType()->isVoidTy())
-      instMap[inst] = op->getResult(0);
+      mapValue(inst, op->getResult(0));
     return success();
   }
   case llvm::Instruction::LandingPad: {
@@ -1001,7 +1042,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
       ops.push_back(processConstant(lpi->getClause(i)));
 
     Type ty = convertType(lpi->getType());
-    instMap[inst] = b.create<LandingpadOp>(loc, ty, lpi->isCleanup(), ops);
+    Value res = b.create<LandingpadOp>(loc, ty, lpi->isCleanup(), ops);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::Invoke: {
@@ -1032,7 +1074,7 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
     }
 
     if (!ii->getType()->isVoidTy())
-      instMap[inst] = op->getResult(0);
+      mapValue(inst, op->getResult(0));
     return success();
   }
   case llvm::Instruction::Fence: {
@@ -1062,7 +1104,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
         getLLVMAtomicOrdering(atomicInst->getOrdering());
 
     Type type = convertType(inst->getType());
-    instMap[inst] = b.create<AtomicRMWOp>(loc, type, binOp, ptr, val, ordering);
+    Value res = b.create<AtomicRMWOp>(loc, type, binOp, ptr, val, ordering);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::AtomicCmpXchg: {
@@ -1077,8 +1120,9 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
         getLLVMAtomicOrdering(cmpXchgInst->getFailureOrdering());
 
     Type type = convertType(inst->getType());
-    instMap[inst] = b.create<AtomicCmpXchgOp>(loc, type, ptr, cmpVal, newVal,
-                                              ordering, failOrdering);
+    Value res = b.create<AtomicCmpXchgOp>(loc, type, ptr, cmpVal, newVal,
+                                          ordering, failOrdering);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::GetElementPtr: {
@@ -1098,8 +1142,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
     }
 
     Type type = convertType(inst->getType());
-    instMap[inst] =
-        b.create<GEPOp>(loc, type, sourceElementType, basePtr, indices);
+    Value res = b.create<GEPOp>(loc, type, sourceElementType, basePtr, indices);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::InsertValue: {
@@ -1109,7 +1153,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
 
     SmallVector<int64_t> indices;
     llvm::append_range(indices, ivInst->getIndices());
-    instMap[inst] = b.create<InsertValueOp>(loc, aggOperand, inserted, indices);
+    Value res = b.create<InsertValueOp>(loc, aggOperand, inserted, indices);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::ExtractValue: {
@@ -1118,7 +1163,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
 
     SmallVector<int64_t> indices;
     llvm::append_range(indices, evInst->getIndices());
-    instMap[inst] = b.create<ExtractValueOp>(loc, aggOperand, indices);
+    Value res = b.create<ExtractValueOp>(loc, aggOperand, indices);
+    mapValue(inst, res);
     return success();
   }
   case llvm::Instruction::ShuffleVector: {
@@ -1127,7 +1173,8 @@ LogicalResult Importer::processInstruction(llvm::Instruction *inst) {
     Value vec2 = processValue(svInst->getOperand(1));
 
     SmallVector<int32_t> mask(svInst->getShuffleMask());
-    instMap[inst] = b.create<ShuffleVectorOp>(loc, vec1, vec2, mask);
+    Value res = b.create<ShuffleVectorOp>(loc, vec1, vec2, mask);
+    mapValue(inst, res);
     return success();
   }
   }
@@ -1166,17 +1213,13 @@ void Importer::processFunctionAttributes(llvm::Function *func,
 
 LogicalResult Importer::processFunction(llvm::Function *f) {
   blocks.clear();
-  instMap.clear();
+  valueMapping.clear();
   unknownInstMap.clear();
 
   auto functionType =
       convertType(f->getFunctionType()).dyn_cast<LLVMFunctionType>();
-  if (f->isIntrinsic()) {
-    StringRef opName = lookupOperationNameFromIntrinsicID(f->getIntrinsicID());
-    // Skip the intrinsic decleration if we could found a corresponding op.
-    if (!opName.empty())
-      return success();
-  }
+  if (f->isIntrinsic() && isConvertibleIntrinsic(f->getIntrinsicID()))
+    return success();
 
   bool dsoLocal = f->hasLocalLinkage();
   CConv cconv = convertCConvFromLLVM(f->getCallingConv());
@@ -1241,8 +1284,9 @@ LogicalResult Importer::processFunction(llvm::Function *f) {
 
   // Add function arguments to the entry block.
   for (const auto &kv : llvm::enumerate(f->args())) {
-    instMap[&kv.value()] = blockList[0]->addArgument(
-        functionType.getParamType(kv.index()), fop.getLoc());
+    mapValue(&kv.value(),
+             blockList[0]->addArgument(functionType.getParamType(kv.index()),
+                                       fop.getLoc()));
   }
 
   for (auto bbs : llvm::zip(*f, blockList)) {
@@ -1253,8 +1297,8 @@ LogicalResult Importer::processFunction(llvm::Function *f) {
   // Now that all instructions are guaranteed to have been visited, ensure
   // any unknown uses we encountered are remapped.
   for (auto &llvmAndUnknown : unknownInstMap) {
-    assert(instMap.count(llvmAndUnknown.first));
-    Value newValue = instMap[llvmAndUnknown.first];
+    assert(valueMapping.count(llvmAndUnknown.first));
+    Value newValue = valueMapping[llvmAndUnknown.first];
     Value oldValue = llvmAndUnknown.second->getResult(0);
     oldValue.replaceAllUsesWith(newValue);
     llvmAndUnknown.second->erase();

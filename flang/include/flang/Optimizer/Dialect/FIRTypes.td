@@ -491,8 +491,10 @@ def fir_SequenceType : FIR_Type<"Sequence", "array"> {
     // Does the sequence have unknown shape? (`array<* x T>`)
     bool hasUnknownShape() const { return getShape().empty(); }
 
-    // The value `-1` represents an unknown extent for a dimension
-    static constexpr Extent getUnknownExtent() { return -1; }
+    // The value `kDynamicSize` represents an unknown extent for a dimension
+    static constexpr Extent getUnknownExtent() {
+      return mlir::ShapedType::kDynamicSize;
+    }
   }];
 }
 
@@ -610,8 +612,8 @@ def AnyRefOrBoxLike : TypeConstraint<Or<[AnyReferenceLike.predicate,
     AnyBoxLike.predicate, FunctionType.predicate]>,
     "any reference or box like">;
 def AnyRefOrBox : TypeConstraint<Or<[fir_ReferenceType.predicate,
-    fir_HeapType.predicate, fir_PointerType.predicate, fir_BoxType.predicate]>,
-    "any reference or box">;
+    fir_HeapType.predicate, fir_PointerType.predicate,
+    IsBaseBoxTypePred]>, "any reference or box">;
 
 def AnyShapeLike : TypeConstraint<Or<[fir_ShapeType.predicate,
     fir_ShapeShiftType.predicate]>, "any legal shape type">;

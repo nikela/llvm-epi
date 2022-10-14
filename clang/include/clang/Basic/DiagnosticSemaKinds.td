@@ -147,7 +147,7 @@ def ext_vla_folded_to_constant : ExtWarn<
   "variable length array folded to constant array as an extension">,
   InGroup<GNUFoldingConstant>;
 def err_vla_unsupported : Error<
-  "variable length arrays are not supported for the current target">;
+  "variable length arrays are not supported for %select{the current target|'%1'}0">;
 def note_vla_unsupported : Note<
   "variable length arrays are not supported for the current target">;
 
@@ -3469,6 +3469,8 @@ def warn_attribute_dll_redeclaration : Warning<
   InGroup<DiagGroup<"dll-attribute-on-redeclaration">>;
 def err_attribute_dllimport_function_definition : Error<
   "dllimport cannot be applied to non-inline function definition">;
+def err_attribute_dllimport_function_specialization_definition : Error<
+  "cannot define non-inline dllimport template specialization">;
 def err_attribute_dll_deleted : Error<
   "attribute %q0 cannot be applied to a deleted function">;
 def err_attribute_dllimport_data_definition : Error<
@@ -6934,8 +6936,11 @@ def err_typecheck_unary_expr : Error<
 def err_typecheck_indirection_requires_pointer : Error<
   "indirection requires pointer operand (%0 invalid)">;
 def ext_typecheck_indirection_through_void_pointer : ExtWarn<
-  "ISO %select{C|C++}0 does not allow indirection on operand of type %1">,
-  InGroup<DiagGroup<"void-ptr-dereference">>;
+  "ISO C does not allow indirection on operand of type %0">,
+  InGroup<VoidPointerDeref>;
+def ext_typecheck_indirection_through_void_pointer_cpp
+    : ExtWarn<"ISO C++ does not allow indirection on operand of type %0">,
+      InGroup<VoidPointerDeref>, DefaultError, SFINAEFailure;
 def warn_indirection_through_null : Warning<
   "indirection of non-volatile null pointer will be deleted, not trap">,
   InGroup<NullDereference>;

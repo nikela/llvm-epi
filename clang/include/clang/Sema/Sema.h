@@ -3686,8 +3686,10 @@ public:
   // template, or just the current friend function. A 'lower' TemplateDepth in
   // the AST refers to a 'containing' template. As the constraint is
   // uninstantiated, this is relative to the 'top' of the TU.
-  bool ConstraintExpressionDependsOnEnclosingTemplate(unsigned TemplateDepth,
-                                                      const Expr *Constraint);
+  bool
+  ConstraintExpressionDependsOnEnclosingTemplate(const FunctionDecl *Friend,
+                                                 unsigned TemplateDepth,
+                                                 const Expr *Constraint);
 
   // Calculates whether the friend function depends on an enclosing template for
   // the purposes of [temp.friend] p9.
@@ -5219,15 +5221,21 @@ public:
   /// of it.
   void MarkUnusedFileScopedDecl(const DeclaratorDecl *D);
 
+  typedef llvm::function_ref<void(SourceLocation Loc, PartialDiagnostic PD)>
+      DiagReceiverTy;
+
   /// DiagnoseUnusedExprResult - If the statement passed in is an expression
   /// whose result is unused, warn.
   void DiagnoseUnusedExprResult(const Stmt *S, unsigned DiagID);
   void DiagnoseUnusedNestedTypedefs(const RecordDecl *D);
+  void DiagnoseUnusedNestedTypedefs(const RecordDecl *D,
+                                    DiagReceiverTy DiagReceiver);
   void DiagnoseUnusedDecl(const NamedDecl *ND);
+  void DiagnoseUnusedDecl(const NamedDecl *ND, DiagReceiverTy DiagReceiver);
 
   /// If VD is set but not otherwise used, diagnose, for a parameter or a
   /// variable.
-  void DiagnoseUnusedButSetDecl(const VarDecl *VD);
+  void DiagnoseUnusedButSetDecl(const VarDecl *VD, DiagReceiverTy DiagReceiver);
 
   /// Emit \p DiagID if statement located on \p StmtLoc has a suspicious null
   /// statement as a \p Body, and it is located on the same line.

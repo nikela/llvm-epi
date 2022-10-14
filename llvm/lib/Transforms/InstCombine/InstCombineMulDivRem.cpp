@@ -983,6 +983,26 @@ Instruction *InstCombinerImpl::commonIDivTransforms(BinaryOperator &I) {
     }
   }
 
+  // With the appropriate no-wrap constraint, remove a multiply by the divisor
+  // after peeking through another divide:
+  // ((Op1 * X) / Y) / Op1 --> X / Y
+  if (match(Op0, m_BinOp(I.getOpcode(), m_c_Mul(m_Specific(Op1), m_Value(X)),
+                         m_Value(Y)))) {
+    auto *InnerDiv = cast<PossiblyExactOperator>(Op0);
+    auto *Mul = cast<OverflowingBinaryOperator>(InnerDiv->getOperand(0));
+    Instruction *NewDiv = nullptr;
+    if (!IsSigned && Mul->hasNoUnsignedWrap())
+      NewDiv = BinaryOperator::CreateUDiv(X, Y);
+    else if (IsSigned && Mul->hasNoSignedWrap())
+      NewDiv = BinaryOperator::CreateSDiv(X, Y);
+
+    // Exact propagates only if both of the original divides are exact.
+    if (NewDiv) {
+      NewDiv->setIsExact(I.isExact() && InnerDiv->isExact());
+      return NewDiv;
+    }
+  }
+
   return nullptr;
 }
 
@@ -1157,6 +1177,16 @@ Instruction *InstCombinerImpl::visitUDiv(BinaryOperator &I) {
       return BinaryOperator::CreateUDiv(A, X);
   }
 
+  // Look through a right-shift to find the common factor:
+  // ((Op1 *nuw A) >> B) / Op1 --> A >> B
+  if (match(Op0, m_LShr(m_NUWMul(m_Specific(Op1), m_Value(A)), m_Value(B))) ||
+      match(Op0, m_LShr(m_NUWMul(m_Value(A), m_Specific(Op1)), m_Value(B)))) {
+    Instruction *Lshr = BinaryOperator::CreateLShr(A, B);
+    if (I.isExact() && cast<PossiblyExactOperator>(Op0)->isExact())
+      Lshr->setIsExact();
+    return Lshr;
+  }
+
   // Op1 udiv Op2 -> Op1 lshr log2(Op2), if log2() folds away.
   if (takeLog2(Builder, Op1, /*Depth*/0, /*DoFold*/false)) {
     Value *Res = takeLog2(Builder, Op1, /*Depth*/0, /*DoFold*/true);
@@ -1192,20 +1222,25 @@ Instruction *InstCombinerImpl::visitSDiv(BinaryOperator &I) {
   if (match(Op1, m_SignMask()))
     return new ZExtInst(Builder.CreateICmpEQ(Op0, Op1), Ty);
 
-  // sdiv exact X,  1<<C  -->    ashr exact X, C   iff  1<<C  is non-negative
-  // sdiv exact X, -1<<C  -->  -(ashr exact X, C)
-  if (I.isExact() && ((match(Op1, m_Power2()) && match(Op1, m_NonNegative())) ||
-                      match(Op1, m_NegatedPower2()))) {
-    bool DivisorWasNegative = match(Op1, m_NegatedPower2());
-    if (DivisorWasNegative)
-      Op1 = ConstantExpr::getNeg(cast<Constant>(Op1));
-    auto *AShr = BinaryOperator::CreateExactAShr(
-        Op0, ConstantExpr::getExactLogBase2(cast<Constant>(Op1)), I.getName());
-    if (!DivisorWasNegative)
-      return AShr;
-    Builder.Insert(AShr);
-    AShr->setName(I.getName() + ".neg");
-    return BinaryOperator::CreateNeg(AShr, I.getName());
+  if (I.isExact()) {
+    // sdiv exact X, 1<<C --> ashr exact X, C   iff  1<<C  is non-negative
+    if (match(Op1, m_Power2()) && match(Op1, m_NonNegative())) {
+      Constant *C = ConstantExpr::getExactLogBase2(cast<Constant>(Op1));
+      return BinaryOperator::CreateExactAShr(Op0, C);
+    }
+
+    // sdiv exact X, (1<<ShAmt) --> ashr exact X, ShAmt (if shl is non-negative)
+    Value *ShAmt;
+    if (match(Op1, m_NSWShl(m_One(), m_Value(ShAmt))))
+      return BinaryOperator::CreateExactAShr(Op0, ShAmt);
+
+    // sdiv exact X, -1<<C --> -(ashr exact X, C)
+    if (match(Op1, m_NegatedPower2())) {
+      Constant *NegPow2C = ConstantExpr::getNeg(cast<Constant>(Op1));
+      Constant *C = ConstantExpr::getExactLogBase2(NegPow2C);
+      Value *Ashr = Builder.CreateAShr(Op0, C, I.getName() + ".neg", true);
+      return BinaryOperator::CreateNeg(Ashr);
+    }
   }
 
   const APInt *Op1C;

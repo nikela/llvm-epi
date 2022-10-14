@@ -18,7 +18,7 @@ define <vscale x 2 x float> @sitofp.f32.i32(<vscale x 2 x i32> %a, i32 zeroext %
 define <vscale x 2 x float> @sitofp.f32.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: sitofp.f32.i32.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfcvt.f.x.v v8, v8, v0.t
 ; CHECK-NEXT:    ret
 {
@@ -48,7 +48,7 @@ define <vscale x 2 x float> @sitofp.f32.i64(<vscale x 2 x i64> %a, i32 zeroext %
 define <vscale x 2 x float> @sitofp.f32.i64.mask(<vscale x 2 x i64> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: sitofp.f32.i64.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfncvt.f.x.w v10, v8, v0.t
 ; CHECK-NEXT:    vmv.v.v v8, v10
 ; CHECK-NEXT:    ret
@@ -79,7 +79,7 @@ define <vscale x 2 x double> @sitofp.f64.i32(<vscale x 2 x i32> %a, i32 zeroext 
 define <vscale x 2 x double> @sitofp.f64.i32.mask(<vscale x 2 x i32> %a, <vscale x 2 x i1> %mask, i32 zeroext %gvl)
 ; CHECK-LABEL: sitofp.f64.i32.mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfwcvt.f.x.v v10, v8, v0.t
 ; CHECK-NEXT:    vmv2r.v v8, v10
 ; CHECK-NEXT:    ret
@@ -109,7 +109,7 @@ define <vscale x 4 x float> @test_vp_sitofp_nxv4f32_nxv4i8(<vscale x 4 x i8> %a,
 define <vscale x 4 x float> @test_vp_sitofp_nxv4f32_nxv4i8_mask(<vscale x 4 x i8> %a, <vscale x 4 x i1> %m, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sitofp_nxv4f32_nxv4i8_mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e16, m1, ta, ma
 ; CHECK-NEXT:    vsext.vf2 v10, v8, v0.t
 ; CHECK-NEXT:    vfwcvt.f.x.v v8, v10, v0.t
 ; CHECK-NEXT:    ret
@@ -133,7 +133,7 @@ define <vscale x 4 x double> @test_vp_sitofp_nxv4f64_nxv4i8(<vscale x 4 x i8> %a
 define <vscale x 4 x double> @test_vp_sitofp_nxv4f64_nxv4i8_mask(<vscale x 4 x i8> %a, <vscale x 4 x i1> %m, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sitofp_nxv4f64_nxv4i8_mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vsext.vf4 v12, v8, v0.t
 ; CHECK-NEXT:    vfwcvt.f.x.v v8, v12, v0.t
 ; CHECK-NEXT:    ret
@@ -157,7 +157,7 @@ define <vscale x 4 x double> @test_vp_sitofp_nxv4f64_nxv4i16(<vscale x 4 x i16> 
 define <vscale x 4 x double> @test_vp_sitofp_nxv4f64_nxv4i16_mask(<vscale x 4 x i16> %a, <vscale x 4 x i1> %m, i32 zeroext %evl) {
 ; CHECK-LABEL: test_vp_sitofp_nxv4f64_nxv4i16_mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vsext.vf2 v12, v8, v0.t
 ; CHECK-NEXT:    vfwcvt.f.x.v v8, v12, v0.t
 ; CHECK-NEXT:    ret
