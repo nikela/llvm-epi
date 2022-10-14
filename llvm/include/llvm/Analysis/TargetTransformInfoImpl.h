@@ -511,6 +511,9 @@ public:
   bool shouldPrefetchAddressSpace(unsigned AS) const { return !AS; }
 
   unsigned getMaxInterleaveFactor(unsigned VF) const { return 1; }
+  unsigned getMaxInterleaveFactorEC(ElementCount VF) const {
+    return getMaxInterleaveFactor(VF.getKnownMinValue());
+  }
 
   InstructionCost getArithmeticInstrCost(
       unsigned Opcode, Type *Ty, TTI::TargetCostKind CostKind,

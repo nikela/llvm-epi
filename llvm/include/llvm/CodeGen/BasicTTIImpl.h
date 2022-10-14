@@ -846,7 +846,9 @@ public:
   }
 
   unsigned getMaxInterleaveFactor(unsigned VF) { return 1; }
-  unsigned getMaxInterleaveFactor(ElementCount VF) { return 1; }
+  unsigned getMaxInterleaveFactorEC(ElementCount VF) {
+    return thisT()->getMaxInterleaveFactor(VF.getKnownMinValue());
+  }
 
   InstructionCost getArithmeticInstrCost(
       unsigned Opcode, Type *Ty, TTI::TargetCostKind CostKind,

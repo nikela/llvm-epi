@@ -401,11 +401,10 @@ public:
     // Let regular unroll to unroll the loop.
     return VF == 1 ? 1 : ST->getMaxInterleaveFactor();
   }
-  unsigned getMaxInterleaveFactor(ElementCount VF) {
-    if (!VF.isScalable())
-      return getMaxInterleaveFactor(VF.getKnownMinValue());
-
-    return ST->getMaxInterleaveFactor();
+  unsigned getMaxInterleaveFactorEC(ElementCount VF) {
+    // If the loop will not be vectorized, don't interleave the loop.
+    // Let regular unroll to unroll the loop.
+    return VF.isScalar() ? 1 : ST->getMaxInterleaveFactor();
   }
 
   enum RISCVRegisterClass { GPRRC, FPRRC, VRRC };

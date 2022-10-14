@@ -6458,7 +6458,7 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
   }
 
   // Clamp the interleave ranges to reasonable counts.
-  unsigned MaxInterleaveCount = TTI.getMaxInterleaveFactor(VF);
+  unsigned MaxInterleaveCount = TTI.getMaxInterleaveFactorEC(VF);
 
   // Check if the user has overridden the max.
   if (VF.isScalar()) {
