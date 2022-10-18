@@ -389,6 +389,10 @@ cl::opt<cl::boolOrDefault> ForceSafeDivisor(
     "force-widen-divrem-via-safe-divisor", cl::Hidden,
     cl::desc("Override cost based safe divisor widening for div/rem instructions"));
 
+cl::opt<bool> EnableInterleaveWithoutScalarEpilogue(
+    "interleave-no-scalar-epilogue", cl::init(false), cl::Hidden,
+    cl::desc("Enable interleaving even when scalar epilogue is not allowed."));
+
 /// A helper function that returns true if the given type is irregular. The
 /// type is irregular if its allocated size doesn't equal the store size of an
 /// element of the corresponding vector type.
@@ -6379,8 +6383,7 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
   // 3. We don't interleave if we think that we will spill registers to memory
   // due to the increased register pressure.
 
-  if (!isScalarEpilogueAllowed() &&
-      !(foldTailByMasking() && Legal->preferPredicatedVectorOps()))
+  if (!isScalarEpilogueAllowed() && !EnableInterleaveWithoutScalarEpilogue)
     return 1;
 
   // We used the distance for the interleave count.
@@ -10452,23 +10455,22 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
   // FIXME: The caveat with this approach is that TC
   // may wrap. This should not be a big problem for EPI (or other 64-bit)
   // architectures.
-  // FIXME: Is the TripCount independent of the part?
-  // We still don't support interleaving so it shouldn't matter now but it
-  // might when we want interleaving.
   Value *TripCount = State.get(getTripCount(), 0);
+  Value *Induction = State.get(getParent()->getPlan()->getCanonicalIV(), 0);
+  // Compute TC - IV as the RVL (requested vector length).
+  Value *RVL = State.Builder.CreateSub(TripCount, Induction);
+  Value *GVL = nullptr;
   for (unsigned Part = 0; Part < State.UF; Part++) {
-    Value *Induction =
-        State.get(getParent()->getPlan()->getCanonicalIV(), Part);
-    Value *RVL = State.Builder.CreateSub(TripCount, Induction);
-    // Compute TC - IV as the RVL(requested vector length). vsetvl() returns a
-    // GVL(granted vector length) that is the number of lanes processed for the
-    // given vector iteration. At the end of the vector iteration increment the
-    // IV by the GVL. This is guaranteed to exit since at some point RVL will be
-    // equal to GVL and IV = TC.
+    // vsetvl() returns a GVL (granted vector length) that is the number of
+    // lanes processed for the given vector iteration. At the end of the vector
+    // iteration increment the IV by the GVL(s). This is guaranteed to exit
+    // since at some point RVL will be equal to GVL and IV = TC.
     // FIXME: Move this to VPlan.
-    Value *SetVL = State.ILV->getSetVL(RVL);
+    if (GVL)
+      RVL = State.Builder.CreateSub(RVL, GVL);
+    GVL = State.ILV->getSetVL(RVL);
     llvm::Value *EVL =
-        State.Builder.CreateTrunc(SetVL, State.Builder.getInt32Ty());
+        State.Builder.CreateTrunc(GVL, State.Builder.getInt32Ty());
     State.set(getEVL(), EVL, Part);
   }
 }
