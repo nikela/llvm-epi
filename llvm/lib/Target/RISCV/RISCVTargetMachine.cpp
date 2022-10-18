@@ -53,6 +53,11 @@ static cl::opt<cl::boolOrDefault>
     EnableGlobalMerge("riscv-enable-global-merge", cl::Hidden,
                       cl::desc("Enable the global merge pass"));
 
+static cl::opt<bool>
+    EnableMachineCombiner("riscv-enable-machine-combiner",
+                          cl::desc("Enable the machine combiner pass"),
+                          cl::init(true), cl::Hidden);
+
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   RegisterTargetMachine<RISCVTargetMachine> X(getTheRISCV32Target());
   RegisterTargetMachine<RISCVTargetMachine> Y(getTheRISCV64Target());
@@ -282,6 +287,8 @@ void RISCVPassConfig::addPreEmitPass2() {
 
 void RISCVPassConfig::addMachineSSAOptimization() {
   TargetPassConfig::addMachineSSAOptimization();
+  if (TM->getOptLevel() == CodeGenOpt::Aggressive && EnableMachineCombiner)
+    addPass(&MachineCombinerID);
 
   if (TM->getTargetTriple().getArch() == Triple::riscv64)
     addPass(createRISCVSExtWRemovalPass());
