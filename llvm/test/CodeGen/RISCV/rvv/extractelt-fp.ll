@@ -26,12 +26,21 @@ define half @extractelt_nxv1f16_imm(<vscale x 1 x half> %v) {
 }
 
 define half @extractelt_nxv1f16_idx(<vscale x 1 x half> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv1f16_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e16, mf4, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv1f16_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e16, mf4, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv1f16_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e16, mf4, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 1 x half> %v, i32 %idx
   ret half %r
 }
@@ -58,12 +67,21 @@ define half @extractelt_nxv2f16_imm(<vscale x 2 x half> %v) {
 }
 
 define half @extractelt_nxv2f16_idx(<vscale x 2 x half> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv2f16_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e16, mf2, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv2f16_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e16, mf2, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv2f16_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e16, mf2, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 2 x half> %v, i32 %idx
   ret half %r
 }
@@ -90,12 +108,21 @@ define half @extractelt_nxv4f16_imm(<vscale x 4 x half> %v) {
 }
 
 define half @extractelt_nxv4f16_idx(<vscale x 4 x half> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv4f16_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e16, m1, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv4f16_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e16, m1, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv4f16_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e16, m1, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 4 x half> %v, i32 %idx
   ret half %r
 }
@@ -122,12 +149,21 @@ define half @extractelt_nxv8f16_imm(<vscale x 8 x half> %v) {
 }
 
 define half @extractelt_nxv8f16_idx(<vscale x 8 x half> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv8f16_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e16, m2, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv8f16_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e16, m2, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv8f16_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e16, m2, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 8 x half> %v, i32 %idx
   ret half %r
 }
@@ -154,12 +190,21 @@ define half @extractelt_nxv16f16_imm(<vscale x 16 x half> %v) {
 }
 
 define half @extractelt_nxv16f16_idx(<vscale x 16 x half> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv16f16_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e16, m4, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv16f16_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e16, m4, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv16f16_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e16, m4, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 16 x half> %v, i32 %idx
   ret half %r
 }
@@ -186,12 +231,21 @@ define half @extractelt_nxv32f16_imm(<vscale x 32 x half> %v) {
 }
 
 define half @extractelt_nxv32f16_idx(<vscale x 32 x half> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv32f16_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e16, m8, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv32f16_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e16, m8, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv32f16_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e16, m8, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 32 x half> %v, i32 %idx
   ret half %r
 }
@@ -218,12 +272,21 @@ define float @extractelt_nxv1f32_imm(<vscale x 1 x float> %v) {
 }
 
 define float @extractelt_nxv1f32_idx(<vscale x 1 x float> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv1f32_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e32, mf2, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv1f32_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e32, mf2, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv1f32_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e32, mf2, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 1 x float> %v, i32 %idx
   ret float %r
 }
@@ -250,12 +313,21 @@ define float @extractelt_nxv2f32_imm(<vscale x 2 x float> %v) {
 }
 
 define float @extractelt_nxv2f32_idx(<vscale x 2 x float> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv2f32_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e32, m1, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv2f32_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e32, m1, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv2f32_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e32, m1, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 2 x float> %v, i32 %idx
   ret float %r
 }
@@ -282,12 +354,21 @@ define float @extractelt_nxv4f32_imm(<vscale x 4 x float> %v) {
 }
 
 define float @extractelt_nxv4f32_idx(<vscale x 4 x float> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv4f32_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e32, m2, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv4f32_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e32, m2, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv4f32_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e32, m2, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 4 x float> %v, i32 %idx
   ret float %r
 }
@@ -314,12 +395,21 @@ define float @extractelt_nxv8f32_imm(<vscale x 8 x float> %v) {
 }
 
 define float @extractelt_nxv8f32_idx(<vscale x 8 x float> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv8f32_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e32, m4, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv8f32_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e32, m4, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv8f32_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e32, m4, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 8 x float> %v, i32 %idx
   ret float %r
 }
@@ -346,12 +436,21 @@ define float @extractelt_nxv16f32_imm(<vscale x 16 x float> %v) {
 }
 
 define float @extractelt_nxv16f32_idx(<vscale x 16 x float> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv16f32_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e32, m8, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv16f32_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e32, m8, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv16f32_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e32, m8, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 16 x float> %v, i32 %idx
   ret float %r
 }
@@ -378,12 +477,21 @@ define double @extractelt_nxv1f64_imm(<vscale x 1 x double> %v) {
 }
 
 define double @extractelt_nxv1f64_idx(<vscale x 1 x double> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv1f64_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e64, m1, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv1f64_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e64, m1, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv1f64_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e64, m1, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 1 x double> %v, i32 %idx
   ret double %r
 }
@@ -410,12 +518,21 @@ define double @extractelt_nxv2f64_imm(<vscale x 2 x double> %v) {
 }
 
 define double @extractelt_nxv2f64_idx(<vscale x 2 x double> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv2f64_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e64, m2, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv2f64_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e64, m2, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv2f64_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e64, m2, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 2 x double> %v, i32 %idx
   ret double %r
 }
@@ -442,12 +559,21 @@ define double @extractelt_nxv4f64_imm(<vscale x 4 x double> %v) {
 }
 
 define double @extractelt_nxv4f64_idx(<vscale x 4 x double> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv4f64_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e64, m4, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv4f64_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e64, m4, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv4f64_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e64, m4, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 4 x double> %v, i32 %idx
   ret double %r
 }
@@ -474,12 +600,21 @@ define double @extractelt_nxv8f64_imm(<vscale x 8 x double> %v) {
 }
 
 define double @extractelt_nxv8f64_idx(<vscale x 8 x double> %v, i32 signext %idx) {
-; CHECK-LABEL: extractelt_nxv8f64_idx:
-; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetivli zero, 1, e64, m8, ta, ma
-; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    vfmv.f.s fa0, v8
-; CHECK-NEXT:    ret
+; CHECK32-LABEL: extractelt_nxv8f64_idx:
+; CHECK32:       # %bb.0:
+; CHECK32-NEXT:    vsetivli zero, 1, e64, m8, ta, ma
+; CHECK32-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK32-NEXT:    vfmv.f.s fa0, v8
+; CHECK32-NEXT:    ret
+;
+; CHECK64-LABEL: extractelt_nxv8f64_idx:
+; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vsetivli zero, 1, e64, m8, ta, ma
+; CHECK64-NEXT:    vslidedown.vx v8, v8, a0
+; CHECK64-NEXT:    vfmv.f.s fa0, v8
+; CHECK64-NEXT:    ret
   %r = extractelement <vscale x 8 x double> %v, i32 %idx
   ret double %r
 }
@@ -623,13 +758,21 @@ define double @extractelt_nxv16f64_neg1(<vscale x 16 x double> %v) {
 ; CHECK64-NEXT:    sub sp, sp, a0
 ; CHECK64-NEXT:    addi a0, sp, 16
 ; CHECK64-NEXT:    vs8r.v v8, (a0)
-; CHECK64-NEXT:    csrr a1, vlenb
-; CHECK64-NEXT:    slli a2, a1, 3
-; CHECK64-NEXT:    add a2, a0, a2
-; CHECK64-NEXT:    vs8r.v v16, (a2)
-; CHECK64-NEXT:    slli a1, a1, 4
-; CHECK64-NEXT:    add a0, a1, a0
-; CHECK64-NEXT:    fld fa0, -8(a0)
+; CHECK64-NEXT:    csrr a2, vlenb
+; CHECK64-NEXT:    slli a1, a2, 3
+; CHECK64-NEXT:    add a3, a0, a1
+; CHECK64-NEXT:    li a1, -1
+; CHECK64-NEXT:    srli a1, a1, 32
+; CHECK64-NEXT:    slli a2, a2, 1
+; CHECK64-NEXT:    addi a2, a2, -1
+; CHECK64-NEXT:    vs8r.v v16, (a3)
+; CHECK64-NEXT:    bltu a2, a1, .LBB52_2
+; CHECK64-NEXT:  # %bb.1:
+; CHECK64-NEXT:    mv a2, a1
+; CHECK64-NEXT:  .LBB52_2:
+; CHECK64-NEXT:    slli a1, a2, 3
+; CHECK64-NEXT:    add a0, a0, a1
+; CHECK64-NEXT:    fld fa0, 0(a0)
 ; CHECK64-NEXT:    csrr a0, vlenb
 ; CHECK64-NEXT:    slli a0, a0, 4
 ; CHECK64-NEXT:    add sp, sp, a0
@@ -682,25 +825,27 @@ define double @extractelt_nxv16f64_idx(<vscale x 16 x double> %v, i32 signext %i
 ;
 ; CHECK64-LABEL: extractelt_nxv16f64_idx:
 ; CHECK64:       # %bb.0:
+; CHECK64-NEXT:    addi sp, sp, -16
+; CHECK64-NEXT:    .cfi_def_cfa_offset 16
 ; CHECK64-NEXT:    csrr a1, vlenb
-; CHECK64-NEXT:    slli a2, a1, 1
+; CHECK64-NEXT:    slli a1, a1, 4
+; CHECK64-NEXT:    sub sp, sp, a1
+; CHECK64-NEXT:    addi a1, sp, 16
+; CHECK64-NEXT:    vs8r.v v8, (a1)
+; CHECK64-NEXT:    csrr a2, vlenb
+; CHECK64-NEXT:    slli a3, a2, 3
+; CHECK64-NEXT:    add a3, a1, a3
+; CHECK64-NEXT:    slli a2, a2, 1
 ; CHECK64-NEXT:    addi a2, a2, -1
+; CHECK64-NEXT:    slli a0, a0, 32
+; CHECK64-NEXT:    srli a0, a0, 32
+; CHECK64-NEXT:    vs8r.v v16, (a3)
 ; CHECK64-NEXT:    bltu a0, a2, .LBB54_2
 ; CHECK64-NEXT:  # %bb.1:
 ; CHECK64-NEXT:    mv a0, a2
 ; CHECK64-NEXT:  .LBB54_2:
-; CHECK64-NEXT:    addi sp, sp, -16
-; CHECK64-NEXT:    .cfi_def_cfa_offset 16
-; CHECK64-NEXT:    csrr a2, vlenb
-; CHECK64-NEXT:    slli a2, a2, 4
-; CHECK64-NEXT:    sub sp, sp, a2
 ; CHECK64-NEXT:    slli a0, a0, 3
-; CHECK64-NEXT:    addi a2, sp, 16
-; CHECK64-NEXT:    add a0, a2, a0
-; CHECK64-NEXT:    vs8r.v v8, (a2)
-; CHECK64-NEXT:    slli a1, a1, 3
-; CHECK64-NEXT:    add a1, a2, a1
-; CHECK64-NEXT:    vs8r.v v16, (a1)
+; CHECK64-NEXT:    add a0, a1, a0
 ; CHECK64-NEXT:    fld fa0, 0(a0)
 ; CHECK64-NEXT:    csrr a0, vlenb
 ; CHECK64-NEXT:    slli a0, a0, 4

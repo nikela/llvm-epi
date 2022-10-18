@@ -5,7 +5,7 @@
 define <vscale x 2 x float> @strided_load(float *%ptr, i64 %stride, <vscale x 2 x i1> %mask, i32 zeroext %evl)
 ; CHECK-LABEL: strided_load:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-NEXT:    vlse32.v v8, (a0), a1, v0.t
 ; CHECK-NEXT:    ret
 {
