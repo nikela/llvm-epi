@@ -60,7 +60,7 @@ define <vscale x 1 x double> @test_store_vp_reverse_many_uses_nxv1f64(<vscale x 
 define void @test_store_vp_reverse_nxv1f64_general_mask(<vscale x 1 x double> %src, <vscale x 1 x i1> %mask, <vscale x 1 x double> *%ptr, i32 zeroext %evl) {
 ; CHECK-LABEL: test_store_vp_reverse_nxv1f64_general_mask:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vid.v v9, v0.t
 ; CHECK-NEXT:    addi a1, a1, -1
 ; CHECK-NEXT:    vrsub.vx v9, v9, a1, v0.t
@@ -95,7 +95,7 @@ define void @test_store_vp_reverse_nxv1f64_inconsistent_mask(<vscale x 1 x doubl
 ; CHECK-LABEL: test_store_vp_reverse_nxv1f64_inconsistent_mask:
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vmv1r.v v10, v0
-; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vid.v v11, v0.t
 ; CHECK-NEXT:    addi a1, a1, -1
@@ -105,7 +105,6 @@ define void @test_store_vp_reverse_nxv1f64_inconsistent_mask(<vscale x 1 x doubl
 ; CHECK-NEXT:    vmerge.vim v10, v12, 1, v0
 ; CHECK-NEXT:    vmv1r.v v0, v9
 ; CHECK-NEXT:    vrgather.vv v12, v10, v11, v0.t
-; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmsne.vi v0, v12, 0, v0.t
 ; CHECK-NEXT:    vid.v v9
 ; CHECK-NEXT:    vrsub.vx v9, v9, a1

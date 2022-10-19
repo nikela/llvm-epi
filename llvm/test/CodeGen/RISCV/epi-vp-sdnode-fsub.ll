@@ -4,7 +4,7 @@
 define <vscale x 1 x double> @test_vp_fsub_nxv1f64(<vscale x 1 x double> %f0, <vscale x 1 x double> %f1, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv1f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double> %f0, <vscale x 1 x double> %f1, <vscale x 1 x i1> %m, i32 %n)
@@ -15,7 +15,7 @@ declare <vscale x 1 x double> @llvm.vp.fsub.nxv1f64(<vscale x 1 x double>, <vsca
 define <vscale x 2 x double> @test_vp_fsub_nxv2f64(<vscale x 2 x double> %f0, <vscale x 2 x double> %f1, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v10, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 2 x double> @llvm.vp.fsub.nxv2f64(<vscale x 2 x double> %f0, <vscale x 2 x double> %f1, <vscale x 2 x i1> %m, i32 %n)
@@ -26,7 +26,7 @@ declare <vscale x 2 x double> @llvm.vp.fsub.nxv2f64(<vscale x 2 x double>, <vsca
 define <vscale x 4 x double> @test_vp_fsub_nxv4f64(<vscale x 4 x double> %f0, <vscale x 4 x double> %f1, <vscale x 4 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv4f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m4, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v12, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 4 x double> @llvm.vp.fsub.nxv4f64(<vscale x 4 x double> %f0, <vscale x 4 x double> %f1, <vscale x 4 x i1> %m, i32 %n)
@@ -37,7 +37,7 @@ declare <vscale x 4 x double> @llvm.vp.fsub.nxv4f64(<vscale x 4 x double>, <vsca
 define <vscale x 8 x double> @test_vp_fsub_nxv8f64(<vscale x 8 x double> %f0, <vscale x 8 x double> %f1, <vscale x 8 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv8f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v16, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 8 x double> @llvm.vp.fsub.nxv8f64(<vscale x 8 x double> %f0, <vscale x 8 x double> %f1, <vscale x 8 x i1> %m, i32 %n)
@@ -48,7 +48,7 @@ declare <vscale x 8 x double> @llvm.vp.fsub.nxv8f64(<vscale x 8 x double>, <vsca
 define <vscale x 1 x float> @test_vp_fsub_nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv1f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, mf2, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 1 x float> @llvm.vp.fsub.nxv1f32(<vscale x 1 x float> %f0, <vscale x 1 x float> %f1, <vscale x 1 x i1> %m, i32 %n)
@@ -59,7 +59,7 @@ declare <vscale x 1 x float> @llvm.vp.fsub.nxv1f32(<vscale x 1 x float>, <vscale
 define <vscale x 2 x float> @test_vp_fsub_nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x float> %f1, <vscale x 2 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v9, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 2 x float> @llvm.vp.fsub.nxv2f32(<vscale x 2 x float> %f0, <vscale x 2 x float> %f1, <vscale x 2 x i1> %m, i32 %n)
@@ -70,7 +70,7 @@ declare <vscale x 2 x float> @llvm.vp.fsub.nxv2f32(<vscale x 2 x float>, <vscale
 define <vscale x 4 x float> @test_vp_fsub_nxv4f32(<vscale x 4 x float> %f0, <vscale x 4 x float> %f1, <vscale x 4 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m2, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v10, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 4 x float> @llvm.vp.fsub.nxv4f32(<vscale x 4 x float> %f0, <vscale x 4 x float> %f1, <vscale x 4 x i1> %m, i32 %n)
@@ -81,7 +81,7 @@ declare <vscale x 4 x float> @llvm.vp.fsub.nxv4f32(<vscale x 4 x float>, <vscale
 define <vscale x 8 x float> @test_vp_fsub_nxv8f32(<vscale x 8 x float> %f0, <vscale x 8 x float> %f1, <vscale x 8 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv8f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m4, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v12, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 8 x float> @llvm.vp.fsub.nxv8f32(<vscale x 8 x float> %f0, <vscale x 8 x float> %f1, <vscale x 8 x i1> %m, i32 %n)
@@ -92,7 +92,7 @@ declare <vscale x 8 x float> @llvm.vp.fsub.nxv8f32(<vscale x 8 x float>, <vscale
 define <vscale x 16 x float> @test_vp_fsub_nxv16f32(<vscale x 16 x float> %f0, <vscale x 16 x float> %f1, <vscale x 16 x i1> %m, i32 zeroext %n) nounwind {
 ; CHECK-LABEL: test_vp_fsub_nxv16f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli zero, a0, e32, m8, ta, mu
+; CHECK-NEXT:    vsetvli zero, a0, e32, m8, ta, ma
 ; CHECK-NEXT:    vfsub.vv v8, v8, v16, v0.t
 ; CHECK-NEXT:    ret
   %r0 = call <vscale x 16 x float> @llvm.vp.fsub.nxv16f32(<vscale x 16 x float> %f0, <vscale x 16 x float> %f1, <vscale x 16 x i1> %m, i32 %n)

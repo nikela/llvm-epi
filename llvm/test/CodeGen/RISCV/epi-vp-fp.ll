@@ -28,7 +28,7 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O0-NEXT:    addi a5, a5, %lo(scratch)
 ; CHECK-O0-NEXT:    sd a5, 32(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    # implicit-def: $v8
-; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-O0-NEXT:    vle64.v v8, (a4), v0.t
 ; CHECK-O0-NEXT:    csrr a4, vlenb
 ; CHECK-O0-NEXT:    slli a5, a4, 3
@@ -261,7 +261,7 @@ define void @test_vp_fp(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1, 
 ; CHECK-O2-NEXT:    mv s0, a4
 ; CHECK-O2-NEXT:    vmv1r.v v16, v0
 ; CHECK-O2-NEXT:    lui a4, %hi(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, s0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, s0, e64, m1, ta, ma
 ; CHECK-O2-NEXT:    vle64.v v17, (a0), v0.t
 ; CHECK-O2-NEXT:    vle64.v v18, (a1), v0.t
 ; CHECK-O2-NEXT:    addi s1, a4, %lo(scratch)
@@ -529,7 +529,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O0-NEXT:    addi a5, a5, %lo(scratch)
 ; CHECK-O0-NEXT:    sd a5, 32(sp) # 8-byte Folded Spill
 ; CHECK-O0-NEXT:    # implicit-def: $v8m2
-; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m2, ta, mu
+; CHECK-O0-NEXT:    vsetvli zero, a0, e64, m2, ta, ma
 ; CHECK-O0-NEXT:    vle64.v v8, (a4), v0.t
 ; CHECK-O0-NEXT:    csrr a4, vlenb
 ; CHECK-O0-NEXT:    li a5, 6
@@ -718,7 +718,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O2-NEXT:    mv s0, a4
 ; CHECK-O2-NEXT:    vmv1r.v v18, v0
 ; CHECK-O2-NEXT:    lui a4, %hi(scratch)
-; CHECK-O2-NEXT:    vsetvli zero, s0, e64, m2, ta, mu
+; CHECK-O2-NEXT:    vsetvli zero, s0, e64, m2, ta, ma
 ; CHECK-O2-NEXT:    vle64.v v20, (a0), v0.t
 ; CHECK-O2-NEXT:    vle64.v v16, (a1), v0.t
 ; CHECK-O2-NEXT:    addi s1, a4, %lo(scratch)

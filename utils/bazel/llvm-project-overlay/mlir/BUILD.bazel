@@ -294,10 +294,11 @@ cc_library(
     srcs = glob([
         "lib/IR/*.cpp",
         "lib/IR/*.h",
-    ]) + ["include/mlir/Bytecode/BytecodeImplementation.h"],
+    ]),
     hdrs = glob([
         "include/mlir/IR/*.h",
     ]) + [
+        "include/mlir/Bytecode/BytecodeImplementation.h",
         "include/mlir/Interfaces/CallInterfaces.h",
         "include/mlir/Interfaces/CastInterfaces.h",
         "include/mlir/Interfaces/SideEffectInterfaces.h",
@@ -2129,12 +2130,12 @@ cc_library(
         ":SCFTransforms",
         ":SparseTensorDialect",
         ":SparseTensorPassIncGen",
+        ":SparseTensorRuntime",
         ":SparseTensorUtils",
         ":Support",
         ":TensorDialect",
         ":Transforms",
         ":VectorDialect",
-        ":mlir_sparse_tensor_utils",
         "//llvm:Support",
     ],
 )
@@ -3505,24 +3506,6 @@ gentbl_cc_library(
     deps = [":LLVMOpsTdFiles"],
 )
 
-gentbl_cc_library(
-    name = "LLVMDialectAttributesIncGen",
-    strip_include_prefix = "include",
-    tbl_outs = [
-        (
-            ["--gen-attrdef-decls"],
-            "include/mlir/Dialect/LLVMIR/LLVMOpsAttrDefs.h.inc",
-        ),
-        (
-            ["--gen-attrdef-defs"],
-            "include/mlir/Dialect/LLVMIR/LLVMOpsAttrDefs.cpp.inc",
-        ),
-    ],
-    tblgen = ":mlir-tblgen",
-    td_file = "include/mlir/Dialect/LLVMIR/LLVMAttrDefs.td",
-    deps = [":LLVMOpsTdFiles"],
-)
-
 cc_library(
     name = "LLVMDialect",
     srcs = glob(
@@ -3560,7 +3543,6 @@ cc_library(
         ":DataLayoutInterfaces",
         ":IR",
         ":InferTypeOpInterface",
-        ":LLVMDialectAttributesIncGen",
         ":LLVMDialectInterfaceIncGen",
         ":LLVMIntrinsicOpsIncGen",
         ":LLVMOpsIncGen",
@@ -3860,6 +3842,7 @@ cc_library(
 td_library(
     name = "LLVMOpsTdFiles",
     srcs = [
+        "include/mlir/Dialect/LLVMIR/LLVMAttrDefs.td",
         "include/mlir/Dialect/LLVMIR/LLVMIntrinsicOps.td",
         "include/mlir/Dialect/LLVMIR/LLVMOpBase.td",
         "include/mlir/Dialect/LLVMIR/LLVMOps.td",
@@ -4226,6 +4209,14 @@ gentbl_cc_library(
             ["-gen-enum-defs"],
             "include/mlir/Dialect/LLVMIR/LLVMOpsEnums.cpp.inc",
         ),
+        (
+            ["--gen-attrdef-decls", "-attrdefs-dialect=llvm"],
+            "include/mlir/Dialect/LLVMIR/LLVMOpsAttrDefs.h.inc",
+        ),
+        (
+            ["--gen-attrdef-defs", "-attrdefs-dialect=llvm"],
+            "include/mlir/Dialect/LLVMIR/LLVMOpsAttrDefs.cpp.inc",
+        ),
     ],
     tblgen = ":mlir-tblgen",
     td_file = "include/mlir/Dialect/LLVMIR/LLVMOps.td",
@@ -4265,6 +4256,10 @@ gentbl_cc_library(
         (
             ["-gen-enum-from-llvmir-conversions"],
             "include/mlir/Dialect/LLVMIR/LLVMConversionEnumsFromLLVM.inc",
+        ),
+        (
+            ["-gen-op-from-llvmir-conversions"],
+            "include/mlir/Dialect/LLVMIR/LLVMOpFromLLVMIRConversions.inc",
         ),
     ],
     tblgen = ":mlir-tblgen",
@@ -6716,14 +6711,18 @@ cc_binary(
 )
 
 # Unlike mlir_float16_utils, mlir_c_runner_utils, etc, we do *not* make
-# this a shared library: because on the CMake side, doing so causes
-# issues when building on Windows.
+# this a shared library: because on the CMake side, doing so causes issues
+# when building on Windows.  In particular, various functions take/return
+# `std::vector` but that class is not designed with dllimport/dllexport
+# pragma, therefore it cannot be safely/correctly used across DLL boundaries.
+# Consequently, we avoid using the "mlir_xxx_utils" naming scheme,
+# since that is reserved/intended for shared libraries only.
 #
 # We relist Float16bits.h because Enums.h includes it; rather than
 # forcing all direct-dependants state that they also directly-depend
 # on :mlir_float16_utils (to satisfy the layering_check).
 cc_library(
-    name = "mlir_sparse_tensor_utils",
+    name = "SparseTensorRuntime",
     srcs = [
         "lib/ExecutionEngine/SparseTensor/File.cpp",
         "lib/ExecutionEngine/SparseTensor/NNZ.cpp",
@@ -6742,22 +6741,22 @@ cc_library(
     deps = [":mlir_float16_utils"],
 )
 
-# We relist Enums.h because SparseTensorUtils.h includes/reexports it
+# We relist Enums.h because SparseTensorRuntime.h includes/reexports it
 # as part of the public API.
 cc_library(
     name = "_mlir_c_runner_utils",
     srcs = [
         "lib/ExecutionEngine/CRunnerUtils.cpp",
-        "lib/ExecutionEngine/SparseTensorUtils.cpp",
+        "lib/ExecutionEngine/SparseTensorRuntime.cpp",
     ],
     hdrs = [
         "include/mlir/ExecutionEngine/CRunnerUtils.h",
         "include/mlir/ExecutionEngine/Msan.h",
         "include/mlir/ExecutionEngine/SparseTensor/Enums.h",
-        "include/mlir/ExecutionEngine/SparseTensorUtils.h",
+        "include/mlir/ExecutionEngine/SparseTensorRuntime.h",
     ],
     includes = ["include"],
-    deps = [":mlir_sparse_tensor_utils"],
+    deps = [":SparseTensorRuntime"],
 )
 
 # Indirection to avoid 'libmlir_c_runner_utils.so' filename clash.
@@ -7398,6 +7397,8 @@ gentbl_cc_library(
 cc_library(
     name = "QuantOps",
     srcs = [
+        "lib/Dialect/Quant/IR/QuantDialectBytecode.h",
+        "lib/Dialect/Quant/IR/QuantDialectBytecode.cpp",
         "lib/Dialect/Quant/IR/QuantOps.cpp",
         "lib/Dialect/Quant/IR/QuantTypes.cpp",
         "lib/Dialect/Quant/IR/TypeDetail.h",
@@ -7420,6 +7421,7 @@ cc_library(
         ":Pass",
         ":QuantOpsIncGen",
         ":SideEffectInterfaces",
+        ":Support",
         ":TransformUtils",
         "//llvm:Support",
     ],

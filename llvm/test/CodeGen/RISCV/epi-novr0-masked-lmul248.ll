@@ -19,7 +19,7 @@ define void @test_lmul_1(<vscale x 1 x double>* %a0, <vscale x 1 x double>* %a1,
   ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 88 /* e64, m1, ta, mu */, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 216 /* e64, m1, ta, ma */, implicit-def $vl, implicit-def $vtype
   ; CHECK-NEXT:   [[PseudoVLE64_V_M1_MASK:%[0-9]+]]:vrnov0 = PseudoVLE64_V_M1_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6 /* e64 */, 1 /* ta, mu */, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a0, align 8)
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrnov0 = IMPLICIT_DEF
@@ -61,7 +61,7 @@ define void @test_lmul_2(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1,
   ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 89 /* e64, m2, ta, mu */, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 217 /* e64, m2, ta, ma */, implicit-def $vl, implicit-def $vtype
   ; CHECK-NEXT:   [[PseudoVLE64_V_M2_MASK:%[0-9]+]]:vrm2nov0 = PseudoVLE64_V_M2_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6 /* e64 */, 1 /* ta, mu */, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a0, align 16)
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm2nov0 = IMPLICIT_DEF
@@ -103,7 +103,7 @@ define void @test_lmul_4(<vscale x 4 x double>* %a0, <vscale x 4 x double>* %a1,
   ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 90 /* e64, m4, ta, mu */, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 218 /* e64, m4, ta, ma */, implicit-def $vl, implicit-def $vtype
   ; CHECK-NEXT:   [[PseudoVLE64_V_M4_MASK:%[0-9]+]]:vrm4nov0 = PseudoVLE64_V_M4_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6 /* e64 */, 1 /* ta, mu */, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a0, align 16)
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm4nov0 = IMPLICIT_DEF
@@ -145,7 +145,7 @@ define void @test_lmul_8(<vscale x 8 x double>* %a0, <vscale x 8 x double>* %a1,
   ; CHECK-NEXT:   [[SRLI:%[0-9]+]]:gprnox0 = SRLI killed [[SLLI]], 32
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF
-  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 91 /* e64, m8, ta, mu */, implicit-def $vl, implicit-def $vtype
+  ; CHECK-NEXT:   dead $x0 = PseudoVSETVLI [[SRLI]], 219 /* e64, m8, ta, ma */, implicit-def $vl, implicit-def $vtype
   ; CHECK-NEXT:   [[PseudoVLE64_V_M8_MASK:%[0-9]+]]:vrm8nov0 = PseudoVLE64_V_M8_MASK [[DEF]], [[COPY3]], $v0, $noreg, 6 /* e64 */, 1 /* ta, mu */, implicit $vl, implicit $vtype :: (load unknown-size from %ir.a0, align 16)
   ; CHECK-NEXT:   $v0 = COPY [[COPY1]]
   ; CHECK-NEXT:   [[DEF1:%[0-9]+]]:vrm8nov0 = IMPLICIT_DEF

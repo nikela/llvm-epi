@@ -15,6 +15,7 @@
 
 #include "flang/Common/Fortran.h"
 #include "flang/Lower/AbstractConverter.h"
+#include "flang/Lower/EnvironmentDefault.h"
 #include "flang/Lower/LoweringOptions.h"
 #include "flang/Optimizer/Builder/FIRBuilder.h"
 #include "flang/Optimizer/Support/KindMapping.h"
@@ -56,11 +57,12 @@ public:
          const Fortran::parser::AllCookedSources &allCooked,
          llvm::StringRef triple, fir::KindMapping &kindMap,
          const Fortran::lower::LoweringOptions &loweringOptions,
+         const std::vector<Fortran::lower::EnvironmentDefault> &envDefaults,
          llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
              funcAttrs) {
     return LoweringBridge(ctx, semanticsContext, defaultKinds, intrinsics,
                           targetCharacteristics, allCooked, triple, kindMap,
-                          loweringOptions, funcAttrs);
+                          loweringOptions, envDefaults, funcAttrs);
   }
 
   //===--------------------------------------------------------------------===//
@@ -91,6 +93,11 @@ public:
 
   const Fortran::lower::LoweringOptions &getLoweringOptions() const {
     return loweringOptions;
+  }
+
+  const std::vector<Fortran::lower::EnvironmentDefault> &
+  getEnvironmentDefaults() const {
+    return envDefaults;
   }
 
   /// Create a folding context. Careful: this is very expensive.
@@ -130,6 +137,7 @@ private:
       const Fortran::parser::AllCookedSources &cooked, llvm::StringRef triple,
       fir::KindMapping &kindMap,
       const Fortran::lower::LoweringOptions &loweringOptions,
+      const std::vector<Fortran::lower::EnvironmentDefault> &envDefaults,
       llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
           funcAttrs);
   LoweringBridge() = delete;
@@ -144,6 +152,7 @@ private:
   std::unique_ptr<mlir::ModuleOp> module;
   fir::KindMapping &kindMap;
   const Fortran::lower::LoweringOptions &loweringOptions;
+  const std::vector<Fortran::lower::EnvironmentDefault> &envDefaults;
   llvm::SmallVector<std::pair<std::string, llvm::Optional<std::string>>, 4>
       funcAttributes;
 };

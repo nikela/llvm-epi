@@ -7,6 +7,7 @@
 ! RUN:     -fdefault-integer-8 \
 ! RUN:     -fdefault-real-8 \
 ! RUN:     -flarge-sizes \
+! RUN:     -fconvert=little-endian \
 ! RUN:     -mllvm -print-before-all\
 ! RUN:     -P \
 ! RUN:     -O2 \
@@ -19,4 +20,5 @@
 ! CHECK: "-fdefault-real-8"
 ! CHECK: "-flarge-sizes"
 ! CHECK: "-O2"
+! CHECK: "-fconvert=little-endian"
 ! CHECK: "-mllvm" "-print-before-all"

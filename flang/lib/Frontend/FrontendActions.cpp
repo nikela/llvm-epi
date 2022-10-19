@@ -178,7 +178,8 @@ bool CodeGenAction::beginSourceFileAction() {
       ci.getInvocation().getSemanticsContext().intrinsics(),
       ci.getInvocation().getSemanticsContext().targetCharacteristics(),
       ci.getParsing().allCooked(), ci.getInvocation().getTargetOpts().triple,
-      kindMap, ci.getInvocation().getLoweringOpts(), funcAttributes);
+      kindMap, ci.getInvocation().getLoweringOpts(),
+      ci.getInvocation().getFrontendOpts().envDefaults, funcAttributes);
 
   // Create a parse tree and lower it to FIR
   Fortran::parser::Program &parseTree{*ci.getParsing().parseTree()};

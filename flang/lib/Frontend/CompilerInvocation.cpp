@@ -202,6 +202,17 @@ static void setUpFrontendBasedOnAction(FrontendOptions &opts) {
     opts.needProvenanceRangeToCharBlockMappings = true;
 }
 
+/// Parse the argument specified for the -fconvert=<value> option
+static std::optional<const char *> parseConvertArg(const char *s) {
+  return llvm::StringSwitch<std::optional<const char *>>(s)
+      .Case("unknown", "UNKNOWN")
+      .Case("native", "NATIVE")
+      .Case("little-endian", "LITTLE_ENDIAN")
+      .Case("big-endian", "BIG_ENDIAN")
+      .Case("swap", "SWAP")
+      .Default(std::nullopt);
+}
+
 static bool parseFrontendArgs(FrontendOptions &opts, llvm::opt::ArgList &args,
                               clang::DiagnosticsEngine &diags) {
   unsigned numErrorsBefore = diags.getNumErrors();
@@ -407,93 +418,99 @@ static bool parseFrontendArgs(FrontendOptions &opts, llvm::opt::ArgList &args,
     }
 
     opts.inputs.emplace_back(std::move(inputs[i]), ik);
-    }
-
-    // Set fortranForm based on options -ffree-form and -ffixed-form.
-    if (const auto *arg =
-            args.getLastArg(clang::driver::options::OPT_ffixed_form,
-                            clang::driver::options::OPT_ffree_form)) {
-      opts.fortranForm =
-          arg->getOption().matches(clang::driver::options::OPT_ffixed_form)
-              ? FortranForm::FixedForm
-              : FortranForm::FreeForm;
-    }
-
-    // Set fixedFormColumns based on -ffixed-line-length=<value>
-    if (const auto *arg = args.getLastArg(
-            clang::driver::options::OPT_ffixed_line_length_EQ)) {
-      llvm::StringRef argValue = llvm::StringRef(arg->getValue());
-      std::int64_t columns = -1;
-      if (argValue == "none") {
-        columns = 0;
-      } else if (argValue.getAsInteger(/*Radix=*/10, columns)) {
-        columns = -1;
-      }
-      if (columns < 0) {
-        diags.Report(clang::diag::err_drv_negative_columns)
-            << arg->getOption().getName() << arg->getValue();
-      } else if (columns == 0) {
-        opts.fixedFormColumns = 1000000;
-      } else if (columns < 7) {
-        diags.Report(clang::diag::err_drv_small_columns)
-            << arg->getOption().getName() << arg->getValue() << "7";
-      } else {
-        opts.fixedFormColumns = columns;
-      }
-    }
-
-    // -f{no-}implicit-none
-    opts.features.Enable(
-        Fortran::common::LanguageFeature::ImplicitNoneTypeAlways,
-        args.hasFlag(clang::driver::options::OPT_fimplicit_none,
-                     clang::driver::options::OPT_fno_implicit_none, false));
-
-    // -f{no-}backslash
-    opts.features.Enable(Fortran::common::LanguageFeature::BackslashEscapes,
-                         args.hasFlag(clang::driver::options::OPT_fbackslash,
-                                      clang::driver::options::OPT_fno_backslash,
-                                      false));
-
-    // -f{no-}logical-abbreviations
-    opts.features.Enable(
-        Fortran::common::LanguageFeature::LogicalAbbreviations,
-        args.hasFlag(clang::driver::options::OPT_flogical_abbreviations,
-                     clang::driver::options::OPT_fno_logical_abbreviations,
-                     false));
-
-    // -f{no-}xor-operator
-    opts.features.Enable(
-        Fortran::common::LanguageFeature::XOROperator,
-        args.hasFlag(clang::driver::options::OPT_fxor_operator,
-                     clang::driver::options::OPT_fno_xor_operator, false));
-
-    // -fno-automatic
-    if (args.hasArg(clang::driver::options::OPT_fno_automatic)) {
-      opts.features.Enable(Fortran::common::LanguageFeature::DefaultSave);
-    }
-
-    if (args.hasArg(
-            clang::driver::options::OPT_falternative_parameter_statement)) {
-      opts.features.Enable(Fortran::common::LanguageFeature::OldStyleParameter);
-    }
-    if (const llvm::opt::Arg *arg =
-            args.getLastArg(clang::driver::options::OPT_finput_charset_EQ)) {
-      llvm::StringRef argValue = arg->getValue();
-      if (argValue == "utf-8") {
-        opts.encoding = Fortran::parser::Encoding::UTF_8;
-      } else if (argValue == "latin-1") {
-        opts.encoding = Fortran::parser::Encoding::LATIN_1;
-      } else {
-        diags.Report(clang::diag::err_drv_invalid_value)
-            << arg->getAsString(args) << argValue;
-      }
-    }
-
-    setUpFrontendBasedOnAction(opts);
-    opts.dashX = dashX;
-
-    return diags.getNumErrors() == numErrorsBefore;
   }
+
+  // Set fortranForm based on options -ffree-form and -ffixed-form.
+  if (const auto *arg = args.getLastArg(clang::driver::options::OPT_ffixed_form,
+          clang::driver::options::OPT_ffree_form)) {
+    opts.fortranForm =
+        arg->getOption().matches(clang::driver::options::OPT_ffixed_form)
+        ? FortranForm::FixedForm
+        : FortranForm::FreeForm;
+  }
+
+  // Set fixedFormColumns based on -ffixed-line-length=<value>
+  if (const auto *arg =
+          args.getLastArg(clang::driver::options::OPT_ffixed_line_length_EQ)) {
+    llvm::StringRef argValue = llvm::StringRef(arg->getValue());
+    std::int64_t columns = -1;
+    if (argValue == "none") {
+      columns = 0;
+    } else if (argValue.getAsInteger(/*Radix=*/10, columns)) {
+      columns = -1;
+    }
+    if (columns < 0) {
+      diags.Report(clang::diag::err_drv_negative_columns)
+          << arg->getOption().getName() << arg->getValue();
+    } else if (columns == 0) {
+      opts.fixedFormColumns = 1000000;
+    } else if (columns < 7) {
+      diags.Report(clang::diag::err_drv_small_columns)
+          << arg->getOption().getName() << arg->getValue() << "7";
+    } else {
+      opts.fixedFormColumns = columns;
+    }
+  }
+
+  // Set conversion based on -fconvert=<value>
+  if (const auto *arg =
+          args.getLastArg(clang::driver::options::OPT_fconvert_EQ)) {
+    const char *argValue = arg->getValue();
+    if (auto convert = parseConvertArg(argValue))
+      opts.envDefaults.push_back({"FORT_CONVERT", *convert});
+    else
+      diags.Report(clang::diag::err_drv_invalid_value)
+          << arg->getAsString(args) << argValue;
+  }
+
+  // -f{no-}implicit-none
+  opts.features.Enable(
+      Fortran::common::LanguageFeature::ImplicitNoneTypeAlways,
+      args.hasFlag(clang::driver::options::OPT_fimplicit_none,
+          clang::driver::options::OPT_fno_implicit_none, false));
+
+  // -f{no-}backslash
+  opts.features.Enable(Fortran::common::LanguageFeature::BackslashEscapes,
+      args.hasFlag(clang::driver::options::OPT_fbackslash,
+          clang::driver::options::OPT_fno_backslash, false));
+
+  // -f{no-}logical-abbreviations
+  opts.features.Enable(Fortran::common::LanguageFeature::LogicalAbbreviations,
+      args.hasFlag(clang::driver::options::OPT_flogical_abbreviations,
+          clang::driver::options::OPT_fno_logical_abbreviations, false));
+
+  // -f{no-}xor-operator
+  opts.features.Enable(Fortran::common::LanguageFeature::XOROperator,
+      args.hasFlag(clang::driver::options::OPT_fxor_operator,
+          clang::driver::options::OPT_fno_xor_operator, false));
+
+  // -fno-automatic
+  if (args.hasArg(clang::driver::options::OPT_fno_automatic)) {
+    opts.features.Enable(Fortran::common::LanguageFeature::DefaultSave);
+  }
+
+  if (args.hasArg(
+          clang::driver::options::OPT_falternative_parameter_statement)) {
+    opts.features.Enable(Fortran::common::LanguageFeature::OldStyleParameter);
+  }
+  if (const llvm::opt::Arg *arg =
+          args.getLastArg(clang::driver::options::OPT_finput_charset_EQ)) {
+    llvm::StringRef argValue = arg->getValue();
+    if (argValue == "utf-8") {
+      opts.encoding = Fortran::parser::Encoding::UTF_8;
+    } else if (argValue == "latin-1") {
+      opts.encoding = Fortran::parser::Encoding::LATIN_1;
+    } else {
+      diags.Report(clang::diag::err_drv_invalid_value)
+          << arg->getAsString(args) << argValue;
+    }
+  }
+
+  setUpFrontendBasedOnAction(opts);
+  opts.dashX = dashX;
+
+  return diags.getNumErrors() == numErrorsBefore;
+}
 
 // Generate the path to look for intrinsic modules
 static std::string getIntrinsicDir() {
@@ -815,6 +832,11 @@ void CompilerInvocation::setDefaultPredefinitions() {
           Fortran::common::LanguageFeature::OpenMP)) {
     fortranOptions.predefinitions.emplace_back("_OPENMP", "201511");
   }
+  llvm::Triple targetTriple{llvm::Triple(this->targetOpts.triple)};
+  if (targetTriple.getArch() == llvm::Triple::ArchType::x86_64) {
+    fortranOptions.predefinitions.emplace_back("__x86_64__", "1");
+    fortranOptions.predefinitions.emplace_back("__x86_64", "1");
+  }
 }
 
 void CompilerInvocation::setFortranOpts() {
@@ -868,7 +890,7 @@ void CompilerInvocation::setFortranOpts() {
 
 void CompilerInvocation::setSemanticsOpts(
     Fortran::parser::AllCookedSources &allCookedSources) {
-  const auto &fortranOptions = getFortranOpts();
+  auto &fortranOptions = getFortranOpts();
 
   semanticsContext = std::make_unique<semantics::SemanticsContext>(
       getDefaultKinds(), fortranOptions.features, allCookedSources);
@@ -882,8 +904,7 @@ void CompilerInvocation::setSemanticsOpts(
 
   llvm::Triple targetTriple{llvm::Triple(this->targetOpts.triple)};
   // FIXME: Handle real(3) ?
-  if (targetTriple.getArch() != llvm::Triple::ArchType::x86 &&
-      targetTriple.getArch() != llvm::Triple::ArchType::x86_64) {
+  if (targetTriple.getArch() != llvm::Triple::ArchType::x86_64) {
     semanticsContext->targetCharacteristics().DisableType(
         Fortran::common::TypeCategory::Real, /*kind=*/10);
   }
