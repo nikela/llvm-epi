@@ -3495,44 +3495,15 @@ inline bool isUniformAfterVectorization(VPValue *VPV) {
 } // end namespace vputils
 
 // Strided accesses.
-struct StrideAccessInfo {
-  bool Valid = false;
-  const SCEV *SCEVExpr = nullptr;
-
-  explicit operator bool() const { return Valid; }
-
-  const SCEV *getSCEVExpr() const { return SCEVExpr; }
-
-  void print(raw_ostream &OS) const {
-    OS << "StrideAccessInfo: ";
-    if (!Valid) {
-      OS << "<<invalid>> ";
-    }
-    OS << "SCEV: ";
-    if (SCEVExpr) {
-      OS << *SCEVExpr;
-    } else {
-      OS << "<<unknown>>";
-    }
-  }
-
-  Value *emitStride();
-  Value *emitBaseAddress();
-};
-
-raw_ostream &operator<<(raw_ostream &OS, const StrideAccessInfo &SAI);
-
 struct StridedAccessValues {
-  Value* BaseAddress;
-  Value* Stride;
+  Value *BaseAddress;
+  Value *Stride;
 };
 
-StrideAccessInfo computeStrideAccessInfo(const VPTransformState &State,
-                                         Value *Addr);
-StridedAccessValues computeStrideAddressing(VPTransformState &State,
-                                            Type *PtrTy,
-                                            const StrideAccessInfo &SAI,
-                                            VPValue *CanonicalIV);
+StridedAccessValues computeStrideAddressing(unsigned Part,
+                                            VPTransformState &State,
+                                            Type *PtrTy, const SCEV *SCEVExpr,
+                                            VPValue *CanonicalIV, VPValue *EVL);
 
 } // end namespace llvm
 

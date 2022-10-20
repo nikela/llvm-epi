@@ -108,38 +108,34 @@ define dso_local void @gather(i8* noalias nocapture %A, i8* noalias nocapture re
 ; GATHER-INTERLEAVE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
 ; GATHER-INTERLEAVE-NEXT:    [[TMP15:%.*]] = bitcast i8* [[TMP14]] to <vscale x 8 x i8>*
 ; GATHER-INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP15]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-INTERLEAVE-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vscale.i32()
-; GATHER-INTERLEAVE-NEXT:    [[TMP17:%.*]] = shl i32 [[TMP16]], 3
-; GATHER-INTERLEAVE-NEXT:    [[TMP18:%.*]] = sext i32 [[TMP17]] to i64
-; GATHER-INTERLEAVE-NEXT:    [[TMP19:%.*]] = getelementptr inbounds i8, i8* [[TMP14]], i64 [[TMP18]]
-; GATHER-INTERLEAVE-NEXT:    [[TMP20:%.*]] = bitcast i8* [[TMP19]] to <vscale x 8 x i8>*
-; GATHER-INTERLEAVE-NEXT:    [[VP_OP_LOAD4:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP20]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP11]])
+; GATHER-INTERLEAVE-NEXT:    [[TMP16:%.*]] = sext i32 [[TMP8]] to i64
+; GATHER-INTERLEAVE-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i8, i8* [[TMP14]], i64 [[TMP16]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP18:%.*]] = bitcast i8* [[TMP17]] to <vscale x 8 x i8>*
+; GATHER-INTERLEAVE-NEXT:    [[VP_OP_LOAD4:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP18]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP11]])
 ; GATHER-INTERLEAVE-NEXT:    [[VP_OP5:%.*]] = call <vscale x 8 x i8> @llvm.vp.add.nxv8i8(<vscale x 8 x i8> [[VP_OP_LOAD]], <vscale x 8 x i8> [[VP_GATHER]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
 ; GATHER-INTERLEAVE-NEXT:    [[VP_OP6:%.*]] = call <vscale x 8 x i8> @llvm.vp.add.nxv8i8(<vscale x 8 x i8> [[VP_OP_LOAD4]], <vscale x 8 x i8> [[VP_GATHER3]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP11]])
-; GATHER-INTERLEAVE-NEXT:    [[TMP21:%.*]] = bitcast i8* [[TMP14]] to <vscale x 8 x i8>*
-; GATHER-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP5]], <vscale x 8 x i8>* [[TMP21]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
-; GATHER-INTERLEAVE-NEXT:    [[TMP22:%.*]] = call i32 @llvm.vscale.i32()
-; GATHER-INTERLEAVE-NEXT:    [[TMP23:%.*]] = shl i32 [[TMP22]], 3
-; GATHER-INTERLEAVE-NEXT:    [[TMP24:%.*]] = sext i32 [[TMP23]] to i64
-; GATHER-INTERLEAVE-NEXT:    [[TMP25:%.*]] = getelementptr inbounds i8, i8* [[TMP14]], i64 [[TMP24]]
-; GATHER-INTERLEAVE-NEXT:    [[TMP26:%.*]] = bitcast i8* [[TMP25]] to <vscale x 8 x i8>*
-; GATHER-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP6]], <vscale x 8 x i8>* [[TMP26]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP11]])
-; GATHER-INTERLEAVE-NEXT:    [[TMP27:%.*]] = add i32 [[TMP8]], [[TMP11]]
-; GATHER-INTERLEAVE-NEXT:    [[TMP28:%.*]] = zext i32 [[TMP27]] to i64
-; GATHER-INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP28]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP19:%.*]] = bitcast i8* [[TMP14]] to <vscale x 8 x i8>*
+; GATHER-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP5]], <vscale x 8 x i8>* [[TMP19]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
+; GATHER-INTERLEAVE-NEXT:    [[TMP20:%.*]] = sext i32 [[TMP8]] to i64
+; GATHER-INTERLEAVE-NEXT:    [[TMP21:%.*]] = getelementptr inbounds i8, i8* [[TMP14]], i64 [[TMP20]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP22:%.*]] = bitcast i8* [[TMP21]] to <vscale x 8 x i8>*
+; GATHER-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP6]], <vscale x 8 x i8>* [[TMP22]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP11]])
+; GATHER-INTERLEAVE-NEXT:    [[TMP23:%.*]] = add i32 [[TMP8]], [[TMP11]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP24:%.*]] = zext i32 [[TMP23]] to i64
+; GATHER-INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP24]]
 ; GATHER-INTERLEAVE-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 8 x i64> [[STEP_ADD]], [[DOTSPLAT]]
-; GATHER-INTERLEAVE-NEXT:    [[TMP29:%.*]] = icmp eq i64 [[INDEX_NEXT]], 1024
-; GATHER-INTERLEAVE-NEXT:    br i1 [[TMP29]], label [[FOR_COND_CLEANUP:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP25:%.*]] = icmp eq i64 [[INDEX_NEXT]], 1024
+; GATHER-INTERLEAVE-NEXT:    br i1 [[TMP25]], label [[FOR_COND_CLEANUP:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; GATHER-INTERLEAVE:       for.cond.cleanup:
 ; GATHER-INTERLEAVE-NEXT:    ret void
 ; GATHER-INTERLEAVE:       for.body:
 ; GATHER-INTERLEAVE-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
-; GATHER-INTERLEAVE-NEXT:    [[TMP30:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], 5
-; GATHER-INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i8, i8* [[B]], i64 [[TMP30]]
-; GATHER-INTERLEAVE-NEXT:    [[TMP31:%.*]] = load i8, i8* [[ARRAYIDX]], align 1
+; GATHER-INTERLEAVE-NEXT:    [[TMP26:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], 5
+; GATHER-INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i8, i8* [[B]], i64 [[TMP26]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP27:%.*]] = load i8, i8* [[ARRAYIDX]], align 1
 ; GATHER-INTERLEAVE-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i8, i8* [[A]], i64 [[INDVARS_IV]]
-; GATHER-INTERLEAVE-NEXT:    [[TMP32:%.*]] = load i8, i8* [[ARRAYIDX2]], align 1
-; GATHER-INTERLEAVE-NEXT:    [[ADD:%.*]] = add i8 [[TMP32]], [[TMP31]]
+; GATHER-INTERLEAVE-NEXT:    [[TMP28:%.*]] = load i8, i8* [[ARRAYIDX2]], align 1
+; GATHER-INTERLEAVE-NEXT:    [[ADD:%.*]] = add i8 [[TMP28]], [[TMP27]]
 ; GATHER-INTERLEAVE-NEXT:    store i8 [[ADD]], i8* [[ARRAYIDX2]], align 1
 ; GATHER-INTERLEAVE-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; GATHER-INTERLEAVE-NEXT:    [[CMP_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 1024
@@ -201,43 +197,41 @@ define dso_local void @gather(i8* noalias nocapture %A, i8* noalias nocapture re
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP9:%.*]] = mul i64 [[INDEX]], 5
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP10:%.*]] = getelementptr i8, i8* [[B:%.*]], i64 [[TMP9]]
 ; STRIDED-INTERLEAVE-NEXT:    [[VP_STRIDED_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.p0i8.i64(i8* [[TMP10]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
-; STRIDED-INTERLEAVE-NEXT:    [[TMP11:%.*]] = mul i64 [[INDEX]], 5
-; STRIDED-INTERLEAVE-NEXT:    [[TMP12:%.*]] = getelementptr i8, i8* [[B]], i64 [[TMP11]]
-; STRIDED-INTERLEAVE-NEXT:    [[VP_STRIDED_LOAD3:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.p0i8.i64(i8* [[TMP12]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
-; STRIDED-INTERLEAVE-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP14:%.*]] = bitcast i8* [[TMP13]] to <vscale x 8 x i8>*
-; STRIDED-INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP14]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
-; STRIDED-INTERLEAVE-NEXT:    [[TMP15:%.*]] = call i32 @llvm.vscale.i32()
-; STRIDED-INTERLEAVE-NEXT:    [[TMP16:%.*]] = shl i32 [[TMP15]], 3
-; STRIDED-INTERLEAVE-NEXT:    [[TMP17:%.*]] = sext i32 [[TMP16]] to i64
-; STRIDED-INTERLEAVE-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i8, i8* [[TMP13]], i64 [[TMP17]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP11:%.*]] = and i64 [[TMP4]], 4294967295
+; STRIDED-INTERLEAVE-NEXT:    [[TMP12:%.*]] = mul nuw nsw i64 [[TMP11]], 5
+; STRIDED-INTERLEAVE-NEXT:    [[TMP13:%.*]] = mul i64 [[INDEX]], [[TMP12]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP14:%.*]] = getelementptr i8, i8* [[B]], i64 [[TMP13]]
+; STRIDED-INTERLEAVE-NEXT:    [[VP_STRIDED_LOAD3:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vp.strided.load.nxv8i8.p0i8.i64(i8* [[TMP14]], i64 5, <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
+; STRIDED-INTERLEAVE-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i8, i8* [[A:%.*]], i64 [[INDEX]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP16:%.*]] = bitcast i8* [[TMP15]] to <vscale x 8 x i8>*
+; STRIDED-INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP16]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
+; STRIDED-INTERLEAVE-NEXT:    [[TMP17:%.*]] = sext i32 [[TMP5]] to i64
+; STRIDED-INTERLEAVE-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i8, i8* [[TMP15]], i64 [[TMP17]]
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP19:%.*]] = bitcast i8* [[TMP18]] to <vscale x 8 x i8>*
 ; STRIDED-INTERLEAVE-NEXT:    [[VP_OP_LOAD4:%.*]] = call <vscale x 8 x i8> @llvm.vp.load.nxv8i8.p0nxv8i8(<vscale x 8 x i8>* [[TMP19]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
 ; STRIDED-INTERLEAVE-NEXT:    [[VP_OP5:%.*]] = call <vscale x 8 x i8> @llvm.vp.add.nxv8i8(<vscale x 8 x i8> [[VP_OP_LOAD]], <vscale x 8 x i8> [[VP_STRIDED_LOAD]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
 ; STRIDED-INTERLEAVE-NEXT:    [[VP_OP6:%.*]] = call <vscale x 8 x i8> @llvm.vp.add.nxv8i8(<vscale x 8 x i8> [[VP_OP_LOAD4]], <vscale x 8 x i8> [[VP_STRIDED_LOAD3]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
-; STRIDED-INTERLEAVE-NEXT:    [[TMP20:%.*]] = bitcast i8* [[TMP13]] to <vscale x 8 x i8>*
+; STRIDED-INTERLEAVE-NEXT:    [[TMP20:%.*]] = bitcast i8* [[TMP15]] to <vscale x 8 x i8>*
 ; STRIDED-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP5]], <vscale x 8 x i8>* [[TMP20]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP5]])
-; STRIDED-INTERLEAVE-NEXT:    [[TMP21:%.*]] = call i32 @llvm.vscale.i32()
-; STRIDED-INTERLEAVE-NEXT:    [[TMP22:%.*]] = shl i32 [[TMP21]], 3
-; STRIDED-INTERLEAVE-NEXT:    [[TMP23:%.*]] = sext i32 [[TMP22]] to i64
-; STRIDED-INTERLEAVE-NEXT:    [[TMP24:%.*]] = getelementptr inbounds i8, i8* [[TMP13]], i64 [[TMP23]]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP25:%.*]] = bitcast i8* [[TMP24]] to <vscale x 8 x i8>*
-; STRIDED-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP6]], <vscale x 8 x i8>* [[TMP25]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
-; STRIDED-INTERLEAVE-NEXT:    [[TMP26:%.*]] = add i32 [[TMP5]], [[TMP8]]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP27:%.*]] = zext i32 [[TMP26]] to i64
-; STRIDED-INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP27]]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP28:%.*]] = icmp eq i64 [[INDEX_NEXT]], 1024
-; STRIDED-INTERLEAVE-NEXT:    br i1 [[TMP28]], label [[FOR_COND_CLEANUP:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP21:%.*]] = sext i32 [[TMP5]] to i64
+; STRIDED-INTERLEAVE-NEXT:    [[TMP22:%.*]] = getelementptr inbounds i8, i8* [[TMP15]], i64 [[TMP21]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP23:%.*]] = bitcast i8* [[TMP22]] to <vscale x 8 x i8>*
+; STRIDED-INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv8i8.p0nxv8i8(<vscale x 8 x i8> [[VP_OP6]], <vscale x 8 x i8>* [[TMP23]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP8]])
+; STRIDED-INTERLEAVE-NEXT:    [[TMP24:%.*]] = add i32 [[TMP5]], [[TMP8]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP25:%.*]] = zext i32 [[TMP24]] to i64
+; STRIDED-INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP25]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP26:%.*]] = icmp eq i64 [[INDEX_NEXT]], 1024
+; STRIDED-INTERLEAVE-NEXT:    br i1 [[TMP26]], label [[FOR_COND_CLEANUP:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; STRIDED-INTERLEAVE:       for.cond.cleanup:
 ; STRIDED-INTERLEAVE-NEXT:    ret void
 ; STRIDED-INTERLEAVE:       for.body:
 ; STRIDED-INTERLEAVE-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY]] ]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP29:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], 5
-; STRIDED-INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i8, i8* [[B]], i64 [[TMP29]]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP30:%.*]] = load i8, i8* [[ARRAYIDX]], align 1
+; STRIDED-INTERLEAVE-NEXT:    [[TMP27:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], 5
+; STRIDED-INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i8, i8* [[B]], i64 [[TMP27]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP28:%.*]] = load i8, i8* [[ARRAYIDX]], align 1
 ; STRIDED-INTERLEAVE-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i8, i8* [[A]], i64 [[INDVARS_IV]]
-; STRIDED-INTERLEAVE-NEXT:    [[TMP31:%.*]] = load i8, i8* [[ARRAYIDX2]], align 1
-; STRIDED-INTERLEAVE-NEXT:    [[ADD:%.*]] = add i8 [[TMP31]], [[TMP30]]
+; STRIDED-INTERLEAVE-NEXT:    [[TMP29:%.*]] = load i8, i8* [[ARRAYIDX2]], align 1
+; STRIDED-INTERLEAVE-NEXT:    [[ADD:%.*]] = add i8 [[TMP29]], [[TMP28]]
 ; STRIDED-INTERLEAVE-NEXT:    store i8 [[ADD]], i8* [[ARRAYIDX2]], align 1
 ; STRIDED-INTERLEAVE-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; STRIDED-INTERLEAVE-NEXT:    [[CMP_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 1024
