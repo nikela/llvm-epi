@@ -503,7 +503,7 @@ tileLinalgOpImpl(RewriterBase &b, LinalgOp op, ArrayRef<OpFoldResult> tileSizes,
     // Tile the `operandValuesToUse` that either match the `op` operands
     // themselves or the tile loop arguments forwarding them.
     assert(operandValuesToUse.size() ==
-               static_cast<size_t>(op.getNumInputsAndOutputs()) &&
+               static_cast<size_t>(op->getNumOperands()) &&
            "expect the number of operands and inputs and outputs to match");
     SmallVector<Value> valuesToTile = operandValuesToUse;
     SmallVector<OpFoldResult> sizeBounds =
@@ -659,14 +659,10 @@ struct PadOpTilingPattern : public OpRewritePattern<tensor::PadOp> {
 
   LogicalResult matchAndRewrite(tensor::PadOp op,
                                 PatternRewriter &rewriter) const override {
-    if (op->hasAttr(LinalgTransforms::kLinalgTransformMarker))
-      return failure();
     tensor::PadOp newPadOp;
     LoopNest loopNest;
     if (failed(tilePadOp(rewriter, op, newPadOp, loopNest, options)))
       return failure();
-    newPadOp->setAttr(LinalgTransforms::kLinalgTransformMarker,
-                      rewriter.getUnitAttr());
     // Replace all uses of the original tensor::PadOp.
     rewriter.replaceOp(op, loopNest.getResults()[0]);
     return success();

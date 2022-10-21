@@ -439,7 +439,6 @@ let Latency = 10, ResourceCycles = [10] in
   def : WriteRes<WriteVFMovV, [AvispadoVPUFArith]>;
   def : WriteRes<WriteVFCvtIToFV, [AvispadoVPUFArith]>;
   def : WriteRes<WriteVFCvtFToIV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFCvtFToFV, [AvispadoVPUFArith]>;
   def : WriteRes<WriteVFWCvtIToFV, [AvispadoVPUFArith]>;
   def : WriteRes<WriteVFWCvtFToIV, [AvispadoVPUFArith]>;
   def : WriteRes<WriteVFWCvtFToFV, [AvispadoVPUFArith]>;
@@ -517,13 +516,13 @@ def : ReadAdvance<ReadVST4R, 0>;
 def : ReadAdvance<ReadVST8R, 0>;
 
 // 12. Vector Integer Arithmetic Instructions
-def : ReadAdvance<ReadVIALUV, 0>;
-def : ReadAdvance<ReadVIALUX, 0>;
+def : ReadAdvance<ReadVICALUV, 0>;
+def : ReadAdvance<ReadVICALUX, 0>;
 def : ReadAdvance<ReadVIWALUV, 0>;
 def : ReadAdvance<ReadVIWALUX, 0>;
 def : ReadAdvance<ReadVExtV, 0>;
-def : ReadAdvance<ReadVIALUCV, 0>;
-def : ReadAdvance<ReadVIALUCX, 0>;
+def : ReadAdvance<ReadVIALUV, 0>;
+def : ReadAdvance<ReadVIALUX, 0>;
 def : ReadAdvance<ReadVShiftV, 0>;
 def : ReadAdvance<ReadVShiftX, 0>;
 def : ReadAdvance<ReadVNShiftV, 0>;
@@ -642,5 +641,6 @@ defm : UnsupportedSchedZbs;
 defm : UnsupportedSchedZbkb;
 defm : UnsupportedSchedZbkx;
 defm : UnsupportedSchedZfh;
+defm : UnsupportedSchedSFB;
 
 }
