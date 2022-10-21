@@ -728,9 +728,13 @@ define double @extractelt_nxv16f64_0(<vscale x 16 x double> %v) {
 define double @extractelt_nxv16f64_neg1(<vscale x 16 x double> %v) {
 ; CHECK32-LABEL: extractelt_nxv16f64_neg1:
 ; CHECK32:       # %bb.0:
-; CHECK32-NEXT:    addi sp, sp, -64
-; CHECK32-NEXT:    .cfi_def_cfa_offset 64
-; CHECK32-NEXT:    addi s0, sp, 64
+; CHECK32-NEXT:    addi sp, sp, -80
+; CHECK32-NEXT:    .cfi_def_cfa_offset 80
+; CHECK32-NEXT:    sw ra, 76(sp) # 4-byte Folded Spill
+; CHECK32-NEXT:    sw s0, 72(sp) # 4-byte Folded Spill
+; CHECK32-NEXT:    .cfi_offset ra, -4
+; CHECK32-NEXT:    .cfi_offset s0, -8
+; CHECK32-NEXT:    addi s0, sp, 80
 ; CHECK32-NEXT:    .cfi_def_cfa s0, 0
 ; CHECK32-NEXT:    csrr a0, vlenb
 ; CHECK32-NEXT:    slli a0, a0, 4
@@ -745,8 +749,10 @@ define double @extractelt_nxv16f64_neg1(<vscale x 16 x double> %v) {
 ; CHECK32-NEXT:    slli a1, a1, 4
 ; CHECK32-NEXT:    add a0, a1, a0
 ; CHECK32-NEXT:    fld fa0, -8(a0)
-; CHECK32-NEXT:    addi sp, s0, -64
-; CHECK32-NEXT:    addi sp, sp, 64
+; CHECK32-NEXT:    addi sp, s0, -80
+; CHECK32-NEXT:    lw ra, 76(sp) # 4-byte Folded Reload
+; CHECK32-NEXT:    lw s0, 72(sp) # 4-byte Folded Reload
+; CHECK32-NEXT:    addi sp, sp, 80
 ; CHECK32-NEXT:    ret
 ;
 ; CHECK64-LABEL: extractelt_nxv16f64_neg1:
@@ -803,9 +809,13 @@ define double @extractelt_nxv16f64_idx(<vscale x 16 x double> %v, i32 signext %i
 ; CHECK32-NEXT:  # %bb.1:
 ; CHECK32-NEXT:    mv a0, a2
 ; CHECK32-NEXT:  .LBB54_2:
-; CHECK32-NEXT:    addi sp, sp, -64
-; CHECK32-NEXT:    .cfi_def_cfa_offset 64
-; CHECK32-NEXT:    addi s0, sp, 64
+; CHECK32-NEXT:    addi sp, sp, -80
+; CHECK32-NEXT:    .cfi_def_cfa_offset 80
+; CHECK32-NEXT:    sw ra, 76(sp) # 4-byte Folded Spill
+; CHECK32-NEXT:    sw s0, 72(sp) # 4-byte Folded Spill
+; CHECK32-NEXT:    .cfi_offset ra, -4
+; CHECK32-NEXT:    .cfi_offset s0, -8
+; CHECK32-NEXT:    addi s0, sp, 80
 ; CHECK32-NEXT:    .cfi_def_cfa s0, 0
 ; CHECK32-NEXT:    csrr a2, vlenb
 ; CHECK32-NEXT:    slli a2, a2, 4
@@ -819,8 +829,10 @@ define double @extractelt_nxv16f64_idx(<vscale x 16 x double> %v, i32 signext %i
 ; CHECK32-NEXT:    add a1, a2, a1
 ; CHECK32-NEXT:    vs8r.v v16, (a1)
 ; CHECK32-NEXT:    fld fa0, 0(a0)
-; CHECK32-NEXT:    addi sp, s0, -64
-; CHECK32-NEXT:    addi sp, sp, 64
+; CHECK32-NEXT:    addi sp, s0, -80
+; CHECK32-NEXT:    lw ra, 76(sp) # 4-byte Folded Reload
+; CHECK32-NEXT:    lw s0, 72(sp) # 4-byte Folded Reload
+; CHECK32-NEXT:    addi sp, sp, 80
 ; CHECK32-NEXT:    ret
 ;
 ; CHECK64-LABEL: extractelt_nxv16f64_idx:

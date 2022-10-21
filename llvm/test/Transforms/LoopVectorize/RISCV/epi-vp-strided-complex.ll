@@ -105,9 +105,8 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; GATHER:       for.body:
 ; GATHER-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
 ; GATHER-NEXT:    [[TMP20:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], [[TMP0]]
-; GATHER-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP20]]
-; GATHER-NEXT:    [[ARRAYIDX2_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 0
-; GATHER-NEXT:    [[ARRAYIDX2_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 1
+; GATHER-NEXT:    [[ARRAYIDX2_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP20]], i32 0
+; GATHER-NEXT:    [[ARRAYIDX2_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP20]], i32 1
 ; GATHER-NEXT:    [[ARRAYIDX4_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 0
 ; GATHER-NEXT:    [[ARRAYIDX4_REAL:%.*]] = load float, float* [[ARRAYIDX4_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; GATHER-NEXT:    [[ARRAYIDX4_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 1
@@ -232,9 +231,8 @@ define dso_local void @foo(i32 signext %n, i32 signext %j, float %temp1.coerce0,
 ; STRIDED:       for.body:
 ; STRIDED-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
 ; STRIDED-NEXT:    [[TMP36:%.*]] = mul nuw nsw i64 [[INDVARS_IV]], [[TMP0]]
-; STRIDED-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP36]]
-; STRIDED-NEXT:    [[ARRAYIDX2_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 0
-; STRIDED-NEXT:    [[ARRAYIDX2_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX2]], i64 0, i32 1
+; STRIDED-NEXT:    [[ARRAYIDX2_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP36]], i32 0
+; STRIDED-NEXT:    [[ARRAYIDX2_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[ARRAYIDX]], i64 [[TMP36]], i32 1
 ; STRIDED-NEXT:    [[ARRAYIDX4_REALP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 0
 ; STRIDED-NEXT:    [[ARRAYIDX4_REAL:%.*]] = load float, float* [[ARRAYIDX4_REALP]], align 4, !llvm.access.group [[ACC_GRP4]]
 ; STRIDED-NEXT:    [[ARRAYIDX4_IMAGP:%.*]] = getelementptr inbounds { float, float }, { float, float }* [[X]], i64 [[INDVARS_IV]], i32 1
