@@ -30,7 +30,9 @@ add_llvm_component_library(LLVMDebugInfoLogicalView
   ${LIBLV_ADDITIONAL_HEADER_DIRS}
 
   LINK_COMPONENTS
+  BinaryFormat
   Object
   MC
   Support
+  DebugInfoDWARF
   )
