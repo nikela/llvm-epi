@@ -325,9 +325,9 @@ Improvements to Clang's diagnostics
   pointers is improved to include the type of the array and whether it's cast
   to another type. This should improve comprehension for why an index is
   out-of-bounds.
-- Clang now correctly point to the problematic parameter for the ``-Wnonnull``
-  warning.
-  This fixes `Issue 58273 <https://github.com/llvm/llvm-project/issues/58273>`_.
+- Clang now correctly points to the problematic parameter for the ``-Wnonnull``
+  warning. This fixes
+  `Issue 58273 <https://github.com/llvm/llvm-project/issues/58273>`_.
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
@@ -603,6 +603,9 @@ X86 Support in Clang
 - Add ISA of ``AMX-FP16`` which support ``_tile_dpfp16ps``.
 - Switch ``AVX512-BF16`` intrinsics types from ``short`` to ``__bf16``.
 - Add support for ``PREFETCHI`` instructions.
+- Support ISA of ``CMPCCXADD``.
+  * Support intrinsic of ``__cmpccxadd_epi32``.
+  * Support intrinsic of ``__cmpccxadd_epi64``.
 
 DWARF Support in Clang
 ----------------------
