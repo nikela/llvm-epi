@@ -27,7 +27,15 @@
 #define GET_REGINFO_TARGET_DESC
 #include "RISCVGenRegisterInfo.inc"
 
+#define DEBUG_TYPE "riscv-register-info"
+
 using namespace llvm;
+
+// Enabling LocalStackSlotAllocation is causing crashes on the testsuite but
+// needs investigation.
+static cl::opt<bool>
+    EnableLocalStackAllocation("enable-local-stack-slot-allocation", cl::Hidden,
+                               cl::init(false));
 
 static_assert(RISCV::X1 == RISCV::X0 + 1, "Register list not consecutive");
 static_assert(RISCV::X31 == RISCV::X0 + 31, "Register list not consecutive");
@@ -301,7 +309,7 @@ void RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
 bool RISCVRegisterInfo::requiresVirtualBaseRegisters(
     const MachineFunction &MF) const {
-  return true;
+  return EnableLocalStackAllocation;
 }
 
 // Returns true if the instruction's frame index reference would be better
