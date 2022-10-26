@@ -633,8 +633,9 @@ public:
 
     // We are explicitly setting a temporality and the instruction
     // does requires one, it must be the same.
-    if (Temporality != NoMem && InstrInfo.Temporality != NoMem &&
-        !hasSameTemporality(InstrInfo))
+    if (InstrInfo.Temporality != NoMem && !hasSameTemporality(InstrInfo) &&
+        // Bias nontemporality towards temporal (i.e. regular) memory accesses.
+        !(Temporality == NoMem && InstrInfo.Temporality == Temporal))
       return false;
 
     return true;
