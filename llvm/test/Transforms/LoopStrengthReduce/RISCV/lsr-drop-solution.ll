@@ -22,7 +22,7 @@ define ptr @foo(ptr %a0, ptr %a1, i64 %a2) {
 ; CHECK-NEXT:  .LBB0_3: # %do.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    add a3, a1, a5
-; CHECK-NEXT:    vsetvli zero, a4, e8, m8, ta, ma
+; CHECK-NEXT:    vsetvli zero, zero, e8, m8, ta, ma
 ; CHECK-NEXT:    vle8.v v8, (a3)
 ; CHECK-NEXT:    add a7, a0, a5
 ; CHECK-NEXT:    add a5, a5, a4
