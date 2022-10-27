@@ -7,6 +7,7 @@ ninja check-llvm-object-riscv
 ninja check-llvm-transforms-simplifycfg-riscv
 ninja check-llvm-analysis-costmodel-riscv
 ninja check-llvm-transforms-loopvectorize
+ninja check-llvm-transforms-loopstrengthreduce-riscv
 
 # Clang tests relevant for RISC-V are a bit scattered.
 # First ensure clang has been rebuilt

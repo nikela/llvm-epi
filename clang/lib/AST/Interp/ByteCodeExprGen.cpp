@@ -786,7 +786,7 @@ bool ByteCodeExprGen<Emitter>::visitRecordInitializer(const Expr *Initializer) {
         return false;
     }
 
-    return this->emitCallVoid(Func, Initializer);
+    return this->emitCall(Func, Initializer);
   } else if (const auto *InitList = dyn_cast<InitListExpr>(Initializer)) {
     const Record *R = getRecord(InitList->getType());
 
@@ -974,26 +974,16 @@ bool ByteCodeExprGen<Emitter>::VisitCallExpr(const CallExpr *E) {
     if (Func->isFullyCompiled() && !Func->isConstexpr())
       return false;
 
-    QualType ReturnType = E->getCallReturnType(Ctx.getASTContext());
-    Optional<PrimType> T = classify(ReturnType);
     // Put arguments on the stack.
     for (const auto *Arg : E->arguments()) {
       if (!this->visit(Arg))
         return false;
     }
 
-    // Primitive return value, just call it.
-    if (T)
-      return this->emitCall(*T, Func, E);
-
-    // Void Return value, easy.
-    if (ReturnType->isVoidType())
-      return this->emitCallVoid(Func, E);
-
-    // Non-primitive return value with Return Value Optimization,
-    // we already have a pointer on the stack to write the result into.
-    if (Func->hasRVO())
-      return this->emitCallVoid(Func, E);
+    // In any case call the function. The return value will end up on the stack and
+    // if the function has RVO, we already have the pointer on the stack to write
+    // the result into.
+    return this->emitCall(Func, E);
   } else {
     assert(false && "We don't support non-FunctionDecl callees right now.");
   }
@@ -1103,41 +1093,33 @@ bool ByteCodeExprGen<Emitter>::VisitUnaryOperator(const UnaryOperator *E) {
 template <class Emitter>
 bool ByteCodeExprGen<Emitter>::VisitDeclRefExpr(const DeclRefExpr *E) {
   const auto *Decl = E->getDecl();
-  bool FoundDecl = false;
+  // References are implemented via pointers, so when we see a DeclRefExpr
+  // pointing to a reference, we need to get its value directly (i.e. the
+  // pointer to the actual value) instead of a pointer to the pointer to the
+  // value.
+  bool IsReference = Decl->getType()->isReferenceType();
 
   if (auto It = Locals.find(Decl); It != Locals.end()) {
     const unsigned Offset = It->second.Offset;
-    if (!this->emitGetPtrLocal(Offset, E))
-      return false;
 
-    FoundDecl = true;
+    if (IsReference)
+      return this->emitGetLocal(PT_Ptr, Offset, E);
+    return this->emitGetPtrLocal(Offset, E);
   } else if (auto GlobalIndex = P.getGlobal(Decl)) {
-    if (!this->emitGetPtrGlobal(*GlobalIndex, E))
-      return false;
+    if (IsReference)
+      return this->emitGetGlobal(PT_Ptr, *GlobalIndex, E);
 
-    FoundDecl = true;
+    return this->emitGetPtrGlobal(*GlobalIndex, E);
   } else if (const auto *PVD = dyn_cast<ParmVarDecl>(Decl)) {
     if (auto It = this->Params.find(PVD); It != this->Params.end()) {
-      if (!this->emitGetPtrParam(It->second, E))
-        return false;
-
-      FoundDecl = true;
+      if (IsReference)
+        return this->emitGetParam(PT_Ptr, It->second, E);
+      return this->emitGetPtrParam(It->second, E);
     }
   } else if (const auto *ECD = dyn_cast<EnumConstantDecl>(Decl)) {
     PrimType T = *classify(ECD->getType());
 
     return this->emitConst(T, ECD->getInitVal(), E);
-  }
-
-  // References are implemented using pointers, so when we get here,
-  // we have a pointer to a pointer, which we need to de-reference once.
-  if (FoundDecl) {
-    if (Decl->getType()->isReferenceType()) {
-      if (!this->emitLoadPopPtr(E))
-        return false;
-    }
-
-    return true;
   }
 
   return false;

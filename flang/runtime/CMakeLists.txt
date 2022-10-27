@@ -70,39 +70,6 @@ include_directories(AFTER ${CMAKE_CURRENT_BINARY_DIR})
 
 add_subdirectory(FortranMain)
 
-# List of module objects we need to add to FortranRuntime
-set(MODULES_TO_BUILD
-  "iso_c_binding")
-
-
-# Create module files directly from the top-level module source directory
-foreach(filename ${MODULES_TO_BUILD})
-  set(depends ${FLANG_INTRINSIC_MODULES_DIR}/__fortran_builtins.mod)
-
-  # Do not reuse the FLANG_INTRINSIC_MODULES_DIR to avoid concurrency
-  # problems with the existing generation of modules elsewhere.
-  set(out_modules_dir ${FLANG_INTRINSIC_MODULES_DIR}-obj)
-  set(base ${out_modules_dir}/${filename})
-
-  # I think we should be using a Fortran extension for the output but
-  # this is safer for now.
-  set(output_file ${filename}${CMAKE_CXX_OUTPUT_EXTENSION})
-  add_custom_command(OUTPUT ${output_file}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${out_modules_dir}
-    COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/wrap-flang.py $<TARGET_FILE:flang-new> -o ${output_file} -O -c
-    -module-dir ${out_modules_dir} ${FLANG_SOURCE_DIR}/module/${filename}.f90 --emulator $<TARGET_PROPERTY:flang-new,CROSSCOMPILING_EMULATOR>
-    COMMAND_EXPAND_LISTS
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/wrap-flang.py flang-new ${FLANG_SOURCE_DIR}/module/${filename}.f90 ${depends}
-  )
-  set_source_files_properties(
-    ${output_file}
-    PROPERTIES
-    GENERATED true
-    EXTERNAL_OBJECT true
-  )
-  list(APPEND MODULE_OBJECTS ${output_file})
-endforeach()
-
 add_flang_library(FortranRuntime
   ISO_Fortran_binding.cpp
   allocatable.cpp
@@ -157,9 +124,6 @@ add_flang_library(FortranRuntime
   unit.cpp
   unit-map.cpp
   utf.cpp
-
-  EXTRA_OBJECTS
-  ${MODULE_OBJECTS}
 
   LINK_LIBS
   FortranDecimal
