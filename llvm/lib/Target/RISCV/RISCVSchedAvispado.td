@@ -266,11 +266,8 @@ let Latency = 1 in
 
 let Latency = 16, ResourceCycles = [8] in
 {
+  def : WriteRes<WriteVLDE, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLDM, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDE8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDE16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDE32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDE64, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLDS8, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLDS16, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLDS32, [AvispadoVPUMemLoad]>;
@@ -285,26 +282,11 @@ let Latency = 16, ResourceCycles = [8] in
   def : WriteRes<WriteVLDOX32, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLDOX64, [AvispadoVPUMemLoad]>;
 
-  def : WriteRes<WriteVLDFF8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDFF16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDFF32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDFF64, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD1R8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD1R16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD1R32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD1R64, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD2R8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD2R16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD2R32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD2R64, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD4R8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD4R16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD4R32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD4R64, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD8R8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD8R16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD8R32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLD8R64, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVLDFF, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVLD1R, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVLD2R, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVLD4R, [AvispadoVPUMemLoad]>;
+  def : WriteRes<WriteVLD8R, [AvispadoVPUMemLoad]>;
 
   foreach nf=2-8 in {
     foreach eew = [8, 16, 32, 64] in {
@@ -333,10 +315,7 @@ let Latency = 16, ResourceCycles = [16] in
   def : WriteRes<WriteVSTOX64, [AvispadoVPUMemStore]>;
   
   def : WriteRes<WriteVSTM, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTE8, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTE16, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTE32, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTE64, [AvispadoVPUMemStore]>;
+  def : WriteRes<WriteVSTE, [AvispadoVPUMemStore]>;
   def : WriteRes<WriteVSTS8, [AvispadoVPUMemStore]>;
   def : WriteRes<WriteVSTS16, [AvispadoVPUMemStore]>;
   def : WriteRes<WriteVSTS32, [AvispadoVPUMemStore]>;
@@ -479,10 +458,7 @@ def : ReadAdvance<ReadVSETVL, 0>;
 // 7. Vector Loads and Stores
 def : ReadAdvance<ReadVLDX, 0>;
 def : ReadAdvance<ReadVSTX, 0>;
-def : ReadAdvance<ReadVSTE8V, 0>;
-def : ReadAdvance<ReadVSTE16V, 0>;
-def : ReadAdvance<ReadVSTE32V, 0>;
-def : ReadAdvance<ReadVSTE64V, 0>;
+def : ReadAdvance<ReadVSTEV, 0>;
 def : ReadAdvance<ReadVSTM, 0>;
 def : ReadAdvance<ReadVLDSX, 0>;
 def : ReadAdvance<ReadVSTSX, 0>;

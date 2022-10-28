@@ -20,9 +20,11 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/Support/Allocator.h"
 #include <forward_list>
+#include <map>
 
 namespace llvm {
 class CanonicalLoopInfo;
+class OffloadEntriesInfoManager;
 
 /// Move the instruction after an InsertPoint to the beginning of another
 /// BasicBlock.
@@ -645,6 +647,17 @@ public:
   /// \param Loc The location where the taskyield directive was encountered.
   void createTaskyield(const LocationDescription &Loc);
 
+  /// A struct to pack the relevant information for an OpenMP depend clause.
+  struct DependData {
+    omp::RTLDependenceKindTy DepKind = omp::RTLDependenceKindTy::DepUnknown;
+    Type *DepValueType;
+    Value *DepVal;
+    explicit DependData() = default;
+    DependData(omp::RTLDependenceKindTy DepKind, Type *DepValueType,
+               Value *DepVal)
+        : DepKind(DepKind), DepValueType(DepValueType), DepVal(DepVal) {}
+  };
+
   /// Generator for `#omp task`
   ///
   /// \param Loc The location where the task construct was encountered.
@@ -662,7 +675,8 @@ public:
   InsertPointTy createTask(const LocationDescription &Loc,
                            InsertPointTy AllocaIP, BodyGenCallbackTy BodyGenCB,
                            bool Tied = true, Value *Final = nullptr,
-                           Value *IfCondition = nullptr);
+                           Value *IfCondition = nullptr,
+                           ArrayRef<DependData *> Dependencies = {});
 
   /// Generator for the taskgroup construct
   ///
@@ -1669,6 +1683,33 @@ public:
                                         const Twine &Name = {});
 };
 
+/// Data structure to contain the information needed to uniquely identify
+/// a target entry.
+struct TargetRegionEntryInfo {
+  std::string ParentName;
+  unsigned DeviceID;
+  unsigned FileID;
+  unsigned Line;
+
+  TargetRegionEntryInfo() : ParentName(""), DeviceID(0), FileID(0), Line(0) {}
+  TargetRegionEntryInfo(StringRef ParentName, unsigned DeviceID,
+                        unsigned FileID, unsigned Line)
+      : ParentName(ParentName), DeviceID(DeviceID), FileID(FileID), Line(Line) {
+  }
+
+  static void getTargetRegionEntryFnName(SmallVectorImpl<char> &Name,
+                                         StringRef ParentName,
+                                         unsigned DeviceID, unsigned FileID,
+                                         unsigned Line);
+
+  void getTargetRegionEntryFnName(SmallVectorImpl<char> &Name);
+
+  bool operator<(const TargetRegionEntryInfo RHS) const {
+    return std::make_tuple(ParentName, DeviceID, FileID, Line) <
+           std::make_tuple(RHS.ParentName, RHS.DeviceID, RHS.FileID, RHS.Line);
+  }
+};
+
 /// Class that manages information about offload code regions and data
 class OffloadEntriesInfoManager {
   /// Number of entries registered so far.
@@ -1770,22 +1811,19 @@ public:
 
   /// Initialize target region entry.
   /// This is ONLY needed for DEVICE compilation.
-  void initializeTargetRegionEntryInfo(unsigned DeviceID, unsigned FileID,
-                                       StringRef ParentName, unsigned LineNum,
+  void initializeTargetRegionEntryInfo(const TargetRegionEntryInfo &EntryInfo,
                                        unsigned Order);
   /// Register target region entry.
-  void registerTargetRegionEntryInfo(unsigned DeviceID, unsigned FileID,
-                                     StringRef ParentName, unsigned LineNum,
+  void registerTargetRegionEntryInfo(const TargetRegionEntryInfo &EntryInfo,
                                      Constant *Addr, Constant *ID,
                                      OMPTargetRegionEntryKind Flags,
                                      bool IsDevice);
   /// Return true if a target region entry with the provided information
   /// exists.
-  bool hasTargetRegionEntryInfo(unsigned DeviceID, unsigned FileID,
-                                StringRef ParentName, unsigned LineNum,
+  bool hasTargetRegionEntryInfo(const TargetRegionEntryInfo &EntryInfo,
                                 bool IgnoreAddressId = false) const;
   /// brief Applies action \a Action on all registered entries.
-  typedef function_ref<void(unsigned, unsigned, StringRef, unsigned,
+  typedef function_ref<void(const TargetRegionEntryInfo &EntryInfo,
                             const OffloadEntryInfoTargetRegion &)>
       OffloadTargetRegionEntryInfoActTy;
   void
@@ -1856,17 +1894,9 @@ public:
       const OffloadDeviceGlobalVarEntryInfoActTy &Action);
 
 private:
-  // Storage for target region entries kind. The storage is to be indexed by
-  // file ID, device ID, parent function name and line number.
-  typedef DenseMap<unsigned, OffloadEntryInfoTargetRegion>
-      OffloadEntriesTargetRegionPerLine;
-  typedef StringMap<OffloadEntriesTargetRegionPerLine>
-      OffloadEntriesTargetRegionPerParentName;
-  typedef DenseMap<unsigned, OffloadEntriesTargetRegionPerParentName>
-      OffloadEntriesTargetRegionPerFile;
-  typedef DenseMap<unsigned, OffloadEntriesTargetRegionPerFile>
-      OffloadEntriesTargetRegionPerDevice;
-  typedef OffloadEntriesTargetRegionPerDevice OffloadEntriesTargetRegionTy;
+  // Storage for target region entries kind.
+  typedef std::map<TargetRegionEntryInfo, OffloadEntryInfoTargetRegion>
+      OffloadEntriesTargetRegionTy;
   OffloadEntriesTargetRegionTy OffloadEntriesTargetRegion;
   /// Storage for device global variable entries kind. The storage is to be
   /// indexed by mangled name.

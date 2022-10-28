@@ -70,10 +70,9 @@ public:
 
 protected:
   CodeGenModule &CGM;
-  uint32_t ResourceCounters[static_cast<uint32_t>(
-      hlsl::ResourceClass::NumClasses)] = {0};
 
-  llvm::Value *emitInputSemantic(llvm::IRBuilder<> &B, const ParmVarDecl &D);
+  llvm::Value *emitInputSemantic(llvm::IRBuilder<> &B, const ParmVarDecl &D,
+                                 llvm::Type *Ty);
 
 public:
   CGHLSLRuntime(CodeGenModule &CGM) : CGM(CGM) {}
@@ -93,7 +92,7 @@ public:
 private:
   void addBufferResourceAnnotation(llvm::GlobalVariable *GV,
                                    llvm::StringRef TyName,
-                                   hlsl::ResourceClass RC,
+                                   llvm::hlsl::ResourceClass RC,
                                    llvm::hlsl::ResourceKind RK,
                                    BufferResBinding &Binding);
   void addConstant(VarDecl *D, Buffer &CB);

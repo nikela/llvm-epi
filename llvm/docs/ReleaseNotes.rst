@@ -12,7 +12,6 @@ LLVM |release| Release Notes
      Release notes for previous releases can be found on
      `the Download Page <https://releases.llvm.org/download.html>`_.
 
-* The LoopFlatten pass is now enabled by default.
 
 Introduction
 ============
@@ -137,6 +136,11 @@ Changes to the Windows Target
 Changes to the X86 Backend
 --------------------------
 
+* Add support for the ``RDMSRLIST and WRMSRLIST`` instructions.
+* Add support for the ``WRMSRNS`` instruction.
+* Support ISA of ``AMX-FP16`` which contains ``tdpfp16ps`` instruction.
+* Support ISA of ``CMPCCXADD``.
+
 Changes to the OCaml bindings
 -----------------------------
 
@@ -173,7 +177,12 @@ Changes to the Metadata Info
 Changes to the Debug Info
 ---------------------------------
 
-During this release ...
+Previously when emitting DWARF v4 and tuning for GDB, llc would use DWARF v2's
+``DW_AT_bit_offset`` and ``DW_AT_data_member_location``. llc now uses DWARF v4's
+``DW_AT_data_bit_offset`` regardless of tuning.
+
+Support for ``DW_AT_data_bit_offset`` was added in GDB 8.0. For earlier versions,
+you can use llc's ``-dwarf-version=3`` option to emit compatible DWARF.
 
 Changes to the LLVM tools
 ---------------------------------

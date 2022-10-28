@@ -321,103 +321,61 @@ define void @add(float* noalias nocapture readonly %src1, float* noalias nocaptu
 ; CHECK-LMUL8-NEXT:  entry:
 ; CHECK-LMUL8-NEXT:    [[CONV:%.*]] = zext i32 [[SIZE:%.*]] to i64
 ; CHECK-LMUL8-NEXT:    [[CMP10_NOT:%.*]] = icmp eq i32 [[SIZE]], 0
-; CHECK-LMUL8-NEXT:    br i1 [[CMP10_NOT]], label [[FOR_COND_CLEANUP:%.*]], label [[ITER_CHECK:%.*]]
-; CHECK-LMUL8:       iter.check:
+; CHECK-LMUL8-NEXT:    br i1 [[CMP10_NOT]], label [[FOR_COND_CLEANUP:%.*]], label [[FOR_BODY_PREHEADER:%.*]]
+; CHECK-LMUL8:       for.body.preheader:
 ; CHECK-LMUL8-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL8-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 8
+; CHECK-LMUL8-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 16
 ; CHECK-LMUL8-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[CONV]], [[TMP1]]
-; CHECK-LMUL8-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[VEC_EPILOG_SCALAR_PH:%.*]], label [[VECTOR_MAIN_LOOP_ITER_CHECK:%.*]]
-; CHECK-LMUL8:       vector.main.loop.iter.check:
+; CHECK-LMUL8-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; CHECK-LMUL8:       vector.ph:
 ; CHECK-LMUL8-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-LMUL8-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 16
-; CHECK-LMUL8-NEXT:    [[MIN_ITERS_CHECK1:%.*]] = icmp ult i64 [[CONV]], [[TMP3]]
-; CHECK-LMUL8-NEXT:    br i1 [[MIN_ITERS_CHECK1]], label [[VEC_EPILOG_PH:%.*]], label [[VECTOR_PH:%.*]]
-; CHECK-LMUL8:       vector.ph:
-; CHECK-LMUL8-NEXT:    [[TMP4:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL8-NEXT:    [[TMP5:%.*]] = mul i64 [[TMP4]], 16
-; CHECK-LMUL8-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[CONV]], [[TMP5]]
+; CHECK-LMUL8-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[CONV]], [[TMP3]]
 ; CHECK-LMUL8-NEXT:    [[N_VEC:%.*]] = sub i64 [[CONV]], [[N_MOD_VF]]
 ; CHECK-LMUL8-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK-LMUL8:       vector.body:
 ; CHECK-LMUL8-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-LMUL8-NEXT:    [[TMP6:%.*]] = add i64 [[INDEX]], 0
-; CHECK-LMUL8-NEXT:    [[TMP7:%.*]] = getelementptr inbounds float, float* [[SRC1:%.*]], i64 [[TMP6]]
-; CHECK-LMUL8-NEXT:    [[TMP8:%.*]] = getelementptr inbounds float, float* [[TMP7]], i32 0
-; CHECK-LMUL8-NEXT:    [[TMP9:%.*]] = bitcast float* [[TMP8]] to <vscale x 16 x float>*
-; CHECK-LMUL8-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 16 x float>, <vscale x 16 x float>* [[TMP9]], align 4
-; CHECK-LMUL8-NEXT:    [[TMP10:%.*]] = getelementptr inbounds float, float* [[SRC2:%.*]], i64 [[TMP6]]
-; CHECK-LMUL8-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, float* [[TMP10]], i32 0
-; CHECK-LMUL8-NEXT:    [[TMP12:%.*]] = bitcast float* [[TMP11]] to <vscale x 16 x float>*
-; CHECK-LMUL8-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 16 x float>, <vscale x 16 x float>* [[TMP12]], align 4
-; CHECK-LMUL8-NEXT:    [[TMP13:%.*]] = fadd <vscale x 16 x float> [[WIDE_LOAD]], [[WIDE_LOAD2]]
-; CHECK-LMUL8-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, float* [[RESULT:%.*]], i64 [[TMP6]]
-; CHECK-LMUL8-NEXT:    [[TMP15:%.*]] = getelementptr inbounds float, float* [[TMP14]], i32 0
-; CHECK-LMUL8-NEXT:    [[TMP16:%.*]] = bitcast float* [[TMP15]] to <vscale x 16 x float>*
-; CHECK-LMUL8-NEXT:    store <vscale x 16 x float> [[TMP13]], <vscale x 16 x float>* [[TMP16]], align 4
-; CHECK-LMUL8-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL8-NEXT:    [[TMP18:%.*]] = mul i64 [[TMP17]], 16
-; CHECK-LMUL8-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP18]]
-; CHECK-LMUL8-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-LMUL8-NEXT:    br i1 [[TMP19]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECK-LMUL8-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
+; CHECK-LMUL8-NEXT:    [[TMP5:%.*]] = getelementptr inbounds float, float* [[SRC1:%.*]], i64 [[TMP4]]
+; CHECK-LMUL8-NEXT:    [[TMP6:%.*]] = getelementptr inbounds float, float* [[TMP5]], i32 0
+; CHECK-LMUL8-NEXT:    [[TMP7:%.*]] = bitcast float* [[TMP6]] to <vscale x 16 x float>*
+; CHECK-LMUL8-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 16 x float>, <vscale x 16 x float>* [[TMP7]], align 4
+; CHECK-LMUL8-NEXT:    [[TMP8:%.*]] = getelementptr inbounds float, float* [[SRC2:%.*]], i64 [[TMP4]]
+; CHECK-LMUL8-NEXT:    [[TMP9:%.*]] = getelementptr inbounds float, float* [[TMP8]], i32 0
+; CHECK-LMUL8-NEXT:    [[TMP10:%.*]] = bitcast float* [[TMP9]] to <vscale x 16 x float>*
+; CHECK-LMUL8-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 16 x float>, <vscale x 16 x float>* [[TMP10]], align 4
+; CHECK-LMUL8-NEXT:    [[TMP11:%.*]] = fadd <vscale x 16 x float> [[WIDE_LOAD]], [[WIDE_LOAD1]]
+; CHECK-LMUL8-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, float* [[RESULT:%.*]], i64 [[TMP4]]
+; CHECK-LMUL8-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, float* [[TMP12]], i32 0
+; CHECK-LMUL8-NEXT:    [[TMP14:%.*]] = bitcast float* [[TMP13]] to <vscale x 16 x float>*
+; CHECK-LMUL8-NEXT:    store <vscale x 16 x float> [[TMP11]], <vscale x 16 x float>* [[TMP14]], align 4
+; CHECK-LMUL8-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL8-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 16
+; CHECK-LMUL8-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP16]]
+; CHECK-LMUL8-NEXT:    [[TMP17:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-LMUL8-NEXT:    br i1 [[TMP17]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK-LMUL8:       middle.block:
 ; CHECK-LMUL8-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[CONV]], [[N_VEC]]
-; CHECK-LMUL8-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[VEC_EPILOG_ITER_CHECK:%.*]]
-; CHECK-LMUL8:       vec.epilog.iter.check:
-; CHECK-LMUL8-NEXT:    [[N_VEC_REMAINING:%.*]] = sub i64 [[CONV]], [[N_VEC]]
-; CHECK-LMUL8-NEXT:    [[TMP20:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL8-NEXT:    [[TMP21:%.*]] = mul i64 [[TMP20]], 8
-; CHECK-LMUL8-NEXT:    [[MIN_EPILOG_ITERS_CHECK:%.*]] = icmp ult i64 [[N_VEC_REMAINING]], [[TMP21]]
-; CHECK-LMUL8-NEXT:    br i1 [[MIN_EPILOG_ITERS_CHECK]], label [[VEC_EPILOG_SCALAR_PH]], label [[VEC_EPILOG_PH]]
-; CHECK-LMUL8:       vec.epilog.ph:
-; CHECK-LMUL8-NEXT:    [[VEC_EPILOG_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[VEC_EPILOG_ITER_CHECK]] ], [ 0, [[VECTOR_MAIN_LOOP_ITER_CHECK]] ]
-; CHECK-LMUL8-NEXT:    [[TMP22:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL8-NEXT:    [[TMP23:%.*]] = mul i64 [[TMP22]], 8
-; CHECK-LMUL8-NEXT:    [[N_MOD_VF3:%.*]] = urem i64 [[CONV]], [[TMP23]]
-; CHECK-LMUL8-NEXT:    [[N_VEC4:%.*]] = sub i64 [[CONV]], [[N_MOD_VF3]]
-; CHECK-LMUL8-NEXT:    br label [[VEC_EPILOG_VECTOR_BODY:%.*]]
-; CHECK-LMUL8:       vec.epilog.vector.body:
-; CHECK-LMUL8-NEXT:    [[OFFSET_IDX:%.*]] = phi i64 [ [[VEC_EPILOG_RESUME_VAL]], [[VEC_EPILOG_PH]] ], [ [[INDEX_NEXT9:%.*]], [[VEC_EPILOG_VECTOR_BODY]] ]
-; CHECK-LMUL8-NEXT:    [[TMP24:%.*]] = add i64 [[OFFSET_IDX]], 0
-; CHECK-LMUL8-NEXT:    [[TMP25:%.*]] = getelementptr inbounds float, float* [[SRC1]], i64 [[TMP24]]
-; CHECK-LMUL8-NEXT:    [[TMP26:%.*]] = getelementptr inbounds float, float* [[TMP25]], i32 0
-; CHECK-LMUL8-NEXT:    [[TMP27:%.*]] = bitcast float* [[TMP26]] to <vscale x 8 x float>*
-; CHECK-LMUL8-NEXT:    [[WIDE_LOAD7:%.*]] = load <vscale x 8 x float>, <vscale x 8 x float>* [[TMP27]], align 4
-; CHECK-LMUL8-NEXT:    [[TMP28:%.*]] = getelementptr inbounds float, float* [[SRC2]], i64 [[TMP24]]
-; CHECK-LMUL8-NEXT:    [[TMP29:%.*]] = getelementptr inbounds float, float* [[TMP28]], i32 0
-; CHECK-LMUL8-NEXT:    [[TMP30:%.*]] = bitcast float* [[TMP29]] to <vscale x 8 x float>*
-; CHECK-LMUL8-NEXT:    [[WIDE_LOAD8:%.*]] = load <vscale x 8 x float>, <vscale x 8 x float>* [[TMP30]], align 4
-; CHECK-LMUL8-NEXT:    [[TMP31:%.*]] = fadd <vscale x 8 x float> [[WIDE_LOAD7]], [[WIDE_LOAD8]]
-; CHECK-LMUL8-NEXT:    [[TMP32:%.*]] = getelementptr inbounds float, float* [[RESULT]], i64 [[TMP24]]
-; CHECK-LMUL8-NEXT:    [[TMP33:%.*]] = getelementptr inbounds float, float* [[TMP32]], i32 0
-; CHECK-LMUL8-NEXT:    [[TMP34:%.*]] = bitcast float* [[TMP33]] to <vscale x 8 x float>*
-; CHECK-LMUL8-NEXT:    store <vscale x 8 x float> [[TMP31]], <vscale x 8 x float>* [[TMP34]], align 4
-; CHECK-LMUL8-NEXT:    [[TMP35:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-LMUL8-NEXT:    [[TMP36:%.*]] = mul i64 [[TMP35]], 8
-; CHECK-LMUL8-NEXT:    [[INDEX_NEXT9]] = add nuw i64 [[OFFSET_IDX]], [[TMP36]]
-; CHECK-LMUL8-NEXT:    [[TMP37:%.*]] = icmp eq i64 [[INDEX_NEXT9]], [[N_VEC4]]
-; CHECK-LMUL8-NEXT:    br i1 [[TMP37]], label [[VEC_EPILOG_MIDDLE_BLOCK:%.*]], label [[VEC_EPILOG_VECTOR_BODY]], !llvm.loop [[LOOP2:![0-9]+]]
-; CHECK-LMUL8:       vec.epilog.middle.block:
-; CHECK-LMUL8-NEXT:    [[CMP_N5:%.*]] = icmp eq i64 [[CONV]], [[N_VEC4]]
-; CHECK-LMUL8-NEXT:    br i1 [[CMP_N5]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[VEC_EPILOG_SCALAR_PH]]
-; CHECK-LMUL8:       vec.epilog.scalar.ph:
-; CHECK-LMUL8-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC4]], [[VEC_EPILOG_MIDDLE_BLOCK]] ], [ [[N_VEC]], [[VEC_EPILOG_ITER_CHECK]] ], [ 0, [[ITER_CHECK]] ]
+; CHECK-LMUL8-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[SCALAR_PH]]
+; CHECK-LMUL8:       scalar.ph:
+; CHECK-LMUL8-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
 ; CHECK-LMUL8-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK-LMUL8:       for.cond.cleanup.loopexit:
 ; CHECK-LMUL8-NEXT:    br label [[FOR_COND_CLEANUP]]
 ; CHECK-LMUL8:       for.cond.cleanup:
 ; CHECK-LMUL8-NEXT:    ret void
 ; CHECK-LMUL8:       for.body:
-; CHECK-LMUL8-NEXT:    [[I_011:%.*]] = phi i64 [ [[ADD4:%.*]], [[FOR_BODY]] ], [ [[BC_RESUME_VAL]], [[VEC_EPILOG_SCALAR_PH]] ]
+; CHECK-LMUL8-NEXT:    [[I_011:%.*]] = phi i64 [ [[ADD4:%.*]], [[FOR_BODY]] ], [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ]
 ; CHECK-LMUL8-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, float* [[SRC1]], i64 [[I_011]]
-; CHECK-LMUL8-NEXT:    [[TMP38:%.*]] = load float, float* [[ARRAYIDX]], align 4
+; CHECK-LMUL8-NEXT:    [[TMP18:%.*]] = load float, float* [[ARRAYIDX]], align 4
 ; CHECK-LMUL8-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, float* [[SRC2]], i64 [[I_011]]
-; CHECK-LMUL8-NEXT:    [[TMP39:%.*]] = load float, float* [[ARRAYIDX2]], align 4
-; CHECK-LMUL8-NEXT:    [[ADD:%.*]] = fadd float [[TMP38]], [[TMP39]]
+; CHECK-LMUL8-NEXT:    [[TMP19:%.*]] = load float, float* [[ARRAYIDX2]], align 4
+; CHECK-LMUL8-NEXT:    [[ADD:%.*]] = fadd float [[TMP18]], [[TMP19]]
 ; CHECK-LMUL8-NEXT:    [[ARRAYIDX3:%.*]] = getelementptr inbounds float, float* [[RESULT]], i64 [[I_011]]
 ; CHECK-LMUL8-NEXT:    store float [[ADD]], float* [[ARRAYIDX3]], align 4
 ; CHECK-LMUL8-NEXT:    [[ADD4]] = add nuw nsw i64 [[I_011]], 1
 ; CHECK-LMUL8-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[ADD4]], [[CONV]]
-; CHECK-LMUL8-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP4:![0-9]+]]
+; CHECK-LMUL8-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP2:![0-9]+]]
 ;
 
 entry:
@@ -443,6 +401,279 @@ for.body:
 }
 
 define void @goo(i32** nocapture noundef %a, i32 noundef signext %n) {
+; CHECK-SCALAR-LABEL: @goo(
+; CHECK-SCALAR-NEXT:  entry:
+; CHECK-SCALAR-NEXT:    [[CMP3:%.*]] = icmp sgt i32 [[N:%.*]], 0
+; CHECK-SCALAR-NEXT:    br i1 [[CMP3]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
+; CHECK-SCALAR:       for.body.preheader:
+; CHECK-SCALAR-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
+; CHECK-SCALAR-NEXT:    br label [[FOR_BODY:%.*]]
+; CHECK-SCALAR:       for.cond.cleanup.loopexit:
+; CHECK-SCALAR-NEXT:    br label [[FOR_COND_CLEANUP]]
+; CHECK-SCALAR:       for.cond.cleanup:
+; CHECK-SCALAR-NEXT:    ret void
+; CHECK-SCALAR:       for.body:
+; CHECK-SCALAR-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ 0, [[FOR_BODY_PREHEADER]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
+; CHECK-SCALAR-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32*, i32** [[A:%.*]], i64 [[INDVARS_IV]]
+; CHECK-SCALAR-NEXT:    [[TMP0:%.*]] = load i32*, i32** [[ARRAYIDX]], align 8
+; CHECK-SCALAR-NEXT:    [[ADD_PTR:%.*]] = getelementptr inbounds i32, i32* [[TMP0]], i64 1
+; CHECK-SCALAR-NEXT:    store i32* [[ADD_PTR]], i32** [[ARRAYIDX]], align 8
+; CHECK-SCALAR-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
+; CHECK-SCALAR-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-SCALAR-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[FOR_BODY]]
+;
+; CHECK-LMUL1-LABEL: @goo(
+; CHECK-LMUL1-NEXT:  entry:
+; CHECK-LMUL1-NEXT:    [[CMP3:%.*]] = icmp sgt i32 [[N:%.*]], 0
+; CHECK-LMUL1-NEXT:    br i1 [[CMP3]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
+; CHECK-LMUL1:       for.body.preheader:
+; CHECK-LMUL1-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
+; CHECK-LMUL1-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL1-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[TMP0]]
+; CHECK-LMUL1-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; CHECK-LMUL1:       vector.ph:
+; CHECK-LMUL1-NEXT:    [[TMP1:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL1-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP1]]
+; CHECK-LMUL1-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
+; CHECK-LMUL1-NEXT:    br label [[VECTOR_BODY:%.*]]
+; CHECK-LMUL1:       vector.body:
+; CHECK-LMUL1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; CHECK-LMUL1-NEXT:    [[TMP2:%.*]] = add i64 [[INDEX]], 0
+; CHECK-LMUL1-NEXT:    [[TMP3:%.*]] = getelementptr inbounds i32*, i32** [[A:%.*]], i64 [[TMP2]]
+; CHECK-LMUL1-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i32*, i32** [[TMP3]], i32 0
+; CHECK-LMUL1-NEXT:    [[TMP5:%.*]] = bitcast i32** [[TMP4]] to <vscale x 1 x i32*>*
+; CHECK-LMUL1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i32*>, <vscale x 1 x i32*>* [[TMP5]], align 8
+; CHECK-LMUL1-NEXT:    [[TMP6:%.*]] = getelementptr inbounds i32, <vscale x 1 x i32*> [[WIDE_LOAD]], i64 1
+; CHECK-LMUL1-NEXT:    [[TMP7:%.*]] = bitcast i32** [[TMP4]] to <vscale x 1 x i32*>*
+; CHECK-LMUL1-NEXT:    store <vscale x 1 x i32*> [[TMP6]], <vscale x 1 x i32*>* [[TMP7]], align 8
+; CHECK-LMUL1-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP8]]
+; CHECK-LMUL1-NEXT:    [[TMP9:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-LMUL1-NEXT:    br i1 [[TMP9]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP4:![0-9]+]]
+; CHECK-LMUL1:       middle.block:
+; CHECK-LMUL1-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
+; CHECK-LMUL1-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[SCALAR_PH]]
+; CHECK-LMUL1:       scalar.ph:
+; CHECK-LMUL1-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
+; CHECK-LMUL1-NEXT:    br label [[FOR_BODY:%.*]]
+; CHECK-LMUL1:       for.cond.cleanup.loopexit:
+; CHECK-LMUL1-NEXT:    br label [[FOR_COND_CLEANUP]]
+; CHECK-LMUL1:       for.cond.cleanup:
+; CHECK-LMUL1-NEXT:    ret void
+; CHECK-LMUL1:       for.body:
+; CHECK-LMUL1-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
+; CHECK-LMUL1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[INDVARS_IV]]
+; CHECK-LMUL1-NEXT:    [[TMP10:%.*]] = load i32*, i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL1-NEXT:    [[ADD_PTR:%.*]] = getelementptr inbounds i32, i32* [[TMP10]], i64 1
+; CHECK-LMUL1-NEXT:    store i32* [[ADD_PTR]], i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
+; CHECK-LMUL1-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-LMUL1-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP5:![0-9]+]]
+;
+; CHECK-LMUL2-LABEL: @goo(
+; CHECK-LMUL2-NEXT:  entry:
+; CHECK-LMUL2-NEXT:    [[CMP3:%.*]] = icmp sgt i32 [[N:%.*]], 0
+; CHECK-LMUL2-NEXT:    br i1 [[CMP3]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
+; CHECK-LMUL2:       for.body.preheader:
+; CHECK-LMUL2-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
+; CHECK-LMUL2-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL2-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 4
+; CHECK-LMUL2-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[TMP1]]
+; CHECK-LMUL2-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; CHECK-LMUL2:       vector.ph:
+; CHECK-LMUL2-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL2-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 4
+; CHECK-LMUL2-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP3]]
+; CHECK-LMUL2-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
+; CHECK-LMUL2-NEXT:    br label [[VECTOR_BODY:%.*]]
+; CHECK-LMUL2:       vector.body:
+; CHECK-LMUL2-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; CHECK-LMUL2-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
+; CHECK-LMUL2-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL2-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 2
+; CHECK-LMUL2-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; CHECK-LMUL2-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; CHECK-LMUL2-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
+; CHECK-LMUL2-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32*, i32** [[A:%.*]], i64 [[TMP4]]
+; CHECK-LMUL2-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[TMP9]]
+; CHECK-LMUL2-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 0
+; CHECK-LMUL2-NEXT:    [[TMP13:%.*]] = bitcast i32** [[TMP12]] to <vscale x 2 x i32*>*
+; CHECK-LMUL2-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 2 x i32*>, <vscale x 2 x i32*>* [[TMP13]], align 8
+; CHECK-LMUL2-NEXT:    [[TMP14:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-LMUL2-NEXT:    [[TMP15:%.*]] = mul i32 [[TMP14]], 2
+; CHECK-LMUL2-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 [[TMP15]]
+; CHECK-LMUL2-NEXT:    [[TMP17:%.*]] = bitcast i32** [[TMP16]] to <vscale x 2 x i32*>*
+; CHECK-LMUL2-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 2 x i32*>, <vscale x 2 x i32*>* [[TMP17]], align 8
+; CHECK-LMUL2-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i32, <vscale x 2 x i32*> [[WIDE_LOAD]], i64 1
+; CHECK-LMUL2-NEXT:    [[TMP19:%.*]] = getelementptr inbounds i32, <vscale x 2 x i32*> [[WIDE_LOAD1]], i64 1
+; CHECK-LMUL2-NEXT:    [[TMP20:%.*]] = bitcast i32** [[TMP12]] to <vscale x 2 x i32*>*
+; CHECK-LMUL2-NEXT:    store <vscale x 2 x i32*> [[TMP18]], <vscale x 2 x i32*>* [[TMP20]], align 8
+; CHECK-LMUL2-NEXT:    [[TMP21:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-LMUL2-NEXT:    [[TMP22:%.*]] = mul i32 [[TMP21]], 2
+; CHECK-LMUL2-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 [[TMP22]]
+; CHECK-LMUL2-NEXT:    [[TMP24:%.*]] = bitcast i32** [[TMP23]] to <vscale x 2 x i32*>*
+; CHECK-LMUL2-NEXT:    store <vscale x 2 x i32*> [[TMP19]], <vscale x 2 x i32*>* [[TMP24]], align 8
+; CHECK-LMUL2-NEXT:    [[TMP25:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL2-NEXT:    [[TMP26:%.*]] = mul i64 [[TMP25]], 4
+; CHECK-LMUL2-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP26]]
+; CHECK-LMUL2-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-LMUL2-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP4:![0-9]+]]
+; CHECK-LMUL2:       middle.block:
+; CHECK-LMUL2-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
+; CHECK-LMUL2-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[SCALAR_PH]]
+; CHECK-LMUL2:       scalar.ph:
+; CHECK-LMUL2-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
+; CHECK-LMUL2-NEXT:    br label [[FOR_BODY:%.*]]
+; CHECK-LMUL2:       for.cond.cleanup.loopexit:
+; CHECK-LMUL2-NEXT:    br label [[FOR_COND_CLEANUP]]
+; CHECK-LMUL2:       for.cond.cleanup:
+; CHECK-LMUL2-NEXT:    ret void
+; CHECK-LMUL2:       for.body:
+; CHECK-LMUL2-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
+; CHECK-LMUL2-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[INDVARS_IV]]
+; CHECK-LMUL2-NEXT:    [[TMP28:%.*]] = load i32*, i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL2-NEXT:    [[ADD_PTR:%.*]] = getelementptr inbounds i32, i32* [[TMP28]], i64 1
+; CHECK-LMUL2-NEXT:    store i32* [[ADD_PTR]], i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL2-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
+; CHECK-LMUL2-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-LMUL2-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP5:![0-9]+]]
+;
+; CHECK-LMUL4-LABEL: @goo(
+; CHECK-LMUL4-NEXT:  entry:
+; CHECK-LMUL4-NEXT:    [[CMP3:%.*]] = icmp sgt i32 [[N:%.*]], 0
+; CHECK-LMUL4-NEXT:    br i1 [[CMP3]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
+; CHECK-LMUL4:       for.body.preheader:
+; CHECK-LMUL4-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
+; CHECK-LMUL4-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL4-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 8
+; CHECK-LMUL4-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[TMP1]]
+; CHECK-LMUL4-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; CHECK-LMUL4:       vector.ph:
+; CHECK-LMUL4-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL4-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 8
+; CHECK-LMUL4-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP3]]
+; CHECK-LMUL4-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
+; CHECK-LMUL4-NEXT:    br label [[VECTOR_BODY:%.*]]
+; CHECK-LMUL4:       vector.body:
+; CHECK-LMUL4-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; CHECK-LMUL4-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
+; CHECK-LMUL4-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL4-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 4
+; CHECK-LMUL4-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; CHECK-LMUL4-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; CHECK-LMUL4-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
+; CHECK-LMUL4-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32*, i32** [[A:%.*]], i64 [[TMP4]]
+; CHECK-LMUL4-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[TMP9]]
+; CHECK-LMUL4-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 0
+; CHECK-LMUL4-NEXT:    [[TMP13:%.*]] = bitcast i32** [[TMP12]] to <vscale x 4 x i32*>*
+; CHECK-LMUL4-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 4 x i32*>, <vscale x 4 x i32*>* [[TMP13]], align 8
+; CHECK-LMUL4-NEXT:    [[TMP14:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-LMUL4-NEXT:    [[TMP15:%.*]] = mul i32 [[TMP14]], 4
+; CHECK-LMUL4-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 [[TMP15]]
+; CHECK-LMUL4-NEXT:    [[TMP17:%.*]] = bitcast i32** [[TMP16]] to <vscale x 4 x i32*>*
+; CHECK-LMUL4-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 4 x i32*>, <vscale x 4 x i32*>* [[TMP17]], align 8
+; CHECK-LMUL4-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i32, <vscale x 4 x i32*> [[WIDE_LOAD]], i64 1
+; CHECK-LMUL4-NEXT:    [[TMP19:%.*]] = getelementptr inbounds i32, <vscale x 4 x i32*> [[WIDE_LOAD1]], i64 1
+; CHECK-LMUL4-NEXT:    [[TMP20:%.*]] = bitcast i32** [[TMP12]] to <vscale x 4 x i32*>*
+; CHECK-LMUL4-NEXT:    store <vscale x 4 x i32*> [[TMP18]], <vscale x 4 x i32*>* [[TMP20]], align 8
+; CHECK-LMUL4-NEXT:    [[TMP21:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-LMUL4-NEXT:    [[TMP22:%.*]] = mul i32 [[TMP21]], 4
+; CHECK-LMUL4-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 [[TMP22]]
+; CHECK-LMUL4-NEXT:    [[TMP24:%.*]] = bitcast i32** [[TMP23]] to <vscale x 4 x i32*>*
+; CHECK-LMUL4-NEXT:    store <vscale x 4 x i32*> [[TMP19]], <vscale x 4 x i32*>* [[TMP24]], align 8
+; CHECK-LMUL4-NEXT:    [[TMP25:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL4-NEXT:    [[TMP26:%.*]] = mul i64 [[TMP25]], 8
+; CHECK-LMUL4-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP26]]
+; CHECK-LMUL4-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-LMUL4-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP4:![0-9]+]]
+; CHECK-LMUL4:       middle.block:
+; CHECK-LMUL4-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
+; CHECK-LMUL4-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[SCALAR_PH]]
+; CHECK-LMUL4:       scalar.ph:
+; CHECK-LMUL4-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
+; CHECK-LMUL4-NEXT:    br label [[FOR_BODY:%.*]]
+; CHECK-LMUL4:       for.cond.cleanup.loopexit:
+; CHECK-LMUL4-NEXT:    br label [[FOR_COND_CLEANUP]]
+; CHECK-LMUL4:       for.cond.cleanup:
+; CHECK-LMUL4-NEXT:    ret void
+; CHECK-LMUL4:       for.body:
+; CHECK-LMUL4-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
+; CHECK-LMUL4-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[INDVARS_IV]]
+; CHECK-LMUL4-NEXT:    [[TMP28:%.*]] = load i32*, i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL4-NEXT:    [[ADD_PTR:%.*]] = getelementptr inbounds i32, i32* [[TMP28]], i64 1
+; CHECK-LMUL4-NEXT:    store i32* [[ADD_PTR]], i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL4-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
+; CHECK-LMUL4-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-LMUL4-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP5:![0-9]+]]
+;
+; CHECK-LMUL8-LABEL: @goo(
+; CHECK-LMUL8-NEXT:  entry:
+; CHECK-LMUL8-NEXT:    [[CMP3:%.*]] = icmp sgt i32 [[N:%.*]], 0
+; CHECK-LMUL8-NEXT:    br i1 [[CMP3]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_COND_CLEANUP:%.*]]
+; CHECK-LMUL8:       for.body.preheader:
+; CHECK-LMUL8-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[N]] to i64
+; CHECK-LMUL8-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL8-NEXT:    [[TMP1:%.*]] = mul i64 [[TMP0]], 16
+; CHECK-LMUL8-NEXT:    [[MIN_ITERS_CHECK:%.*]] = icmp ult i64 [[WIDE_TRIP_COUNT]], [[TMP1]]
+; CHECK-LMUL8-NEXT:    br i1 [[MIN_ITERS_CHECK]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
+; CHECK-LMUL8:       vector.ph:
+; CHECK-LMUL8-NEXT:    [[TMP2:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL8-NEXT:    [[TMP3:%.*]] = mul i64 [[TMP2]], 16
+; CHECK-LMUL8-NEXT:    [[N_MOD_VF:%.*]] = urem i64 [[WIDE_TRIP_COUNT]], [[TMP3]]
+; CHECK-LMUL8-NEXT:    [[N_VEC:%.*]] = sub i64 [[WIDE_TRIP_COUNT]], [[N_MOD_VF]]
+; CHECK-LMUL8-NEXT:    br label [[VECTOR_BODY:%.*]]
+; CHECK-LMUL8:       vector.body:
+; CHECK-LMUL8-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; CHECK-LMUL8-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
+; CHECK-LMUL8-NEXT:    [[TMP5:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL8-NEXT:    [[TMP6:%.*]] = mul i64 [[TMP5]], 8
+; CHECK-LMUL8-NEXT:    [[TMP7:%.*]] = add i64 [[TMP6]], 0
+; CHECK-LMUL8-NEXT:    [[TMP8:%.*]] = mul i64 [[TMP7]], 1
+; CHECK-LMUL8-NEXT:    [[TMP9:%.*]] = add i64 [[INDEX]], [[TMP8]]
+; CHECK-LMUL8-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i32*, i32** [[A:%.*]], i64 [[TMP4]]
+; CHECK-LMUL8-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[TMP9]]
+; CHECK-LMUL8-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 0
+; CHECK-LMUL8-NEXT:    [[TMP13:%.*]] = bitcast i32** [[TMP12]] to <vscale x 8 x i32*>*
+; CHECK-LMUL8-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x i32*>, <vscale x 8 x i32*>* [[TMP13]], align 8
+; CHECK-LMUL8-NEXT:    [[TMP14:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-LMUL8-NEXT:    [[TMP15:%.*]] = mul i32 [[TMP14]], 8
+; CHECK-LMUL8-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 [[TMP15]]
+; CHECK-LMUL8-NEXT:    [[TMP17:%.*]] = bitcast i32** [[TMP16]] to <vscale x 8 x i32*>*
+; CHECK-LMUL8-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 8 x i32*>, <vscale x 8 x i32*>* [[TMP17]], align 8
+; CHECK-LMUL8-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i32, <vscale x 8 x i32*> [[WIDE_LOAD]], i64 1
+; CHECK-LMUL8-NEXT:    [[TMP19:%.*]] = getelementptr inbounds i32, <vscale x 8 x i32*> [[WIDE_LOAD1]], i64 1
+; CHECK-LMUL8-NEXT:    [[TMP20:%.*]] = bitcast i32** [[TMP12]] to <vscale x 8 x i32*>*
+; CHECK-LMUL8-NEXT:    store <vscale x 8 x i32*> [[TMP18]], <vscale x 8 x i32*>* [[TMP20]], align 8
+; CHECK-LMUL8-NEXT:    [[TMP21:%.*]] = call i32 @llvm.vscale.i32()
+; CHECK-LMUL8-NEXT:    [[TMP22:%.*]] = mul i32 [[TMP21]], 8
+; CHECK-LMUL8-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i32*, i32** [[TMP10]], i32 [[TMP22]]
+; CHECK-LMUL8-NEXT:    [[TMP24:%.*]] = bitcast i32** [[TMP23]] to <vscale x 8 x i32*>*
+; CHECK-LMUL8-NEXT:    store <vscale x 8 x i32*> [[TMP19]], <vscale x 8 x i32*>* [[TMP24]], align 8
+; CHECK-LMUL8-NEXT:    [[TMP25:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-LMUL8-NEXT:    [[TMP26:%.*]] = mul i64 [[TMP25]], 16
+; CHECK-LMUL8-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP26]]
+; CHECK-LMUL8-NEXT:    [[TMP27:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-LMUL8-NEXT:    br i1 [[TMP27]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP4:![0-9]+]]
+; CHECK-LMUL8:       middle.block:
+; CHECK-LMUL8-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
+; CHECK-LMUL8-NEXT:    br i1 [[CMP_N]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[SCALAR_PH]]
+; CHECK-LMUL8:       scalar.ph:
+; CHECK-LMUL8-NEXT:    [[BC_RESUME_VAL:%.*]] = phi i64 [ [[N_VEC]], [[MIDDLE_BLOCK]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
+; CHECK-LMUL8-NEXT:    br label [[FOR_BODY:%.*]]
+; CHECK-LMUL8:       for.cond.cleanup.loopexit:
+; CHECK-LMUL8-NEXT:    br label [[FOR_COND_CLEANUP]]
+; CHECK-LMUL8:       for.cond.cleanup:
+; CHECK-LMUL8-NEXT:    ret void
+; CHECK-LMUL8:       for.body:
+; CHECK-LMUL8-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
+; CHECK-LMUL8-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32*, i32** [[A]], i64 [[INDVARS_IV]]
+; CHECK-LMUL8-NEXT:    [[TMP28:%.*]] = load i32*, i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL8-NEXT:    [[ADD_PTR:%.*]] = getelementptr inbounds i32, i32* [[TMP28]], i64 1
+; CHECK-LMUL8-NEXT:    store i32* [[ADD_PTR]], i32** [[ARRAYIDX]], align 8
+; CHECK-LMUL8-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
+; CHECK-LMUL8-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
+; CHECK-LMUL8-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP5:![0-9]+]]
+;
 entry:
   %cmp3 = icmp sgt i32 %n, 0
   br i1 %cmp3, label %for.body.preheader, label %for.cond.cleanup
