@@ -1469,12 +1469,12 @@ void ASTWriter::WriteControlBlock(Preprocessor &PP, ASTContext &Context,
 
     Record.clear();
     Record.push_back(ORIGINAL_FILE);
-    Record.push_back(SM.getMainFileID().getOpaqueValue());
+    AddFileID(SM.getMainFileID(), Record);
     EmitRecordWithPath(FileAbbrevCode, Record, MainFile->getName());
   }
 
   Record.clear();
-  Record.push_back(SM.getMainFileID().getOpaqueValue());
+  AddFileID(SM.getMainFileID(), Record);
   Stream.EmitRecord(ORIGINAL_FILE_ID, Record);
 
   std::set<const FileEntry *> AffectingClangModuleMaps;
@@ -2047,7 +2047,6 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
     // Record the offset of this source-location entry.
     uint64_t Offset = Stream.GetCurrentBitNo() - SLocEntryOffsetsBase;
     assert((Offset >> 32) == 0 && "SLocEntry offset too large");
-    SLocEntryOffsets.push_back(Offset);
 
     // Figure out which record code to use.
     unsigned Code;
@@ -2062,8 +2061,6 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
     Record.clear();
     Record.push_back(Code);
 
-    // Starting offset of this entry within this module, so skip the dummy.
-    Record.push_back(SLoc->getOffset() - 2);
     if (SLoc->isFile()) {
       const SrcMgr::FileInfo &File = SLoc->getFile();
       const SrcMgr::ContentCache *Content = &File.getContentCache();
@@ -2073,6 +2070,9 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
         // Do not emit files that were not listed as inputs.
         continue;
       }
+      SLocEntryOffsets.push_back(Offset);
+      // Starting offset of this entry within this module, so skip the dummy.
+      Record.push_back(getAdjustedOffset(SLoc->getOffset()) - 2);
       AddSourceLocation(File.getIncludeLoc(), Record);
       Record.push_back(File.getFileCharacteristic()); // FIXME: stable encoding
       Record.push_back(File.hasLineDirectives());
@@ -2086,7 +2086,7 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
         assert(InputFileIDs[Content->OrigEntry] != 0 && "Missed file entry");
         Record.push_back(InputFileIDs[Content->OrigEntry]);
 
-        Record.push_back(File.NumCreatedFIDs);
+        Record.push_back(getAdjustedNumCreatedFIDs(FID));
 
         FileDeclIDsTy::iterator FDI = FileDeclIDs.find(FID);
         if (FDI != FileDeclIDs.end()) {
@@ -2133,6 +2133,9 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
     } else {
       // The source location entry is a macro expansion.
       const SrcMgr::ExpansionInfo &Expansion = SLoc->getExpansion();
+      SLocEntryOffsets.push_back(Offset);
+      // Starting offset of this entry within this module, so skip the dummy.
+      Record.push_back(getAdjustedOffset(SLoc->getOffset()) - 2);
       LocSeq::State Seq;
       AddSourceLocation(Expansion.getSpellingLoc(), Record, Seq);
       AddSourceLocation(Expansion.getExpansionLocStart(), Record, Seq);
@@ -2146,7 +2149,7 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
       SourceLocation::UIntTy NextOffset = SourceMgr.getNextLocalOffset();
       if (I + 1 != N)
         NextOffset = SourceMgr.getLocalSLocEntry(I + 1).getOffset();
-      Record.push_back(NextOffset - SLoc->getOffset() - 1);
+      Record.push_back(getAdjustedOffset(NextOffset - SLoc->getOffset()) - 1);
       Stream.EmitRecordWithAbbrev(SLocExpansionAbbrv, Record);
     }
   }
@@ -2170,7 +2173,7 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
   {
     RecordData::value_type Record[] = {
         SOURCE_LOCATION_OFFSETS, SLocEntryOffsets.size(),
-        SourceMgr.getNextLocalOffset() - 1 /* skip dummy */,
+        getAdjustedOffset(SourceMgr.getNextLocalOffset()) - 1 /* skip dummy */,
         SLocEntryOffsetsBase - SourceManagerBlockOffset};
     Stream.EmitRecordWithBlob(SLocOffsetsAbbrev, Record,
                               bytes(SLocEntryOffsets));
@@ -2206,8 +2209,7 @@ void ASTWriter::WriteSourceManagerBlock(SourceManager &SourceMgr,
       if (L.first.ID < 0)
         continue;
 
-      // Emit the file ID
-      Record.push_back(L.first.ID);
+      AddFileID(L.first, Record);
 
       // Emit the line entries
       Record.push_back(L.second.size());
@@ -2570,7 +2572,7 @@ void ASTWriter::WritePreprocessorDetail(PreprocessingRecord &PPRec,
     uint64_t Offset = Stream.GetCurrentBitNo() - MacroOffsetsBase;
     assert((Offset >> 32) == 0 && "Preprocessed entity offset too large");
     PreprocessedEntityOffsets.push_back(
-        PPEntityOffset((*E)->getSourceRange(), Offset));
+        PPEntityOffset(getAdjustedRange((*E)->getSourceRange()), Offset));
 
     if (auto *MD = dyn_cast<MacroDefinitionRecord>(*E)) {
       // Record this macro definition's ID.
@@ -3011,13 +3013,11 @@ void ASTWriter::WritePragmaDiagnosticMappings(const DiagnosticsEngine &Diag,
       continue;
     ++NumLocations;
 
-    SourceLocation Loc = Diag.SourceMgr->getComposedLoc(FileIDAndFile.first, 0);
-    assert(!Loc.isInvalid() && "start loc for valid FileID is invalid");
-    AddSourceLocation(Loc, Record);
+    AddFileID(FileIDAndFile.first, Record);
 
     Record.push_back(FileIDAndFile.second.StateTransitions.size());
     for (auto &StatePoint : FileIDAndFile.second.StateTransitions) {
-      Record.push_back(StatePoint.Offset);
+      Record.push_back(getAdjustedOffset(StatePoint.Offset));
       AddDiagState(StatePoint.State, false);
     }
   }
@@ -5228,8 +5228,42 @@ void ASTWriter::AddAlignPackInfo(const Sema::AlignPackInfo &Info,
   Record.push_back(Raw);
 }
 
+FileID ASTWriter::getAdjustedFileID(FileID FID) const {
+  // TODO: Actually adjust this.
+  return FID;
+}
+
+unsigned ASTWriter::getAdjustedNumCreatedFIDs(FileID FID) const {
+  // TODO: Actually adjust this.
+  return PP->getSourceManager()
+      .getLocalSLocEntry(FID.ID)
+      .getFile()
+      .NumCreatedFIDs;
+}
+
+SourceLocation ASTWriter::getAdjustedLocation(SourceLocation Loc) const {
+  // TODO: Actually adjust this.
+  return Loc;
+}
+
+SourceRange ASTWriter::getAdjustedRange(SourceRange Range) const {
+  // TODO: Actually adjust this.
+  return Range;
+}
+
+SourceLocation::UIntTy
+ASTWriter::getAdjustedOffset(SourceLocation::UIntTy Offset) const {
+  // TODO: Actually adjust this.
+  return Offset;
+}
+
+void ASTWriter::AddFileID(FileID FID, RecordDataImpl &Record) {
+  Record.push_back(getAdjustedFileID(FID).getOpaqueValue());
+}
+
 void ASTWriter::AddSourceLocation(SourceLocation Loc, RecordDataImpl &Record,
                                   SourceLocationSequence *Seq) {
+  Loc = getAdjustedLocation(Loc);
   Record.push_back(SourceLocationEncoding::encode(Loc, Seq));
 }
 
