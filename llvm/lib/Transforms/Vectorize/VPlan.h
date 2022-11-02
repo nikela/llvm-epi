@@ -1217,17 +1217,24 @@ class VPWidenIntOrFpInductionRecipe : public VPRecipeBase, public VPValue {
 public:
   VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
                                 const InductionDescriptor &IndDesc,
-                                bool NeedsVectorIV)
+                                bool NeedsVectorIV, VPValue *EVLRecipe)
       : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start, Step}),
         VPValue(IV, this), IV(IV), IndDesc(IndDesc),
-        NeedsVectorIV(NeedsVectorIV) {}
+        NeedsVectorIV(NeedsVectorIV) {
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
 
   VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
                                 const InductionDescriptor &IndDesc,
-                                TruncInst *Trunc, bool NeedsVectorIV)
+                                TruncInst *Trunc, bool NeedsVectorIV,
+                                VPValue *EVLRecipe)
       : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start, Step}),
         VPValue(Trunc, this), IV(IV), IndDesc(IndDesc),
-        NeedsVectorIV(NeedsVectorIV) {}
+        NeedsVectorIV(NeedsVectorIV) {
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
 
   ~VPWidenIntOrFpInductionRecipe() override = default;
 
@@ -1280,6 +1287,11 @@ public:
 
   /// Returns true if a vector phi needs to be created for the induction.
   bool needsVectorIV() const { return NeedsVectorIV; }
+
+  /// Returns the EVLRecipe VP Value.
+  VPValue *getEVLRecipe() const {
+    return getNumOperands() > 2 ? getOperand(2) : nullptr;
+  }
 };
 
 /// A pure virtual base class for all recipes modeling header phis, including

@@ -9104,10 +9104,12 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
 
 /// Creates a VPWidenIntOrFpInductionRecpipe for \p Phi. If needed, it will also
 /// insert a recipe to expand the step for the induction recipe.
-static VPWidenIntOrFpInductionRecipe *createWidenInductionRecipes(
-    PHINode *Phi, Instruction *PhiOrTrunc, VPValue *Start,
-    const InductionDescriptor &IndDesc, LoopVectorizationCostModel &CM,
-    VPlan &Plan, ScalarEvolution &SE, Loop &OrigLoop, VFRange &Range) {
+static VPWidenIntOrFpInductionRecipe *
+createWidenInductionRecipes(PHINode *Phi, Instruction *PhiOrTrunc,
+                            VPValue *Start, const InductionDescriptor &IndDesc,
+                            LoopVectorizationCostModel &CM, VPlan &Plan,
+                            ScalarEvolution &SE, Loop &OrigLoop, VFRange &Range,
+                            VPValue *EVLRecipe) {
   // Returns true if an instruction \p I should be scalarized instead of
   // vectorized for the chosen vectorization factor.
   auto ShouldScalarizeInstruction = [&CM](Instruction *I, ElementCount VF) {
@@ -9129,25 +9131,31 @@ static VPWidenIntOrFpInductionRecipe *createWidenInductionRecipes(
       vputils::getOrCreateVPValueForSCEVExpr(Plan, IndDesc.getStep(), SE);
   if (auto *TruncI = dyn_cast<TruncInst>(PhiOrTrunc)) {
     return new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, IndDesc, TruncI,
-                                             !NeedsScalarIVOnly);
+                                             !NeedsScalarIVOnly, EVLRecipe);
   }
   assert(isa<PHINode>(PhiOrTrunc) && "must be a phi node here");
   return new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, IndDesc,
-                                           !NeedsScalarIVOnly);
+                                           !NeedsScalarIVOnly, EVLRecipe);
 }
 
-VPRecipeBase *VPRecipeBuilder::tryToOptimizeInductionPHI(
-    PHINode *Phi, ArrayRef<VPValue *> Operands, VPlan &Plan, VFRange &Range) {
+VPRecipeBase *
+VPRecipeBuilder::tryToOptimizeInductionPHI(PHINode *Phi,
+                                           ArrayRef<VPValue *> Operands,
+                                           VPlanPtr &Plan, VFRange &Range) {
 
   // Check if this is an integer or fp induction. If so, build the recipe that
   // produces its scalar and vector values.
-  if (auto *II = Legal->getIntOrFpInductionDescriptor(Phi))
-    return createWidenInductionRecipes(Phi, Phi, Operands[0], *II, CM, Plan,
-                                       *PSE.getSE(), *OrigLoop, Range);
+  if (auto *II = Legal->getIntOrFpInductionDescriptor(Phi)) {
+    VPValue *EVLRecipe =
+        preferPredicatedWiden() ? getOrCreateEVL(Plan) : nullptr;
+    return createWidenInductionRecipes(Phi, Phi, Operands[0], *II, CM, *Plan,
+                                       *PSE.getSE(), *OrigLoop, Range,
+                                       EVLRecipe);
+  }
 
   // Check if this is pointer induction. If so, build the recipe for it.
   if (auto *II = Legal->getPointerInductionDescriptor(Phi)) {
-    VPValue *Step = vputils::getOrCreateVPValueForSCEVExpr(Plan, II->getStep(),
+    VPValue *Step = vputils::getOrCreateVPValueForSCEVExpr(*Plan, II->getStep(),
                                                            *PSE.getSE());
     assert(isa<SCEVConstant>(II->getStep()));
     return new VPWidenPointerInductionRecipe(
@@ -9162,7 +9170,8 @@ VPRecipeBase *VPRecipeBuilder::tryToOptimizeInductionPHI(
 }
 
 VPWidenIntOrFpInductionRecipe *VPRecipeBuilder::tryToOptimizeInductionTruncate(
-    TruncInst *I, ArrayRef<VPValue *> Operands, VFRange &Range, VPlan &Plan) {
+    TruncInst *I, ArrayRef<VPValue *> Operands, VFRange &Range,
+    VPlanPtr &Plan) {
   // Optimize the special case where the source is a constant integer
   // induction variable. Notice that we can only optimize the 'trunc' case
   // because (a) FP conversions lose precision, (b) sext/zext may wrap, and
@@ -9182,9 +9191,12 @@ VPWidenIntOrFpInductionRecipe *VPRecipeBuilder::tryToOptimizeInductionTruncate(
 
     auto *Phi = cast<PHINode>(I->getOperand(0));
     const InductionDescriptor &II = *Legal->getIntOrFpInductionDescriptor(Phi);
-    VPValue *Start = Plan.getOrAddVPValue(II.getStartValue());
-    return createWidenInductionRecipes(Phi, I, Start, II, CM, Plan,
-                                       *PSE.getSE(), *OrigLoop, Range);
+    VPValue *Start = Plan->getOrAddVPValue(II.getStartValue());
+    VPValue *EVLRecipe =
+        preferPredicatedWiden() ? getOrCreateEVL(Plan) : nullptr;
+    return createWidenInductionRecipes(Phi, I, Start, II, CM, *Plan,
+                                       *PSE.getSE(), *OrigLoop, Range,
+                                       EVLRecipe);
   }
   return nullptr;
 }
@@ -9620,7 +9632,7 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
     // can have earlier phis as incoming values.
     recordRecipeOf(Phi);
 
-    if ((Recipe = tryToOptimizeInductionPHI(Phi, Operands, *Plan, Range)))
+    if ((Recipe = tryToOptimizeInductionPHI(Phi, Operands, Plan, Range)))
       return toVPRecipeResult(Recipe);
 
     VPHeaderPHIRecipe *PhiRecipe = nullptr;
@@ -9662,7 +9674,7 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
 
   if (isa<TruncInst>(Instr) &&
       (Recipe = tryToOptimizeInductionTruncate(cast<TruncInst>(Instr), Operands,
-                                               Range, *Plan)))
+                                               Range, Plan)))
     return toVPRecipeResult(Recipe);
 
   // All widen recipes below deal only with VF > 1.
@@ -10238,8 +10250,24 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   }
   
   // Now is a good moment to insert the VPWidenEVLRecipe.
-  if (EVLRecipe)
-    HeaderVPBB->insert(EVLRecipe, HeaderVPBB->getFirstNonPhi());
+  if (EVLRecipe) {
+    bool Found = false;
+    for (auto &VPRecipe : *HeaderVPBB) {
+      if (!VPRecipe.isPhi())
+        continue;
+      for (auto &VPOp : VPRecipe.operands()) {
+        if (VPOp == EVLRecipe) {
+          Found = true;
+          EVLRecipe->insertBefore(&VPRecipe);
+          break;
+        }
+      }
+      if (Found)
+        break;
+    }
+    if (!Found)
+      HeaderVPBB->insert(EVLRecipe, HeaderVPBB->getFirstNonPhi());
+  }
 
   std::string PlanName;
   raw_string_ostream RSO(PlanName);
@@ -10601,14 +10629,30 @@ void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
   VecInd->setDebugLoc(EntryVal->getDebugLoc());
   Instruction *LastInduction = VecInd;
 
+  VPValue *EVLRecipe = getEVLRecipe();
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     State.set(this, LastInduction, Part);
 
     if (isa<TruncInst>(EntryVal))
       State.addMetadata(LastInduction, EntryVal);
 
-    LastInduction = cast<Instruction>(
-        Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add"));
+    if (EVLRecipe) {
+      // Ensure the types match.
+      Type *DestTy = LastInduction->getType()->getScalarType();
+      Value *EVL = State.get(EVLRecipe, Part);
+      if (DestTy->isIntegerTy()) {
+        EVL = Builder.CreateZExtOrTrunc(EVL, DestTy);
+      } else {
+        assert(DestTy->isFloatingPointTy());
+        EVL = Builder.CreateUIToFP(EVL, DestTy);
+      }
+      Value *SplatEVL = Builder.CreateVectorSplat(State.VF, EVL);
+      LastInduction = cast<Instruction>(
+          Builder.CreateBinOp(AddOp, LastInduction, SplatEVL, "step.add"));
+    } else {
+      LastInduction = cast<Instruction>(
+          Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add"));
+    }
     LastInduction->setDebugLoc(EntryVal->getDebugLoc());
   }
 

@@ -52,8 +52,12 @@ void VPlanTransforms::VPInstructionsToVPRecipes(
           VPValue *Start = Plan->getOrAddVPValue(II->getStartValue());
           VPValue *Step =
               vputils::getOrCreateVPValueForSCEVExpr(*Plan, II->getStep(), SE);
+          // TODO: when we'll use explicit vector length in the native VPlan,
+          // we need to bring the EVLRecipe up to this point (e.g., in the
+          // VPlan itself).
           NewRecipe =
-              new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, *II, true);
+              new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, *II, true,
+                                                /*EVLRecipe*/ nullptr);
         } else {
           Plan->addVPValue(Phi, VPPhi);
           continue;

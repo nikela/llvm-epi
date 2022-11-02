@@ -977,6 +977,10 @@ void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
 
   O << ", ";
   getStepValue()->printAsOperand(O, SlotTracker);
+  if (auto *EVL = getEVLRecipe()) {
+    O << ", ";
+    EVL->printAsOperand(O, SlotTracker);
+  }
 }
 #endif
 

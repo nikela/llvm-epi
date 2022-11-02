@@ -698,6 +698,10 @@ void VPlan::execute(VPTransformState *State) {
       continue;
     }
 
+    // EVLRecipe is not an actual PHI, even though conceptually it is.
+    if (isa<VPWidenEVLRecipe>(&R))
+      continue;
+
     // Skip phi-like recipes that generate their backedege values themselves.
     if (isa<VPWidenPHIRecipe>(&R))
       continue;
