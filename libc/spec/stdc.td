@@ -9,6 +9,8 @@ def StdC : StandardSpec<"stdc"> {
   NamedType LDivTType = NamedType<"ldiv_t">;
   NamedType LLDivTType = NamedType<"lldiv_t">;
 
+  NamedType JmpBuf = NamedType<"jmp_buf">;
+
   NamedType TssTType = NamedType<"tss_t">;
   PtrType TssTPtr = PtrType<TssTType>;
   NamedType TssDtorTType = NamedType<"tss_dtor_t">;
@@ -477,12 +479,15 @@ def StdC : StandardSpec<"stdc"> {
           FunctionSpec<"nextafter", RetValSpec<DoubleType>, [ArgSpec<DoubleType>, ArgSpec<DoubleType>]>,
           FunctionSpec<"nextafterl", RetValSpec<LongDoubleType>, [ArgSpec<LongDoubleType>, ArgSpec<LongDoubleType>]>,
 
+          FunctionSpec<"pow", RetValSpec<DoubleType>, [ArgSpec<DoubleType>, ArgSpec<DoubleType>]>,
+
           FunctionSpec<"coshf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
           FunctionSpec<"sinhf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
           FunctionSpec<"tanhf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
 
           FunctionSpec<"acosf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
           FunctionSpec<"asinf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
+          FunctionSpec<"asin", RetValSpec<DoubleType>, [ArgSpec<DoubleType>]>,
           FunctionSpec<"atanf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
 
           FunctionSpec<"atanhf", RetValSpec<FloatType>, [ArgSpec<FloatType>]>,
@@ -985,6 +990,30 @@ def StdC : StandardSpec<"stdc"> {
       ]
   >;
 
+  HeaderSpec SetJmp = HeaderSpec<
+      "setjmp.h",
+      [], // Macros
+      [JmpBuf],
+      [], // Enumerations
+      [
+          FunctionSpec<
+              "longjmp",
+              RetValSpec<NoReturn>,
+              [ArgSpec<JmpBuf>, ArgSpec<IntType>]
+          >,
+          FunctionSpec<
+              "setjmp",
+              RetValSpec<IntType>,
+              [ArgSpec<JmpBuf>]
+          >,
+          FunctionSpec<
+              "longjmp",
+              RetValSpec<VoidType>,
+              [ArgSpec<JmpBuf>, ArgSpec<IntType>]
+          >,
+      ]
+  >;
+
   let Headers = [
     Assert,
     CType,
@@ -995,6 +1024,7 @@ def StdC : StandardSpec<"stdc"> {
     StdIO,
     StdLib,
     IntTypes,
+    SetJmp,
     Signal,
     Threads,
     Time,

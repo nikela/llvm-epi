@@ -99,7 +99,6 @@ def : WriteRes<WriteLDH, [AvispadoUnitMem]>;
 
 let Latency = 2 in {
 def : WriteRes<WriteLDW, [AvispadoUnitMem]>;
-def : WriteRes<WriteLDWU, [AvispadoUnitMem]>;
 def : WriteRes<WriteLDD, [AvispadoUnitMem]>;
 def : WriteRes<WriteFLD32, [AvispadoUnitMem]>;
 def : WriteRes<WriteFLD64, [AvispadoUnitMem]>;

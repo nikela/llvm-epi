@@ -8618,6 +8618,11 @@ SDValue DAGCombiner::visitXOR(SDNode *N) {
   if (SDValue RXOR = reassociateOps(ISD::XOR, DL, N0, N1, N->getFlags()))
     return RXOR;
 
+  // fold (a^b) -> (a|b) iff a and b share no bits.
+  if ((!LegalOperations || TLI.isOperationLegal(ISD::OR, VT)) &&
+      DAG.haveNoCommonBitsSet(N0, N1))
+    return DAG.getNode(ISD::OR, DL, VT, N0, N1);
+
   // look for 'add-like' folds:
   // XOR(N0,MIN_SIGNED_VALUE) == ADD(N0,MIN_SIGNED_VALUE)
   if ((!LegalOperations || TLI.isOperationLegal(ISD::ADD, VT)) &&
@@ -8872,13 +8877,9 @@ SDValue DAGCombiner::visitShiftByConstant(SDNode *N) {
   if (!LHS.hasOneUse() || !TLI.isDesirableToCommuteWithShift(N, Level))
     return SDValue();
 
-  // TODO: This is limited to early combining because it may reveal regressions
-  //       otherwise. But since we just checked a target hook to see if this is
-  //       desirable, that should have filtered out cases where this interferes
-  //       with some other pattern matching.
-  if (!LegalTypes)
-    if (SDValue R = combineShiftOfShiftedLogic(N, DAG))
-      return R;
+  // Fold shift(bitop(shift(x,c1),y), c2) -> bitop(shift(x,c1+c2),shift(y,c2)).
+  if (SDValue R = combineShiftOfShiftedLogic(N, DAG))
+    return R;
 
   // We want to pull some binops through shifts, so that we have (and (shift))
   // instead of (shift (and)), likewise for add, or, xor, etc.  This sort of
@@ -14719,8 +14720,8 @@ SDValue DAGCombiner::visitFSUBForFMACombine(SDNode *N) {
     return Options.UnsafeFPMath || N->getFlags().hasAllowReassociation();
   };
 
-  auto isContractableAndReassociableFMUL = [isContractableFMUL,
-                                            isReassociable](SDValue N) {
+  auto isContractableAndReassociableFMUL = [&isContractableFMUL,
+                                            &isReassociable](SDValue N) {
     return isContractableFMUL(N) && isReassociable(N.getNode());
   };
 
@@ -23521,8 +23522,11 @@ SDValue DAGCombiner::visitSCALAR_TO_VECTOR(SDNode *N) {
   // TODO: Generalize this, so it can be called from visitINSERT_VECTOR_ELT().
   SDValue Scalar = N->getOperand(0);
   unsigned Opcode = Scalar.getOpcode();
+  EVT VecEltVT = VT.getScalarType();
   if (Scalar.hasOneUse() && Scalar->getNumValues() == 1 &&
-      TLI.isBinOp(Opcode) && VT.getScalarType() == Scalar.getValueType() &&
+      TLI.isBinOp(Opcode) && Scalar.getValueType() == VecEltVT &&
+      Scalar.getOperand(0).getValueType() == VecEltVT &&
+      Scalar.getOperand(1).getValueType() == VecEltVT &&
       DAG.isSafeToSpeculativelyExecute(Opcode) && hasOperation(Opcode, VT)) {
     // Match an extract element and get a shuffle mask equivalent.
     SmallVector<int, 8> ShufMask(VT.getVectorNumElements(), -1);
@@ -23567,11 +23571,9 @@ SDValue DAGCombiner::visitSCALAR_TO_VECTOR(SDNode *N) {
     return SDValue();
 
   // If we have an implicit truncate, truncate here if it is legal.
-  if (VT.getScalarType() != Scalar.getValueType() &&
-      Scalar.getValueType().isScalarInteger() &&
-      isTypeLegal(VT.getScalarType())) {
-    SDValue Val =
-        DAG.getNode(ISD::TRUNCATE, SDLoc(Scalar), VT.getScalarType(), Scalar);
+  if (VecEltVT != Scalar.getValueType() &&
+      Scalar.getValueType().isScalarInteger() && isTypeLegal(VecEltVT)) {
+    SDValue Val = DAG.getNode(ISD::TRUNCATE, SDLoc(Scalar), VecEltVT, Scalar);
     return DAG.getNode(ISD::SCALAR_TO_VECTOR, SDLoc(N), VT, Val);
   }
 
@@ -23583,7 +23585,7 @@ SDValue DAGCombiner::visitSCALAR_TO_VECTOR(SDNode *N) {
   EVT SrcVT = SrcVec.getValueType();
   unsigned SrcNumElts = SrcVT.getVectorNumElements();
   unsigned VTNumElts = VT.getVectorNumElements();
-  if (VT.getScalarType() == SrcVT.getScalarType() && VTNumElts <= SrcNumElts) {
+  if (VecEltVT == SrcVT.getScalarType() && VTNumElts <= SrcNumElts) {
     // Create a shuffle equivalent for scalar-to-vector: {ExtIndex, -1, -1, ...}
     SmallVector<int, 8> Mask(SrcNumElts, -1);
     Mask[0] = ExtIndexC->getZExtValue();
