@@ -150,7 +150,6 @@ protected:
     Str << " declare <8 x float> @llvm.vp.sin.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.exp.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.pow.v8f32(<8 x float>, <8 x float>, <8 x i1>, i32) ";
-    Str << " declare <8 x float> @llvm.vp.frint.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.log.v8f32(<8 x float>, <8 x i1>, "
            "i32) ";
     Str << " declare <8 x float> @llvm.vp.log2.v8f32(<8 x float>, <8 x i1>, "
