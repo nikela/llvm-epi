@@ -328,41 +328,46 @@ let Latency = 16, ResourceCycles = [16] in
 
 let Latency = 8, ResourceCycles = [8] in
 {
-  def : WriteRes<WriteVIALUV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIALUX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIALUI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWALUV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWALUX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWALUI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVExtV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVICALUV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVICALUX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVICALUI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVShiftV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVShiftX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVShiftI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVNShiftV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVNShiftX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVNShiftI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVICmpV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVICmpX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVICmpI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMulV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMulX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIDivV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIDivX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWMulV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWMulX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMulAddV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMulAddX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWMulAddV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIWMulAddX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMergeV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMergeX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMergeI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMovV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMovX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVIMovI, [AvispadoVPUIArith]>;
+  // FIXME: Values are likely unrealistic for LMUL>1
+  foreach mx = SchedMxList in {
+    def : WriteRes<!cast<SchedWrite>("WriteVIALUV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIALUX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIALUI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVExtV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVICALUV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVICALUX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVICALUI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVShiftV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVShiftX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVShiftI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVICmpV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVICmpX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVICmpI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMulV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMulX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIDivV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIDivX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMulAddV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMulAddX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMergeV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMergeX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMergeI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMovV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMovX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIMovI_" # mx), [AvispadoVPUIArith]>;
+  }
+  foreach mx = SchedMxListW in {
+    def : WriteRes<!cast<SchedWrite>("WriteVIWALUV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIWALUX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIWALUI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVNShiftV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVNShiftX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVNShiftI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIWMulV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIWMulX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIWMulAddV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVIWMulAddX_" # mx), [AvispadoVPUIArith]>;
+  }
 
   // Fixed point is integer arithmetic in disguise.
   def : WriteRes<WriteVSALUV, [AvispadoVPUIArith]>;
@@ -491,33 +496,38 @@ def : ReadAdvance<ReadVST4R, 0>;
 def : ReadAdvance<ReadVST8R, 0>;
 
 // 12. Vector Integer Arithmetic Instructions
-def : ReadAdvance<ReadVICALUV, 0>;
-def : ReadAdvance<ReadVICALUX, 0>;
-def : ReadAdvance<ReadVIWALUV, 0>;
-def : ReadAdvance<ReadVIWALUX, 0>;
-def : ReadAdvance<ReadVExtV, 0>;
-def : ReadAdvance<ReadVIALUV, 0>;
-def : ReadAdvance<ReadVIALUX, 0>;
-def : ReadAdvance<ReadVShiftV, 0>;
-def : ReadAdvance<ReadVShiftX, 0>;
-def : ReadAdvance<ReadVNShiftV, 0>;
-def : ReadAdvance<ReadVNShiftX, 0>;
-def : ReadAdvance<ReadVICmpV, 0>;
-def : ReadAdvance<ReadVICmpX, 0>;
-def : ReadAdvance<ReadVIMulV, 0>;
-def : ReadAdvance<ReadVIMulX, 0>;
-def : ReadAdvance<ReadVIDivV, 0>;
-def : ReadAdvance<ReadVIDivX, 0>;
-def : ReadAdvance<ReadVIWMulV, 0>;
-def : ReadAdvance<ReadVIWMulX, 0>;
-def : ReadAdvance<ReadVIMulAddV, 0>;
-def : ReadAdvance<ReadVIMulAddX, 0>;
-def : ReadAdvance<ReadVIWMulAddV, 0>;
-def : ReadAdvance<ReadVIWMulAddX, 0>;
-def : ReadAdvance<ReadVIMergeV, 0>;
-def : ReadAdvance<ReadVIMergeX, 0>;
-def : ReadAdvance<ReadVIMovV, 0>;
-def : ReadAdvance<ReadVIMovX, 0>;
+foreach mx = SchedMxList in {
+  def : ReadAdvance<!cast<SchedRead>("ReadVICALUV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVICALUX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVExtV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIALUV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIALUX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVShiftV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVShiftX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVICmpV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVICmpX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMulV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMulX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIDivV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIDivX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMulAddV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMulAddX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMergeV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMergeX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMovV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIMovX_" # mx), 0>;
+}
+
+foreach mx = SchedMxListW in {
+  def : ReadAdvance<!cast<SchedRead>("ReadVIWALUV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIWALUX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVNShiftV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVNShiftX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulAddV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulAddX_" # mx), 0>;
+}
 
 // 13. Vector Fixed-Point Arithmetic Instructions
 def : ReadAdvance<ReadVSALUV, 0>;
