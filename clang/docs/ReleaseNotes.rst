@@ -158,6 +158,23 @@ code bases.
       }
     }
 
+- The ``-fexperimental-new-pass-manager`` and ``-fno-legacy-pass-manager``
+  flags have been removed. These have been no-ops since 15.0.0.
+
+- As a side effect of implementing DR692/DR1395/DR1432, Clang now rejects some
+  overloaded function templates as ambiguous when one of the candidates has a
+  trailing parameter pack.
+
+  .. code-block:: c++
+
+    template <typename T> void g(T, T = T());
+    template <typename T, typename... U> void g(T, U...);
+    void h() {
+      // This is rejected due to ambiguity between the pack and the
+      // default argument. Only parameters with arguments are considered during
+      // partial ordering of function templates.
+      g(42);
+    }
 
 What's New in Clang |release|?
 ==============================
@@ -258,6 +275,24 @@ Bug Fixes
 - Fix template arguments of pointer and reference not taking the type as
   part of their identity.
   `Issue 47136 <https://github.com/llvm/llvm-project/issues/47136>`_
+- Fix a crash when trying to form a recovery expression on a call inside a
+  constraint, which re-evaluated the same constraint.
+  `Issue 53213 <https://github.com/llvm/llvm-project/issues/53213>`_
+  `Issue 45736 <https://github.com/llvm/llvm-project/issues/45736>`_
+- Fix an issue when performing constraints partial ordering on non-template
+  functions. `Issue 56154 <https://github.com/llvm/llvm-project/issues/56154>`_
+- Fix handling of unexpanded packs in template argument expressions.
+  `Issue 58679 <https://github.com/llvm/llvm-project/issues/58679>`_
+- Fix a crash when a ``btf_type_tag`` attribute is applied to the pointee of
+  a function pointer.
+- Fix a number of recursively-instantiated constraint issues, which would possibly
+  result in a stack overflow.
+  `Issue 44304 <https://github.com/llvm/llvm-project/issues/44304>`_
+  `Issue 50891 <https://github.com/llvm/llvm-project/issues/50891>`_
+- Clang 14 predeclared some builtin POSIX library functions in ``gnu2x`` mode,
+  and Clang 15 accidentally stopped predeclaring those functions in that
+  language mode. Clang 16 now predeclares those functions again. This fixes
+  `Issue 56607 <https://github.com/llvm/llvm-project/issues/56607>`_.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -336,6 +371,15 @@ Improvements to Clang's diagnostics
   <https://clang.llvm.org/docs/ControlFlowIntegrity.html>`_ failures. This diagnostic
   is grouped under ``-Wcast-function-type`` as it identifies a more strict set of
   potentially problematic function type casts.
+- Clang will now disambiguate NTTP types when printing diagnostic that contain NTTP types.
+  Fixes `Issue 57562 <https://github.com/llvm/llvm-project/issues/57562>`_.
+- Better error recovery for pack expansion of expressions.
+  `Issue 58673 <https://github.com/llvm/llvm-project/issues/58673>`_.
+- Better diagnostics when the user has missed `auto` in a declaration.
+  `Issue 49129 <https://github.com/llvm/llvm-project/issues/49129>`_.
+- Clang now diagnoses use of invalid or reserved module names in a module
+  export declaration. Both are diagnosed as an error, but the diagnostic is
+  suppressed for use of reserved names in a system header.
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
@@ -391,8 +435,26 @@ New Compiler Flags
   `::operator new(size_­t, std::aligned_val_t, nothrow_­t)` if there is
   `get_­return_­object_­on_­allocation_­failure`. We feel this is more consistent
   with the intention.
+
 - Added ``--no-default-config`` to disable automatically loading configuration
   files using default paths.
+
+- Added the new level, ``3``, to the ``-fstrict-flex-arrays=`` flag. The new
+  level is the strict, standards-conforming mode for flexible array members. It
+  recognizes only incomplete arrays as flexible array members (which is how the
+  feature is defined by the C standard).
+
+  .. code-block:: c
+
+    struct foo {
+      int a;
+      int b[]; // Flexible array member.
+    };
+
+    struct bar {
+      int a;
+      int b[0]; // NOT a flexible array member.
+    };
 
 Deprecated Compiler Flags
 -------------------------
@@ -507,14 +569,15 @@ C2x Feature Support
 
 C++ Language Changes in Clang
 -----------------------------
-- Implemented DR692, DR1395 and DR1432. Use the ``-fclang-abi-compat=15`` option
-  to get the old partial ordering behavior regarding packs. Note that the fix for
-  DR1432 is speculative that there is no wording or even resolution for this issue.
-  A speculative fix for DR1432 is needed because it fixes regressions caused by DR692.
+- Implemented `DR692 <https://wg21.link/cwg692>`_, `DR1395 <https://wg21.link/cwg1395>`_,
+  and `DR1432 <https://wg21.link/cwg1432>`_. The fix for DR1432 is speculative since the
+  issue is still open and has no proposed resolution at this time. A speculative fix
+  for DR1432 is needed to prevent regressions that would otherwise occur due to DR692.
 - Clang's default C++/ObjC++ standard is now ``gnu++17`` instead of ``gnu++14``.
   This means Clang will by default accept code using features from C++17 and
   conforming GNU extensions. Projects incompatible with C++17 can add
   ``-std=gnu++14`` to their build settings to restore the previous behaviour.
+- Implemented DR2358 allowing init captures in lambdas in default arguments.
 
 C++20 Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
@@ -591,6 +654,10 @@ ABI Changes in Clang
   such packing. Clang now matches the gcc behavior (except on Darwin and PS4).
   You can switch back to the old ABI behavior with the flag:
   ``-fclang-abi-compat=15.0``.
+- GCC allows POD types to have defaulted special members. Clang historically
+  classified such types as non-POD (for the purposes of Itanium ABI). Clang now
+  matches the gcc behavior (except on Darwin and PS4). You can switch back to
+  the old ABI behavior with the flag: ``-fclang-abi-compat=15.0``.
 
 OpenMP Support in Clang
 -----------------------
@@ -623,6 +690,22 @@ X86 Support in Clang
   * Support intrinsic of ``_aand_i32/64``
   * Support intrinsic of ``_aor_i32/64``
   * Support intrinsic of ``_axor_i32/64``
+- Support ISA of ``AVX-IFMA``.
+  * Support intrinsic of ``_mm(256)_madd52hi_avx_epu64``.
+  * Support intrinsic of ``_mm(256)_madd52lo_avx_epu64``.
+- Support ISA of ``AVX-VNNI-INT8``.
+  * Support intrinsic of ``_mm(256)_dpbssd(s)_epi32``.
+  * Support intrinsic of ``_mm(256)_dpbsud(s)_epi32``.
+  * Support intrinsic of ``_mm(256)_dpbuud(s)_epi32``.
+- Support ISA of ``AVX-NE-CONVERT``.
+  * Support intrinsic of ``_mm(256)_bcstnebf16_ps``.
+  * Support intrinsic of ``_mm(256)_bcstnesh_ps``.
+  * Support intrinsic of ``_mm(256)_cvtneebf16_ps``.
+  * Support intrinsic of ``_mm(256)_cvtneeph_ps``.
+  * Support intrinsic of ``_mm(256)_cvtneobf16_ps``.
+  * Support intrinsic of ``_mm(256)_cvtneoph_ps``.
+  * Support intrinsic of ``_mm(256)_cvtneps_avx_pbh``.
+- ``-march=raptorlake`` and ``-march=meteorlake`` are now supported.
 
 WebAssembly Support in Clang
 ----------------------------
@@ -655,6 +738,9 @@ Arm and AArch64 Support in Clang
   them, which it cannot.
 - Add driver and tuning support for Neoverse V2 via the flag ``-mcpu=neoverse-v2``.
   Native detection is also supported via ``-mcpu=native``.
+- Support has been added for the following processors (-mcpu identifiers in parenthesis):
+
+  * Arm Cortex-A715 (cortex-a715).
 
 Floating Point Support in Clang
 -------------------------------

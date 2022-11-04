@@ -149,10 +149,10 @@ public:
     // FIXME: Assuming ELEN=64.
     bool HasV = llvm::is_contained(Opts.FeaturesAsWritten, "+v");
     if (HasV)
-      resetDataLayout("e-m:e-p:64:64-i64:64-i128:128-n64-S128-v128:128:128-"
+      resetDataLayout("e-m:e-p:64:64-i64:64-i128:128-n32:64-S128-v128:128:128-"
                       "v256:128:128-v512:128:128-v1024:128:128");
     else
-      resetDataLayout("e-m:e-p:64:64-i64:64-i128:128-n64-S128");
+      resetDataLayout("e-m:e-p:64:64-i64:64-i128:128-n32:64-S128");
   }
 
   bool setABI(const std::string &Name) override {

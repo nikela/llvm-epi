@@ -22,6 +22,22 @@ add_libc_unittest(
 )
 
 add_libc_unittest(
+  ungetc_test
+  SUITE
+    libc_stdio_unittests
+  SRCS
+    ungetc_test.cpp
+  DEPENDS
+    libc.include.stdio
+    libc.src.stdio.fclose
+    libc.src.stdio.fopen
+    libc.src.stdio.fread
+    libc.src.stdio.fseek
+    libc.src.stdio.fwrite
+    libc.src.stdio.ungetc
+)
+
+add_libc_unittest(
   unlocked_fileop_test
   SUITE
     libc_stdio_unittests
@@ -170,5 +186,23 @@ add_libc_unittest(
     libc.src.stdio.fwrite
 )
 
+add_libc_unittest(
+  fgets_test
+  SUITE
+    libc_stdio_unittests
+  SRCS
+    fgets_test.cpp
+  DEPENDS
+    libc.include.errno
+    libc.include.stdio
+    libc.src.stdio.fclose
+    libc.src.stdio.feof
+    libc.src.stdio.ferror
+    libc.src.stdio.fgets
+    libc.src.stdio.fopen
+    libc.src.stdio.fwrite
+)
+
 add_subdirectory(printf_core)
+add_subdirectory(scanf_core)
 add_subdirectory(testdata)
