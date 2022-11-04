@@ -2082,10 +2082,6 @@ public:
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
 
-  bool getConsecutive() const { return Consecutive; }
-
-  bool getReverse() const { return Reverse; }
-
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,

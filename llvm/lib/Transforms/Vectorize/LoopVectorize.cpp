@@ -10996,20 +10996,27 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     if (isReverse()) {
       // If the address is consecutive but reversed, then the
       // wide store needs to start at the last vector element.
-      Value *VecLen;
+      Value *NumElt = nullptr;
+      Value *LastLane = nullptr;
       if (getEVL()) {
         // If EVL is not nullptr, then EVL must be a valid value set during plan
-        // creation and must be used to correctly reverse the address
-        VecLen = State.get(getEVL(), Part);
+        // creation and must be used to correctly reverse the address.
+        // Number of elements already processed.
+        NumElt = Builder.getInt32(0);
+        for (unsigned P = 0; P < Part; P++) {
+          NumElt = Builder.CreateAdd(NumElt, State.get(getEVL(), P));
+        }
+        NumElt = Builder.CreateSub(Builder.getInt32(0), NumElt);
+        LastLane = Builder.CreateSub(Builder.getInt32(1),
+                                     State.get(getEVL(), Part));
       } else {
         // RunTimeVF =  VScale * VF.getKnownMinValue()
         // For fixed-width VScale is 1, then RunTimeVF = VF.getKnownMinValue()
-        VecLen = getRuntimeVF(Builder, Builder.getInt32Ty(), State.VF);
+        Value *RunTimeVF = getRuntimeVF(Builder, Builder.getInt32Ty(),
+                                        State.VF);
+        NumElt = Builder.CreateMul(Builder.getInt32(-Part), RunTimeVF);
+        LastLane = Builder.CreateSub(Builder.getInt32(1), RunTimeVF);
       }
-      // NumElt = -Part * RunTimeVF
-      Value *NumElt = Builder.CreateMul(Builder.getInt32(-Part), VecLen);
-      // LastLane = 1 - RunTimeVF
-      Value *LastLane = Builder.CreateSub(Builder.getInt32(1), VecLen);
       PartPtr =
           cast<GetElementPtrInst>(Builder.CreateGEP(ScalarDataTy, Ptr, NumElt));
       PartPtr->setIsInBounds(InBounds);
