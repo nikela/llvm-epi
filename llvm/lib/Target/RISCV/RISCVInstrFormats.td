@@ -150,16 +150,8 @@ def OPC_JAL       : RISCVOpcode<"JAL",       0b1101111>;
 def OPC_SYSTEM    : RISCVOpcode<"SYSTEM",    0b1110011>;
 def OPC_CUSTOM_3  : RISCVOpcode<"CUSTOM_3",  0b1111011>;
 
-// Row 00
-def OPC_CUSTOM_0   : RISCVOpcode<"CUSTOM_0", 0b0001011>;
-// Row 01
-def OPC_CUSTOM_1   : RISCVOpcode<"CUSTOM_1", 0b0101011>;
-// Row 10
-def OPC_CUSTOM_2   : RISCVOpcode<"CUSTOM_2", 0b1011011>;
-// Row 11
 def OPC_RESERVED_1 : RISCVOpcode<"RESERVED_1", 0b1101011>;
 def OPC_RESERVED_2 : RISCVOpcode<"RESERVED_2", 0b1110111>;
-def OPC_CUSTOM_3   : RISCVOpcode<"CUSTOM_3", 0b1111011>;
 
 class RVInst<dag outs, dag ins, string opcodestr, string argstr,
              list<dag> pattern, InstFormat format>
