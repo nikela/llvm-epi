@@ -10646,7 +10646,10 @@ void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
         assert(DestTy->isFloatingPointTy());
         EVL = Builder.CreateUIToFP(EVL, DestTy);
       }
-      Value *SplatEVL = Builder.CreateVectorSplat(State.VF, EVL);
+      // Multiply the EVL by the step using integer or floating-point
+      // arithmetic as appropriate.
+      Value *Mul = Builder.CreateBinOp(MulOp, Step, EVL);
+      Value *SplatEVL = Builder.CreateVectorSplat(State.VF, Mul);
       LastInduction = cast<Instruction>(
           Builder.CreateBinOp(AddOp, LastInduction, SplatEVL, "step.add"));
     } else {
