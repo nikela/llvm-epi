@@ -92,7 +92,8 @@ static bool parseShowColorsArgs(const llvm::opt::ArgList &args,
 }
 
 /// Extracts the optimisation level from \a args.
-static unsigned getOptimizationLevel(llvm::opt::ArgList &args,
+static unsigned getOptimizationLevel(CompilerInvocation &invoc,
+                                     llvm::opt::ArgList &args,
                                      clang::DiagnosticsEngine &diags) {
   unsigned defaultOpt = llvm::CodeGenOpt::None;
 
@@ -101,10 +102,17 @@ static unsigned getOptimizationLevel(llvm::opt::ArgList &args,
     if (a->getOption().matches(clang::driver::options::OPT_O0))
       return llvm::CodeGenOpt::None;
 
-    assert(a->getOption().matches(clang::driver::options::OPT_O));
-
-    return getLastArgIntValue(args, clang::driver::options::OPT_O, defaultOpt,
-                              diags);
+    if (a->getOption().matches(clang::driver::options::OPT_O)) {
+      return getLastArgIntValue(args, clang::driver::options::OPT_O, defaultOpt,
+                                diags);
+    } else if (a->getOption().matches(clang::driver::options::OPT_Ofast)) {
+      // FIXME: Acting as if -ffp-contract=fast -menable-no-infinities
+      LangOptions &opts = invoc.getLangOpts();
+      opts.setFPContractMode(LangOptions::FPM_Fast);
+      opts.NoHonorInfs = true;
+      return 3;
+    }
+    llvm_unreachable("Unhandled optimization level");
   }
 
   return defaultOpt;
@@ -117,12 +125,13 @@ bool Fortran::frontend::parseDiagnosticArgs(clang::DiagnosticOptions &opts,
   return true;
 }
 
-static bool parseCodeGenArgs(Fortran::frontend::CodeGenOptions &opts,
+static bool parseCodeGenArgs(CompilerInvocation &invoc,
                              llvm::opt::ArgList &args,
                              clang::DiagnosticsEngine &diags) {
+  Fortran::frontend::CodeGenOptions &opts = invoc.getCodeGenOpts();
   unsigned numErrorsBefore = diags.getNumErrors();
 
-  unsigned optLevel = getOptimizationLevel(args, diags);
+  unsigned optLevel = getOptimizationLevel(invoc, args, diags);
 
   unsigned maxOptLevel = 3;
   if (optLevel > maxOptLevel) {
@@ -734,13 +743,11 @@ static bool parseFloatingPointArgs(CompilerInvocation &invoc,
       return false;
     }
 
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.setFPContractMode(fpContractMode);
   }
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_menable_no_infinities)) {
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.NoHonorInfs = true;
   }
 
@@ -821,7 +828,7 @@ bool CompilerInvocation::createFromArgs(
   success &= parseFrontendArgs(res.getFrontendOpts(), args, diags);
   parseTargetArgs(res.getTargetOpts(), args);
   parsePreprocessorArgs(res.getPreprocessorOpts(), args);
-  success &= parseCodeGenArgs(res.getCodeGenOpts(), args, diags);
+  success &= parseCodeGenArgs(res, args, diags);
   success &= parseSemaArgs(res, args, diags);
   success &= parseDialectArgs(res, args, diags);
   success &= parseDiagArgs(res, args, diags);
