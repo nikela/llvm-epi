@@ -3371,7 +3371,7 @@ InnerLoopVectorizer::createVectorizedLoopSkeleton() {
   // to an incorrect trip count of zero. In this (rare) case we will also jump
   // to the scalar loop.
   bool ForbiddenEpilogue =
-      findOptionMDForLoopID(OrigLoopID, "llvm.loop.epilogue.forbid");
+      findOptionMDForLoop(OrigLoop, "llvm.loop.epilogue.forbid");
   emitIterationCountCheck(LoopScalarPreHeader, ForbiddenEpilogue);
 
   // Generate the code to check any assumptions that we've made for SCEV
