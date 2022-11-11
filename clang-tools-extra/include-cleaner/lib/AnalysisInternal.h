@@ -21,6 +21,8 @@
 #ifndef CLANG_INCLUDE_CLEANER_ANALYSISINTERNAL_H
 #define CLANG_INCLUDE_CLEANER_ANALYSISINTERNAL_H
 
+#include "clang-include-cleaner/Record.h"
+#include "clang-include-cleaner/Types.h"
 #include "clang/Basic/SourceLocation.h"
 #include "llvm/ADT/STLFunctionalExtras.h"
 
@@ -37,10 +39,25 @@ namespace include_cleaner {
 ///   the primary location of the AST node found under Root.
 /// - the NamedDecl is the symbol referenced. It is canonical, rather than e.g.
 ///   the redecl actually found by lookup.
+/// - the RefType describes the relation between the SourceLocation and the
+///   NamedDecl.
 ///
 /// walkAST is typically called once per top-level declaration in the file
 /// being analyzed, in order to find all references within it.
-void walkAST(Decl &Root, llvm::function_ref<void(SourceLocation, NamedDecl &)>);
+void walkAST(Decl &Root,
+             llvm::function_ref<void(SourceLocation, NamedDecl &, RefType)>);
+
+/// A location where a symbol can be provided.
+/// It is either a physical file of the TU (SourceLocation) or a logical
+/// location in the standard library (stdlib::Symbol).
+// FIXME: use a real Class!
+using SymbolLocation = std::variant<SourceLocation, tooling::stdlib::Symbol>;
+
+/// Finds the headers that provide the symbol location.
+// FIXME: expose signals
+llvm::SmallVector<Header> findIncludeHeaders(const SymbolLocation &Loc,
+                                             const SourceManager &SM,
+                                             const PragmaIncludes &PI);
 
 /// Write an HTML summary of the analysis to the given stream.
 /// FIXME: Once analysis has a public API, this should be public too.
