@@ -351,14 +351,20 @@ void VPInstruction::generateInstruction(VPTransformState &State,
       bool IsNUW = getOpcode() == VPInstruction::CanonicalIVIncrementNUW;
       auto *Phi = State.get(getOperand(0), 0);
       Value *Step = nullptr;
-      if (getNumOperands() > 1)
+      // Operands > 1 only when we pass the EVL recipe.
+      if (getNumOperands() > 1) {
         // We have the EVL value available to use.
-        Step = Builder.CreateZExtOrTrunc(State.get(getOperand(1), 0),
-                                         Phi->getType());
-      else
+        VPValue *EVL = getOperand(1);
+        Step = State.get(EVL, 0);
+        for (unsigned P = 1; P < State.UF; P++)
+          Step = Builder.CreateAdd(Step, State.get(EVL, P));
+
+        Step = Builder.CreateZExtOrTrunc(Step, Phi->getType());
+      } else {
         // The loop step is equal to the vectorization factor (num of SIMD
         // elements) times the unroll factor (num of SIMD instructions).
         Step = createStepForVF(Builder, Phi->getType(), State.VF, State.UF);
+      }
 
       Next = Builder.CreateAdd(Phi, Step, Name, IsNUW, false);
     } else {
@@ -971,6 +977,10 @@ void VPWidenIntOrFpInductionRecipe::print(raw_ostream &O, const Twine &Indent,
 
   O << ", ";
   getStepValue()->printAsOperand(O, SlotTracker);
+  if (auto *EVL = getEVLRecipe()) {
+    O << ", ";
+    EVL->printAsOperand(O, SlotTracker);
+  }
 }
 #endif
 

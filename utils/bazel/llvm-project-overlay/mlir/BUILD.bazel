@@ -4000,11 +4000,10 @@ cc_library(
         ":GPUDialect",
         ":IR",
         ":LLVMCommonConversion",
+        ":LLVMDialect",
         ":NVGPUDialect",
         ":NVVMDialect",
         ":Pass",
-        ":Transforms",
-        "//llvm:Support",
     ],
 )
 
@@ -5924,12 +5923,24 @@ cc_library(
 )
 
 cc_library(
+    name = "ArithAttrToLLVMConversion",
+    srcs = glob(["lib/Conversion/ArithCommon/*.cpp"]),
+    hdrs = glob(["include/mlir/Conversion/ArithCommon/*.h"]),
+    includes = ["include"],
+    deps = [
+        ":ArithDialect",
+        ":LLVMDialect",
+    ],
+)
+
+cc_library(
     name = "ArithToLLVM",
     srcs = glob(["lib/Conversion/ArithToLLVM/*.cpp"]),
     hdrs = glob(["include/mlir/Conversion/ArithToLLVM/*.h"]),
     includes = ["include"],
     deps = [
         ":Analysis",
+        ":ArithAttrToLLVMConversion",
         ":ArithDialect",
         ":ConversionPassIncGen",
         ":IR",
@@ -5968,6 +5979,7 @@ cc_library(
     includes = ["include"],
     deps = [
         ":Analysis",
+        ":ArithAttrToLLVMConversion",
         ":ConversionPassIncGen",
         ":DataLayoutInterfaces",
         ":IR",
@@ -9277,6 +9289,7 @@ td_library(
     ],
     includes = ["include"],
     deps = [
+        ":ArithOpsTdFiles",
         ":InferTypeOpInterfaceTdFiles",
         ":OpBaseTdFiles",
         ":SideEffectInterfacesTdFiles",
@@ -10174,4 +10187,10 @@ cc_binary(
         ":MlirPdllLspServerLib",
         ":Support",
     ],
+)
+
+td_library(
+    name = "DialectConversionPdllFiles",
+    srcs = ["include/mlir/Transforms/DialectConversion.pdll"],
+    includes = ["include"],
 )

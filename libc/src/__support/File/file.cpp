@@ -294,7 +294,28 @@ int File::seek(long offset, int whence) {
   // Reset the eof flag as a seek might move the file positon to some place
   // readable.
   eof = false;
-  return platform_seek(this, offset, whence);
+  long platform_pos = platform_seek(this, offset, whence);
+  if (platform_pos >= 0)
+    return 0;
+  else
+    return -1;
+}
+
+long File::tell() {
+  FileLock lock(this);
+  long platform_offset;
+  if (eof)
+    platform_offset = platform_seek(this, 0, SEEK_END);
+  else
+    platform_offset = platform_seek(this, 0, SEEK_CUR);
+  if (platform_offset < 0)
+    return -1;
+  if (prev_op == FileOp::READ)
+    return platform_offset - (read_limit - pos);
+  else if (prev_op == FileOp::WRITE)
+    return platform_offset + pos;
+  else
+    return platform_offset;
 }
 
 int File::flush_unlocked() {
@@ -330,12 +351,49 @@ int File::close() {
   return 0;
 }
 
-void File::set_buffer(void *buffer, size_t size, bool owned) {
-  if (own_buf)
-    free(buf);
-  buf = static_cast<uint8_t *>(buffer);
-  bufsize = size;
-  own_buf = owned;
+int File::set_buffer(void *buffer, size_t size, int buffer_mode) {
+  // We do not need to lock the file as this method should be called before
+  // other operations are performed on the file.
+
+  if (buffer != nullptr && size == 0)
+    return EINVAL;
+
+  switch (buffer_mode) {
+  case _IOFBF:
+  case _IOLBF:
+  case _IONBF:
+    break;
+  default:
+    return EINVAL;
+  }
+
+  if (buffer == nullptr && size != 0 && buffer_mode != _IONBF) {
+    // We exclude the case of buffer_mode == _IONBF in this branch
+    // because we don't need to allocate buffer in such a case.
+    if (own_buf) {
+      buf = realloc(buf, size);
+    } else {
+      buf = malloc(size);
+      own_buf = true;
+    }
+    bufsize = size;
+    // TODO: Handle allocation failures.
+  } else {
+    if (own_buf)
+      free(buf);
+    if (buffer_mode != _IONBF) {
+      buf = static_cast<uint8_t *>(buffer);
+      bufsize = size;
+    } else {
+      // We don't need any buffer.
+      buf = nullptr;
+      bufsize = 0;
+    }
+    own_buf = false;
+  }
+  bufmode = buffer_mode;
+  adjust_buf();
+  return 0;
 }
 
 File::ModeFlags File::mode_flags(const char *mode) {

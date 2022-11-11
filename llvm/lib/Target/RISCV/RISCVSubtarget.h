@@ -106,6 +106,7 @@ private:
   unsigned ZvlLen = 0;
   MVT XLenVT = MVT::i32;
   uint8_t MaxInterleaveFactor = 2;
+  uint8_t EPIMaxInterleaveFactor = 8;
   RISCVABI::ABI TargetABI = RISCVABI::ABI_Unknown;
   std::bitset<RISCV::NUM_TARGET_REGS> UserReservedRegister;
   RISCVFrameLowering FrameLowering;
@@ -243,7 +244,9 @@ public:
   // F16 and F64 both require F32.
   bool hasVInstructionsAnyF() const { return hasVInstructionsF32(); }
   unsigned getMaxInterleaveFactor() const {
-    return hasVInstructions() ? MaxInterleaveFactor : 1;
+    return hasVInstructions()
+               ? (HasEPI ? EPIMaxInterleaveFactor : MaxInterleaveFactor)
+               : 1;
   }
 
 protected:

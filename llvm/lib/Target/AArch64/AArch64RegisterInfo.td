@@ -1233,6 +1233,10 @@ let EncoderMethod = "EncodeRegAsMultipleOf<2>",
   def ZZ_d_mul_r : RegisterOperand<ZPR2Mul2, "printTypedVectorList<0,'d'>"> {
     let ParserMatchClass = ZPRVectorListMul<64, 2>;
   }
+
+  def ZZ_q_mul_r : RegisterOperand<ZPR2Mul2, "printTypedVectorList<0,'q'>"> {
+    let ParserMatchClass = ZPRVectorListMul<128, 2>;
+  }
 } // end let EncoderMethod/DecoderMethod
 
 let EncoderMethod = "EncodeRegAsMultipleOf<4>",
@@ -1251,6 +1255,10 @@ let EncoderMethod = "EncodeRegAsMultipleOf<4>",
 
   def ZZZZ_d_mul_r : RegisterOperand<ZPR4Mul4, "printTypedVectorList<0,'d'>"> {
     let ParserMatchClass = ZPRVectorListMul<64, 4>;
+  }
+
+  def ZZZZ_q_mul_r : RegisterOperand<ZPR4Mul4, "printTypedVectorList<0,'q'>"> {
+    let ParserMatchClass = ZPRVectorListMul<128, 4>;
   }
 } // end let EncoderMethod/DecoderMethod
 
@@ -1534,6 +1542,8 @@ class MatrixOperand<RegisterClass RC, int EltSize> : RegisterOperand<RC> {
 
 def MatrixOp : MatrixOperand<MPR, 0>;
 // SME2 register operands and classes
+def MatrixOp8 : MatrixOperand<MPR, 8>;
+def MatrixOp16 : MatrixOperand<MPR, 16>;
 def MatrixOp32 : MatrixOperand<MPR, 32>;
 def MatrixOp64 : MatrixOperand<MPR, 64>;
 

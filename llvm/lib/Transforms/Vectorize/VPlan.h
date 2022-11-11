@@ -1217,17 +1217,24 @@ class VPWidenIntOrFpInductionRecipe : public VPRecipeBase, public VPValue {
 public:
   VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
                                 const InductionDescriptor &IndDesc,
-                                bool NeedsVectorIV)
+                                bool NeedsVectorIV, VPValue *EVLRecipe)
       : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start, Step}),
         VPValue(IV, this), IV(IV), IndDesc(IndDesc),
-        NeedsVectorIV(NeedsVectorIV) {}
+        NeedsVectorIV(NeedsVectorIV) {
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
 
   VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
                                 const InductionDescriptor &IndDesc,
-                                TruncInst *Trunc, bool NeedsVectorIV)
+                                TruncInst *Trunc, bool NeedsVectorIV,
+                                VPValue *EVLRecipe)
       : VPRecipeBase(VPWidenIntOrFpInductionSC, {Start, Step}),
         VPValue(Trunc, this), IV(IV), IndDesc(IndDesc),
-        NeedsVectorIV(NeedsVectorIV) {}
+        NeedsVectorIV(NeedsVectorIV) {
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
 
   ~VPWidenIntOrFpInductionRecipe() override = default;
 
@@ -1280,6 +1287,11 @@ public:
 
   /// Returns true if a vector phi needs to be created for the induction.
   bool needsVectorIV() const { return NeedsVectorIV; }
+
+  /// Returns the EVLRecipe VP Value.
+  VPValue *getEVLRecipe() const {
+    return getNumOperands() > 2 ? getOperand(2) : nullptr;
+  }
 };
 
 /// A pure virtual base class for all recipes modeling header phis, including
@@ -2069,10 +2081,6 @@ public:
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
-
-  bool getConsecutive() const { return Consecutive; }
-
-  bool getReverse() const { return Reverse; }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
@@ -3495,44 +3503,15 @@ inline bool isUniformAfterVectorization(VPValue *VPV) {
 } // end namespace vputils
 
 // Strided accesses.
-struct StrideAccessInfo {
-  bool Valid = false;
-  const SCEV *SCEVExpr = nullptr;
-
-  explicit operator bool() const { return Valid; }
-
-  const SCEV *getSCEVExpr() const { return SCEVExpr; }
-
-  void print(raw_ostream &OS) const {
-    OS << "StrideAccessInfo: ";
-    if (!Valid) {
-      OS << "<<invalid>> ";
-    }
-    OS << "SCEV: ";
-    if (SCEVExpr) {
-      OS << *SCEVExpr;
-    } else {
-      OS << "<<unknown>>";
-    }
-  }
-
-  Value *emitStride();
-  Value *emitBaseAddress();
-};
-
-raw_ostream &operator<<(raw_ostream &OS, const StrideAccessInfo &SAI);
-
 struct StridedAccessValues {
-  Value* BaseAddress;
-  Value* Stride;
+  Value *BaseAddress;
+  Value *Stride;
 };
 
-StrideAccessInfo computeStrideAccessInfo(const VPTransformState &State,
-                                         Value *Addr);
-StridedAccessValues computeStrideAddressing(VPTransformState &State,
-                                            Type *PtrTy,
-                                            const StrideAccessInfo &SAI,
-                                            VPValue *CanonicalIV);
+StridedAccessValues computeStrideAddressing(unsigned Part,
+                                            VPTransformState &State,
+                                            Type *PtrTy, const SCEV *SCEVExpr,
+                                            VPValue *CanonicalIV, VPValue *EVL);
 
 } // end namespace llvm
 

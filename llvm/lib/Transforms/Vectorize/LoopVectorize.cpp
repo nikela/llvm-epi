@@ -389,6 +389,10 @@ cl::opt<cl::boolOrDefault> ForceSafeDivisor(
     "force-widen-divrem-via-safe-divisor", cl::Hidden,
     cl::desc("Override cost based safe divisor widening for div/rem instructions"));
 
+cl::opt<bool> EnableInterleaveWithoutScalarEpilogue(
+    "interleave-no-scalar-epilogue", cl::init(false), cl::Hidden,
+    cl::desc("Enable interleaving even when scalar epilogue is not allowed."));
+
 /// A helper function that returns true if the given type is irregular. The
 /// type is irregular if its allocated size doesn't equal the store size of an
 /// element of the corresponding vector type.
@@ -6379,7 +6383,7 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
   // 3. We don't interleave if we think that we will spill registers to memory
   // due to the increased register pressure.
 
-  if (!isScalarEpilogueAllowed())
+  if (!isScalarEpilogueAllowed() && !EnableInterleaveWithoutScalarEpilogue)
     return 1;
 
   // We used the distance for the interleave count.
@@ -6457,8 +6461,7 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
   }
 
   // Clamp the interleave ranges to reasonable counts.
-  unsigned MaxInterleaveCount =
-      TTI.getMaxInterleaveFactor(VF.getKnownMinValue());
+  unsigned MaxInterleaveCount = TTI.getMaxInterleaveFactorEC(VF);
 
   // Check if the user has overridden the max.
   if (VF.isScalar()) {
@@ -9101,10 +9104,12 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
 
 /// Creates a VPWidenIntOrFpInductionRecpipe for \p Phi. If needed, it will also
 /// insert a recipe to expand the step for the induction recipe.
-static VPWidenIntOrFpInductionRecipe *createWidenInductionRecipes(
-    PHINode *Phi, Instruction *PhiOrTrunc, VPValue *Start,
-    const InductionDescriptor &IndDesc, LoopVectorizationCostModel &CM,
-    VPlan &Plan, ScalarEvolution &SE, Loop &OrigLoop, VFRange &Range) {
+static VPWidenIntOrFpInductionRecipe *
+createWidenInductionRecipes(PHINode *Phi, Instruction *PhiOrTrunc,
+                            VPValue *Start, const InductionDescriptor &IndDesc,
+                            LoopVectorizationCostModel &CM, VPlan &Plan,
+                            ScalarEvolution &SE, Loop &OrigLoop, VFRange &Range,
+                            VPValue *EVLRecipe) {
   // Returns true if an instruction \p I should be scalarized instead of
   // vectorized for the chosen vectorization factor.
   auto ShouldScalarizeInstruction = [&CM](Instruction *I, ElementCount VF) {
@@ -9126,25 +9131,31 @@ static VPWidenIntOrFpInductionRecipe *createWidenInductionRecipes(
       vputils::getOrCreateVPValueForSCEVExpr(Plan, IndDesc.getStep(), SE);
   if (auto *TruncI = dyn_cast<TruncInst>(PhiOrTrunc)) {
     return new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, IndDesc, TruncI,
-                                             !NeedsScalarIVOnly);
+                                             !NeedsScalarIVOnly, EVLRecipe);
   }
   assert(isa<PHINode>(PhiOrTrunc) && "must be a phi node here");
   return new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, IndDesc,
-                                           !NeedsScalarIVOnly);
+                                           !NeedsScalarIVOnly, EVLRecipe);
 }
 
-VPRecipeBase *VPRecipeBuilder::tryToOptimizeInductionPHI(
-    PHINode *Phi, ArrayRef<VPValue *> Operands, VPlan &Plan, VFRange &Range) {
+VPRecipeBase *
+VPRecipeBuilder::tryToOptimizeInductionPHI(PHINode *Phi,
+                                           ArrayRef<VPValue *> Operands,
+                                           VPlanPtr &Plan, VFRange &Range) {
 
   // Check if this is an integer or fp induction. If so, build the recipe that
   // produces its scalar and vector values.
-  if (auto *II = Legal->getIntOrFpInductionDescriptor(Phi))
-    return createWidenInductionRecipes(Phi, Phi, Operands[0], *II, CM, Plan,
-                                       *PSE.getSE(), *OrigLoop, Range);
+  if (auto *II = Legal->getIntOrFpInductionDescriptor(Phi)) {
+    VPValue *EVLRecipe =
+        preferPredicatedWiden() ? getOrCreateEVL(Plan) : nullptr;
+    return createWidenInductionRecipes(Phi, Phi, Operands[0], *II, CM, *Plan,
+                                       *PSE.getSE(), *OrigLoop, Range,
+                                       EVLRecipe);
+  }
 
   // Check if this is pointer induction. If so, build the recipe for it.
   if (auto *II = Legal->getPointerInductionDescriptor(Phi)) {
-    VPValue *Step = vputils::getOrCreateVPValueForSCEVExpr(Plan, II->getStep(),
+    VPValue *Step = vputils::getOrCreateVPValueForSCEVExpr(*Plan, II->getStep(),
                                                            *PSE.getSE());
     assert(isa<SCEVConstant>(II->getStep()));
     return new VPWidenPointerInductionRecipe(
@@ -9159,7 +9170,8 @@ VPRecipeBase *VPRecipeBuilder::tryToOptimizeInductionPHI(
 }
 
 VPWidenIntOrFpInductionRecipe *VPRecipeBuilder::tryToOptimizeInductionTruncate(
-    TruncInst *I, ArrayRef<VPValue *> Operands, VFRange &Range, VPlan &Plan) {
+    TruncInst *I, ArrayRef<VPValue *> Operands, VFRange &Range,
+    VPlanPtr &Plan) {
   // Optimize the special case where the source is a constant integer
   // induction variable. Notice that we can only optimize the 'trunc' case
   // because (a) FP conversions lose precision, (b) sext/zext may wrap, and
@@ -9179,9 +9191,12 @@ VPWidenIntOrFpInductionRecipe *VPRecipeBuilder::tryToOptimizeInductionTruncate(
 
     auto *Phi = cast<PHINode>(I->getOperand(0));
     const InductionDescriptor &II = *Legal->getIntOrFpInductionDescriptor(Phi);
-    VPValue *Start = Plan.getOrAddVPValue(II.getStartValue());
-    return createWidenInductionRecipes(Phi, I, Start, II, CM, Plan,
-                                       *PSE.getSE(), *OrigLoop, Range);
+    VPValue *Start = Plan->getOrAddVPValue(II.getStartValue());
+    VPValue *EVLRecipe =
+        preferPredicatedWiden() ? getOrCreateEVL(Plan) : nullptr;
+    return createWidenInductionRecipes(Phi, I, Start, II, CM, *Plan,
+                                       *PSE.getSE(), *OrigLoop, Range,
+                                       EVLRecipe);
   }
   return nullptr;
 }
@@ -9617,7 +9632,7 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
     // can have earlier phis as incoming values.
     recordRecipeOf(Phi);
 
-    if ((Recipe = tryToOptimizeInductionPHI(Phi, Operands, *Plan, Range)))
+    if ((Recipe = tryToOptimizeInductionPHI(Phi, Operands, Plan, Range)))
       return toVPRecipeResult(Recipe);
 
     VPHeaderPHIRecipe *PhiRecipe = nullptr;
@@ -9659,7 +9674,7 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
 
   if (isa<TruncInst>(Instr) &&
       (Recipe = tryToOptimizeInductionTruncate(cast<TruncInst>(Instr), Operands,
-                                               Range, *Plan)))
+                                               Range, Plan)))
     return toVPRecipeResult(Recipe);
 
   // All widen recipes below deal only with VF > 1.
@@ -10235,8 +10250,24 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
   }
   
   // Now is a good moment to insert the VPWidenEVLRecipe.
-  if (EVLRecipe)
-    HeaderVPBB->insert(EVLRecipe, HeaderVPBB->getFirstNonPhi());
+  if (EVLRecipe) {
+    bool Found = false;
+    for (auto &VPRecipe : *HeaderVPBB) {
+      if (!VPRecipe.isPhi())
+        continue;
+      for (auto &VPOp : VPRecipe.operands()) {
+        if (VPOp == EVLRecipe) {
+          Found = true;
+          EVLRecipe->insertBefore(&VPRecipe);
+          break;
+        }
+      }
+      if (Found)
+        break;
+    }
+    if (!Found)
+      HeaderVPBB->insert(EVLRecipe, HeaderVPBB->getFirstNonPhi());
+  }
 
   std::string PlanName;
   raw_string_ostream RSO(PlanName);
@@ -10452,23 +10483,22 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
   // FIXME: The caveat with this approach is that TC
   // may wrap. This should not be a big problem for EPI (or other 64-bit)
   // architectures.
-  // FIXME: Is the TripCount independent of the part?
-  // We still don't support interleaving so it shouldn't matter now but it
-  // might when we want interleaving.
   Value *TripCount = State.get(getTripCount(), 0);
+  Value *Induction = State.get(getParent()->getPlan()->getCanonicalIV(), 0);
+  // Compute TC - IV as the RVL (requested vector length).
+  Value *RVL = State.Builder.CreateSub(TripCount, Induction);
+  Value *GVL = nullptr;
   for (unsigned Part = 0; Part < State.UF; Part++) {
-    Value *Induction =
-        State.get(getParent()->getPlan()->getCanonicalIV(), Part);
-    Value *RVL = State.Builder.CreateSub(TripCount, Induction);
-    // Compute TC - IV as the RVL(requested vector length). vsetvl() returns a
-    // GVL(granted vector length) that is the number of lanes processed for the
-    // given vector iteration. At the end of the vector iteration increment the
-    // IV by the GVL. This is guaranteed to exit since at some point RVL will be
-    // equal to GVL and IV = TC.
+    // vsetvl() returns a GVL (granted vector length) that is the number of
+    // lanes processed for the given vector iteration. At the end of the vector
+    // iteration increment the IV by the GVL(s). This is guaranteed to exit
+    // since at some point RVL will be equal to GVL and IV = TC.
     // FIXME: Move this to VPlan.
-    Value *SetVL = State.ILV->getSetVL(RVL);
+    if (GVL)
+      RVL = State.Builder.CreateSub(RVL, GVL);
+    GVL = State.ILV->getSetVL(RVL);
     llvm::Value *EVL =
-        State.Builder.CreateTrunc(SetVL, State.Builder.getInt32Ty());
+        State.Builder.CreateTrunc(GVL, State.Builder.getInt32Ty());
     State.set(getEVL(), EVL, Part);
   }
 }
@@ -10599,14 +10629,33 @@ void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
   VecInd->setDebugLoc(EntryVal->getDebugLoc());
   Instruction *LastInduction = VecInd;
 
+  VPValue *EVLRecipe = getEVLRecipe();
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     State.set(this, LastInduction, Part);
 
     if (isa<TruncInst>(EntryVal))
       State.addMetadata(LastInduction, EntryVal);
 
-    LastInduction = cast<Instruction>(
-        Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add"));
+    if (EVLRecipe) {
+      // Ensure the types match.
+      Type *DestTy = LastInduction->getType()->getScalarType();
+      Value *EVL = State.get(EVLRecipe, Part);
+      if (DestTy->isIntegerTy()) {
+        EVL = Builder.CreateZExtOrTrunc(EVL, DestTy);
+      } else {
+        assert(DestTy->isFloatingPointTy());
+        EVL = Builder.CreateUIToFP(EVL, DestTy);
+      }
+      // Multiply the EVL by the step using integer or floating-point
+      // arithmetic as appropriate.
+      Value *Mul = Builder.CreateBinOp(MulOp, Step, EVL);
+      Value *SplatEVL = Builder.CreateVectorSplat(State.VF, Mul);
+      LastInduction = cast<Instruction>(
+          Builder.CreateBinOp(AddOp, LastInduction, SplatEVL, "step.add"));
+    } else {
+      LastInduction = cast<Instruction>(
+          Builder.CreateBinOp(AddOp, LastInduction, SplatVF, "step.add"));
+    }
     LastInduction->setDebugLoc(EntryVal->getDebugLoc());
   }
 
@@ -10935,7 +10984,6 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     for (unsigned Part = 0; Part < State.UF; ++Part)
       BlockInMaskParts[Part] = State.get(getMask(), Part);
 
-
   // FIXME: We only use it for the context, I'm sure we can get it from
   // other places.
   // FIXME: We should be using VPBuilder here!
@@ -10951,33 +10999,41 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     if (isReverse()) {
       // If the address is consecutive but reversed, then the
       // wide store needs to start at the last vector element.
-      Value *VecLen;
+      Value *NumElt = nullptr;
+      Value *LastLane = nullptr;
       if (getEVL()) {
         // If EVL is not nullptr, then EVL must be a valid value set during plan
-        // creation and must be used to correctly reverse the address
-        VecLen = State.get(getEVL(), Part);
+        // creation and must be used to correctly reverse the address.
+        // Number of elements already processed.
+        NumElt = Builder.getInt32(0);
+        for (unsigned P = 0; P < Part; P++) {
+          NumElt = Builder.CreateAdd(NumElt, State.get(getEVL(), P));
+        }
+        NumElt = Builder.CreateSub(Builder.getInt32(0), NumElt);
+        LastLane = Builder.CreateSub(Builder.getInt32(1),
+                                     State.get(getEVL(), Part));
       } else {
         // RunTimeVF =  VScale * VF.getKnownMinValue()
         // For fixed-width VScale is 1, then RunTimeVF = VF.getKnownMinValue()
-        VecLen = getRuntimeVF(Builder, Builder.getInt32Ty(), State.VF);
+        Value *RunTimeVF = getRuntimeVF(Builder, Builder.getInt32Ty(),
+                                        State.VF);
+        NumElt = Builder.CreateMul(Builder.getInt32(-Part), RunTimeVF);
+        LastLane = Builder.CreateSub(Builder.getInt32(1), RunTimeVF);
       }
-      // NumElt = -Part * RunTimeVF
-      Value *NumElt = Builder.CreateMul(Builder.getInt32(-Part), VecLen);
-      // LastLane = 1 - RunTimeVF
-      Value *LastLane = Builder.CreateSub(Builder.getInt32(1), VecLen);
       PartPtr =
           cast<GetElementPtrInst>(Builder.CreateGEP(ScalarDataTy, Ptr, NumElt));
       PartPtr->setIsInBounds(InBounds);
       PartPtr = cast<GetElementPtrInst>(
           Builder.CreateGEP(ScalarDataTy, PartPtr, LastLane));
       PartPtr->setIsInBounds(InBounds);
-      if (isMaskRequired) { // We reverse the mask only if it is not an all-ones mask.
+      if (isMaskRequired) { // We reverse the mask only if it is not an all-ones
+                            // mask.
         if (getEVL()) {
           Value *Mask = BlockInMaskParts[Part];
           VectorType *MaskTy = cast<VectorType>(Mask->getType());
           Function *VPIntr = Intrinsic::getDeclaration(
-              VectorPH->getModule(),
-              Intrinsic::experimental_vp_reverse, {MaskTy});
+              VectorPH->getModule(), Intrinsic::experimental_vp_reverse,
+              {MaskTy});
           Value *BlockInMaskPart =
               Builder.getTrueVector(MaskTy->getElementCount());
 
@@ -10989,8 +11045,15 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
         }
       }
     } else {
-      Value *Increment =
-          createStepForVF(Builder, Builder.getInt32Ty(), State.VF, Part);
+      Value *Increment = nullptr;
+      if (getEVL()) {
+        Increment = Builder.getInt32(0);
+        for (unsigned int P = 0; P < Part; P++)
+          Increment = Builder.CreateAdd(Increment, State.get(getEVL(), P));
+      } else {
+        Increment =
+            createStepForVF(Builder, Builder.getInt32Ty(), State.VF, Part);
+      }
       PartPtr = cast<GetElementPtrInst>(
           Builder.CreateGEP(ScalarDataTy, Ptr, Increment));
       PartPtr->setIsInBounds(InBounds);
@@ -11021,13 +11084,14 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
       // creation, possibly default value = whole vector register length. EVL is
       // created only if TTI prefers predicated vectorization, thus if EVL is
       // not nullptr it also implies preference for predicated vectorization.
-      Value *EVLPart = getEVL() ? State.get(getEVL(), Part) : nullptr;
+      VPValue *EVL = getEVL();
+      Value *EVLPart = EVL ? State.get(EVL, Part) : nullptr;
       if (CreateGatherScatter) {
         if (EVLPart) {
           bool EmittedStridedAccess = false;
           Value *VectorGep = State.get(getAddr(), Part);
-          auto PtrsTy = cast<VectorType>(VectorGep->getType());
-          auto DataTy = cast<VectorType>(StoredVal->getType());
+          auto *PtrsTy = cast<VectorType>(VectorGep->getType());
+          auto *DataTy = cast<VectorType>(StoredVal->getType());
           ElementCount NumElts = PtrsTy->getElementCount();
           Value *BlockInMaskPart = isMaskRequired
                                        ? MaskValue(Part, NumElts)
@@ -11037,14 +11101,15 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
                        << "It should be possible to stride this store!\n");
             LLVM_DEBUG(llvm::dbgs() << "Addr = " << *getAddr() << "\n");
 
-            if (StrideAccessInfo SAI = computeStrideAccessInfo(
-                    State, getAddr()->getUnderlyingValue())) {
+            if (const SCEV *SCEVExpr = isStridedAddressing(
+                    getAddr()->getUnderlyingValue(), State.SE)) {
               LLVM_DEBUG(llvm::dbgs() << "Found stride for store\n");
               // FIXME: This should be using VPValues rather than doing
               // this by hand. This is not taking into account Part!
-              auto PtrTy = cast<PointerType>(PtrsTy->getElementType());
+              auto *PtrTy = cast<PointerType>(PtrsTy->getElementType());
               StridedAccessValues SAV = computeStrideAddressing(
-                  State, PtrTy, SAI, getParent()->getPlan()->getCanonicalIV());
+                  Part, State, PtrTy, SCEVExpr,
+                  getParent()->getPlan()->getCanonicalIV(), EVL);
               Value *Operands[] = {StoredVal, SAV.BaseAddress, SAV.Stride,
                                    BlockInMaskPart, EVLPart};
               NewSI = Builder.CreateIntrinsic(
@@ -11053,13 +11118,13 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
                   Operands);
               EmittedStridedAccess = true;
             } else {
-              LLVM_DEBUG(llvm::dbgs() << "Cannot stride store: "
-                                      << *getAddr()->getUnderlyingValue()
-                                      << "SAI=" << SAI << "\n");
+              LLVM_DEBUG(llvm::dbgs()
+                         << "Cannot stride store: "
+                         << *getAddr()->getUnderlyingValue() << "\n");
             }
           } else {
-            LLVM_DEBUG(llvm::dbgs()
-                       << "Not consecutive stride store for " << *getAddr() << "\n");
+            LLVM_DEBUG(llvm::dbgs() << "Not consecutive stride store for "
+                                    << *getAddr() << "\n");
           }
           if (!EmittedStridedAccess) {
             Value *Operands[] = {StoredVal, VectorGep, BlockInMaskPart,
@@ -11081,8 +11146,8 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
           if (EVLPart) {
             VectorType *StoredValTy = cast<VectorType>(StoredVal->getType());
             Function *VPIntr = Intrinsic::getDeclaration(
-                VectorPH->getModule(),
-                Intrinsic::experimental_vp_reverse, {StoredValTy});
+                VectorPH->getModule(), Intrinsic::experimental_vp_reverse,
+                {StoredValTy});
             Value *BlockInMaskPart =
                 isMaskRequired
                     ? MaskValue(Part, StoredValTy->getElementCount())
@@ -11127,7 +11192,8 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
   State.setDebugLocFromInst(LI);
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     Value *NewLI;
-    Value *EVLPart = getEVL() ? State.get(getEVL(), Part) : nullptr;
+    VPValue *EVL = getEVL();
+    Value *EVLPart = EVL ? State.get(EVL, Part) : nullptr;
     if (CreateGatherScatter) {
       if (EVLPart) {
         bool EmittedStridedAccess = false;
@@ -11143,11 +11209,12 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
                      << "It should be possible to stride this load!\n");
           LLVM_DEBUG(llvm::dbgs() << "Addr = " << *getAddr() << "\n");
 
-          if (StrideAccessInfo SAI = computeStrideAccessInfo(
-                  State, getAddr()->getUnderlyingValue())) {
+          if (const SCEV *SCEVExpr = isStridedAddressing(
+                  getAddr()->getUnderlyingValue(), State.SE)) {
             LLVM_DEBUG(llvm::dbgs() << "Found stride for load\n");
             StridedAccessValues SAV = computeStrideAddressing(
-                State, PtrTy, SAI, getParent()->getPlan()->getCanonicalIV());
+                Part, State, PtrTy, SCEVExpr,
+                getParent()->getPlan()->getCanonicalIV(), EVL);
             Value *Operands[] = {SAV.BaseAddress, SAV.Stride, BlockInMaskPart,
                                  EVLPart};
             NewLI =
@@ -11157,12 +11224,12 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
             EmittedStridedAccess = true;
           } else {
             LLVM_DEBUG(llvm::dbgs()
-                       << "Cannot stride load: " << *getAddr()->getUnderlyingValue()
-                       << "SAI=" << SAI << "\n");
+                       << "Cannot stride load: "
+                       << *getAddr()->getUnderlyingValue() << "\n");
           }
         } else {
-          LLVM_DEBUG(llvm::dbgs()
-                     << "Not consecutive stride load for " << *getAddr() << "\n");
+          LLVM_DEBUG(llvm::dbgs() << "Not consecutive stride load for "
+                                  << *getAddr() << "\n");
         }
         if (!EmittedStridedAccess) {
           Value *Operands[] = {VectorGep, BlockInMaskPart, EVLPart};
@@ -11184,9 +11251,9 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
       // if EVLPart is not null, we can vectorize using predicated
       // intrinsic.
       if (EVLPart) {
-        Function *VPIntr = Intrinsic::getDeclaration(
-            VectorPH->getModule(), Intrinsic::vp_load,
-            {DataTy, VecPtr->getType()});
+        Function *VPIntr =
+            Intrinsic::getDeclaration(VectorPH->getModule(), Intrinsic::vp_load,
+                                      {DataTy, VecPtr->getType()});
 
         VectorType *VecTy = cast<VectorType>(DataTy);
         Value *BlockInMaskPart =
@@ -11207,17 +11274,16 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
       State.addMetadata(NewLI, LI);
       if (isReverse()) {
         if (EVLPart) {
-            VectorType *LoadedValTy = cast<VectorType>(NewLI->getType());
-            Function *VPIntr = Intrinsic::getDeclaration(
-                VectorPH->getModule(),
-                Intrinsic::experimental_vp_reverse, {LoadedValTy});
-            Value *BlockInMaskPart =
-                isMaskRequired
-                    ? MaskValue(Part, LoadedValTy->getElementCount())
-                    : Builder.getTrueVector(LoadedValTy->getElementCount());
+          VectorType *LoadedValTy = cast<VectorType>(NewLI->getType());
+          Function *VPIntr = Intrinsic::getDeclaration(
+              VectorPH->getModule(), Intrinsic::experimental_vp_reverse,
+              {LoadedValTy});
+          Value *BlockInMaskPart =
+              isMaskRequired
+                  ? MaskValue(Part, LoadedValTy->getElementCount())
+                  : Builder.getTrueVector(LoadedValTy->getElementCount());
 
-            NewLI = Builder.CreateCall(
-                VPIntr, {NewLI, BlockInMaskPart, EVLPart});
+          NewLI = Builder.CreateCall(VPIntr, {NewLI, BlockInMaskPart, EVLPart});
         } else
           NewLI = Builder.CreateVectorReverse(NewLI, "reverse");
       }
