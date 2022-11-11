@@ -15,6 +15,7 @@
 ! RUN:     -fno-signed-zeros \
 ! RUN:     -fassociative-math \
 ! RUN:     -freciprocal-math \
+! RUN:     -fpass-plugin=Bye%pluginext \
 ! RUN:     -mllvm -print-before-all\
 ! RUN:     -P \
 ! RUN:     -O2 \
@@ -35,4 +36,5 @@
 ! CHECK: "-mreassociate"
 ! CHECK: "-freciprocal-math"
 ! CHECK: "-fconvert=little-endian"
+! CHECK: "-fpass-plugin=Bye
 ! CHECK: "-mllvm" "-print-before-all"

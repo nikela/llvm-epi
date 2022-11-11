@@ -154,6 +154,9 @@ static bool parseCodeGenArgs(CompilerInvocation &invoc,
                                   clang::driver::options::OPT_fno_unroll_loops,
                                   (opts.OptimizationLevel > 1));
 
+  for (auto *a : args.filtered(clang::driver::options::OPT_fpass_plugin_EQ))
+    opts.LLVMPassPlugins.push_back(a->getValue());
+
   // -mrelocation-model option.
   if (const llvm::opt::Arg *A =
           args.getLastArg(clang::driver::options::OPT_mrelocation_model)) {
@@ -739,7 +742,7 @@ static bool parseFloatingPointArgs(CompilerInvocation &invoc,
       fpContractMode = LangOptions::FPM_Fast;
     else {
       diags.Report(clang::diag::err_drv_unsupported_option_argument)
-          << a->getOption().getName() << val;
+          << a->getSpelling() << val;
       return false;
     }
 
@@ -1023,5 +1026,10 @@ void CompilerInvocation::setLoweringOptions() {
   mathOpts
       .setFPContractEnabled(langOptions.getFPContractMode() ==
                             LangOptions::FPM_Fast)
-      .setNoHonorInfs(langOptions.NoHonorInfs);
+      .setNoHonorInfs(langOptions.NoHonorInfs)
+      .setNoHonorNaNs(langOptions.NoHonorNaNs)
+      .setApproxFunc(langOptions.ApproxFunc)
+      .setNoSignedZeros(langOptions.NoSignedZeros)
+      .setAssociativeMath(langOptions.AssociativeMath)
+      .setReciprocalMath(langOptions.ReciprocalMath);
 }
