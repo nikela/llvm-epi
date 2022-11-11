@@ -722,16 +722,10 @@ private:
       }
     } else if (dynamicType.category() ==
                Fortran::common::TypeCategory::Derived) {
-      // Hack. Maybe TYPE(C_PTR) and TYPE(C_FUNPTR) should be earnestly an
-      // intrinsic type of their own, rather than shoehorning them into a
-      // derived type, the nature of which must be special-cased everywhere.
-      if (!semantics::IsCPtrType(&dynamicType.GetDerivedTypeSpec()) &&
-          !semantics::IsCFunPtrType(&dynamicType.GetDerivedTypeSpec())) {
-        // Derived result need to be allocated by the caller and the result
-        // value must be saved. Derived type in implicit interface cannot have
-        // length parameters.
-        setSaveResult();
-      }
+      // Derived result need to be allocated by the caller and the result
+      // value must be saved. Derived type in implicit interface cannot have
+      // length parameters.
+      setSaveResult();
       mlir::Type mlirType = translateDynamicType(dynamicType);
       addFirResult(mlirType, FirPlaceHolder::resultEntityPosition,
                    Property::Value);
