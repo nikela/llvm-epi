@@ -741,6 +741,10 @@ unsigned TargetTransformInfo::getMaxInterleaveFactor(unsigned VF) const {
   return TTIImpl->getMaxInterleaveFactor(VF);
 }
 
+unsigned TargetTransformInfo::getMaxInterleaveFactorEC(ElementCount VF) const {
+  return TTIImpl->getMaxInterleaveFactorEC(VF);
+}
+
 TargetTransformInfo::OperandValueInfo
 TargetTransformInfo::getOperandInfo(const Value *V) {
   OperandValueKind OpInfo = OK_AnyValue;

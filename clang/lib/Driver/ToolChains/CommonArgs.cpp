@@ -12,6 +12,7 @@
 #include "Arch/M68k.h"
 #include "Arch/Mips.h"
 #include "Arch/PPC.h"
+#include "Arch/RISCV.h"
 #include "Arch/Sparc.h"
 #include "Arch/SystemZ.h"
 #include "Arch/VE.h"
@@ -432,9 +433,7 @@ std::string tools::getCPUName(const Driver &D, const ArgList &Args,
       return "ck810";
   case llvm::Triple::riscv32:
   case llvm::Triple::riscv64:
-    if (const Arg *A = Args.getLastArg(options::OPT_mcpu_EQ))
-      return A->getValue();
-    return "";
+    return riscv::getRISCVTargetCPU(Args, T);
 
   case llvm::Triple::bpfel:
   case llvm::Triple::bpfeb:
@@ -599,6 +598,10 @@ void tools::addLTOOptions(const ToolChain &ToolChain, const ArgList &Args,
                                         options::OPT_gno_strict_dwarf, true))
       CmdArgs.push_back(
           Args.MakeArgString(Twine(PluginOptPrefix) + "-strict-dwarf=true"));
+
+    if (Args.getLastArg(options::OPT_mabi_EQ_vec_extabi))
+      CmdArgs.push_back(
+          Args.MakeArgString(Twine(PluginOptPrefix) + "-vec-extabi"));
   }
 
   bool UseSeparateSections =

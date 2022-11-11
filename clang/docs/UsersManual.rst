@@ -1371,7 +1371,7 @@ describes the various floating point semantic modes and the corresponding option
   :header: "Mode", "Values"
   :widths: 15, 30, 30
 
-  "ffp-exception-behavior", "{ignore, strict, may_trap}",
+  "ffp-exception-behavior", "{ignore, strict, maytrap}",
   "fenv_access", "{off, on}", "(none)"
   "frounding-math", "{dynamic, tonearest, downward, upward, towardzero}"
   "ffp-contract", "{on, off, fast, fast-honor-pragmas}"
@@ -2241,6 +2241,15 @@ usual build cycle when using sample profilers for optimization:
 
      $ clang++ -O2 -gline-tables-only -fprofile-sample-use=code.prof code.cc -o code
 
+  [OPTIONAL] Sampling-based profiles can have inaccuracies or missing block/
+  edge counters. The profile inference algorithm (profi) can be used to infer
+  missing blocks and edge counts, and improve the quality of profile data.
+  Enable it with ``-fsample-profile-use-profi``.
+
+  .. code-block:: console
+
+    $ clang++ -O2 -gline-tables-only -fprofile-sample-use=code.prof \
+      -fsample-profile-use-profi code.cc -o code
 
 Sample Profile Formats
 """"""""""""""""""""""

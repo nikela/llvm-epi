@@ -4532,6 +4532,7 @@ void Sema::ActOnOpenMPRegionStart(OpenMPDirectiveKind DKind, Scope *CurScope) {
   case OMPD_threadprivate:
   case OMPD_allocate:
   case OMPD_taskyield:
+  case OMPD_error:
   case OMPD_barrier:
   case OMPD_taskwait:
   case OMPD_cancellation_point:
@@ -6304,6 +6305,11 @@ StmtResult Sema::ActOnOpenMPExecutableDirective(
     assert(AStmt == nullptr &&
            "No associated statement allowed for 'omp taskyield' directive");
     Res = ActOnOpenMPTaskyieldDirective(StartLoc, EndLoc);
+    break;
+  case OMPD_error:
+    assert(AStmt == nullptr &&
+           "No associated statement allowed for 'omp taskyield' directive");
+    Res = ActOnOpenMPErrorDirective(ClausesWithImplicit, StartLoc, EndLoc);
     break;
   case OMPD_barrier:
     assert(ClausesWithImplicit.empty() &&
@@ -11021,6 +11027,12 @@ StmtResult Sema::ActOnOpenMPBarrierDirective(SourceLocation StartLoc,
   return OMPBarrierDirective::Create(Context, StartLoc, EndLoc);
 }
 
+StmtResult Sema::ActOnOpenMPErrorDirective(ArrayRef<OMPClause *> Clauses,
+                                           SourceLocation StartLoc,
+                                           SourceLocation EndLoc) {
+  return OMPErrorDirective::Create(Context, StartLoc, EndLoc, Clauses);
+}
+
 StmtResult Sema::ActOnOpenMPTaskwaitDirective(ArrayRef<OMPClause *> Clauses,
                                               SourceLocation StartLoc,
                                               SourceLocation EndLoc) {
@@ -15314,6 +15326,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15402,6 +15415,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15498,6 +15512,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15589,6 +15604,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15677,6 +15693,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15768,6 +15785,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15862,6 +15880,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -15953,6 +15972,7 @@ static OpenMPDirectiveKind getOpenMPCaptureRegionForClause(
     case OMPD_threadprivate:
     case OMPD_allocate:
     case OMPD_taskyield:
+    case OMPD_error:
     case OMPD_barrier:
     case OMPD_taskwait:
     case OMPD_cancellation_point:
@@ -16567,9 +16587,8 @@ getListOfPossibleValues(OpenMPClauseKind K, unsigned First, unsigned Last,
   SmallString<256> Buffer;
   llvm::raw_svector_ostream Out(Buffer);
   unsigned Skipped = Exclude.size();
-  auto S = Exclude.begin(), E = Exclude.end();
   for (unsigned I = First; I < Last; ++I) {
-    if (std::find(S, E, I) != E) {
+    if (llvm::is_contained(Exclude, I)) {
       --Skipped;
       continue;
     }
@@ -20951,8 +20970,8 @@ public:
     }
 
     // Pointer arithmetic is the only thing we expect to happen here so after we
-    // make sure the binary operator is a pointer type, the we only thing need
-    // to to is to visit the subtree that has the same type as root (so that we
+    // make sure the binary operator is a pointer type, the only thing we need
+    // to do is to visit the subtree that has the same type as root (so that we
     // know the other subtree is just an offset)
     Expr *LE = BO->getLHS()->IgnoreParenImpCasts();
     Expr *RE = BO->getRHS()->IgnoreParenImpCasts();
@@ -21722,7 +21741,7 @@ static void checkMappableExpressionList(
                                           /*WhereFoundClauseKind=*/OMPC_map);
 
     // Save the components and declaration to create the clause. For purposes of
-    // the clause creation, any component list that has has base 'this' uses
+    // the clause creation, any component list that has base 'this' uses
     // null as base declaration.
     MVLI.VarComponents.resize(MVLI.VarComponents.size() + 1);
     MVLI.VarComponents.back().append(CurComponents.begin(),

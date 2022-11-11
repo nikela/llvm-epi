@@ -1131,7 +1131,7 @@ root of a given floating-point vector.}];
 def : DocEPIBuiltin<vfsub>
 {
   let Category = DocEPIFloatingPointArithmetic;
-  let Title = "Elementwise floating-point addition";
+  let Title = "Elementwise floating-point subtraction";
   let Description = [{Use these builtins to do an elementwise subtraction of two
 floating-point vectors.}];
   let Instruction = "vfsub.vv";
@@ -1519,7 +1519,7 @@ This builtin will compute the sum in any valid sequential order.
 def : DocEPIBuiltin<vfwsub>
 {
   let Category = DocEPIFloatingPointArithmetic;
-  let Title = "Elementwise floating-point addition";
+  let Title = "Elementwise widening floating-point subtraction";
   let Description = [{Use these builtins to do an elementwise subtraction of two
 floating-point vectors.
 
@@ -1545,7 +1545,7 @@ elements.}];
 def : DocEPIBuiltin<vfwsub_w>
 {
   let Category = DocEPIFloatingPointArithmetic;
-  let Title = "Elementwise floating-point addition";
+  let Title = "Elementwise widening floating-point subtraction (second operand)";
   let Description = [{Use these builtins to do an elementwise subtraction of two
 floating-point vectors.
 

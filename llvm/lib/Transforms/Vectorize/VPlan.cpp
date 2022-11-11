@@ -62,11 +62,6 @@ raw_ostream &llvm::operator<<(raw_ostream &OS, const VPValue &V) {
   V.print(OS, SlotTracker);
   return OS;
 }
-
-raw_ostream &llvm::operator<<(raw_ostream &OS, const StrideAccessInfo &SAI) {
-  SAI.print(OS);
-  return OS;
-}
 #endif
 
 Value *VPLane::getAsRuntimeExpr(IRBuilderBase &Builder,
@@ -703,6 +698,10 @@ void VPlan::execute(VPTransformState *State) {
       continue;
     }
 
+    // EVLRecipe is not an actual PHI, even though conceptually it is.
+    if (isa<VPWidenEVLRecipe>(&R))
+      continue;
+
     // Skip phi-like recipes that generate their backedege values themselves.
     if (isa<VPWidenPHIRecipe>(&R))
       continue;
@@ -1134,24 +1133,10 @@ VPValue *vputils::getOrCreateVPValueForSCEVExpr(VPlan &Plan, const SCEV *Expr,
   return Step;
 }
 
-llvm::StrideAccessInfo
-llvm::computeStrideAccessInfo(const VPTransformState &State, Value *Ptr) {
-  StrideAccessInfo SAI;
-
-  const SCEV *V = isStridedAddressing(Ptr, State.SE);
-  assert(V && "The SCEV should be valid at this point");
-
-  SAI.SCEVExpr = V;
-  // Remove this.
-  SAI.Valid = true;
-
-  return SAI;
-}
-
 llvm::StridedAccessValues
-llvm::computeStrideAddressing(VPTransformState &State, Type *PtrTy,
-                              const StrideAccessInfo &SAI,
-                              VPValue *CanonicalIV) {
+llvm::computeStrideAddressing(unsigned Part, VPTransformState &State,
+                              Type *PtrTy, const SCEV *SCEVExpr,
+                              VPValue *CanonicalIV, VPValue *EVL) {
   // FIXME: This does not seem to adhere to the VPlan principles but I'm unsure
   // what part of it should. We should be using Addr but AFAIU it represents
   // the vectorised address already, which is not useful. When doing
@@ -1163,7 +1148,7 @@ llvm::computeStrideAddressing(VPTransformState &State, Type *PtrTy,
   LLVMContext &Context = PtrTy->getContext();
 
   SCEVExpander Exp(*(State.SE), DL, "stride");
-  const SCEVAddRecExpr *S = cast<SCEVAddRecExpr>(SAI.getSCEVExpr());
+  const SCEVAddRecExpr *S = cast<SCEVAddRecExpr>(SCEVExpr);
 
   LLVM_DEBUG(llvm::dbgs() << "SCEV = " << *S << "\n";);
 
@@ -1179,12 +1164,21 @@ llvm::computeStrideAddressing(VPTransformState &State, Type *PtrTy,
       Exp.expandCodeFor(Stride, Stride->getType(), &*Builder.GetInsertPoint());
   LLVM_DEBUG(llvm::dbgs() << "BytesStride = " << *BytesStride << "\n";);
 
-  // FIXME: Part???
   Value *CanonicalIVValue = State.get(CanonicalIV, 0);
+  Value *Multiplier = nullptr;
+  if (Part == 0)
+    Multiplier =
+        Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType());
+  else {
+    Value *PrevEVL = State.get(EVL, 0);
+    for (unsigned P = 1; P < Part; P++)
+      PrevEVL = Builder.CreateAdd(PrevEVL, State.get(EVL, P));
 
-  auto *BytesStrideIter = Builder.CreateMul(
-      CanonicalIVValue,
-      Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType()));
+    Multiplier = Builder.CreateMul(
+        Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType()),
+        Builder.CreateZExtOrTrunc(PrevEVL, CanonicalIVValue->getType()));
+  }
+  auto *BytesStrideIter = Builder.CreateMul(CanonicalIVValue, Multiplier);
   auto *StrideBaseAddress = Builder.CreateGEP(
       Type::getInt8Ty(Context),
       Builder.CreatePointerCast(PointerStart, Type::getInt8PtrTy(Context)),

@@ -949,15 +949,11 @@ bool fir::hasAbstractResult(mlir::FunctionType ty) {
   if (ty.getNumResults() == 0)
     return false;
   auto resultType = ty.getResult(0);
-  if (auto recordTy = resultType.dyn_cast<fir::RecordType>()) {
-    // Horrible hack, this should have been handled earlier. This is the wrong
-    // place to do this.
-    if (recordTy.getName() == "_QM__fortran_builtinsT__builtin_c_ptr"
-        || recordTy.getName() == "_QM__fortran_builtinsT__builtin_c_funptr")
-      return false;
-    return true;
-  }
-  return resultType.isa<fir::SequenceType, fir::BoxType>();
+  // FIXME: The interoperable derived type needs more investigations and tests.
+  // The derived type without BIND attribute may also not be abstract result.
+  if (fir::isa_builtin_cptr_type(resultType))
+    return false;
+  return resultType.isa<fir::SequenceType, fir::BoxType, fir::RecordType>();
 }
 
 /// Convert llvm::Type::TypeID to mlir::Type. \p kind is provided for error

@@ -34,6 +34,8 @@
 #include "mlir/IR/Dialect.h"
 #include "mlir/Parser/Parser.h"
 #include "mlir/Pass/PassManager.h"
+#include "mlir/Support/LLVM.h"
+#include "mlir/Target/LLVMIR/Import.h"
 #include "mlir/Target/LLVMIR/ModuleTranslation.h"
 #include "clang/Basic/Diagnostic.h"
 #include "clang/Basic/DiagnosticFrontend.h"
@@ -94,6 +96,16 @@ static void renderFeatures(CompilerInvocation &invoc, std::string &Features) {
   }
 }
 
+static void setMLIRDataLayout(mlir::ModuleOp &mlirModule,
+                              const llvm::DataLayout &dl) {
+  mlir::MLIRContext *context = mlirModule.getContext();
+  mlirModule->setAttr(
+      mlir::LLVM::LLVMDialect::getDataLayoutAttrName(),
+      mlir::StringAttr::get(context, dl.getStringRepresentation()));
+  mlir::DataLayoutSpecInterface dlSpec = mlir::translateDataLayout(dl, context);
+  mlirModule->setAttr(mlir::DLTIDialect::kDataLayoutAttrName, dlSpec);
+}
+
 bool CodeGenAction::beginSourceFileAction() {
   llvmCtx = std::make_unique<llvm::LLVMContext>();
   CompilerInstance &ci = this->getInstance();
@@ -139,6 +151,9 @@ bool CodeGenAction::beginSourceFileAction() {
     }
 
     mlirModule = std::make_unique<mlir::ModuleOp>(module.release());
+    setUpTargetMachine();
+    const llvm::DataLayout &dl = tm->createDataLayout();
+    setMLIRDataLayout(*mlirModule, dl);
     return true;
   }
 
@@ -181,10 +196,15 @@ bool CodeGenAction::beginSourceFileAction() {
       kindMap, ci.getInvocation().getLoweringOpts(),
       ci.getInvocation().getFrontendOpts().envDefaults, funcAttributes);
 
+  // Fetch module from lb, so we can set
+  mlirModule = std::make_unique<mlir::ModuleOp>(lb.getModule());
+  setUpTargetMachine();
+  const llvm::DataLayout &dl = tm->createDataLayout();
+  setMLIRDataLayout(*mlirModule, dl);
+
   // Create a parse tree and lower it to FIR
   Fortran::parser::Program &parseTree{*ci.getParsing().parseTree()};
   lb.lower(parseTree, ci.getInvocation().getSemanticsContext());
-  mlirModule = std::make_unique<mlir::ModuleOp>(lb.getModule());
 
   // run the default passes.
   mlir::PassManager pm(mlirCtx.get(), mlir::OpPassManager::Nesting::Implicit);
@@ -596,12 +616,12 @@ void CodeGenAction::generateLLVMIR() {
 }
 
 static void computeTargetOpts(
-    llvm::Module &llvmModule, llvm::TargetOptions &TargetOpts) {
+    const std::string& theTriple, llvm::TargetOptions &TargetOpts) {
   // OK. This is terrible but I can't tell exactly what are the plans here.
   // So let's try to do something that is entirely to be thrown-away.
   // "This is not a place of honour" and all that.
   // -- Heinous code starts here.
-  llvm::Triple currentTriple(llvmModule.getTargetTriple());
+  llvm::Triple currentTriple(theTriple);
   bool IsRISCV64Linux =
       currentTriple.getArch() == llvm::Triple::ArchType::riscv64 &&
       currentTriple.getOS() == llvm::Triple::OSType::Linux;
@@ -631,16 +651,10 @@ void CodeGenAction::setUpTargetMachine() {
   CompilerInstance &ci = this->getInstance();
   auto &invoc = ci.getInvocation();
 
-  // Set the triple based on the CompilerInvocation set-up
   const std::string &theTriple = ci.getInvocation().getTargetOpts().triple;
-  if (llvmModule->getTargetTriple() != theTriple) {
-    ci.getDiagnostics().Report(clang::diag::warn_fe_override_module)
-        << theTriple;
-    llvmModule->setTargetTriple(theTriple);
-  }
 
   llvm::TargetOptions TargetOpts;
-  computeTargetOpts(*llvmModule, TargetOpts);
+  computeTargetOpts(theTriple, TargetOpts);
   std::string Features;
   renderFeatures(invoc, Features);
 
@@ -833,8 +847,22 @@ void CodeGenAction::executeAction() {
   if (!llvmModule)
     return;
 
-  // Run LLVM's middle-end (i.e. the optimizer).
+  // Set the triple based on the targetmachine (this comes compiler invocation
+  // and the command-line target option if specified, or the default if not
+  // given on the command-line).
   setUpTargetMachine();
+  const std::string &theTriple = tm->getTargetTriple().str();
+
+  if (llvmModule->getTargetTriple() != theTriple) {
+    ci.getDiagnostics().Report(clang::diag::warn_fe_override_module)
+        << theTriple;
+  }
+  // Always set the triple and data layout, to make sure they match and are set.
+  // Note that this overwrites any datalayout stored in the LLVM-IR. This avoids
+  // an assert for incompatible data layout when the code-generation happens.
+  llvmModule->setTargetTriple(theTriple);
+  llvmModule->setDataLayout(tm->createDataLayout());
+
   runOptimizationPipeline(*os);
 
   if (action == BackendActionTy::Backend_EmitLL) {
@@ -842,9 +870,6 @@ void CodeGenAction::executeAction() {
                       /*AssemblyAnnotationWriter=*/nullptr);
     return;
   }
-
-  assert(tm && "Target machine was not created");
-  llvmModule->setDataLayout(tm->createDataLayout());
 
   if (action == BackendActionTy::Backend_EmitBC) {
     // This action has effectively been completed in runOptimizationPipeline.

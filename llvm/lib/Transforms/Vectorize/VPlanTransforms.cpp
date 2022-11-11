@@ -52,8 +52,12 @@ void VPlanTransforms::VPInstructionsToVPRecipes(
           VPValue *Start = Plan->getOrAddVPValue(II->getStartValue());
           VPValue *Step =
               vputils::getOrCreateVPValueForSCEVExpr(*Plan, II->getStep(), SE);
+          // TODO: when we'll use explicit vector length in the native VPlan,
+          // we need to bring the EVLRecipe up to this point (e.g., in the
+          // VPlan itself).
           NewRecipe =
-              new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, *II, true);
+              new VPWidenIntOrFpInductionRecipe(Phi, Start, Step, *II, true,
+                                                /*EVLRecipe*/ nullptr);
         } else {
           Plan->addVPValue(Phi, VPPhi);
           continue;
@@ -138,8 +142,7 @@ bool VPlanTransforms::sinkScalarOperands(VPlan &Plan) {
     // All recipe users of the sink candidate must be in the same block SinkTo
     // or all users outside of SinkTo must be uniform-after-vectorization (
     // i.e., only first lane is used) . In the latter case, we need to duplicate
-    // SinkCandidate. At the moment, we identify such UAV's by looking for the
-    // address operands of widened memory recipes.
+    // SinkCandidate.
     auto CanSinkWithUser = [SinkTo, &NeedsDuplicating,
                             SinkCandidate](VPUser *U) {
       auto *UI = dyn_cast<VPRecipeBase>(U);
@@ -147,12 +150,8 @@ bool VPlanTransforms::sinkScalarOperands(VPlan &Plan) {
         return false;
       if (UI->getParent() == SinkTo)
         return true;
-      auto *WidenI = dyn_cast<VPWidenMemoryInstructionRecipe>(UI);
-      if (WidenI && WidenI->getAddr() == SinkCandidate) {
-        NeedsDuplicating = true;
-        return true;
-      }
-      return false;
+      NeedsDuplicating = UI->onlyFirstLaneUsed(SinkCandidate);
+      return NeedsDuplicating;
     };
     if (!all_of(SinkCandidate->users(), CanSinkWithUser))
       continue;

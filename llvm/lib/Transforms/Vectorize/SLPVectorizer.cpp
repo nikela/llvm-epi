@@ -290,15 +290,17 @@ static Optional<unsigned> getInsertIndex(const Value *InsertInst,
                                          unsigned Offset = 0) {
   int Index = Offset;
   if (const auto *IE = dyn_cast<InsertElementInst>(InsertInst)) {
-    if (const auto *CI = dyn_cast<ConstantInt>(IE->getOperand(2))) {
-      auto *VT = cast<FixedVectorType>(IE->getType());
-      if (CI->getValue().uge(VT->getNumElements()))
-        return None;
-      Index *= VT->getNumElements();
-      Index += CI->getZExtValue();
-      return Index;
-    }
-    return None;
+    const auto *VT = dyn_cast<FixedVectorType>(IE->getType());
+    if (!VT)
+      return None;
+    const auto *CI = dyn_cast<ConstantInt>(IE->getOperand(2));
+    if (!CI)
+      return None;
+    if (CI->getValue().uge(VT->getNumElements()))
+      return None;
+    Index *= VT->getNumElements();
+    Index += CI->getZExtValue();
+    return Index;
   }
 
   const auto *IV = cast<InsertValueInst>(InsertInst);
@@ -547,6 +549,7 @@ static bool areCompatibleCmpOps(Value *BaseOp0, Value *BaseOp1, Value *Op0,
          (isConstant(BaseOp1) && isConstant(Op1)) ||
          (!isa<Instruction>(BaseOp0) && !isa<Instruction>(Op0) &&
           !isa<Instruction>(BaseOp1) && !isa<Instruction>(Op1)) ||
+         BaseOp0 == Op0 || BaseOp1 == Op1 ||
          getSameOpcode({BaseOp0, Op0}, TLI).getOpcode() ||
          getSameOpcode({BaseOp1, Op1}, TLI).getOpcode();
 }
@@ -3900,7 +3903,7 @@ static bool isRepeatedNonIdentityClusteredMask(ArrayRef<int> Mask,
   ArrayRef<int> FirstCluster = Mask.slice(0, Sz);
   if (ShuffleVectorInst::isIdentityMask(FirstCluster))
     return false;
-  for (unsigned I = 0, E = Mask.size(); I < E; I += Sz) {
+  for (unsigned I = Sz, E = Mask.size(); I < E; I += Sz) {
     ArrayRef<int> Cluster = Mask.slice(I, Sz);
     if (Cluster != FirstCluster)
       return false;
@@ -3921,10 +3924,10 @@ void BoUpSLP::reorderNodeWithReuses(TreeEntry &TE, ArrayRef<int> Mask) const {
   // Try to improve gathered nodes with clustered reuses, if possible.
   reorderScalars(TE.Scalars, makeArrayRef(TE.ReuseShuffleIndices).slice(0, Sz));
   // Fill the reuses mask with the identity submasks.
-  for (auto It = TE.ReuseShuffleIndices.begin(),
-            End = TE.ReuseShuffleIndices.end();
+  for (auto *It = TE.ReuseShuffleIndices.begin(),
+            *End = TE.ReuseShuffleIndices.end();
        It != End; std::advance(It, Sz))
-    std::iota(It, std::next(It + Sz), 0);
+    std::iota(It, std::next(It, Sz), 0);
 }
 
 void BoUpSLP::reorderTopToBottom() {
@@ -7154,8 +7157,10 @@ static bool areTwoInsertFromSameBuildVector(
     return false;
   auto *IE1 = VU;
   auto *IE2 = V;
-  unsigned Idx1 = *getInsertIndex(IE1);
-  unsigned Idx2 = *getInsertIndex(IE2);
+  Optional<unsigned> Idx1 = getInsertIndex(IE1);
+  Optional<unsigned> Idx2 = getInsertIndex(IE2);
+  if (Idx1 == None || Idx2 == None)
+    return false;
   // Go through the vector operand of insertelement instructions trying to find
   // either VU as the original vector for IE2 or V as the original vector for
   // IE1.
@@ -7166,14 +7171,14 @@ static bool areTwoInsertFromSameBuildVector(
       return V->hasOneUse();
     if (IE1) {
       if ((IE1 != VU && !IE1->hasOneUse()) ||
-          getInsertIndex(IE1).value_or(Idx2) == Idx2)
+          getInsertIndex(IE1).value_or(*Idx2) == *Idx2)
         IE1 = nullptr;
       else
         IE1 = dyn_cast_or_null<InsertElementInst>(GetBaseOperand(IE1));
     }
     if (IE2) {
       if ((IE2 != V && !IE2->hasOneUse()) ||
-          getInsertIndex(IE2).value_or(Idx1) == Idx1)
+          getInsertIndex(IE2).value_or(*Idx1) == *Idx1)
         IE2 = nullptr;
       else
         IE2 = dyn_cast_or_null<InsertElementInst>(GetBaseOperand(IE2));
@@ -7216,12 +7221,11 @@ namespace {
 /// value, otherwise.
 struct ValueSelect {
   template <typename U>
-  static std::enable_if_t<std::is_same<Value *, U>::value, Value *>
-  get(Value *V) {
+  static std::enable_if_t<std::is_same_v<Value *, U>, Value *> get(Value *V) {
     return V;
   }
   template <typename U>
-  static std::enable_if_t<!std::is_same<Value *, U>::value, U> get(Value *) {
+  static std::enable_if_t<!std::is_same_v<Value *, U>, U> get(Value *) {
     return U();
   }
 };

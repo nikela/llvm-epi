@@ -88,10 +88,10 @@ static StringRef computeDataLayout(const Triple &TT, StringRef FS) {
     // FIXME: Assuming ELEN=64.
     bool HasV = llvm::is_contained(Split, "+v");
     if (HasV)
-      return "e-m:e-p:64:64-i64:64-i128:128-n64-S128-v128:128:128-v256:128:128-"
+      return "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128-v128:128:128-v256:128:128-"
              "v512:128:128-v1024:128:128";
     else
-      return "e-m:e-p:64:64-i64:64-i128:128-n64-S128";
+      return "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128";
   } else {
     assert(TT.isArch32Bit() && "only RV32 and RV64 are currently supported");
     return "e-m:e-p:32:32-i64:64-n32-S128";

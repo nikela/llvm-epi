@@ -2187,7 +2187,10 @@ void Clang::AddRISCVTargetArgs(const ArgList &Args,
 
   if (const Arg *A = Args.getLastArg(options::OPT_mtune_EQ)) {
     CmdArgs.push_back("-tune-cpu");
-    CmdArgs.push_back(A->getValue());
+    if (strcmp(A->getValue(), "native") == 0)
+      CmdArgs.push_back(Args.MakeArgString(llvm::sys::getHostCPUName()));
+    else
+      CmdArgs.push_back(A->getValue());
   }
 
   if (Args.hasArg(options::OPT_mepi)) {
@@ -2771,6 +2774,11 @@ static void CollectArgsForIntegratedAssembler(Compilation &C,
   if (C.getDriver().embedBitcodeEnabled() ||
       C.getDriver().embedBitcodeMarkerOnly())
     Args.AddLastArg(CmdArgs, options::OPT_fembed_bitcode_EQ);
+
+  if (const char *AsSecureLogFile = getenv("AS_SECURE_LOG_FILE")) {
+    CmdArgs.push_back("-as-secure-log-file");
+    CmdArgs.push_back(Args.MakeArgString(AsSecureLogFile));
+  }
 }
 
 static void RenderFloatingPointOptions(const ToolChain &TC, const Driver &D,
@@ -4252,6 +4260,8 @@ static void renderDebugOptions(const ToolChain &TC, const Driver &D,
     // Clamp effective DWARF version to the max supported by the toolchain.
     EffectiveDWARFVersion =
         std::min(RequestedDWARFVersion, TC.getMaxDwarfVersion());
+  } else {
+    Args.ClaimAllArgs(options::OPT_fdebug_default_version);
   }
 
   // -gline-directives-only supported only for the DWARF debug info.
@@ -4343,18 +4353,15 @@ static void renderDebugOptions(const ToolChain &TC, const Driver &D,
   if (EmitCodeView) {
     CmdArgs.push_back("-gcodeview");
 
-    // Emit codeview type hashes if requested.
-    if (Args.hasFlag(options::OPT_gcodeview_ghash,
-                     options::OPT_gno_codeview_ghash, false)) {
-      CmdArgs.push_back("-gcodeview-ghash");
-    }
+    Args.addOptInFlag(CmdArgs, options::OPT_gcodeview_ghash,
+                      options::OPT_gno_codeview_ghash);
+
+    Args.addOptOutFlag(CmdArgs, options::OPT_gcodeview_command_line,
+                       options::OPT_gno_codeview_command_line);
   }
 
-  // Omit inline line tables if requested.
-  if (Args.hasFlag(options::OPT_gno_inline_line_tables,
-                   options::OPT_ginline_line_tables, false)) {
-    CmdArgs.push_back("-gno-inline-line-tables");
-  }
+  Args.addOptOutFlag(CmdArgs, options::OPT_ginline_line_tables,
+                     options::OPT_gno_inline_line_tables);
 
   // When emitting remarks, we need at least debug lines in the output.
   if (willEmitRemarks(Args) &&
@@ -4409,10 +4416,8 @@ static void renderDebugOptions(const ToolChain &TC, const Driver &D,
     CmdArgs.push_back(Args.MakeArgString("-gsrc-hash=" + v));
   }
 
-  if (Args.hasFlag(options::OPT_fdebug_ranges_base_address,
-                   options::OPT_fno_debug_ranges_base_address, false)) {
-    CmdArgs.push_back("-fdebug-ranges-base-address");
-  }
+  Args.addOptInFlag(CmdArgs, options::OPT_fdebug_ranges_base_address,
+                    options::OPT_fno_debug_ranges_base_address);
 
   // -gdwarf-aranges turns on the emission of the aranges section in the
   // backend.
@@ -4425,9 +4430,8 @@ static void renderDebugOptions(const ToolChain &TC, const Driver &D,
     CmdArgs.push_back("-generate-arange-section");
   }
 
-  if (Args.hasFlag(options::OPT_fforce_dwarf_frame,
-                   options::OPT_fno_force_dwarf_frame, false))
-    CmdArgs.push_back("-fforce-dwarf-frame");
+  Args.addOptInFlag(CmdArgs, options::OPT_fforce_dwarf_frame,
+                    options::OPT_fno_force_dwarf_frame);
 
   if (Args.hasFlag(options::OPT_fdebug_types_section,
                    options::OPT_fno_debug_types_section, false)) {
@@ -5223,9 +5227,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
                    options::OPT_fno_merge_all_constants, false))
     CmdArgs.push_back("-fmerge-all-constants");
 
-  if (Args.hasFlag(options::OPT_fno_delete_null_pointer_checks,
-                   options::OPT_fdelete_null_pointer_checks, false))
-    CmdArgs.push_back("-fno-delete-null-pointer-checks");
+  Args.addOptOutFlag(CmdArgs, options::OPT_fdelete_null_pointer_checks,
+                     options::OPT_fno_delete_null_pointer_checks);
 
   // LLVM Code Generator Options.
 
@@ -5380,9 +5383,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
                   options::OPT_fno_experimental_relative_cxx_abi_vtables);
 
   // Handle segmented stacks.
-  if (Args.hasFlag(options::OPT_fsplit_stack, options::OPT_fno_split_stack,
-                   false))
-    CmdArgs.push_back("-fsplit-stack");
+  Args.addOptInFlag(CmdArgs, options::OPT_fsplit_stack,
+                    options::OPT_fno_split_stack);
 
   // -fprotect-parens=0 is default.
   if (Args.hasFlag(options::OPT_fprotect_parens,
@@ -5770,6 +5772,12 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   Args.AddLastArg(CmdArgs, options::OPT_fclang_abi_compat_EQ);
 
+  if (getLastProfileSampleUseArg(Args) &&
+      Args.hasArg(options::OPT_fsample_profile_use_profi)) {
+    CmdArgs.push_back("-mllvm");
+    CmdArgs.push_back("-sample-profile-use-profi");
+  }
+
   // Add runtime flag for PS4/PS5 when PGO, coverage, or sanitizers are enabled.
   if (RawTriple.isPS() &&
       !Args.hasArg(options::OPT_nostdlib, options::OPT_nodefaultlibs)) {
@@ -5861,10 +5869,8 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   Args.AddLastArg(CmdArgs, options::OPT_pedantic_errors);
   Args.AddLastArg(CmdArgs, options::OPT_w);
 
-  // Fixed point flags
-  if (Args.hasFlag(options::OPT_ffixed_point, options::OPT_fno_fixed_point,
-                   /*Default=*/false))
-    Args.AddLastArg(CmdArgs, options::OPT_ffixed_point);
+  Args.addOptInFlag(CmdArgs, options::OPT_ffixed_point,
+                    options::OPT_fno_fixed_point);
 
   if (Arg *A = Args.getLastArg(options::OPT_fcxx_abi_EQ))
     A->render(Args, CmdArgs);
@@ -7033,18 +7039,21 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
 
   // Forward -Xclang arguments to -cc1, and -mllvm arguments to the LLVM option
   // parser.
-  // -finclude-default-header flag is for preprocessor,
-  // do not pass it to other cc1 commands when save-temps is enabled
-  if (C.getDriver().isSaveTempsEnabled() &&
-      !isa<PreprocessJobAction>(JA)) {
-    for (auto *Arg : Args.filtered(options::OPT_Xclang)) {
-      Arg->claim();
-      if (StringRef(Arg->getValue()) != "-finclude-default-header")
-        CmdArgs.push_back(Arg->getValue());
+  for (auto Arg : Args.filtered(options::OPT_Xclang)) {
+    Arg->claim();
+    // -finclude-default-header flag is for preprocessor,
+    // do not pass it to other cc1 commands when save-temps is enabled
+    if (C.getDriver().isSaveTempsEnabled() &&
+        !isa<PreprocessJobAction>(JA)) {
+      if (StringRef(Arg->getValue()) == "-finclude-default-header")
+        continue;
     }
-  }
-  else {
-    Args.AddAllArgValues(CmdArgs, options::OPT_Xclang);
+    if (StringRef(Arg->getValue()) == "-fexperimental-assignment-tracking") {
+      // Add the llvm version of this flag too.
+      CmdArgs.push_back("-mllvm");
+      CmdArgs.push_back("-experimental-assignment-tracking");
+    }
+    CmdArgs.push_back(Arg->getValue());
   }
   for (const Arg *A : Args.filtered(options::OPT_mllvm)) {
     A->claim();
@@ -7249,15 +7258,29 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
   if (SplitLTOUnit)
     CmdArgs.push_back("-fsplit-lto-unit");
 
-  if (Arg *A = Args.getLastArg(options::OPT_fglobal_isel,
-                               options::OPT_fno_global_isel)) {
+  A = Args.getLastArg(options::OPT_fglobal_isel, options::OPT_fno_global_isel);
+  // If a configuration is fully supported, we don't issue any warnings or
+  // remarks.
+  bool IsFullySupported = getToolChain().getTriple().isOSDarwin() &&
+                          Triple.getArch() == llvm::Triple::aarch64;
+  if (IsFullySupported) {
+    if (A && A->getOption().matches(options::OPT_fno_global_isel)) {
+      CmdArgs.push_back("-mllvm");
+      CmdArgs.push_back("-global-isel=0");
+    } else {
+      CmdArgs.push_back("-mllvm");
+      CmdArgs.push_back("-global-isel=1");
+      CmdArgs.push_back("-mllvm");
+      CmdArgs.push_back("-global-isel-abort=0");
+    }
+  } else if (A) {
     CmdArgs.push_back("-mllvm");
     if (A->getOption().matches(options::OPT_fglobal_isel)) {
       CmdArgs.push_back("-global-isel=1");
 
       // GISel is on by default on AArch64 -O0, so don't bother adding
       // the fallback remarks for it. Other combinations will add a warning of
-      // some kind.
+      // some kind, unless we're on Darwin.
       bool IsArchSupported = Triple.getArch() == llvm::Triple::aarch64;
       bool IsOptLevelSupported = false;
 
