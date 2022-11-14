@@ -211,6 +211,15 @@ static bool hasAllWUsers(const MachineInstr &OrigMI, MachineRegisterInfo &MRI) {
       case RISCV::BINVI:
         Worklist.push_back(UserMI);
         break;
+
+      case RISCV::PseudoCCMOVGPR:
+        // Either operand 4 or operand 5 is returned by this instruction. If
+        // only the lower word of the result is used, then only the lower word
+        // of operand 4 and 5 is used.
+        if (OpIdx != 4 && OpIdx != 5)
+          return false;
+        Worklist.push_back(UserMI);
+        break;
       }
     }
   }
@@ -264,6 +273,15 @@ static bool isSignExtendingOpW(MachineInstr &MI, MachineRegisterInfo &MRI) {
   case RISCV::SLTI:
   case RISCV::SLTU:
   case RISCV::SLTIU:
+  case RISCV::FEQ_H:
+  case RISCV::FEQ_S:
+  case RISCV::FEQ_D:
+  case RISCV::FLT_H:
+  case RISCV::FLT_S:
+  case RISCV::FLT_D:
+  case RISCV::FLE_H:
+  case RISCV::FLE_S:
+  case RISCV::FLE_D:
   case RISCV::SEXT_B:
   case RISCV::SEXT_H:
   case RISCV::ZEXT_H_RV64:
@@ -283,8 +301,6 @@ static bool isSignExtendingOpW(MachineInstr &MI, MachineRegisterInfo &MRI) {
   // The LI pattern ADDI rd, X0, imm is sign extended.
   case RISCV::ADDI:
     return MI.getOperand(1).isReg() && MI.getOperand(1).getReg() == RISCV::X0;
-      return true;
-    return false;
   // An ANDI with an 11 bit immediate will zero bits 63:11.
   case RISCV::ANDI:
     return isUInt<11>(MI.getOperand(2).getImm());
@@ -389,19 +405,24 @@ static bool isSignExtendedW(MachineInstr &OrigMI, MachineRegisterInfo &MRI,
     case RISCV::MAXU:
     case RISCV::MIN:
     case RISCV::MINU:
+    case RISCV::PseudoCCMOVGPR:
     case RISCV::PHI: {
       // If all incoming values are sign-extended, the output of AND, OR, XOR,
       // MIN, MAX, or PHI is also sign-extended.
 
       // The input registers for PHI are operand 1, 3, ...
+      // The input registers for PseudoCCMOVGPR are 4 and 5.
       // The input registers for others are operand 1 and 2.
-      unsigned E = 3, D = 1;
+      unsigned B = 1, E = 3, D = 1;
       if (MI->getOpcode() == RISCV::PHI) {
         E = MI->getNumOperands();
         D = 2;
+      } else if (MI->getOpcode() == RISCV::PseudoCCMOVGPR) {
+        B = 4;
+        E = 6;
       }
 
-      for (unsigned I = 1; I != E; I += D) {
+      for (unsigned I = B; I != E; I += D) {
         if (!MI->getOperand(I).isReg())
           return false;
 
