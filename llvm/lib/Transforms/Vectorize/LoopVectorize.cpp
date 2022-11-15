@@ -11573,6 +11573,18 @@ static bool areRuntimeChecksProfitable(GeneratedRTChecks &Checks,
     unsigned AssumedMinimumVscale = 1;
     if (VScale)
       AssumedMinimumVscale = *VScale;
+
+    if (AssumedMinimumVscale == 1) {
+      // This is in practice absence of knowledge, so the only sensible thing we
+      // can do here is use a hard threshold.
+      if (CheckCost > VectorizeMemoryCheckThreshold) {
+        LLVM_DEBUG(dbgs() << "LV: Runtime checks are deemed not profitable "
+                             "when not assuming a minimum vscale\n");
+        return false;
+      }
+      return true;
+    }
+
     IntVF *= AssumedMinimumVscale;
   }
   double VecCOverVF = double(*VF.Cost.getValue()) / IntVF;
