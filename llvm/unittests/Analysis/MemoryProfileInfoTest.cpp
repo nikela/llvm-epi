@@ -405,10 +405,13 @@ declare noundef nonnull ptr @_Znam(i64 noundef)
     for (auto ContextIter = StackContext.beginAfterSharedPrefix(InstCallsite);
          ContextIter != StackContext.end(); ++ContextIter)
       StackIds.push_back(*ContextIter);
-    if (First)
-      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef({2UL, 3UL, 4UL}));
-    else
-      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef({2UL, 3UL, 5UL}));
+    if (First) {
+      std::vector<uint64_t> Expected = {2, 3, 4};
+      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef(Expected));
+    } else {
+      std::vector<uint64_t> Expected = {2, 3, 5};
+      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef(Expected));
+    }
     First = false;
   }
 }
@@ -430,10 +433,13 @@ TEST_F(MemoryProfileInfoTest, CallStackTestSummary) {
     std::vector<uint64_t> StackIds;
     for (auto StackIdIndex : InstCallsite)
       StackIds.push_back(Index->getStackIdAtIndex(StackIdIndex));
-    if (First)
-      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef({3UL, 4UL}));
-    else
-      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef({3UL, 5UL}));
+    if (First) {
+      std::vector<uint64_t> Expected = {3, 4};
+      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef(Expected));
+    } else {
+      std::vector<uint64_t> Expected = {3, 5};
+      EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef(Expected));
+    }
     First = false;
   }
 
@@ -447,10 +453,13 @@ TEST_F(MemoryProfileInfoTest, CallStackTestSummary) {
       std::vector<uint64_t> StackIds;
       for (auto StackIdIndex : StackContext)
         StackIds.push_back(Index->getStackIdAtIndex(StackIdIndex));
-      if (First)
-        EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef({1UL, 2UL, 3UL, 4UL}));
-      else
-        EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef({1UL, 2UL, 3UL, 5UL}));
+      if (First) {
+        std::vector<uint64_t> Expected = {1, 2, 3, 4};
+        EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef(Expected));
+      } else {
+        std::vector<uint64_t> Expected = {1, 2, 3, 5};
+        EXPECT_EQ(makeArrayRef(StackIds), makeArrayRef(Expected));
+      }
       First = false;
     }
   }
