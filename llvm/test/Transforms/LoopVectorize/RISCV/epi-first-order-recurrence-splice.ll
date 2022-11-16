@@ -176,7 +176,7 @@ define void @recurrence_1(i32* noalias nocapture readonly %a, i32* noalias nocap
 ; CHECKVP-NEXT:    [[TMP15:%.*]] = add nuw nsw i64 [[INDEX]], 1
 ; CHECKVP-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[TMP15]]
 ; CHECKVP-NEXT:    [[TMP17:%.*]] = bitcast i32* [[TMP16]] to <vscale x 2 x i32>*
-; CHECKVP-NEXT:    [[VP_OP_LOAD]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* nonnull [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; CHECKVP-NEXT:    [[VP_OP_LOAD]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0nxv2i32(<vscale x 2 x i32>* [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
 ; CHECKVP-NEXT:    [[TMP18:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECKVP-NEXT:    [[TMP19:%.*]] = shl i32 [[TMP18]], 1
 ; CHECKVP-NEXT:    [[TMP20:%.*]] = add i32 [[TMP19]], -1
