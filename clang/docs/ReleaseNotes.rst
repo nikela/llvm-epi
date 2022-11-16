@@ -388,6 +388,8 @@ Improvements to Clang's diagnostics
 - Clang now diagnoses use of invalid or reserved module names in a module
   export declaration. Both are diagnosed as an error, but the diagnostic is
   suppressed for use of reserved names in a system header.
+- ``-Winteger-overflow`` will diagnose overflow in more cases. This fixes
+  `Issue 58944 <https://github.com/llvm/llvm-project/issues/58944>`_.
 
 Non-comprehensive list of changes in this release
 -------------------------------------------------
@@ -791,6 +793,9 @@ libclang
   whether the method is declared ``= delete``.
 - Introduced the new function ``clang_CXXMethod_isCopyAssignmentOperator``,
   which identifies whether a method cursor is a copy-assignment
+  operator.
+- Introduced the new function ``clang_CXXMethod_isMoveAssignmentOperator``,
+  which identifies whether a method cursor is a move-assignment
   operator.
 - ``clang_Cursor_getNumTemplateArguments``, ``clang_Cursor_getTemplateArgumentKind``, 
   ``clang_Cursor_getTemplateArgumentType``, ``clang_Cursor_getTemplateArgumentValue`` and 

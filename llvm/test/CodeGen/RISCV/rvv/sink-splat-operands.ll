@@ -3025,9 +3025,6 @@ for.cond.cleanup:                                 ; preds = %vector.body
   ret void
 }
 
-; FIXME: This doesn't match against vadd.vx because our patterns aren't
-; commutative.
-
 define void @sink_splat_vp_add_commute(i32* nocapture %a, i32 signext %x, <4 x i1> %m, i32 zeroext %vl) {
 ; CHECK-LABEL: sink_splat_vp_add_commute:
 ; CHECK:       # %bb.0: # %entry

@@ -90,6 +90,7 @@ private:
   bool HasStdExtZmmul = false;
   bool HasStdExtZawrs = false;
   bool HasStdExtZtso = false;
+  bool HasVendorXVentanaCondOps = false;
   bool HasRV32 = false;
   bool HasEPI = false;
   bool HasRV64 = false;
@@ -102,6 +103,7 @@ private:
   bool HasShortForwardBranchOpt = false;
   bool HasLUIADDIFusion = false;
   bool HasForcedAtomics = false;
+  bool HasOptimizedZeroStrideLoad = true;
   unsigned XLen = 32;
   unsigned ZvlLen = 0;
   MVT XLenVT = MVT::i32;
@@ -191,6 +193,7 @@ public:
   bool hasStdExtZawrs() const { return HasStdExtZawrs; }
   bool hasStdExtZmmul() const { return HasStdExtZmmul; }
   bool hasStdExtZtso() const { return HasStdExtZtso; }
+  bool hasVendorXVentanaCondOps() const { return HasVendorXVentanaCondOps; }
   bool hasEPI() const { return HasEPI; }
   bool is64Bit() const { return HasRV64; }
   bool isRV32E() const { return IsRV32E; }
@@ -202,6 +205,7 @@ public:
   bool enableUnalignedScalarMem() const { return EnableUnalignedScalarMem; }
   bool hasLUIADDIFusion() const { return HasLUIADDIFusion; }
   bool hasForcedAtomics() const { return HasForcedAtomics; }
+  bool hasOptimizedZeroStrideLoad() const { return HasOptimizedZeroStrideLoad; }
   MVT getXLenVT() const { return XLenVT; }
   unsigned getXLen() const { return XLen; }
   unsigned getFLen() const {

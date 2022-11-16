@@ -158,8 +158,6 @@ public:
   bool WFVVectorize;
   bool LoopVectorize;
   bool LoopsInterleaved;
-  bool RerollLoops;
-  bool NewGVN;
   bool DisableGVNLoadPRE;
   bool ForgetAllSCEVInLoopUnroll;
   bool VerifyInput;
