@@ -2162,6 +2162,12 @@ bool LoongArchTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
 TargetLowering::AtomicExpansionKind
 LoongArchTargetLowering::shouldExpandAtomicRMWInIR(AtomicRMWInst *AI) const {
   // TODO: Add more AtomicRMWInst that needs to be extended.
+
+  // Since floating-point operation requires a non-trivial set of data
+  // operations, use CmpXChg to expand.
+  if (AI->isFloatingPointOperation())
+    return AtomicExpansionKind::CmpXChg;
+
   unsigned Size = AI->getType()->getPrimitiveSizeInBits();
   if (Size == 8 || Size == 16)
     return AtomicExpansionKind::MaskedIntrinsic;
@@ -2450,4 +2456,25 @@ void LoongArchTargetLowering::LowerAsmOperandForConstraint(
     }
   }
   TargetLowering::LowerAsmOperandForConstraint(Op, Constraint, Ops, DAG);
+}
+
+#define GET_REGISTER_MATCHER
+#include "LoongArchGenAsmMatcher.inc"
+
+Register
+LoongArchTargetLowering::getRegisterByName(const char *RegName, LLT VT,
+                                           const MachineFunction &MF) const {
+  std::pair<StringRef, StringRef> Name = StringRef(RegName).split('$');
+  std::string NewRegName = Name.second.str();
+  Register Reg = MatchRegisterAltName(NewRegName);
+  if (Reg == LoongArch::NoRegister)
+    Reg = MatchRegisterName(NewRegName);
+  if (Reg == LoongArch::NoRegister)
+    report_fatal_error(
+        Twine("Invalid register name \"" + StringRef(RegName) + "\"."));
+  BitVector ReservedRegs = Subtarget.getRegisterInfo()->getReservedRegs(MF);
+  if (!ReservedRegs.test(Reg))
+    report_fatal_error(Twine("Trying to obtain non-reserved register \"" +
+                             StringRef(RegName) + "\"."));
+  return Reg;
 }

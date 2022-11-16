@@ -134,6 +134,7 @@ class DebugCommunication(object):
         self.configuration_done_sent = False
         self.frame_scopes = {}
         self.init_commands = init_commands
+        self.initialized_event = None
 
     @classmethod
     def encode_content(cls, s):
@@ -231,6 +232,8 @@ class DebugCommunication(object):
                 self._process_stopped()
                 tid = body['threadId']
                 self.thread_stop_reasons[tid] = body
+            elif event == 'initialized':
+                self.initialized_event = packet
             elif event == 'breakpoint':
                 # Breakpoint events come in when a breakpoint has locations
                 # added or removed. Keep track of them so we can look for them
@@ -369,7 +372,13 @@ class DebugCommunication(object):
     def wait_for_exited(self):
         event_dict = self.wait_for_event('exited')
         if event_dict is None:
-            raise ValueError("didn't get stopped event")
+            raise ValueError("didn't get exited event")
+        return event_dict
+
+    def wait_for_terminated(self):
+        event_dict = self.wait_for_event('terminated')
+        if event_dict is None:
+            raise ValueError("didn't get terminated event")
         return event_dict
 
     def get_initialize_value(self, key):

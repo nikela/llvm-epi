@@ -173,6 +173,7 @@ struct SparseTensorCodegenPass
     // Most ops in the sparse dialect must go!
     target.addIllegalDialect<SparseTensorDialect>();
     target.addLegalOp<SortOp>();
+    target.addLegalOp<SortCooOp>();
     target.addLegalOp<PushBackOp>();
     // All dynamic rules below accept new function, call, return, and various
     // tensor and bufferization operations as legal output of the rewriting
@@ -282,9 +283,17 @@ std::unique_ptr<Pass> mlir::createSparseTensorConversionPass(
   return std::make_unique<SparseTensorConversionPass>(options);
 }
 
+std::unique_ptr<Pass> mlir::createSparseTensorCodegenPass() {
+  return std::make_unique<SparseTensorCodegenPass>();
+}
+
 std::unique_ptr<Pass>
 mlir::createSparseTensorCodegenPass(bool enableBufferInitialization) {
   return std::make_unique<SparseTensorCodegenPass>(enableBufferInitialization);
+}
+
+std::unique_ptr<Pass> mlir::createSparseBufferRewritePass() {
+  return std::make_unique<SparseBufferRewritePass>();
 }
 
 std::unique_ptr<Pass>
