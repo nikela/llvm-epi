@@ -1130,57 +1130,6 @@ foldShuffledIntrinsicOperands(IntrinsicInst *II,
   return new ShuffleVectorInst(NewIntrinsic, Mask);
 }
 
-Instruction *InstCombinerImpl::visitVPSelect(IntrinsicInst *II) {
-  auto *VPSelect = cast<VPIntrinsic>(II);
-  Type *RetType = VPSelect->getType();
-  Value *CondVal = VPSelect->getArgOperand(0);
-  Value *TrueVal = VPSelect->getArgOperand(1);
-  Value *FalseVal = VPSelect->getArgOperand(2);
-  Value *VL = VPSelect->getVectorLengthParam();
-
-  // If true and false values are the same, no need for the select.
-  if (TrueVal == FalseVal)
-    return replaceInstUsesWith(*II, TrueVal);
-
-  // No need for a select when the cond is an allzeros or allones vector.
-  if (match(CondVal, m_One()))
-    return replaceInstUsesWith(*II, TrueVal);
-  if (match(CondVal, m_Zero()))
-    return replaceInstUsesWith(*II, FalseVal);
-
-  // Merge two selects with the same condition value.
-  if (auto *PrevVPSelect = dyn_cast<VPIntrinsic>(FalseVal))
-    if (PrevVPSelect->getIntrinsicID() == Intrinsic::vp_select &&
-        PrevVPSelect->getArgOperand(0) == CondVal &&
-        PrevVPSelect->getVectorLengthParam() == VL)
-      return replaceOperand(*II, 2, PrevVPSelect->getArgOperand(2));
-
-  if (RetType->isIntOrIntVectorTy(1) && CondVal->getType() == TrueVal->getType()) {
-    auto *AllOnes = ConstantInt::getAllOnesValue(CondVal->getType());
-    IRBuilder<> Builder(II->getContext());
-
-    // If TrueVal is an allones vector, transform the select in an or.
-    if (match(TrueVal, m_One())) {
-      auto *VPDecl = VPIntrinsic::getDeclarationForParams(
-          II->getModule(), Intrinsic::vp_or, nullptr,
-          {CondVal, FalseVal, AllOnes, VL});
-      return Builder.CreateCall(VPDecl, {CondVal, FalseVal, AllOnes, VL},
-                                VPSelect->getName() + ".or");
-    }
-
-    // If FalseVal is an allzeros vector, transform the select in an and.
-    if (match(FalseVal, m_Zero())) {
-      auto *VPDecl = VPIntrinsic::getDeclarationForParams(
-          II->getModule(), Intrinsic::vp_and, nullptr,
-          {CondVal, TrueVal, AllOnes, VL});
-      return Builder.CreateCall(VPDecl, {CondVal, TrueVal, AllOnes, VL},
-                                VPSelect->getName() + ".and");
-    }
-  }
-
-  return nullptr;
-}
-
 /// CallInst simplification. This mostly only handles folding of intrinsic
 /// instructions. For normal calls, it allows visitCallBase to do the heavy
 /// lifting.
@@ -1298,6 +1247,8 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
   }
 
   Intrinsic::ID IID = II->getIntrinsicID();
+  if (VPIntrinsic::isVPIntrinsic(IID))
+    return visitVPInst(cast<VPIntrinsic>(II));
   switch (IID) {
   case Intrinsic::objectsize:
     if (Value *V = lowerObjectSizeCall(II, DL, &TLI, AA, /*MustSucceed=*/false))
@@ -2867,9 +2818,6 @@ Instruction *InstCombinerImpl::visitCallInst(CallInst &CI) {
       return nullptr;
     }
     break;
-  }
-  case Intrinsic::vp_select: {
-    return visitVPSelect(II);
   }
   default: {
     // Handle target specific intrinsics
