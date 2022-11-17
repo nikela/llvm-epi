@@ -10143,13 +10143,13 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
        Plan->getVectorLoopRegion()->getEntryBasicBlock()->phis()) {
     if (auto *RecurPhi =
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
-      VPRecipeBase *PrevRecipe = RecurPhi->getBackedgeRecipe();
+      VPRecipeBase *PrevRecipe = &RecurPhi->getBackedgeRecipe();
       // Fixed-order recurrences do not contain cycles, so this loop is
       // guaranteed to terminate.
       while (
           auto *PrevPhi =
               dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(PrevRecipe)) {
-        PrevRecipe = PrevPhi->getBackedgeRecipe();
+        PrevRecipe = &PrevPhi->getBackedgeRecipe();
       }
       VPBasicBlock *InsertBlock = PrevRecipe->getParent();
       auto *Region = GetReplicateRegion(PrevRecipe);
