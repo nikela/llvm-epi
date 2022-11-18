@@ -2304,6 +2304,10 @@ Instruction *InstCombinerImpl::visitGetElementPtrInst(GetElementPtrInst &GEP) {
     // undef elements to decrease demanded bits
   }
 
+  // Handle pointer-vector geps used in VP gather/scatter intrinsics.
+  if (auto *I = visitVPGatherScatterOnlyGEP(GEP))
+    return I;
+
   // Eliminate unneeded casts for indices, and replace indices which displace
   // by multiples of a zero size type with zero.
   bool MadeChange = false;
