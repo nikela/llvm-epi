@@ -99,6 +99,7 @@
 #include "llvm/Support/KnownBits.h"
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Utils/BasicBlockUtils.h"
 #include "llvm/Transforms/Utils/Local.h"
 #include <algorithm>
 #include <cassert>
@@ -2304,6 +2305,10 @@ Instruction *InstCombinerImpl::visitGetElementPtrInst(GetElementPtrInst &GEP) {
     // undef elements to decrease demanded bits
   }
 
+  // Handle pointer-vector geps used in VP gather/scatter intrinsics.
+  if (auto *I = visitVPGatherScatterOnlyGEP(GEP))
+    return I;
+
   // Eliminate unneeded casts for indices, and replace indices which displace
   // by multiples of a zero size type with zero.
   bool MadeChange = false;
@@ -4163,6 +4168,11 @@ static bool TryToSinkInstruction(Instruction *I, BasicBlock *DestBlock,
     if (!SunkVariables.insert(DbgUserVariable).second)
       continue;
 
+    // Leave dbg.assign intrinsics in their original positions and there should
+    // be no need to insert a clone.
+    if (isa<DbgAssignIntrinsic>(User))
+      continue;
+
     DIIClones.emplace_back(cast<DbgVariableIntrinsic>(User->clone()));
     if (isa<DbgDeclareInst>(User) && isa<CastInst>(I))
       DIIClones.back()->replaceVariableLocationOp(I, I->getOperand(0));
@@ -4588,6 +4598,13 @@ static bool combineInstructionsOverFunction(
   bool MadeIRChange = false;
   if (ShouldLowerDbgDeclare)
     MadeIRChange = LowerDbgDeclare(F);
+  // LowerDbgDeclare calls RemoveRedundantDbgInstrs, but LowerDbgDeclare will
+  // almost never return true when running an assignment tracking build. Take
+  // this opportunity to do some clean up for assignment tracking builds too.
+  if (!MadeIRChange && getEnableAssignmentTracking()) {
+    for (auto &BB : F)
+      RemoveRedundantDbgInstrs(&BB);
+  }
 
   // Iterate while there is work to do.
   unsigned Iteration = 0;

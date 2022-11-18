@@ -219,6 +219,11 @@ public:
                         bodyBuilder, linkage);
   }
 
+  /// Create a fir::DispatchTable operation.
+  fir::DispatchTableOp createDispatchTableOp(mlir::Location loc,
+                                             llvm::StringRef name,
+                                             llvm::StringRef parentName);
+
   /// Convert a StringRef string into a fir::StringLitOp.
   fir::StringLitOp createStringLitOp(mlir::Location loc,
                                      llvm::StringRef string);
@@ -424,6 +429,9 @@ public:
   /// Set default FastMathFlags value from the passed MathOptionsBase
   /// config.
   void setFastMathFlags(Fortran::common::MathOptionsBase options);
+
+  /// Get current FastMathFlags value.
+  mlir::arith::FastMathFlags getFastMathFlags() const { return fastMathFlags; }
 
   /// Dump the current function. (debug)
   LLVM_DUMP_METHOD void dumpFunc();

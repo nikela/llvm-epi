@@ -1308,17 +1308,13 @@ bool AArch64InstrInfo::optimizePTestInstr(
   bool PredIsPTestLike = isPTestLikeOpcode(PredOpcode);
   bool PredIsWhileLike = isWhileOpcode(PredOpcode);
 
-  if (isPTrueOpcode(MaskOpcode) && (PredIsPTestLike || PredIsWhileLike)) {
-    // For PTEST(PTRUE_ALL, WHILE), if the element size matches the PTEST is
+  if (isPTrueOpcode(MaskOpcode) && (PredIsPTestLike || PredIsWhileLike) &&
+      getElementSizeForOpcode(MaskOpcode) ==
+          getElementSizeForOpcode(PredOpcode) &&
+      Mask->getOperand(1).getImm() == 31) {
+    // For PTEST(PTRUE_ALL, WHILE), if the element size matches, the PTEST is
     // redundant since WHILE performs an implicit PTEST with an all active
-    // mask.
-    uint64_t MaskElementSize = getElementSizeForOpcode(MaskOpcode);
-    uint64_t PredElementSize = getElementSizeForOpcode(PredOpcode);
-
-    // Must be an all active predicate of matching element size.
-    if ((PredElementSize != MaskElementSize) ||
-        (Mask->getOperand(1).getImm() != 31))
-      return false;
+    // mask. Must be an all active predicate of matching element size.
 
     // For PTEST(PTRUE_ALL, PTEST_LIKE), the PTEST is redundant if the
     // PTEST_LIKE instruction uses the same all active mask and the element
@@ -3691,7 +3687,12 @@ void AArch64InstrInfo::copyPhysReg(MachineBasicBlock &MBB,
 
   if (AArch64::FPR128RegClass.contains(DestReg) &&
       AArch64::FPR128RegClass.contains(SrcReg)) {
-    if (Subtarget.hasNEON()) {
+    if (Subtarget.forceStreamingCompatibleSVE()) {
+      BuildMI(MBB, I, DL, get(AArch64::ORR_ZZZ))
+          .addReg(AArch64::Z0 + (DestReg - AArch64::Q0), RegState::Define)
+          .addReg(AArch64::Z0 + (SrcReg - AArch64::Q0))
+          .addReg(AArch64::Z0 + (SrcReg - AArch64::Q0));
+    } else if (Subtarget.hasNEON()) {
       BuildMI(MBB, I, DL, get(AArch64::ORRv16i8), DestReg)
           .addReg(SrcReg)
           .addReg(SrcReg, getKillRegState(KillSrc));

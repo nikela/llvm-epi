@@ -2057,7 +2057,7 @@ MVT AArch64TargetLowering::getScalarShiftAmountTy(const DataLayout &DL,
 
 bool AArch64TargetLowering::allowsMisalignedMemoryAccesses(
     EVT VT, unsigned AddrSpace, Align Alignment, MachineMemOperand::Flags Flags,
-    bool *Fast) const {
+    unsigned *Fast) const {
   if (Subtarget->requiresStrictAlign())
     return false;
 
@@ -2082,7 +2082,7 @@ bool AArch64TargetLowering::allowsMisalignedMemoryAccesses(
 // Same as above but handling LLTs instead.
 bool AArch64TargetLowering::allowsMisalignedMemoryAccesses(
     LLT Ty, unsigned AddrSpace, Align Alignment, MachineMemOperand::Flags Flags,
-    bool *Fast) const {
+    unsigned *Fast) const {
   if (Subtarget->requiresStrictAlign())
     return false;
 
@@ -4747,6 +4747,22 @@ SDValue AArch64TargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
                                      Op.getOperand(0),
                                      DAG.getNode(ISD::BITCAST, dl, MVT::f64,
                                                  Op.getOperand(1))));
+    return SDValue();
+  }
+  case Intrinsic::aarch64_sve_whilelo: {
+    if (isa<ConstantSDNode>(Op.getOperand(1)) &&
+        isa<ConstantSDNode>(Op.getOperand(2))) {
+      unsigned MinSVEVectorSize =
+          std::max(Subtarget->getMinSVEVectorSizeInBits(), 128u);
+      unsigned ElementSize = 128 / Op.getValueType().getVectorMinNumElements();
+      unsigned NumActiveElems =
+          Op.getConstantOperandVal(2) - Op.getConstantOperandVal(1);
+      Optional<unsigned> PredPattern =
+          getSVEPredPatternFromNumElements(NumActiveElems);
+      if ((PredPattern != None) &&
+          NumActiveElems <= (MinSVEVectorSize / ElementSize))
+        return getPTrue(DAG, dl, Op.getValueType(), *PredPattern);
+    }
     return SDValue();
   }
   case Intrinsic::aarch64_sve_sunpkhi:
@@ -12288,7 +12304,8 @@ SDValue AArch64TargetLowering::LowerINSERT_VECTOR_ELT(SDValue Op,
                                                       SelectionDAG &DAG) const {
   assert(Op.getOpcode() == ISD::INSERT_VECTOR_ELT && "Unknown opcode!");
 
-  if (useSVEForFixedLengthVectorVT(Op.getValueType()))
+  if (useSVEForFixedLengthVectorVT(Op.getValueType(),
+                                   Subtarget->forceStreamingCompatibleSVE()))
     return LowerFixedLengthInsertVectorElt(Op, DAG);
 
   // Check for non-constant or out of range lane.
@@ -14329,7 +14346,7 @@ EVT AArch64TargetLowering::getOptimalMemOpType(
   auto AlignmentIsAcceptable = [&](EVT VT, Align AlignCheck) {
     if (Op.isAligned(AlignCheck))
       return true;
-    bool Fast;
+    unsigned Fast;
     return allowsMisalignedMemoryAccesses(VT, 0, Align(1),
                                           MachineMemOperand::MONone, &Fast) &&
            Fast;
@@ -14359,7 +14376,7 @@ LLT AArch64TargetLowering::getOptimalMemOpLLT(
   auto AlignmentIsAcceptable = [&](EVT VT, Align AlignCheck) {
     if (Op.isAligned(AlignCheck))
       return true;
-    bool Fast;
+    unsigned Fast;
     return allowsMisalignedMemoryAccesses(VT, 0, Align(1),
                                           MachineMemOperand::MONone, &Fast) &&
            Fast;
