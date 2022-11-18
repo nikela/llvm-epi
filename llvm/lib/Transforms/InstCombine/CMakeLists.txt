@@ -14,6 +14,7 @@ add_llvm_component_library(LLVMInstCombine
   InstCombineShifts.cpp
   InstCombineSimplifyDemanded.cpp
   InstCombineVectorOps.cpp
+  InstCombineVPOps.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${LLVM_MAIN_INCLUDE_DIR}/llvm/Transforms

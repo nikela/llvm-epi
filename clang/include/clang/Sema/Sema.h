@@ -11287,9 +11287,12 @@ public:
   StmtResult ActOnOpenMPTaskyieldDirective(SourceLocation StartLoc,
                                            SourceLocation EndLoc);
   /// Called on well-formed '\#pragma omp error'.
+  /// Error direcitive is allowed in both declared and excutable contexts.
+  /// Adding InExContext to identify which context is called from.
   StmtResult ActOnOpenMPErrorDirective(ArrayRef<OMPClause *> Clauses,
                                        SourceLocation StartLoc,
-                                       SourceLocation EndLoc);
+                                       SourceLocation EndLoc,
+                                       bool InExContext = true);
   /// Called on well-formed '\#pragma omp barrier'.
   StmtResult ActOnOpenMPBarrierDirective(SourceLocation StartLoc,
                                          SourceLocation EndLoc);
@@ -11827,6 +11830,13 @@ public:
   OMPClause *ActOnOpenMPAtomicDefaultMemOrderClause(
       OpenMPAtomicDefaultMemOrderClauseKind Kind, SourceLocation KindLoc,
       SourceLocation StartLoc, SourceLocation LParenLoc, SourceLocation EndLoc);
+
+  /// Called on well-formed 'at' clause.
+  OMPClause *ActOnOpenMPAtClause(OpenMPAtClauseKind Kind,
+                                 SourceLocation KindLoc,
+                                 SourceLocation StartLoc,
+                                 SourceLocation LParenLoc,
+                                 SourceLocation EndLoc);
 
   /// Data used for processing a list of variables in OpenMP clauses.
   struct OpenMPVarListDataTy final {
@@ -13344,6 +13354,8 @@ private:
   bool CheckRISCVLMUL(CallExpr *TheCall, unsigned ArgNum);
   bool CheckRISCVBuiltinFunctionCall(const TargetInfo &TI, unsigned BuiltinID,
                                      CallExpr *TheCall);
+  bool CheckLoongArchBuiltinFunctionCall(const TargetInfo &TI,
+                                         unsigned BuiltinID, CallExpr *TheCall);
 
   bool SemaBuiltinVAStart(unsigned BuiltinID, CallExpr *TheCall);
   bool SemaBuiltinVAStartARMMicrosoft(CallExpr *Call);

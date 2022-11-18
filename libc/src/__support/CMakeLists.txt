@@ -85,15 +85,6 @@ add_header_library(
     libc.src.errno.errno
 )
 
-add_object_library(
-  fork_callbacks
-  SRCS
-    fork_callbacks.cpp
-  HDRS
-    fork_callbacks.h
-  DEPENDS
-    .threads.mutex
-)
 
 add_header_library(
   integer_operations
@@ -116,11 +107,33 @@ add_header_library(
 )
 
 add_header_library(
+  number_pair
+  HDRS
+    number_pair.h
+  DEPENDS
+    libc.src.__support.CPP.type_traits
+)
+
+add_header_library(
+  integer_utils
+  HDRS
+    integer_utils.h
+  DEPENDS
+    .builtin_wrappers
+    .number_pair
+    libc.src.__support.CPP.type_traits
+)
+
+add_header_library(
   uint
   HDRS
     UInt.h
   DEPENDS
+    .builtin_wrappers
+    .number_pair
+    .integer_utils
     libc.src.__support.CPP.array
+    libc.src.__support.CPP.type_traits
 )
 
 add_header_library(

@@ -23,6 +23,7 @@
 #include "llvm/IR/InstVisitor.h"
 #include "llvm/IR/PatternMatch.h"
 #include "llvm/IR/Value.h"
+#include "llvm/IR/VectorBuilder.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/KnownBits.h"
 #include "llvm/Transforms/InstCombine/InstCombiner.h"
@@ -176,7 +177,6 @@ public:
   bool freezeOtherUses(FreezeInst &FI);
   Instruction *foldFreezeIntoRecurrence(FreezeInst &I, PHINode *PN);
   Instruction *visitFreeze(FreezeInst &I);
-  Instruction *visitVPSelect(IntrinsicInst *II);
 
   /// Specify what to return for unhandled instructions.
   Instruction *visitInstruction(Instruction &I) { return nullptr; }
@@ -379,6 +379,11 @@ private:
   // into simplier select instruction using isImpliedCondition.
   Instruction *foldAndOrOfSelectUsingImpliedCond(Value *Op, SelectInst &SI,
                                                  bool IsAnd);
+
+  /// Vector Predication related visitors and functions.
+  Instruction *visitVPInst(VPIntrinsic *VPI);
+  Instruction *visitVPMul(VPIntrinsic *VPMul);
+  Instruction *visitVPSelect(VPIntrinsic *VPSelect);
 
 public:
   /// Inserts an instruction \p New before instruction \p Old
