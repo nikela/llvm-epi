@@ -128,6 +128,12 @@ InstCombinerImpl::visitVPGatherScatterOnlyGEP(GetElementPtrInst &GEP) {
     // The GEP must be the pointer operand of the gather/scatter.
     if (GEPUse != VPI->getMemoryPointerParam())
       return nullptr;
+    // If either the mask or VL do not dominate the GEP, for now ignore this
+    // case. FIXME: It looks like it should be possible to insert the VP "gep"
+    // right after the definiton of the mask or the VL.
+    if (!DT.dominates(VPI->getMaskParam(), &GEP) ||
+        !DT.dominates(VPI->getVectorLengthParam(), &GEP))
+      return nullptr;
     if (!Mask && !VL) {
       Mask = VPI->getMaskParam();
       VL = VPI->getVectorLengthParam();
