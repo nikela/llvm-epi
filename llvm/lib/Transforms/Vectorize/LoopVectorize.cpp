@@ -9476,16 +9476,12 @@ void VPRecipeBuilder::fixHeaderPhis(VPlanPtr &Plan) {
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(R)) {
       if (!EVLPhiRecipe) {
         EVLPhiRecipe = new VPEVLPHIRecipe();
-        // See comment below.
-        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
         EVLPhiRecipe->addOperand(getOrCreateEVL(Plan));
+        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
       }
       // This will be used later when adding the recipe
       // VPInstruction::PredicatedFirstOrderRecurrenceSplice
       // via the getter getEVLPhi.
-      // Because it is not used as a proper input of
-      // VPPredicatedFirstOrderRecurrencePHIRecipe it doesn't have to be
-      // emitted before it (hence the usage of getFirstNonPhi above).
       PredPhi->addOperand(EVLPhiRecipe);
     }
   }
