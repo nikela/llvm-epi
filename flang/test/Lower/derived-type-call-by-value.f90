@@ -47,7 +47,7 @@ end module moo
 ! CHECK:         %[[VAL_9:.*]] = fir.convert %[[VAL_7]] : (index) -> i64
 ! CHECK:         %[[VAL_10:.*]] = arith.constant false
 ! CHECK:         %[[VAL_11:.*]] = arith.constant false
-! CHECK:         %[[VAL_12:.*]] = fir.call @_FortranAStopStatementText(%[[VAL_8]], %[[VAL_9]], %[[VAL_10]], %[[VAL_11]]) : (!fir.ref<i8>, i64, i1, i1) -> none
+! CHECK:         %[[VAL_12:.*]] = fir.call @_FortranAStopStatementText(%[[VAL_8]], %[[VAL_9]], %[[VAL_10]], %[[VAL_11]]) fastmath<contract> : (!fir.ref<i8>, i64, i1, i1) -> none
 ! CHECK:         fir.unreachable
 ! CHECK:       ^bb2:
 ! CHECK:         %[[VAL_13:.*]] = fir.field_index x, !fir.type<_QMmooTmytype{x:i32}>
@@ -75,7 +75,7 @@ end module moo
 ! CHECK:         %[[VAL_9:.*]] = fir.coordinate_of %[[VAL_1]], %[[VAL_8]] : (!fir.ref<!fir.type<_QMmooTmytype{x:i32}>>, !fir.field) -> !fir.ref<i32>
 ! CHECK:         %[[VAL_10:.*]] = fir.load %[[VAL_7]] : !fir.ref<i32>
 ! CHECK:         fir.store %[[VAL_10]] to %[[VAL_9]] : !fir.ref<i32>
-! CHECK:         fir.call @_QMmooPmyfoo(%[[VAL_1]]) : (!fir.ref<!fir.type<_QMmooTmytype{x:i32}>>) -> ()
+! CHECK:         fir.call @_QMmooPmyfoo(%[[VAL_1]]) fastmath<contract> : (!fir.ref<!fir.type<_QMmooTmytype{x:i32}>>) -> ()
 ! CHECK:         %[[VAL_11:.*]] = fir.field_index x, !fir.type<_QMmooTmytype{x:i32}>
 ! CHECK:         %[[VAL_12:.*]] = fir.coordinate_of %[[VAL_2]], %[[VAL_11]] : (!fir.ref<!fir.type<_QMmooTmytype{x:i32}>>, !fir.field) -> !fir.ref<i32>
 ! CHECK:         %[[VAL_13:.*]] = fir.load %[[VAL_12]] : !fir.ref<i32>
@@ -89,7 +89,7 @@ end module moo
 ! CHECK:         %[[VAL_19:.*]] = fir.convert %[[VAL_17]] : (index) -> i64
 ! CHECK:         %[[VAL_20:.*]] = arith.constant false
 ! CHECK:         %[[VAL_21:.*]] = arith.constant false
-! CHECK:         %[[VAL_22:.*]] = fir.call @_FortranAStopStatementText(%[[VAL_18]], %[[VAL_19]], %[[VAL_20]], %[[VAL_21]]) : (!fir.ref<i8>, i64, i1, i1) -> none
+! CHECK:         %[[VAL_22:.*]] = fir.call @_FortranAStopStatementText(%[[VAL_18]], %[[VAL_19]], %[[VAL_20]], %[[VAL_21]]) fastmath<contract> : (!fir.ref<i8>, i64, i1, i1) -> none
 ! CHECK:         fir.unreachable
 ! CHECK:       ^bb2:
 ! CHECK:         return
@@ -99,7 +99,6 @@ end module moo
 ! CHECK:         %[[VAL_0:.*]] = fir.alloca i32 {adapt.valuebyref}
 ! CHECK:         %[[VAL_1:.*]] = arith.constant 42 : i32
 ! CHECK:         fir.store %[[VAL_1]] to %[[VAL_0]] : !fir.ref<i32>
-! CHECK:         fir.call @_QMmooPmysub(%[[VAL_0]]) : (!fir.ref<i32>) -> ()
+! CHECK:         fir.call @_QMmooPmysub(%[[VAL_0]]) fastmath<contract> : (!fir.ref<i32>) -> ()
 ! CHECK:         return
 ! CHECK:       }
-

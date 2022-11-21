@@ -33,7 +33,7 @@ end module moo
 ! CHECK:         %[[VAL_2:.*]] = fir.alloca i32 {bindc_name = "w", uniq_name = "_QMmooFfooEw"}
 ! CHECK:         %[[VAL_3:.*]] = fir.load %[[VAL_1]] : !fir.ref<i32>
 ! CHECK:         %[[VAL_4:.*]] = fir.load %[[VAL_0]] : !fir.ref<!fir.type<_QMmooTmytype{myaddr:i64}>>
-! CHECK:         %[[VAL_5:.*]] = fir.call @bar_c(%[[VAL_3]], %[[VAL_4]]) : (i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32
+! CHECK:         %[[VAL_5:.*]] = fir.call @bar_c(%[[VAL_3]], %[[VAL_4]]) fastmath<contract> : (i32, !fir.type<_QMmooTmytype{myaddr:i64}>) -> i32
 ! CHECK:         fir.store %[[VAL_5]] to %[[VAL_2]] : !fir.ref<i32>
 ! CHECK:         return
 ! CHECK:       }
