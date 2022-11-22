@@ -10508,8 +10508,8 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
 }
 
 void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
-  Value *EVL = State.get(getEVL(), 0);
   for (unsigned Part = 0; Part < State.UF; Part++) {
+    Value *EVL = State.get(getEVL(), Part);
     Value *EVLSplat = State.Builder.CreateVectorSplat(State.VF, EVL, "evl");
     Value *StepVec = State.Builder.CreateIntrinsic(
         Intrinsic::experimental_stepvector, EVLSplat->getType(), {}, nullptr,
