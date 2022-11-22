@@ -2149,6 +2149,7 @@ bool RISCVAsmParser::parseDirectiveOption() {
                    "unexpected token, expected end of statement");
 
     clearFeatureBits(RISCV::FeatureStdExtC, "c");
+    clearFeatureBits(RISCV::FeatureExtZca, "+experimental-zca");
     return false;
   }
 
