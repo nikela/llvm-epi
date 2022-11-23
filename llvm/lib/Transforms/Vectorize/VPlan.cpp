@@ -697,12 +697,15 @@ void VPlan::execute(VPTransformState *State) {
   // phis in the vector loop.
   VPBasicBlock *Header = getVectorLoopRegion()->getEntryBasicBlock();
   for (VPRecipeBase &R : Header->phis()) {
-    if (auto *EVL = dyn_cast<VPEVLPHIRecipe>(&R)) {
-      auto *VecPhi = cast<PHINode>(State->get(EVL, 0));
-
-      VPValue *PreviousDef = EVL->getOperand(0);
-      Value *Incoming = State->get(PreviousDef, State->UF - 1);
-      VecPhi->addIncoming(Incoming, VectorLatchBB);
+    if (auto *VPEVLPhi = dyn_cast<VPEVLPHIRecipe>(&R)) {
+      // NOTE: we only need to get Part == 0 because all the others do not have
+      // a PHI, they directly use the EVL of the previous part.
+      auto *EVLPhi = cast<PHINode>(State->get(VPEVLPhi, 0));
+      // Set the last EVL used in this iteration as the second operand of the
+      // Phi (valid for the following iteration).
+      VPValue *VPEVL = VPEVLPhi->getOperand(0);
+      Value *LastEVL = State->get(VPEVL, State->UF - 1);
+      EVLPhi->addIncoming(LastEVL, VectorLatchBB);
       continue;
     }
 

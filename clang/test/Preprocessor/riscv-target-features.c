@@ -46,6 +46,7 @@
 // CHECK-NOT: __riscv_svnapot
 // CHECK-NOT: __riscv_svinval
 // CHECK-NOT: __riscv_xventanacondops
+// CHECK-NOT: __riscv_zcf
 
 // RUN: %clang -target riscv32-unknown-linux-gnu -march=rv32im -x c -E -dM %s \
 // RUN: -o - | FileCheck --check-prefix=CHECK-M-EXT %s
@@ -453,3 +454,7 @@
 // RUN: %clang -target riscv64 -march=rv64ixventanacondops -x c -E -dM %s \
 // RUN: -o - | FileCheck --check-prefix=CHECK-XVENTANACONDOPS-EXT %s
 // CHECK-XVENTANACONDOPS-EXT: __riscv_xventanacondops 1000000{{$}}
+
+// RUN: %clang -target riscv32 -march=rv32izcf0p70 -menable-experimental-extensions \
+// RUN: -x c -E -dM %s -o - | FileCheck --check-prefix=CHECK-ZCF-EXT %s
+// CHECK-ZCF-EXT: __riscv_zcf 70000{{$}}

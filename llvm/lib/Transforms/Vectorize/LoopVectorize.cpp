@@ -9476,16 +9476,12 @@ void VPRecipeBuilder::fixHeaderPhis(VPlanPtr &Plan) {
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(R)) {
       if (!EVLPhiRecipe) {
         EVLPhiRecipe = new VPEVLPHIRecipe();
-        // See comment below.
-        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
         EVLPhiRecipe->addOperand(getOrCreateEVL(Plan));
+        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
       }
       // This will be used later when adding the recipe
       // VPInstruction::PredicatedFirstOrderRecurrenceSplice
       // via the getter getEVLPhi.
-      // Because it is not used as a proper input of
-      // VPPredicatedFirstOrderRecurrencePHIRecipe it doesn't have to be
-      // emitted before it (hence the usage of getFirstNonPhi above).
       PredPhi->addOperand(EVLPhiRecipe);
     }
   }
@@ -10508,8 +10504,8 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
 }
 
 void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
-  Value *EVL = State.get(getEVL(), 0);
   for (unsigned Part = 0; Part < State.UF; Part++) {
+    Value *EVL = State.get(getEVL(), Part);
     Value *EVLSplat = State.Builder.CreateVectorSplat(State.VF, EVL, "evl");
     Value *StepVec = State.Builder.CreateIntrinsic(
         Intrinsic::experimental_stepvector, EVLSplat->getType(), {}, nullptr,
