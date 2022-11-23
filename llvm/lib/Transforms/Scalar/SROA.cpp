@@ -1840,10 +1840,8 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
                  ? (Type*)ScalableVectorType::get(Ty->getElementType(), NumElements)
                  : (Type*)FixedVectorType::get(Ty->getElementType(), NumElements));
 
-  Type *SplitIntTy = nullptr;
-  if (uint64_t Bitwidth = NumElements * ElementSize * 8;
-      Bitwidth <= IntegerType::MAX_INT_BITS)
-    SplitIntTy = Type::getIntNTy(Ty->getContext(), Bitwidth);
+  Type *SplitIntTy =
+      Type::getIntNTy(Ty->getContext(), NumElements * ElementSize * 8);
 
   Use *U = S.getUse();
 
@@ -1862,8 +1860,7 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
     // Disable vector promotion when there are loads or stores of an FCA.
     if (LTy->isStructTy())
       return false;
-    if (SplitIntTy &&
-        (P.beginOffset() > S.beginOffset() || P.endOffset() < S.endOffset())) {
+    if (P.beginOffset() > S.beginOffset() || P.endOffset() < S.endOffset()) {
       assert(LTy->isIntegerTy());
       LTy = SplitIntTy;
     }
@@ -1876,8 +1873,7 @@ static bool isVectorPromotionViableForSlice(Partition &P, const Slice &S,
     // Disable vector promotion when there are loads or stores of an FCA.
     if (STy->isStructTy())
       return false;
-    if (SplitIntTy &&
-        (P.beginOffset() > S.beginOffset() || P.endOffset() < S.endOffset())) {
+    if (P.beginOffset() > S.beginOffset() || P.endOffset() < S.endOffset()) {
       assert(STy->isIntegerTy());
       STy = SplitIntTy;
     }
@@ -1972,9 +1968,6 @@ static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL) {
         CheckCandidateType(LI->getType());
       else if (auto *SI = dyn_cast<StoreInst>(S.getUse()->getUser()))
         CheckCandidateType(SI->getValueOperand()->getType());
-      else if (auto *MTI = dyn_cast<MemIntrinsic>(S.getUse()->getUser()))
-        CheckCandidateType(FixedVectorType::get(
-            IntegerType::getInt8Ty(MTI->getContext()), P.size()));
     }
 
   // If we didn't find a vector type, nothing to do here.
