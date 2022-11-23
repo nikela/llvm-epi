@@ -2036,7 +2036,7 @@ static VectorType *isVectorPromotionViable(Partition &P, const DataLayout &DL) {
   // FIXME: hack. Do we have a named constant for this?
   // SDAG SDNode can't have more than 65535 operands.
   llvm::erase_if(CandidateTys, [](VectorType *VTy) {
-    return cast<FixedVectorType>(VTy)->getNumElements() >
+    return cast<VectorType>(VTy)->getElementCount().getKnownMinValue() >
            std::numeric_limits<unsigned short>::max();
   });
 
