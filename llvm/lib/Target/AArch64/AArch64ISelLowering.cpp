@@ -343,7 +343,7 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
       addQRTypeForNEON(MVT::v8bf16);
   }
 
-  if (Subtarget->hasSVE() || Subtarget->hasSME()) {
+  if (Subtarget->hasSVEorSME()) {
     // Add legal sve predicate types
     addRegisterClass(MVT::nxv1i1, &AArch64::PPRRegClass);
     addRegisterClass(MVT::nxv2i1, &AArch64::PPRRegClass);
@@ -1155,7 +1155,7 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
 
   // FIXME: Move lowering for more nodes here if those are common between
   // SVE and SME.
-  if (Subtarget->hasSVE() || Subtarget->hasSME()) {
+  if (Subtarget->hasSVEorSME()) {
     for (auto VT :
          {MVT::nxv16i1, MVT::nxv8i1, MVT::nxv4i1, MVT::nxv2i1, MVT::nxv1i1}) {
       setOperationAction(ISD::SPLAT_VECTOR, VT, Custom);
@@ -12901,7 +12901,8 @@ SDValue AArch64TargetLowering::LowerVSETCC(SDValue Op,
   if (Op.getValueType().isScalableVector())
     return LowerToPredicatedOp(Op, DAG, AArch64ISD::SETCC_MERGE_ZERO);
 
-  if (useSVEForFixedLengthVectorVT(Op.getOperand(0).getValueType()))
+  if (useSVEForFixedLengthVectorVT(Op.getOperand(0).getValueType(),
+                                   Subtarget->forceStreamingCompatibleSVE()))
     return LowerFixedLengthVectorSetccToSVE(Op, DAG);
 
   ISD::CondCode CC = cast<CondCodeSDNode>(Op.getOperand(2))->get();
@@ -22867,7 +22868,7 @@ SDValue AArch64TargetLowering::LowerFixedLengthVectorSetccToSVE(
   EVT InVT = Op.getOperand(0).getValueType();
   EVT ContainerVT = getContainerForFixedLengthVector(DAG, InVT);
 
-  assert(useSVEForFixedLengthVectorVT(InVT) &&
+  assert(InVT.isFixedLengthVector() && isTypeLegal(InVT) &&
          "Only expected to lower fixed length vector operation!");
   assert(Op.getValueType() == InVT.changeTypeToInteger() &&
          "Expected integer result of the same bit length as the inputs!");
