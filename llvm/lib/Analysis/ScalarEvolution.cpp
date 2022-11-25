@@ -8630,11 +8630,6 @@ ScalarEvolution::ExitLimit::ExitLimit(
     : ExitLimit(E, M, MaxOrZero, {&PredSet}) {
 }
 
-ScalarEvolution::ExitLimit::ExitLimit(const SCEV *E, const SCEV *M,
-                                      bool MaxOrZero)
-    : ExitLimit(E, M, MaxOrZero, None) {
-}
-
 /// Allocate memory for BackedgeTakenInfo and copy the not-taken count of each
 /// computable exit into a persistent ExitNotTakenInfo array.
 ScalarEvolution::BackedgeTakenInfo::BackedgeTakenInfo(
@@ -13391,6 +13386,7 @@ static void PrintLoopInfo(raw_ostream &OS, ScalarEvolution *SE,
     OS << "Unpredictable symbolic max backedge-taken count. ";
   }
 
+  OS << "\n";
   if (ExitingBlocks.size() > 1)
     for (BasicBlock *ExitingBlock : ExitingBlocks) {
       OS << "  symbolic max exit count for " << ExitingBlock->getName() << ": "
@@ -13398,8 +13394,7 @@ static void PrintLoopInfo(raw_ostream &OS, ScalarEvolution *SE,
          << "\n";
     }
 
-  OS << "\n"
-        "Loop ";
+  OS << "Loop ";
   L->getHeader()->printAsOperand(OS, /*PrintType=*/false);
   OS << ": ";
 
