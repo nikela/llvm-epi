@@ -1668,7 +1668,7 @@ private:
 
 // FIXME: Reorganise this
 const SCEV *llvm::isStridedAddressing(Value *Ptr, ScalarEvolution *SE,
-                                      bool OneLevelAddrec) {
+                                      const Loop *L, bool OneLevelAddrec) {
   auto *PtrTy = dyn_cast<PointerType>(Ptr->getType());
   if (!PtrTy || PtrTy->isAggregateType())
     return nullptr;
@@ -1677,6 +1677,9 @@ const SCEV *llvm::isStridedAddressing(Value *Ptr, ScalarEvolution *SE,
 
   const SCEVAddRecExpr *S = dyn_cast<SCEVAddRecExpr>(V);
   if (!S)
+    return nullptr;
+
+  if (S->getLoop() != L)
     return nullptr;
 
   if (!S->isAffine())

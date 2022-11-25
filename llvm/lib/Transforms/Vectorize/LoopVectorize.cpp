@@ -7610,7 +7610,7 @@ bool LoopVectorizationCostModel::canUseStridedAccess(Instruction *I) {
     llvm_unreachable("Unexpected instruction");
   }
   assert(Ptr && "Invalid pointer");
-  return isStridedAddressing(Ptr, PSE.getSE());
+  return isStridedAddressing(Ptr, PSE.getSE(), TheLoop);
 }
 
 void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
@@ -11102,8 +11102,13 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
                        << "It should be possible to stride this store!\n");
             LLVM_DEBUG(llvm::dbgs() << "Addr = " << *getAddr() << "\n");
 
+            // Careful this value may be defined in the scalar loop so SCEV
+            // should not go through its phis. An earlier invocation of
+            // isStridedAddressing should have protected us from this.
+            Value *UnderlyingValue = getAddr()->getUnderlyingValue();
             if (const SCEV *SCEVExpr = isStridedAddressing(
-                    getAddr()->getUnderlyingValue(), State.SE)) {
+                    UnderlyingValue, State.SE,
+                    State.LI->getLoopFor(SI->getParent()))) {
               LLVM_DEBUG(llvm::dbgs() << "Found stride for store\n");
               // FIXME: This should be using VPValues rather than doing
               // this by hand. This is not taking into account Part!
@@ -11210,8 +11215,13 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
                      << "It should be possible to stride this load!\n");
           LLVM_DEBUG(llvm::dbgs() << "Addr = " << *getAddr() << "\n");
 
+          // Careful this value may be defined in the scalar loop so SCEV
+          // should not go through its phis. An earlier invocation of
+          // isStridedAddressing should have protected us from this.
+          Value *UnderlyingValue = getAddr()->getUnderlyingValue();
           if (const SCEV *SCEVExpr = isStridedAddressing(
-                  getAddr()->getUnderlyingValue(), State.SE)) {
+                  UnderlyingValue, State.SE,
+                  State.LI->getLoopFor(LI->getParent()))) {
             LLVM_DEBUG(llvm::dbgs() << "Found stride for load\n");
             StridedAccessValues SAV = computeStrideAddressing(
                 Part, State, PtrTy, SCEVExpr,

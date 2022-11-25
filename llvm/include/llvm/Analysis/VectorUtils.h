@@ -1107,7 +1107,7 @@ private:
 
 // FIXME: Reorganise this
 // \a OneLevelAddRec Does not allow other recurrences in the Start and the Step.
-const SCEV *isStridedAddressing(Value *Ptr, ScalarEvolution *SE,
+const SCEV *isStridedAddressing(Value *Ptr, ScalarEvolution *SE, const Loop *L,
                                 bool OneLevelAddRec = true);
 
 } // llvm namespace
