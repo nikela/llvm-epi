@@ -382,8 +382,11 @@ private:
 
   /// Vector Predication related visitors and functions.
   Instruction *visitVPInst(VPIntrinsic *VPI);
+  Instruction *visitVPGatherScatterOnlyGEP(GetElementPtrInst &GEP);
   Instruction *visitVPMul(VPIntrinsic *VPMul);
   Instruction *visitVPSelect(VPIntrinsic *VPSelect);
+
+  Value *emitGEPOffsetVP(GetElementPtrInst &GEP, VectorBuilder &VB);
 
 public:
   /// Inserts an instruction \p New before instruction \p Old

@@ -1169,7 +1169,7 @@ NextIteration:
 
       // Anything using the load now uses the current value.
       I->replaceAllUsesWith(V);
-      BB->getInstList().erase(I);
+      I->eraseFromParent();
     } else if (isa<StoreInst>(I) || I->isVPStore()) {
       // Delete this instruction and mark the name as the current holder of the
       // value
@@ -1227,7 +1227,7 @@ NextIteration:
       for (DbgVariableIntrinsic *DII : AllocaDbgUsers[ai->second])
         if (DII->isAddressOfVariable())
           ConvertDebugDeclareToDebugValue(DII, I, DIB);
-      BB->getInstList().erase(I);
+      I->eraseFromParent();
     }
   }
 

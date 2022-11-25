@@ -2837,8 +2837,6 @@ public:
 
   unsigned getTargetAddressSpace(QualType T) const;
 
-  unsigned getTargetAddressSpace(Qualifiers Q) const;
-
   unsigned getTargetAddressSpace(LangAS AS) const;
 
   LangAS getLangASForBuiltinAddressSpace(unsigned AS) const;

@@ -27,9 +27,11 @@
   ; CHECK-NEXT:    lui t2, 2
   ; CHECK-NEXT:    addiw t2, t2, -2032
   ; CHECK-NEXT:    sub sp, sp, t2
+  ; CHECK-NEXT:    sd a0, 0(sp)
+  ; CHECK-NEXT:    srli a0, sp, 12
+  ; CHECK-NEXT:    slli sp, a0, 12
+  ; CHECK-NEXT:    ld a0, 0(sp)
   ; CHECK-NEXT:    sd a1, 0(sp)
-  ; CHECK-NEXT:    srli a1, sp, 12
-  ; CHECK-NEXT:    slli sp, a1, 12
   ; CHECK-NEXT:    lui a1, 1
   ; CHECK-NEXT:    addiw a1, a1, -8
   ; CHECK-NEXT:    add a1, sp, a1

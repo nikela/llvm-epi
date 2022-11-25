@@ -683,9 +683,8 @@ TEST(TargetParserTest, ARMExtensionFeatures) {
   std::map<uint64_t, std::vector<StringRef>> Extensions;
 
   for (auto &Ext : ARM::ARCHExtNames) {
-    if (Ext.Feature && Ext.NegFeature)
-      Extensions[Ext.ID] = { StringRef(Ext.Feature),
-                             StringRef(Ext.NegFeature) };
+    if (!Ext.Feature.empty() && !Ext.NegFeature.empty())
+      Extensions[Ext.ID] = {Ext.Feature, Ext.NegFeature};
   }
 
   Extensions[ARM::AEK_HWDIVARM]   = { "+hwdiv-arm", "-hwdiv-arm" };
@@ -1607,7 +1606,7 @@ TEST(TargetParserTest, AArch64ExtensionFeatures) {
       AArch64::AEK_SME,     AArch64::AEK_SMEF64F64, AArch64::AEK_SMEI16I64,
       AArch64::AEK_SME2,    AArch64::AEK_HBC,      AArch64::AEK_MOPS,
       AArch64::AEK_PERFMON, AArch64::AEK_SVE2p1,   AArch64::AEK_SME2p1,
-      AArch64::AEK_B16B16,  AArch64::AEK_SMEF16F16};
+      AArch64::AEK_B16B16,  AArch64::AEK_SMEF16F16, AArch64::AEK_CSSC};
 
   std::vector<StringRef> Features;
 
@@ -1672,6 +1671,7 @@ TEST(TargetParserTest, AArch64ExtensionFeatures) {
   EXPECT_TRUE(llvm::is_contained(Features, "+hbc"));
   EXPECT_TRUE(llvm::is_contained(Features, "+mops"));
   EXPECT_TRUE(llvm::is_contained(Features, "+perfmon"));
+  EXPECT_TRUE(llvm::is_contained(Features, "+cssc"));
 
   // Assuming we listed every extension above, this should produce the same
   // result. (note that AEK_NONE doesn't have a name so it won't be in the

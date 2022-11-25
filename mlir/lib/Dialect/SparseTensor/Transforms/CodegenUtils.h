@@ -183,6 +183,26 @@ void sizesFromSrc(OpBuilder &builder, SmallVectorImpl<Value> &sizes,
 /// Scans to top of generated loop.
 Operation *getTop(Operation *op);
 
+/// Iterate over a sparse constant, generates constantOp for value and indices.
+/// E.g.,
+/// sparse<[ [0], [28], [31] ],
+///          [ (-5.13, 2.0), (3.0, 4.0), (5.0, 6.0) ] >
+/// =>
+/// %c1 = arith.constant 0
+/// %v1 = complex.constant (5.13, 2.0)
+/// callback({%c1}, %v1)
+///
+/// %c2 = arith.constant 28
+/// %v2 = complex.constant (3.0, 4.0)
+/// callback({%c2}, %v2)
+///
+/// %c3 = arith.constant 31
+/// %v3 = complex.constant (5.0, 6.0)
+/// callback({%c3}, %v3)
+void foreachInSparseConstant(
+    Location loc, RewriterBase &rewriter, SparseElementsAttr attr,
+    function_ref<void(ArrayRef<Value>, Value)> callback);
+
 //===----------------------------------------------------------------------===//
 // Inlined constant generators.
 //
@@ -197,9 +217,9 @@ Operation *getTop(Operation *op);
 //===----------------------------------------------------------------------===//
 
 /// Generates a 0-valued constant of the given type.  In addition to
-/// the scalar types (`ComplexType`, ``FloatType`, `IndexType`, `IntegerType`),
-/// this also works for `RankedTensorType` and `VectorType` (for which it
-/// generates a constant `DenseElementsAttr` of zeros).
+/// the scalar types (`ComplexType`, ``FloatType`, `IndexType`,
+/// `IntegerType`), this also works for `RankedTensorType` and `VectorType`
+/// (for which it generates a constant `DenseElementsAttr` of zeros).
 inline Value constantZero(OpBuilder &builder, Location loc, Type tp) {
   if (auto ctp = tp.dyn_cast<ComplexType>()) {
     auto zeroe = builder.getZeroAttr(ctp.getElementType());
@@ -318,7 +338,6 @@ inline bool isZeroRankedTensorOrScalar(Type type) {
 // loopEmiter.exitCurrentLoop(); // exit i
 //===----------------------------------------------------------------------===//
 
-// TODO: Sparsification should also rely on this class to generate loops.
 class SparseTensorLoopEmitter {
 public:
   /// Optional callback function to setup dense output tensors when
@@ -331,15 +350,23 @@ public:
   /// tensor id (tid) used in related functions.
   /// If isSparseOut is set, loop emitter assume that the sparse output tensor
   /// is empty, and will always generate loops on it based on the dim sizes.
+  /// An optional array could be provided (by sparsification) to indicate the
+  /// loop id sequence that will be generated. It is used to establish the
+  /// mapping between affineDimExpr to the corresponding loop index in the loop
+  /// stack that are maintained by the loop emitter.
   explicit SparseTensorLoopEmitter(ValueRange tensors,
                                    StringAttr loopTag = nullptr,
                                    bool hasOutput = false,
-                                   bool isSparseOut = false);
+                                   bool isSparseOut = false,
+                                   ArrayRef<unsigned> topSort = {});
 
   /// Starts a loop emitting session by generating all the buffers needed to
   /// iterate tensors.
   void initializeLoopEmit(OpBuilder &builder, Location loc,
                           OutputUpdater updater = nullptr);
+
+  /// Generates a list of operations to compute the affine expression.
+  Value genAffine(OpBuilder &builder, AffineExpr a, Location loc);
 
   /// Enters a new loop sequence, the loops within the same sequence starts from
   /// the break points of previous loop instead of starting over from 0.
@@ -379,6 +406,15 @@ public:
                                       ArrayRef<size_t> extraTids = {},
                                       ArrayRef<size_t> extraDims = {});
 
+  Operation *enterFilterLoopOverTensorAtDim(OpBuilder &builder, Location loc,
+                                            size_t tid, size_t dim,
+                                            AffineExpr affine,
+                                            MutableArrayRef<Value> reduc = {});
+
+  void genDenseAffineAddressAtCurLevel(OpBuilder &builder, Location loc,
+                                       size_t tid, size_t dim,
+                                       AffineExpr affine);
+
   /// Emits a co-iteration loop over a set of tensors.
   Operation *enterCoIterationOverTensorsAtDims(
       OpBuilder &builder, Location loc, ArrayRef<size_t> tids,
@@ -393,6 +429,9 @@ public:
     for (auto &l : loopStack)
       coords.push_back(l.iv);
   }
+
+  /// Gets loop induction variable at the given level.
+  unsigned getCurrentDepth() const { return loopStack.size(); }
 
   /// Gets loop induction variable at the given level.
   Value getLoopIV(size_t level) const {
@@ -523,6 +562,11 @@ private:
   // Loop Sequence Stack, stores the unversial index for the current loop
   // sequence.
   std::vector<Value> loopSeqStack;
+
+  // Maps AffineDimExpr to the index of the loop in loopStack.
+  // TODO: We should probably use a callback function here to make it more
+  // general.
+  std::vector<unsigned> sparsiferLoopLvlMap;
 
   // TODO: not yet used, it should track the current level for each tensor
   // to help eliminate `dim` paramters from above APIs.

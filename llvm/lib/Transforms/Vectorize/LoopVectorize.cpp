@@ -381,13 +381,14 @@ cl::opt<bool> llvm::EnableLoopVectorization(
     "vectorize-loops", cl::init(true), cl::Hidden,
     cl::desc("Run the Loop vectorization passes"));
 
-cl::opt<bool> PrintVPlansInDotFormat(
-    "vplan-print-in-dot-format", cl::init(false), cl::Hidden,
+static cl::opt<bool> PrintVPlansInDotFormat(
+    "vplan-print-in-dot-format", cl::Hidden,
     cl::desc("Use dot format instead of plain text when dumping VPlans"));
 
-cl::opt<cl::boolOrDefault> ForceSafeDivisor(
+static cl::opt<cl::boolOrDefault> ForceSafeDivisor(
     "force-widen-divrem-via-safe-divisor", cl::Hidden,
-    cl::desc("Override cost based safe divisor widening for div/rem instructions"));
+    cl::desc(
+        "Override cost based safe divisor widening for div/rem instructions"));
 
 cl::opt<bool> EnableInterleaveWithoutScalarEpilogue(
     "interleave-no-scalar-epilogue", cl::init(false), cl::Hidden,
@@ -6643,8 +6644,9 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   IntervalMap EndPoint;
   // Saves the list of instruction indices that are used in the loop.
   SmallPtrSet<Instruction *, 8> Ends;
-  // Saves the list of values that are used in the loop but are
-  // defined outside the loop, such as arguments and constants.
+  // Saves the list of values that are used in the loop but are defined outside
+  // the loop (not including non-instruction values such as arguments and
+  // constants).
   SmallPtrSet<Value *, 8> LoopInvariants;
 
   for (BasicBlock *BB : make_range(DFS.beginRPO(), DFS.endRPO())) {
@@ -6656,6 +6658,9 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
         auto *Instr = dyn_cast<Instruction>(U);
 
         // Ignore non-instruction values such as arguments, constants, etc.
+        // FIXME: Might need some motivation why these values are ignored. If
+        // for example an argument is used inside the loop it will increase the
+        // register pressure (so shouldn't we add it to LoopInvariants).
         if (!Instr)
           continue;
 
@@ -6719,14 +6724,19 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
 
     // For each VF find the maximum usage of registers.
     for (unsigned j = 0, e = VFs.size(); j < e; ++j) {
-      // Count the number of live intervals.
+      // Count the number of registers used, per register class, given all open
+      // intervals.
+      // Note that elements in this SmallMapVector will be default constructed
+      // as 0. So we can use "RegUsage[ClassID] += n" in the code below even if
+      // there is no previous entry for ClassID.
       SmallMapVector<unsigned, unsigned, 4> RegUsage;
 
       if (VFs[j].isScalar()) {
         for (auto *Inst : OpenIntervals) {
-          unsigned ClassID = TTI.getRegisterClassForType(false, Inst->getType());
-          // If RegUsage[ClassID] doesn't exist, it will be default
-          // constructed as 0 before the addition
+          unsigned ClassID =
+              TTI.getRegisterClassForType(false, Inst->getType());
+          // FIXME: The target might use more than one register for the type
+          // even in the scalar case.
           RegUsage[ClassID] += 1;
         }
       } else {
@@ -6736,14 +6746,14 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
           if (VecValuesToIgnore.count(Inst))
             continue;
           if (isScalarAfterVectorization(Inst, VFs[j])) {
-            unsigned ClassID = TTI.getRegisterClassForType(false, Inst->getType());
-            // If RegUsage[ClassID] doesn't exist, it will be default
-            // constructed as 0 before the addition
+            unsigned ClassID =
+                TTI.getRegisterClassForType(false, Inst->getType());
+            // FIXME: The target might use more than one register for the type
+            // even in the scalar case.
             RegUsage[ClassID] += 1;
           } else {
-            unsigned ClassID = TTI.getRegisterClassForType(true, Inst->getType());
-            // If RegUsage[ClassID] doesn't exist, it will be default
-            // constructed as 0 before the addition
+            unsigned ClassID =
+                TTI.getRegisterClassForType(true, Inst->getType());
             RegUsage[ClassID] += GetRegUsage(Inst->getType(), VFs[j]);
           }
         }
@@ -6763,17 +6773,19 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   }
 
   for (unsigned i = 0, e = VFs.size(); i < e; ++i) {
+    // Note that elements in this SmallMapVector will be default constructed
+    // as 0. So we can use "Invariant[ClassID] += n" in the code below even if
+    // there is no previous entry for ClassID.
     SmallMapVector<unsigned, unsigned, 4> Invariant;
 
     for (auto *Inst : LoopInvariants) {
+      // FIXME: The target might use more than one register for the type
+      // even in the scalar case.
       unsigned Usage =
           VFs[i].isScalar() ? 1 : GetRegUsage(Inst->getType(), VFs[i]);
       unsigned ClassID =
           TTI.getRegisterClassForType(VFs[i].isVector(), Inst->getType());
-      if (Invariant.find(ClassID) == Invariant.end())
-        Invariant[ClassID] = Usage;
-      else
-        Invariant[ClassID] += Usage;
+      Invariant[ClassID] += Usage;
     }
 
     LLVM_DEBUG({
@@ -9465,16 +9477,12 @@ void VPRecipeBuilder::fixHeaderPhis(VPlanPtr &Plan) {
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(R)) {
       if (!EVLPhiRecipe) {
         EVLPhiRecipe = new VPEVLPHIRecipe();
-        // See comment below.
-        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
         EVLPhiRecipe->addOperand(getOrCreateEVL(Plan));
+        R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
       }
       // This will be used later when adding the recipe
       // VPInstruction::PredicatedFirstOrderRecurrenceSplice
       // via the getter getEVLPhi.
-      // Because it is not used as a proper input of
-      // VPPredicatedFirstOrderRecurrencePHIRecipe it doesn't have to be
-      // emitted before it (hence the usage of getFirstNonPhi above).
       PredPhi->addOperand(EVLPhiRecipe);
     }
   }
@@ -10497,8 +10505,8 @@ void VPWidenEVLRecipe::execute(VPTransformState &State) {
 }
 
 void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
-  Value *EVL = State.get(getEVL(), 0);
   for (unsigned Part = 0; Part < State.UF; Part++) {
+    Value *EVL = State.get(getEVL(), Part);
     Value *EVLSplat = State.Builder.CreateVectorSplat(State.VF, EVL, "evl");
     Value *StepVec = State.Builder.CreateIntrinsic(
         Intrinsic::experimental_stepvector, EVLSplat->getType(), {}, nullptr,

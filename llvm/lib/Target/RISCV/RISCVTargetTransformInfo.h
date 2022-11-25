@@ -249,19 +249,6 @@ public:
                                          bool IsUnsigned,
                                          TTI::TargetCostKind CostKind);
 
-  InstructionCost getArithmeticInstrCost(
-      unsigned int Opcode, Type *Ty, TTI::TargetCostKind CostKind,
-      TTI::OperandValueInfo Opd1Info = {TTI::OK_AnyValue, TTI::OP_None},
-      TTI::OperandValueInfo Opd2Info = {TTI::OK_AnyValue, TTI::OP_None},
-      ArrayRef<const Value *> Args = ArrayRef<const Value *>(),
-      const Instruction *CxtI = nullptr) {
-    if (ST->hasEPI() && isa<ScalableVectorType>(Ty) && !isTypeLegal(Ty))
-      return InstructionCost::getInvalid();
-
-    return BaseT::getArithmeticInstrCost(Opcode, Ty, CostKind, Opd1Info,
-                                         Opd2Info, Args, CxtI);
-  }
-
   InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
                                              Optional<FastMathFlags> FMF,
                                              TTI::TargetCostKind CostKind);
@@ -285,6 +272,13 @@ public:
   using BaseT::getVectorInstrCost;
   InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
                                      unsigned Index);
+
+  InstructionCost getArithmeticInstrCost(
+      unsigned Opcode, Type *Ty, TTI::TargetCostKind CostKind,
+      TTI::OperandValueInfo Op1Info = {TTI::OK_AnyValue, TTI::OP_None},
+      TTI::OperandValueInfo Op2Info = {TTI::OK_AnyValue, TTI::OP_None},
+      ArrayRef<const Value *> Args = ArrayRef<const Value *>(),
+      const Instruction *CxtI = nullptr);
 
   bool isElementTypeLegalForScalableVector(Type *Ty) const {
     return TLI->isLegalElementTypeForRVV(Ty);
@@ -389,6 +383,8 @@ public:
     case RecurKind::UMax:
     case RecurKind::FMin:
     case RecurKind::FMax:
+    case RecurKind::SelectICmp:
+    case RecurKind::SelectFCmp:
     case RecurKind::FMulAdd:
       return true;
     default:

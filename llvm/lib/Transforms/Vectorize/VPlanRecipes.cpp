@@ -332,6 +332,8 @@ void VPInstruction::generateInstruction(VPTransformState &State,
       Value *Vlen = Builder.CreateVScale(
           ConstantInt::get(IdxTy, State.VF.getKnownMinValue()));
       Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(IdxTy, 1));
+      // We should do this, but first we need to find a way to test it though.
+      // Value *Shift = Builder.CreateSub(EVLPhi, ConstantInt::get(IdxTy, 1));
       Value *Mask =
           Builder.CreateVectorSplat(State.VF, ConstantInt::get(Builder.getInt1Ty(), 1));
 
@@ -1489,17 +1491,27 @@ void VPFirstOrderRecurrencePHIRecipe::print(raw_ostream &O, const Twine &Indent,
 #endif
 
 void VPEVLPHIRecipe::execute(VPTransformState &State) {
-  auto &Builder = State.Builder;
-  auto *IdxTy = Builder.getInt32Ty();
-  PHINode *EVLEntryPart = PHINode::Create(
-      IdxTy, 2, "prev.evl", &*State.CFG.PrevBB->getFirstInsertionPt());
-  IRBuilder<>::InsertPointGuard Guard(Builder);
-  BasicBlock *VectorPH = State.CFG.getPreheaderBBFor(this);
-  Builder.SetInsertPoint(VectorPH->getTerminator());
-  auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, State.VF);
-  EVLEntryPart->addIncoming(RuntimeVF, VectorPH);
+  for (unsigned Part = 0; Part < State.UF; ++Part) {
+    Value *EVLPart = nullptr;
+    if (Part == 0) {
+      auto &Builder = State.Builder;
+      auto *IdxTy = Builder.getInt32Ty();
+      PHINode *EVLEntryPartPHI = PHINode::Create(
+          IdxTy, 2, "prev.evl", &*State.CFG.PrevBB->getFirstInsertionPt());
+      IRBuilder<>::InsertPointGuard Guard(Builder);
+      BasicBlock *VectorPH = State.CFG.getPreheaderBBFor(this);
+      Builder.SetInsertPoint(VectorPH->getTerminator());
+      auto *RuntimeVF = getRuntimeVF(Builder, IdxTy, State.VF);
+      EVLEntryPartPHI->addIncoming(RuntimeVF, VectorPH);
 
-  State.set(this, EVLEntryPart, 0);
+      EVLPart = EVLEntryPartPHI;
+    } else {
+      // Use the EVL of the previous part.
+      EVLPart = State.get(getOperand(0), Part - 1);
+    }
+
+    State.set(this, EVLPart, Part);
+  }
 }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
