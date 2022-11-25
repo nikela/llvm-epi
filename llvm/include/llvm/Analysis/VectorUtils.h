@@ -1105,8 +1105,10 @@ private:
   }
 };
 
-// Reorganise this
-const SCEV *isStridedAddressing(Value *Ptr, ScalarEvolution *SE);
+// FIXME: Reorganise this
+// \a OneLevelAddRec Does not allow other recurrences in the Start and the Step.
+const SCEV *isStridedAddressing(Value *Ptr, ScalarEvolution *SE,
+                                bool OneLevelAddRec = true);
 
 } // llvm namespace
 
