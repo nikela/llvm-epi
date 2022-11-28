@@ -34,8 +34,8 @@ define void @nxv1i64_3(<vscale x 1 x i64> %data, i64* %ptr, <vscale x 1 x i1> %m
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.x v9, a0
-; CHECK-NEXT:    slli a0, a1, 32
-; CHECK-NEXT:    srli a0, a0, 32
+; CHECK-NEXT:    slli a1, a1, 32
+; CHECK-NEXT:    srli a0, a1, 32
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v9, v0.t
 ; CHECK-NEXT:    ret
@@ -78,8 +78,8 @@ define void @nxv2f32_3(<vscale x 2 x float> %data, float* %ptr, <vscale x 2 x i1
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmv.v.x v10, a0
-; CHECK-NEXT:    slli a0, a1, 32
-; CHECK-NEXT:    srli a0, a0, 32
+; CHECK-NEXT:    slli a1, a1, 32
+; CHECK-NEXT:    srli a0, a1, 32
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
@@ -159,8 +159,8 @@ define void @nxv8f64_3(<vscale x 8 x double> %data, double* %ptr, <vscale x 8 x 
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vmv.v.x v16, a0
-; CHECK-NEXT:    slli a0, a1, 32
-; CHECK-NEXT:    srli a0, a0, 32
+; CHECK-NEXT:    slli a1, a1, 32
+; CHECK-NEXT:    srli a0, a1, 32
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
 ; CHECK-NEXT:    vsoxei64.v v8, (zero), v16, v0.t
 ; CHECK-NEXT:    ret

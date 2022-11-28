@@ -38,6 +38,7 @@
 #include "llvm/Support/MachineValueType.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/TargetParser.h"
+#include <optional>
 
 using namespace llvm;
 using namespace llvm::AMDGPU;
@@ -1816,13 +1817,6 @@ public:
   AMDGPUOperand::Ptr defaultWaitVDST() const;
   AMDGPUOperand::Ptr defaultWaitEXP() const;
   OperandMatchResultTy parseVOPD(OperandVector &Operands);
-};
-
-struct OptionalOperand {
-  const char *Name;
-  AMDGPUOperand::ImmTy Type;
-  bool IsBit;
-  bool (*ConvertResult)(int64_t&);
 };
 
 } // end anonymous namespace
@@ -4990,7 +4984,7 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
 
   // Track if the asm explicitly contains the directive for the user SGPR
   // count.
-  Optional<unsigned> ExplicitUserSGPRCount;
+  std::optional<unsigned> ExplicitUserSGPRCount;
   bool ReserveVCC = true;
   bool ReserveFlatScr = true;
   Optional<bool> EnableWavefrontSize32;

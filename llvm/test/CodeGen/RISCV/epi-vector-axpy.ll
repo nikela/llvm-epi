@@ -35,9 +35,9 @@ define void @saxpy(i32 signext %N, float* noalias nocapture %y, float* noalias n
 ; CHECK-NEXT:    beqz a6, .LBB0_8
 ; CHECK-NEXT:  .LBB0_6: # %for.body.preheader17
 ; CHECK-NEXT:    sub a0, a0, a5
-; CHECK-NEXT:    slli a3, a5, 2
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    add a2, a2, a3
+; CHECK-NEXT:    slli a5, a5, 2
+; CHECK-NEXT:    add a1, a1, a5
+; CHECK-NEXT:    add a2, a2, a5
 ; CHECK-NEXT:  .LBB0_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    flw ft0, 0(a2)
@@ -146,9 +146,9 @@ define void @daxpy(i32 signext %N, double* noalias nocapture %y, double* noalias
 ; CHECK-NEXT:    beqz a6, .LBB1_8
 ; CHECK-NEXT:  .LBB1_6: # %for.body.preheader17
 ; CHECK-NEXT:    sub a0, a0, a5
-; CHECK-NEXT:    slli a3, a5, 3
-; CHECK-NEXT:    add a1, a1, a3
-; CHECK-NEXT:    add a2, a2, a3
+; CHECK-NEXT:    slli a5, a5, 3
+; CHECK-NEXT:    add a1, a1, a5
+; CHECK-NEXT:    add a2, a2, a5
 ; CHECK-NEXT:  .LBB1_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    fld ft0, 0(a2)

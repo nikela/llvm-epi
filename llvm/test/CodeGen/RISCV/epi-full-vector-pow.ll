@@ -137,8 +137,8 @@ define <vscale x 16 x float> @pow_nxv16f32(<vscale x 16 x float> %a, <vscale x 1
 ; CHECK-NEXT:    slli a0, a0, 3
 ; CHECK-NEXT:    sub sp, sp, a0
 ; CHECK-NEXT:    addi a2, sp, 16
-; CHECK-NEXT:    csrr a0, vlenb
-; CHECK-NEXT:    slli a1, a0, 1
+; CHECK-NEXT:    csrr a1, vlenb
+; CHECK-NEXT:    slli a1, a1, 1
 ; CHECK-NEXT:    addi a0, sp, 16
 ; CHECK-NEXT:    vs8r.v v16, (a2)
 ; CHECK-NEXT:    call __epi_pow_nxv16f32@plt

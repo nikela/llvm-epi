@@ -126,6 +126,7 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -713,7 +714,7 @@ CompareValueComplexity(EquivalenceClasses<const Value *> &EqCacheValue,
 // more efficient.
 // If the max analysis depth was reached, return None, assuming we do not know
 // if they are equivalent for sure.
-static Optional<int>
+static std::optional<int>
 CompareSCEVComplexity(EquivalenceClasses<const SCEV *> &EqCacheSCEV,
                       EquivalenceClasses<const Value *> &EqCacheValue,
                       const LoopInfo *const LI, const SCEV *LHS,
@@ -5126,7 +5127,7 @@ struct BinaryOp {
 } // end anonymous namespace
 
 /// Try to map \p V into a BinaryOp, and return \c None on failure.
-static Optional<BinaryOp> MatchBinaryOp(Value *V, DominatorTree &DT) {
+static std::optional<BinaryOp> MatchBinaryOp(Value *V, DominatorTree &DT) {
   auto *Op = dyn_cast<Operator>(V);
   if (!Op)
     return None;
@@ -6954,7 +6955,7 @@ ConstantRange ScalarEvolution::getRangeViaFactoring(const SCEV *Start,
 
     explicit SelectPattern(ScalarEvolution &SE, unsigned BitWidth,
                            const SCEV *S) {
-      Optional<unsigned> CastOp;
+      std::optional<unsigned> CastOp;
       APInt Offset(BitWidth, 0);
 
       assert(SE.getTypeSizeInBits(S->getType()) == BitWidth &&
@@ -8158,7 +8159,7 @@ unsigned ScalarEvolution::getSmallConstantTripMultiple(const Loop *L) {
   SmallVector<BasicBlock *, 8> ExitingBlocks;
   L->getExitingBlocks(ExitingBlocks);
 
-  Optional<unsigned> Res;
+  std::optional<unsigned> Res;
   for (auto *ExitingBB : ExitingBlocks) {
     unsigned Multiple = getSmallConstantTripMultiple(L, ExitingBB);
     if (!Res)
@@ -8559,8 +8560,11 @@ const SCEV *ScalarEvolution::BackedgeTakenInfo::getConstantMax(
 
 const SCEV *ScalarEvolution::BackedgeTakenInfo::getSymbolicMax(
     const BasicBlock *ExitingBlock, ScalarEvolution *SE) const {
-  // FIXME: Need to implement this. Return exact for now.
-  return getExact(ExitingBlock, SE);
+  for (const auto &ENT : ExitNotTaken)
+    if (ENT.ExitingBlock == ExitingBlock && ENT.hasAlwaysTruePredicate())
+      return ENT.SymbolicMaxNotTaken;
+
+  return SE->getCouldNotCompute();
 }
 
 /// getConstantMax - Get the constant max backedge taken count for the loop.
@@ -8610,6 +8614,13 @@ ScalarEvolution::ExitLimit::ExitLimit(
   if (ConstantMaxNotTaken->isZero())
     ExactNotTaken = ConstantMaxNotTaken;
 
+  // FIXME: For now, SymbolicMaxNotTaken is either exact (if available) or
+  // constant max. In the future, we are planning to make it more powerful.
+  if (isa<SCEVCouldNotCompute>(ExactNotTaken))
+    SymbolicMaxNotTaken = ConstantMaxNotTaken;
+  else
+    SymbolicMaxNotTaken = ExactNotTaken;
+
   assert((isa<SCEVCouldNotCompute>(ExactNotTaken) ||
           !isa<SCEVCouldNotCompute>(ConstantMaxNotTaken)) &&
          "Exact is not allowed to be less precise than Max");
@@ -8646,7 +8657,8 @@ ScalarEvolution::BackedgeTakenInfo::BackedgeTakenInfo(
         BasicBlock *ExitBB = EEI.first;
         const ExitLimit &EL = EEI.second;
         return ExitNotTakenInfo(ExitBB, EL.ExactNotTaken,
-                                EL.ConstantMaxNotTaken, EL.Predicates);
+                                EL.ConstantMaxNotTaken, EL.SymbolicMaxNotTaken,
+                                EL.Predicates);
   });
   assert((isa<SCEVCouldNotCompute>(ConstantMax) ||
           isa<SCEVConstant>(ConstantMax)) &&
@@ -9199,7 +9211,7 @@ ScalarEvolution::ExitLimit ScalarEvolution::computeShiftCompareExitLimit(
   // above) in PNOut and the opcode of the shift operation in OpCodeOut.
   auto MatchShiftRecurrence =
       [&](Value *V, PHINode *&PNOut, Instruction::BinaryOps &OpCodeOut) {
-    Optional<Instruction::BinaryOps> PostShiftOpCode;
+    std::optional<Instruction::BinaryOps> PostShiftOpCode;
 
     {
       Instruction::BinaryOps OpC;
@@ -9996,7 +10008,7 @@ static const SCEV *SolveLinEquationWithOverflow(const APInt &A, const SCEV *B,
 /// coefficients.
 /// This function returns None if the addrec coefficients are not compile-
 /// time constants.
-static Optional<std::tuple<APInt, APInt, APInt, APInt, unsigned>>
+static std::optional<std::tuple<APInt, APInt, APInt, APInt, unsigned>>
 GetQuadraticEquation(const SCEVAddRecExpr *AddRec) {
   assert(AddRec->getNumOperands() == 3 && "This is not a quadratic chrec!");
   const SCEVConstant *LC = dyn_cast<SCEVConstant>(AddRec->getOperand(0));
@@ -14751,9 +14763,6 @@ ScalarEvolution::computeSymbolicMaxBackedgeTakenCount(const Loop *L) {
   for (BasicBlock *ExitingBB : ExitingBlocks) {
     const SCEV *ExitCount =
         getExitCount(L, ExitingBB, ScalarEvolution::SymbolicMaximum);
-    if (isa<SCEVCouldNotCompute>(ExitCount))
-      ExitCount = getExitCount(L, ExitingBB,
-                                  ScalarEvolution::ConstantMaximum);
     if (!isa<SCEVCouldNotCompute>(ExitCount)) {
       assert(DT.dominates(ExitingBB, L->getLoopLatch()) &&
              "We should only have known counts for exiting blocks that "

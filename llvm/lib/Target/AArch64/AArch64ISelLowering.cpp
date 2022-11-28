@@ -1658,6 +1658,17 @@ void AArch64TargetLowering::addTypeForStreamingSVE(MVT VT) {
   setOperationAction(ISD::FROUND, VT, Custom);
   setOperationAction(ISD::FROUNDEVEN, VT, Custom);
   setOperationAction(ISD::FTRUNC, VT, Custom);
+  if (VT.isFloatingPoint()) {
+    setCondCodeAction(ISD::SETO, VT, Expand);
+    setCondCodeAction(ISD::SETOLT, VT, Expand);
+    setCondCodeAction(ISD::SETOLE, VT, Expand);
+    setCondCodeAction(ISD::SETULT, VT, Expand);
+    setCondCodeAction(ISD::SETULE, VT, Expand);
+    setCondCodeAction(ISD::SETUGE, VT, Expand);
+    setCondCodeAction(ISD::SETUGT, VT, Expand);
+    setCondCodeAction(ISD::SETUEQ, VT, Expand);
+    setCondCodeAction(ISD::SETONE, VT, Expand);
+  }
 }
 
 void AArch64TargetLowering::addTypeForFixedLengthSVE(MVT VT) {
@@ -1673,9 +1684,7 @@ void AArch64TargetLowering::addTypeForFixedLengthSVE(MVT VT) {
   if (VT.isFloatingPoint()) {
     setCondCodeAction(ISD::SETO, VT, Expand);
     setCondCodeAction(ISD::SETOLT, VT, Expand);
-    setCondCodeAction(ISD::SETLT, VT, Expand);
     setCondCodeAction(ISD::SETOLE, VT, Expand);
-    setCondCodeAction(ISD::SETLE, VT, Expand);
     setCondCodeAction(ISD::SETULT, VT, Expand);
     setCondCodeAction(ISD::SETULE, VT, Expand);
     setCondCodeAction(ISD::SETUGE, VT, Expand);
@@ -11961,6 +11970,11 @@ SDValue AArch64TargetLowering::LowerBUILD_VECTOR(SDValue Op,
 
   // Try to build a simple constant vector.
   Op = NormalizeBuildVector(Op, DAG);
+  // Thought this might return a non-BUILD_VECTOR (e.g. CONCAT_VECTORS), if so,
+  // abort.
+  if (Op.getOpcode() != ISD::BUILD_VECTOR)
+    return SDValue();
+
   if (VT.isInteger()) {
     // Certain vector constants, used to express things like logical NOT and
     // arithmetic NEG, are passed through unmodified.  This allows special
@@ -16933,7 +16947,7 @@ static bool isCMP(SDValue Op) {
 
 // (CSEL 1 0 CC Cond) => CC
 // (CSEL 0 1 CC Cond) => !CC
-static Optional<AArch64CC::CondCode> getCSETCondCode(SDValue Op) {
+static std::optional<AArch64CC::CondCode> getCSETCondCode(SDValue Op) {
   if (Op.getOpcode() != AArch64ISD::CSEL)
     return None;
   auto CC = static_cast<AArch64CC::CondCode>(Op.getConstantOperandVal(2));

@@ -776,8 +776,8 @@ define double @extractelt_nxv16f64_neg1(<vscale x 16 x double> %v) {
 ; CHECK64-NEXT:  # %bb.1:
 ; CHECK64-NEXT:    mv a2, a1
 ; CHECK64-NEXT:  .LBB52_2:
-; CHECK64-NEXT:    slli a1, a2, 3
-; CHECK64-NEXT:    add a0, a0, a1
+; CHECK64-NEXT:    slli a2, a2, 3
+; CHECK64-NEXT:    add a0, a0, a2
 ; CHECK64-NEXT:    fld fa0, 0(a0)
 ; CHECK64-NEXT:    csrr a0, vlenb
 ; CHECK64-NEXT:    slli a0, a0, 4
