@@ -507,6 +507,14 @@ def FeatureNoBTIAtReturnTwice : SubtargetFeature<"no-bti-at-return-twice",
 def FeatureMEC : SubtargetFeature<"mec", "HasMEC",
     "true", "Enable Memory Encryption Contexts Extension", [FeatureRME]>;
 
+def FeatureITE : SubtargetFeature<"ite", "HasITE",
+    "true", "Enable Armv9.4-A Instrumentation Extension FEAT_ITE", [FeatureETE,
+    FeatureTRBE]>;
+
+def FeatureRCPC3 : SubtargetFeature<"rcpc3", "HasRCPC3",
+    "true", "Enable Armv8.9-A RCPC instructions for A64 and Advanced SIMD and floating-point instruction set (FEAT_LRCPC3)",
+    [FeatureRCPC_IMMO]>;
+
 //===----------------------------------------------------------------------===//
 // Architectures.
 //

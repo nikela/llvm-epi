@@ -309,6 +309,17 @@ bool isUnlimitedPolymorphicType(mlir::Type ty) {
   return isAssumedType(ty);
 }
 
+mlir::Type unwrapInnerType(mlir::Type ty) {
+  return llvm::TypeSwitch<mlir::Type, mlir::Type>(ty)
+      .Case<fir::PointerType, fir::HeapType, fir::SequenceType>([](auto t) {
+        mlir::Type eleTy = t.getEleTy();
+        if (auto seqTy = eleTy.dyn_cast<fir::SequenceType>())
+          return seqTy.getEleTy();
+        return eleTy;
+      })
+      .Default([](mlir::Type) { return mlir::Type{}; });
+}
+
 bool isRecordWithAllocatableMember(mlir::Type ty) {
   if (auto recTy = ty.dyn_cast<fir::RecordType>())
     for (auto [field, memTy] : recTy.getTypeList()) {
@@ -988,14 +999,7 @@ mlir::Type BaseBoxType::getEleTy() const {
 }
 
 mlir::Type BaseBoxType::unwrapInnerType() const {
-  return llvm::TypeSwitch<mlir::Type, mlir::Type>(getEleTy())
-      .Case<fir::PointerType, fir::HeapType, fir::SequenceType>([](auto ty) {
-        mlir::Type eleTy = ty.getEleTy();
-        if (auto seqTy = eleTy.dyn_cast<fir::SequenceType>())
-          return seqTy.getEleTy();
-        return eleTy;
-      })
-      .Default([](mlir::Type) { return mlir::Type{}; });
+  return fir::unwrapInnerType(getEleTy());
 }
 
 //===----------------------------------------------------------------------===//
