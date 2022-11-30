@@ -1805,6 +1805,8 @@ bool RISCVTargetLowering::canSplatOperand(Instruction *I, int Operand) const {
       case Intrinsic::vp_fsub:
       case Intrinsic::vp_fdiv:
         return Operand == 0 || Operand == 1;
+      case Intrinsic::vp_gather:
+          return Operand == 0;
       default:
         return false;
       }
@@ -11419,6 +11421,26 @@ static bool combine_CC(SDValue &LHS, SDValue &RHS, SDValue &CC, const SDLoc &DL,
   return false;
 }
 
+static SDValue combineVPGather(VPGatherSDNode *VPGSN, SelectionDAG &DAG) {
+  // Check if the vector of indices is a splat.
+  const SDValue &Index = VPGSN->getIndex();
+  if (DAG.isSplatValue(Index)) {
+    // Create scalar store of splatted value.
+    SDLoc DL(VPGSN);
+    const SDValue &SplatValue = DAG.getSplatValue(Index);
+    SDValue ScalarLoad =
+        DAG.getLoad(VPGSN->getValueType(0).getScalarType(), DL,
+                    VPGSN->getChain(), SplatValue, VPGSN->getMemOperand());
+
+    // Splat the loaded value.
+    SDValue SplattedLoad =
+        DAG.getSplatVector(VPGSN->getValueType(0), DL, ScalarLoad);
+    return DAG.getMergeValues({SplattedLoad, ScalarLoad.getValue(1)}, DL);
+  }
+
+  return SDValue();
+}
+
 SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
                                                DAGCombinerInfo &DCI) const {
   SelectionDAG &DAG = DCI.DAG;
@@ -11770,8 +11792,13 @@ SDValue RISCVTargetLowering::PerformDAGCombine(SDNode *N,
   case ISD::MSCATTER:
   case ISD::VP_GATHER:
   case ISD::VP_SCATTER: {
-    if (!DCI.isBeforeLegalize())
+    if (!DCI.isBeforeLegalize()) {
+      if (isa<VPGatherSDNode>(N)) {
+          return combineVPGather(cast<VPGatherSDNode>(N), DAG);
+      }
+
       break;
+    }
     SDValue Index, ScaleOp;
     bool IsIndexSigned = false;
     if (const auto *VPGSN = dyn_cast<VPGatherScatterSDNode>(N)) {
