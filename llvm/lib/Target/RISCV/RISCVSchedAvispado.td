@@ -355,6 +355,16 @@ let Latency = 8, ResourceCycles = [8] in
     def : WriteRes<!cast<SchedWrite>("WriteVIMovV_" # mx), [AvispadoVPUIArith]>;
     def : WriteRes<!cast<SchedWrite>("WriteVIMovX_" # mx), [AvispadoVPUIArith]>;
     def : WriteRes<!cast<SchedWrite>("WriteVIMovI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSALUV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSALUX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSALUI_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVAALUV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVAALUX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSMulV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSMulX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSShiftV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSShiftX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVSShiftI_" # mx), [AvispadoVPUIArith]>;
   }
   foreach mx = SchedMxListW in {
     def : WriteRes<!cast<SchedWrite>("WriteVIWALUV_" # mx), [AvispadoVPUIArith]>;
@@ -367,22 +377,10 @@ let Latency = 8, ResourceCycles = [8] in
     def : WriteRes<!cast<SchedWrite>("WriteVIWMulX_" # mx), [AvispadoVPUIArith]>;
     def : WriteRes<!cast<SchedWrite>("WriteVIWMulAddV_" # mx), [AvispadoVPUIArith]>;
     def : WriteRes<!cast<SchedWrite>("WriteVIWMulAddX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVNClipV_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVNClipX_" # mx), [AvispadoVPUIArith]>;
+    def : WriteRes<!cast<SchedWrite>("WriteVNClipI_" # mx), [AvispadoVPUIArith]>;
   }
-
-  // Fixed point is integer arithmetic in disguise.
-  def : WriteRes<WriteVSALUV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSALUX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSALUI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVAALUV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVAALUX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSMulV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSMulX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSShiftV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSShiftX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVSShiftI, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVNClipV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVNClipX, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVNClipI, [AvispadoVPUIArith]>;
 
   def : WriteRes<WriteVIRedV, [AvispadoVPUIArith]>;
   def : WriteRes<WriteVIWRedV, [AvispadoVPUIArith]>;
@@ -516,6 +514,14 @@ foreach mx = SchedMxList in {
   def : ReadAdvance<!cast<SchedRead>("ReadVIMergeX_" # mx), 0>;
   def : ReadAdvance<!cast<SchedRead>("ReadVIMovV_" # mx), 0>;
   def : ReadAdvance<!cast<SchedRead>("ReadVIMovX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVSALUV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVSALUX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVAALUV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVAALUX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVSMulV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVSMulX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVSShiftV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVSShiftX_" # mx), 0>;
 }
 
 foreach mx = SchedMxListW in {
@@ -527,19 +533,11 @@ foreach mx = SchedMxListW in {
   def : ReadAdvance<!cast<SchedRead>("ReadVIWMulX_" # mx), 0>;
   def : ReadAdvance<!cast<SchedRead>("ReadVIWMulAddV_" # mx), 0>;
   def : ReadAdvance<!cast<SchedRead>("ReadVIWMulAddX_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVNClipV_" # mx), 0>;
+  def : ReadAdvance<!cast<SchedRead>("ReadVNClipX_" # mx), 0>;
 }
 
 // 13. Vector Fixed-Point Arithmetic Instructions
-def : ReadAdvance<ReadVSALUV, 0>;
-def : ReadAdvance<ReadVSALUX, 0>;
-def : ReadAdvance<ReadVAALUV, 0>;
-def : ReadAdvance<ReadVAALUX, 0>;
-def : ReadAdvance<ReadVSMulV, 0>;
-def : ReadAdvance<ReadVSMulX, 0>;
-def : ReadAdvance<ReadVSShiftV, 0>;
-def : ReadAdvance<ReadVSShiftX, 0>;
-def : ReadAdvance<ReadVNClipV, 0>;
-def : ReadAdvance<ReadVNClipX, 0>;
 
 // 14. Vector Floating-Point Instructions
 def : ReadAdvance<ReadVFALUV, 0>;

@@ -728,8 +728,6 @@ static bool parseFloatingPointArgs(CompilerInvocation &invoc,
                                    llvm::opt::ArgList &args,
                                    clang::DiagnosticsEngine &diags) {
   LangOptions &opts = invoc.getLangOpts();
-  const unsigned diagUnimplemented = diags.getCustomDiagID(
-      clang::DiagnosticsEngine::Warning, "%0 is not currently implemented");
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_ffp_contract)) {
@@ -756,31 +754,26 @@ static bool parseFloatingPointArgs(CompilerInvocation &invoc,
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_menable_no_nans)) {
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.NoHonorNaNs = true;
   }
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_fapprox_func)) {
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.ApproxFunc = true;
   }
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_fno_signed_zeros)) {
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.NoSignedZeros = true;
   }
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_mreassociate)) {
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.AssociativeMath = true;
   }
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_freciprocal_math)) {
-    diags.Report(diagUnimplemented) << a->getOption().getName();
     opts.ReciprocalMath = true;
   }
 
