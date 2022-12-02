@@ -1204,6 +1204,10 @@ bool TargetTransformInfo::preferPredicatedVectorOps() const {
   return TTIImpl->preferPredicatedVectorOps();
 }
 
+bool TargetTransformInfo::canUseStridedAccesses() const {
+  return TTIImpl->canUseStridedAccesses();
+}
+
 TargetTransformInfo::Concept::~Concept() = default;
 
 TargetIRAnalysis::TargetIRAnalysis() : TTICallback(&getDefaultTTI) {}

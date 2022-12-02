@@ -240,7 +240,7 @@ static cl::opt<PreferPredicateTy::Option> PreferPredicateOverEpilogue(
 
 static cl::opt<bool> UseStridedAccesses(
     "vectorizer-use-vp-strided-load-store",
-    cl::init(false),
+    cl::init(true),
     cl::Hidden,
     cl::desc("Use VPred strided vector load store. This is EXPERIMENTAL"));
 
@@ -7671,11 +7671,12 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         // costs compare as maximumal large.  If both are invalid, we get
         // scalable invalid which signals a failure and a vectorization abort.
         if (GatherScatterCost < ScalarizationCost) {
-          if (UseStridedAccesses && canUseStridedAccess(&I)) {
+          if (UseStridedAccesses && TTI.canUseStridedAccesses() &&
+              canUseStridedAccess(&I)) {
             LLVM_DEBUG(llvm::dbgs() << "Can use strided access " << I << "\n");
             setWideningDecision(&I, VF, CM_Strided, GatherScatterCost);
           } else {
-            if (UseStridedAccesses) {
+            if (UseStridedAccesses && TTI.canUseStridedAccesses()) {
               LLVM_DEBUG(llvm::dbgs()
                          << "Cannot use strided access " << I << "\n");
             }
@@ -7737,7 +7738,7 @@ void LoopVectorizationCostModel::setCostBasedWideningDecision(ElementCount VF) {
         Decision = CM_GatherScatter;
         Cost = GatherScatterCost;
 
-        if (UseStridedAccesses) {
+        if (UseStridedAccesses && TTI.canUseStridedAccesses()) {
           if (canUseStridedAccess(&I)) {
             // FIXME
             // Cost = StridedAccessCost;

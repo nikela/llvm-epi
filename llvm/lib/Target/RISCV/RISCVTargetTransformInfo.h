@@ -158,6 +158,7 @@ public:
 
   unsigned getMaxElementWidth() const;
   bool preferPredicatedVectorOps() const;
+  bool canUseStridedAccesses() const;
   bool isLegalMaskedLoad(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;

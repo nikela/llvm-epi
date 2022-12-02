@@ -865,6 +865,8 @@ public:
 
   bool preferPredicatedVectorOps() const { return false; }
 
+  bool canUseStridedAccesses() const { return false; }
+
   unsigned getMinTripCountTailFoldingThreshold() const { return 0; }
 
   bool supportsScalableVectors() const { return false; }

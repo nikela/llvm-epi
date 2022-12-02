@@ -1505,6 +1505,9 @@ public:
   /// instead of just loads and stores.
   bool preferPredicatedVectorOps() const;
 
+  /// \returns True if the target is capable of using strided memory accesses.
+  bool canUseStridedAccesses() const;
+
   /// \returns the lower bound of a trip count to decide on vectorization
   /// while tail-folding.
   unsigned getMinTripCountTailFoldingThreshold() const;
@@ -1918,6 +1921,7 @@ public:
   virtual bool hasActiveVectorLength(unsigned Opcode, Type *DataType,
                                      Align Alignment) const = 0;
   virtual bool preferPredicatedVectorOps() const = 0;
+  virtual bool canUseStridedAccesses() const = 0;
   virtual VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const = 0;
 };
@@ -2603,6 +2607,10 @@ public:
 
   bool preferPredicatedVectorOps() const override {
     return Impl.preferPredicatedVectorOps();
+  }
+
+  bool canUseStridedAccesses() const override {
+    return Impl.canUseStridedAccesses();
   }
 
   VPLegalization

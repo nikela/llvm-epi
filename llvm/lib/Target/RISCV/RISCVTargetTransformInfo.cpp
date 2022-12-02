@@ -196,6 +196,13 @@ bool RISCVTTIImpl::preferPredicatedVectorOps() const {
   return ST->hasEPI();
 }
 
+bool RISCVTTIImpl::canUseStridedAccesses() const {
+  if (ST->hasEPI())
+    return true;
+
+  return BaseT::canUseStridedAccesses();
+}
+
 bool RISCVTTIImpl::isLegalMaskedLoadStore(Type *DataType) const {
   if (!ST->hasVInstructions())
     return false;

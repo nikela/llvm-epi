@@ -2423,6 +2423,7 @@ public:
 
   bool preferPredicatedVectorOps() const { return false; }
 
+  bool canUseStridedAccesses() const { return false; }
   /// @}
 };
 
