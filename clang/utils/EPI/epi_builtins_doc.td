@@ -883,13 +883,13 @@ be overwritten by the `+vfnmsub+` instruction.}];
 
   let Operation = [{
     for element = 0 to gvl - 1
-       result[element] = a[element] * b[element] - c[element]
+       result[element] = -( a[element] * b[element] ) + c[element]
   }];
 
   let OperationMask = [{
     for element = 0 to gvl - 1
        if mask[element] then
-         result[element] = a[element] * b[element] - c[element]
+         result[element] = -( a[element] * b[element] ) + c[element]
        else
          result[element] = a[element]
   }];

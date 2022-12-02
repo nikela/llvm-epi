@@ -143,8 +143,8 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfmul.vv v17, v14, v20
 ; CHECK-NEXT:    vfneg.v v14, v14, v0.t
 ; CHECK-NEXT:    vtrn.vv v4, v14, v14
-; CHECK-NEXT:    add a5, a0, s7
-; CHECK-NEXT:    vle64.v v23, (a5)
+; CHECK-NEXT:    add a4, a0, s7
+; CHECK-NEXT:    vle64.v v23, (a4)
 ; CHECK-NEXT:    vtrn.vv v4, v5, v14
 ; CHECK-NEXT:    vfnmsac.vv v17, v21, v4
 ; CHECK-NEXT:    vtrn.vv v20, v19, v19
@@ -218,9 +218,9 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v1, v4, v4
 ; CHECK-NEXT:    vtrn.vv v1, v2, v4
 ; CHECK-NEXT:    vfnmsac.vv v31, v11, v1
-; CHECK-NEXT:    ld a4, 24(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    add a4, a4, a0
-; CHECK-NEXT:    vle64.v v1, (a4)
+; CHECK-NEXT:    ld a5, 24(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    add a5, a5, a0
+; CHECK-NEXT:    vle64.v v1, (a5)
 ; CHECK-NEXT:    vfadd.vv v10, v26, v30
 ; CHECK-NEXT:    addi t3, sp, 80
 ; CHECK-NEXT:    vs1r.v v10, (t3) # Unknown-size Folded Spill
@@ -352,7 +352,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vfadd.vv v11, v16, v11
 ; CHECK-NEXT:    vse64.v v11, (a0)
 ; CHECK-NEXT:    vfsub.vv v9, v12, v9
-; CHECK-NEXT:    vse64.v v9, (a5)
+; CHECK-NEXT:    vse64.v v9, (a4)
 ; CHECK-NEXT:    vfmacc.vf v8, ft1, v17
 ; CHECK-NEXT:    vfadd.vv v9, v20, v22
 ; CHECK-NEXT:    vmv1r.v v10, v8
@@ -372,7 +372,7 @@ define void @t3fv_16(double* nocapture %ri, double* nocapture readnone %ii, doub
 ; CHECK-NEXT:    vtrn.vv v15, v14, v14
 ; CHECK-NEXT:    vtrn.vv v14, v16, v14
 ; CHECK-NEXT:    vfadd.vv v9, v8, v14
-; CHECK-NEXT:    vse64.v v9, (a4)
+; CHECK-NEXT:    vse64.v v9, (a5)
 ; CHECK-NEXT:    vfadd.vv v9, v10, v12
 ; CHECK-NEXT:    vse64.v v9, (s1)
 ; CHECK-NEXT:    vfsub.vv v8, v8, v14

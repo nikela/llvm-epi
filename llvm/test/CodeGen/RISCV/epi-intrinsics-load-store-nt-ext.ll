@@ -159,8 +159,8 @@ define void @test.7(<vscale x 1 x i64> * %pa,
 ; CHECK:       # %bb.0: # %entry
 ; CHECK-NEXT:    vsetvli zero, a4, e64, m1, ta, mu, nt
 ; CHECK-NEXT:    vle64.v v8, (a0)
-; CHECK-NEXT:    andi a0, a5, 1
-; CHECK-NEXT:    c.beqz a0, .LBB6_2
+; CHECK-NEXT:    c.andi a5, 1
+; CHECK-NEXT:    c.beqz a5, .LBB6_2
 ; CHECK-NEXT:  # %bb.1: # %then
 ; CHECK-NEXT:    vse64.v v8, (a1)
 ; CHECK-NEXT:    c.jr ra
@@ -200,8 +200,8 @@ define void @test.8(<vscale x 1 x i64> * %pa,
 ; CHECK-NEXT:    ori a3, a3, 88
 ; CHECK-NEXT:    vsetvl zero, a4, a3
 ; CHECK-NEXT:    vle64.v v8, (a0)
-; CHECK-NEXT:    andi a0, a5, 1
-; CHECK-NEXT:    c.beqz a0, .LBB7_2
+; CHECK-NEXT:    c.andi a5, 1
+; CHECK-NEXT:    c.beqz a5, .LBB7_2
 ; CHECK-NEXT:  # %bb.1: # %then
 ; CHECK-NEXT:    vse64.v v8, (a1)
 ; CHECK-NEXT:    c.jr ra
@@ -242,8 +242,8 @@ define void @test.9(<vscale x 1 x i64> * %pa,
 ; CHECK-NEXT:    ori a3, a3, 88
 ; CHECK-NEXT:    vsetvl zero, a4, a3
 ; CHECK-NEXT:    vle64.v v8, (a0)
-; CHECK-NEXT:    andi a0, a5, 1
-; CHECK-NEXT:    c.beqz a0, .LBB8_2
+; CHECK-NEXT:    c.andi a5, 1
+; CHECK-NEXT:    c.beqz a5, .LBB8_2
 ; CHECK-NEXT:  # %bb.1: # %then
 ; CHECK-NEXT:    vsetvli zero, zero, e64, m1, ta, mu, nt
 ; CHECK-NEXT:    vse64.v v8, (a1)
