@@ -37,9 +37,9 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:    beqz a7, .LBB0_8
 ; CHECK-NEXT:  .LBB0_6: # %for.body.preheader23
 ; CHECK-NEXT:    sub a0, a0, a6
-; CHECK-NEXT:    slli a4, a6, 1
-; CHECK-NEXT:    add a1, a1, a4
-; CHECK-NEXT:    add a2, a2, a4
+; CHECK-NEXT:    slli a6, a6, 1
+; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    add a2, a2, a6
 ; CHECK-NEXT:  .LBB0_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    lh a4, 0(a2)
@@ -149,9 +149,9 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:    beqz a7, .LBB1_8
 ; CHECK-NEXT:  .LBB1_6: # %for.body.preheader17
 ; CHECK-NEXT:    sub a0, a0, a6
-; CHECK-NEXT:    slli a4, a6, 2
-; CHECK-NEXT:    add a1, a1, a4
-; CHECK-NEXT:    add a2, a2, a4
+; CHECK-NEXT:    slli a6, a6, 2
+; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    add a2, a2, a6
 ; CHECK-NEXT:  .LBB1_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    lw a4, 0(a2)
@@ -262,9 +262,9 @@ define void @s64axpy(i64 %N, i64* noalias nocapture %y, i64* noalias nocapture r
 ; CHECK-NEXT:    beqz a7, .LBB2_8
 ; CHECK-NEXT:  .LBB2_6: # %for.body.preheader15
 ; CHECK-NEXT:    sub a0, a0, a6
-; CHECK-NEXT:    slli a4, a6, 3
-; CHECK-NEXT:    add a1, a1, a4
-; CHECK-NEXT:    add a2, a2, a4
+; CHECK-NEXT:    slli a6, a6, 3
+; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    add a2, a2, a6
 ; CHECK-NEXT:  .LBB2_7: # %for.body
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
 ; CHECK-NEXT:    ld a4, 0(a2)

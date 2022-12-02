@@ -38,6 +38,20 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
   bool hasReservedSpillSlot(const MachineFunction &MF, Register Reg,
                             int &FrameIdx) const override;
 
+  // Update DestReg to have the value SrcReg plus an offset.  This is
+  // used during frame layout, and we may need to ensure that if we
+  // split the offset internally that the DestReg is always aligned,
+  // assuming that source reg was.
+  bool adjustReg(MachineBasicBlock &MBB, MachineBasicBlock::iterator MBBI,
+                 const DebugLoc &DL, Register DestReg, Register SrcReg,
+                 int64_t Val, MachineInstr::MIFlag Flag,
+                 MaybeAlign RequiredAlign,
+                 Register ScratchReg = 0) const;
+
+  // Update DestReg to have the value of SrcReg plus an Offset.
+  void adjustReg(MachineBasicBlock::iterator II, Register DestReg,
+                 Register SrcReg, StackOffset Offset) const;
+
   bool eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
                            unsigned FIOperandNum,
                            RegScavenger *RS = nullptr) const override;
@@ -69,6 +83,11 @@ struct RISCVRegisterInfo : public RISCVGenRegisterInfo {
                         SmallVectorImpl<uint64_t> &Ops) const override;
 
   unsigned getRegisterCostTableIndex(const MachineFunction &MF) const override;
+
+  bool getRegAllocationHints(Register VirtReg, ArrayRef<MCPhysReg> Order,
+                             SmallVectorImpl<MCPhysReg> &Hints,
+                             const MachineFunction &MF, const VirtRegMap *VRM,
+                             const LiveRegMatrix *Matrix) const override;
 };
 }
 

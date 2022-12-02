@@ -120,6 +120,18 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
   addRegisterClass(MVT::v4i64, &AMDGPU::SGPR_256RegClass);
   addRegisterClass(MVT::v4f64, TRI->getVGPRClassForBitWidth(256));
 
+  addRegisterClass(MVT::v9i32, &AMDGPU::SGPR_288RegClass);
+  addRegisterClass(MVT::v9f32, TRI->getVGPRClassForBitWidth(288));
+
+  addRegisterClass(MVT::v10i32, &AMDGPU::SGPR_320RegClass);
+  addRegisterClass(MVT::v10f32, TRI->getVGPRClassForBitWidth(320));
+
+  addRegisterClass(MVT::v11i32, &AMDGPU::SGPR_352RegClass);
+  addRegisterClass(MVT::v11f32, TRI->getVGPRClassForBitWidth(352));
+
+  addRegisterClass(MVT::v12i32, &AMDGPU::SGPR_384RegClass);
+  addRegisterClass(MVT::v12f32, TRI->getVGPRClassForBitWidth(384));
+
   addRegisterClass(MVT::v16i32, &AMDGPU::SGPR_512RegClass);
   addRegisterClass(MVT::v16f32, TRI->getVGPRClassForBitWidth(512));
 
@@ -158,15 +170,17 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
 
   // We need to custom lower vector stores from local memory
   setOperationAction(ISD::LOAD,
-                     {MVT::v2i32, MVT::v3i32, MVT::v4i32, MVT::v5i32,
-                      MVT::v6i32, MVT::v7i32, MVT::v8i32, MVT::v16i32, MVT::i1,
-                      MVT::v32i32},
+                     {MVT::v2i32,  MVT::v3i32,  MVT::v4i32,  MVT::v5i32,
+                      MVT::v6i32,  MVT::v7i32,  MVT::v8i32,  MVT::v9i32,
+                      MVT::v10i32, MVT::v11i32, MVT::v12i32, MVT::v16i32,
+                      MVT::i1,     MVT::v32i32},
                      Custom);
 
   setOperationAction(ISD::STORE,
-                     {MVT::v2i32, MVT::v3i32, MVT::v4i32, MVT::v5i32,
-                      MVT::v6i32, MVT::v7i32, MVT::v8i32, MVT::v16i32, MVT::i1,
-                      MVT::v32i32},
+                     {MVT::v2i32,  MVT::v3i32,  MVT::v4i32,  MVT::v5i32,
+                      MVT::v6i32,  MVT::v7i32,  MVT::v8i32,  MVT::v9i32,
+                      MVT::v10i32, MVT::v11i32, MVT::v12i32, MVT::v16i32,
+                      MVT::i1,     MVT::v32i32},
                      Custom);
 
   setTruncStoreAction(MVT::v2i32, MVT::v2i16, Expand);
@@ -209,12 +223,14 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
   AddPromotedToType(ISD::SETCC, MVT::i1, MVT::i32);
 
   setOperationAction(ISD::TRUNCATE,
-                     {MVT::v2i32, MVT::v3i32, MVT::v4i32, MVT::v5i32,
-                      MVT::v6i32, MVT::v7i32, MVT::v8i32, MVT::v16i32},
+                     {MVT::v2i32,  MVT::v3i32,  MVT::v4i32,  MVT::v5i32,
+                      MVT::v6i32,  MVT::v7i32,  MVT::v8i32,  MVT::v9i32,
+                      MVT::v10i32, MVT::v11i32, MVT::v12i32, MVT::v16i32},
                      Expand);
   setOperationAction(ISD::FP_ROUND,
-                     {MVT::v2f32, MVT::v3f32, MVT::v4f32, MVT::v5f32,
-                      MVT::v6f32, MVT::v7f32, MVT::v8f32, MVT::v16f32},
+                     {MVT::v2f32,  MVT::v3f32,  MVT::v4f32,  MVT::v5f32,
+                      MVT::v6f32,  MVT::v7f32,  MVT::v8f32,  MVT::v9f32,
+                      MVT::v10f32, MVT::v11f32, MVT::v12f32, MVT::v16f32},
                      Expand);
 
   setOperationAction(ISD::SIGN_EXTEND_INREG,
@@ -240,11 +256,13 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
   // We only support LOAD/STORE and vector manipulation ops for vectors
   // with > 4 elements.
   for (MVT VT :
-       {MVT::v8i32,  MVT::v8f32,  MVT::v16i32, MVT::v16f32, MVT::v2i64,
-        MVT::v2f64,  MVT::v4i16,  MVT::v4f16,  MVT::v3i64,  MVT::v3f64,
-        MVT::v6i32,  MVT::v6f32,  MVT::v4i64,  MVT::v4f64,  MVT::v8i64,
-        MVT::v8f64,  MVT::v8i16,  MVT::v8f16,  MVT::v16i16, MVT::v16f16,
-        MVT::v16i64, MVT::v16f64, MVT::v32i32, MVT::v32f32}) {
+       {MVT::v8i32,  MVT::v8f32,  MVT::v9i32,   MVT::v9f32,  MVT::v10i32,
+        MVT::v10f32, MVT::v11i32, MVT::v11f32,  MVT::v12i32, MVT::v12f32,
+        MVT::v16i32, MVT::v16f32, MVT::v2i64,   MVT::v2f64,  MVT::v4i16,
+        MVT::v4f16,  MVT::v3i64,  MVT::v3f64,   MVT::v6i32,  MVT::v6f32,
+        MVT::v4i64,  MVT::v4f64,  MVT::v8i64,   MVT::v8f64,  MVT::v8i16,
+        MVT::v8f16,  MVT::v16i16, MVT::v16f16,  MVT::v16i64, MVT::v16f64,
+        MVT::v32i32, MVT::v32f32}) {
     for (unsigned Op = 0; Op < ISD::BUILTIN_OP_END; ++Op) {
       switch (Op) {
       case ISD::LOAD:
@@ -256,6 +274,7 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
       case ISD::INSERT_VECTOR_ELT:
       case ISD::EXTRACT_SUBVECTOR:
       case ISD::SCALAR_TO_VECTOR:
+      case ISD::IS_FPCLASS:
         break;
       case ISD::INSERT_SUBVECTOR:
       case ISD::CONCAT_VECTORS:
@@ -364,8 +383,10 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
 
   // Deal with vec5/6/7 vector operations when widened to vec8.
   setOperationAction(ISD::INSERT_SUBVECTOR,
-                     {MVT::v5i32, MVT::v5f32, MVT::v6i32, MVT::v6f32,
-                      MVT::v7i32, MVT::v7f32, MVT::v8i32, MVT::v8f32},
+                     {MVT::v5i32,  MVT::v5f32,  MVT::v6i32,  MVT::v6f32,
+                      MVT::v7i32,  MVT::v7f32,  MVT::v8i32,  MVT::v8f32,
+                      MVT::v9i32,  MVT::v9f32,  MVT::v10i32, MVT::v10f32,
+                      MVT::v11i32, MVT::v11f32, MVT::v12i32, MVT::v12f32},
                      Custom);
 
   // BUFFER/FLAT_ATOMIC_CMP_SWAP on GCN GPUs needs input marshalling,
@@ -525,6 +546,7 @@ SITargetLowering::SITargetLowering(const TargetMachine &TM,
         case ISD::INSERT_SUBVECTOR:
         case ISD::EXTRACT_SUBVECTOR:
         case ISD::SCALAR_TO_VECTOR:
+        case ISD::IS_FPCLASS:
           break;
         case ISD::CONCAT_VECTORS:
           setOperationAction(Op, VT, Custom);
@@ -969,7 +991,7 @@ bool SITargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
       Info.ptrVal = MFI->getImagePSV(TM);
       Info.align.reset();
     } else {
-      Info.ptrVal = MFI->getBufferPSV(TM);
+      Info.fallbackAddressSpace = AMDGPUAS::BUFFER_FAT_POINTER;
     }
 
     Info.flags |= MachineMemOperand::MODereferenceable;
@@ -1055,14 +1077,9 @@ bool SITargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
     return true;
   }
   case Intrinsic::amdgcn_buffer_atomic_fadd: {
-    SIMachineFunctionInfo *MFI = MF.getInfo<SIMachineFunctionInfo>();
-
-    const GCNTargetMachine &TM =
-        static_cast<const GCNTargetMachine &>(getTargetMachine());
-
     Info.opc = ISD::INTRINSIC_W_CHAIN;
     Info.memVT = MVT::getVT(CI.getOperand(0)->getType());
-    Info.ptrVal = MFI->getBufferPSV(TM);
+    Info.fallbackAddressSpace = AMDGPUAS::BUFFER_FAT_POINTER;
     Info.align.reset();
     Info.flags |= MachineMemOperand::MOLoad | MachineMemOperand::MOStore;
 
@@ -1421,8 +1438,21 @@ bool SITargetLowering::allowsMisalignedMemoryAccessesImpl(
         // We will either select ds_read_b64/ds_write_b64 or ds_read2_b32/
         // ds_write2_b32 depending on the alignment. In either case with either
         // alignment there is no faster way of doing this.
+
+        // The numbers returned here and below are not additive, it is a 'speed
+        // rank'. They are just meant to be compared to decide if a certain way
+        // of lowering an operation is faster than another. For that purpose
+        // naturally aligned operation gets it bitsize to indicate that "it
+        // operates with a speed comparable to N-bit wide load". With the full
+        // alignment ds128 is slower than ds96 for example. If underaligned it
+        // is comparable to a speed of a single dword access, which would then
+        // mean 32 < 128 and it is faster to issue a wide load regardless.
+        // 1 is simply "slow, don't do it". I.e. comparing an aligned load to a
+        // wider load which will not be aligned anymore the latter is slower.
         if (IsFast)
-          *IsFast = 1;
+          *IsFast = (Alignment >= RequiredAlignment) ? 64
+                    : (Alignment < Align(4))         ? 32
+                                                     : 1;
         return true;
       }
 
@@ -1440,8 +1470,12 @@ bool SITargetLowering::allowsMisalignedMemoryAccessesImpl(
         // be equally slow as a single ds_read_b96/ds_write_b96, but there will
         // be more of them, so overall we will pay less penalty issuing a single
         // instruction.
+
+        // See comment on the values above.
         if (IsFast)
-          *IsFast = Alignment >= RequiredAlignment || Alignment < Align(4);
+          *IsFast = (Alignment >= RequiredAlignment) ? 96
+                    : (Alignment < Align(4))         ? 32
+                                                     : 1;
         return true;
       }
 
@@ -1461,8 +1495,12 @@ bool SITargetLowering::allowsMisalignedMemoryAccessesImpl(
         // be equally slow as a single ds_read_b128/ds_write_b128, but there
         // will be more of them, so overall we will pay less penalty issuing a
         // single instruction.
+
+        // See comment on the values above.
         if (IsFast)
-          *IsFast= Alignment >= RequiredAlignment || Alignment < Align(4);
+          *IsFast = (Alignment >= RequiredAlignment) ? 128
+                    : (Alignment < Align(4))         ? 32
+                                                     : 1;
         return true;
       }
 
@@ -1474,8 +1512,11 @@ bool SITargetLowering::allowsMisalignedMemoryAccessesImpl(
       break;
     }
 
+    // See comment on the values above.
+    // Note that we have a single-dword or sub-dword here, so if underaligned
+    // it is a slowest possible access, hence returned value is 0.
     if (IsFast)
-      *IsFast = Alignment >= RequiredAlignment;
+      *IsFast = (Alignment >= RequiredAlignment) ? Size : 0;
 
     return Alignment >= RequiredAlignment ||
            Subtarget->hasUnalignedDSAccessEnabled();
@@ -1533,22 +1574,8 @@ bool SITargetLowering::allowsMisalignedMemoryAccessesImpl(
 bool SITargetLowering::allowsMisalignedMemoryAccesses(
     EVT VT, unsigned AddrSpace, Align Alignment, MachineMemOperand::Flags Flags,
     unsigned *IsFast) const {
-  bool Allow = allowsMisalignedMemoryAccessesImpl(VT.getSizeInBits(), AddrSpace,
-                                                  Alignment, Flags, IsFast);
-
-  if (Allow && IsFast && Subtarget->hasUnalignedDSAccessEnabled() &&
-      (AddrSpace == AMDGPUAS::LOCAL_ADDRESS ||
-       AddrSpace == AMDGPUAS::REGION_ADDRESS)) {
-    // Lie it is fast if +unaligned-access-mode is passed so that DS accesses
-    // get vectorized. We could use ds_read2_b*/ds_write2_b* instructions on a
-    // misaligned data which is faster than a pair of ds_read_b*/ds_write_b*
-    // which would be equally misaligned.
-    // This is only used by the common passes, selection always calls the
-    // allowsMisalignedMemoryAccessesImpl version.
-    *IsFast= 1;
-  }
-
-  return Allow;
+  return allowsMisalignedMemoryAccessesImpl(VT.getSizeInBits(), AddrSpace,
+                                            Alignment, Flags, IsFast);
 }
 
 EVT SITargetLowering::getOptimalMemOpType(
@@ -4223,6 +4250,10 @@ MachineBasicBlock *SITargetLowering::EmitInstrWithCustomInserter(
   case AMDGPU::SI_INDIRECT_SRC_V2:
   case AMDGPU::SI_INDIRECT_SRC_V4:
   case AMDGPU::SI_INDIRECT_SRC_V8:
+  case AMDGPU::SI_INDIRECT_SRC_V9:
+  case AMDGPU::SI_INDIRECT_SRC_V10:
+  case AMDGPU::SI_INDIRECT_SRC_V11:
+  case AMDGPU::SI_INDIRECT_SRC_V12:
   case AMDGPU::SI_INDIRECT_SRC_V16:
   case AMDGPU::SI_INDIRECT_SRC_V32:
     return emitIndirectSrc(MI, *BB, *getSubtarget());
@@ -4230,6 +4261,10 @@ MachineBasicBlock *SITargetLowering::EmitInstrWithCustomInserter(
   case AMDGPU::SI_INDIRECT_DST_V2:
   case AMDGPU::SI_INDIRECT_DST_V4:
   case AMDGPU::SI_INDIRECT_DST_V8:
+  case AMDGPU::SI_INDIRECT_DST_V9:
+  case AMDGPU::SI_INDIRECT_DST_V10:
+  case AMDGPU::SI_INDIRECT_DST_V11:
+  case AMDGPU::SI_INDIRECT_DST_V12:
   case AMDGPU::SI_INDIRECT_DST_V16:
   case AMDGPU::SI_INDIRECT_DST_V32:
     return emitIndirectDst(MI, *BB, *getSubtarget());
@@ -6173,7 +6208,7 @@ static SDValue getBuildDwordsVector(SelectionDAG &DAG, SDLoc DL,
   MVT Type;
   unsigned NumElts = Elts.size();
 
-  if (NumElts <= 8) {
+  if (NumElts <= 12) {
     Type = MVT::getVectorVT(MVT::f32, NumElts);
   } else {
     assert(Elts.size() <= 16);
@@ -7723,7 +7758,7 @@ SDValue SITargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
           AMDGPU::getMIMGOpcode(BaseOpcodes[Is64][IsA16],
                                 IsGFX11Plus ? AMDGPU::MIMGEncGfx11Default
                                             : AMDGPU::MIMGEncGfx10Default,
-                                NumVDataDwords, PowerOf2Ceil(NumVAddrDwords));
+                                NumVDataDwords, NumVAddrDwords);
     }
     assert(Opcode != -1);
 
@@ -7789,13 +7824,13 @@ SDValue SITargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
 
     if (!UseNSA) {
       // Build a single vector containing all the operands so far prepared.
-      if (NumVAddrDwords > 8) {
+      if (NumVAddrDwords > 12) {
         SDValue Undef = DAG.getUNDEF(MVT::i32);
         Ops.append(16 - Ops.size(), Undef);
       }
-      assert(Ops.size() == 8 || Ops.size() == 16);
+      assert(Ops.size() >= 8 && Ops.size() <= 12);
       SDValue MergedOps = DAG.getBuildVector(
-          Ops.size() == 16 ? MVT::v16i32 : MVT::v8i32, DL, Ops);
+          MVT::getVectorVT(MVT::i32, Ops.size()), DL, Ops);
       Ops.clear();
       Ops.push_back(MergedOps);
     }
@@ -8783,7 +8818,7 @@ SDValue SITargetLowering::LowerLOAD(SDValue Op, SelectionDAG &DAG) const {
     auto Flags = Load->getMemOperand()->getFlags();
     if (allowsMisalignedMemoryAccessesImpl(MemVT.getSizeInBits(), AS,
                                            Load->getAlign(), Flags, &Fast) &&
-        Fast)
+        Fast > 1)
       return SDValue();
 
     if (MemVT.isVector())
@@ -9282,7 +9317,7 @@ SDValue SITargetLowering::LowerSTORE(SDValue Op, SelectionDAG &DAG) const {
     auto Flags = Store->getMemOperand()->getFlags();
     if (allowsMisalignedMemoryAccessesImpl(VT.getSizeInBits(), AS,
                                            Store->getAlign(), Flags, &Fast) &&
-        Fast)
+        Fast > 1)
       return SDValue();
 
     if (VT.isVector())
@@ -9674,7 +9709,8 @@ SDValue SITargetLowering::performAndCombine(SDNode *N,
 
     SDValue X = LHS.getOperand(0);
     SDValue Y = RHS.getOperand(0);
-    if (Y.getOpcode() != ISD::FABS || Y.getOperand(0) != X)
+    if (Y.getOpcode() != ISD::FABS || Y.getOperand(0) != X ||
+        !isTypeLegal(X.getValueType()))
       return SDValue();
 
     if (LCC == ISD::SETO) {
@@ -11436,8 +11472,8 @@ SDValue SITargetLowering::performSetCCCombine(SDNode *N,
     }
   }
 
-  if (VT != MVT::f32 && VT != MVT::f64 && (Subtarget->has16BitInsts() &&
-                                           VT != MVT::f16))
+  if (VT != MVT::f32 && VT != MVT::f64 &&
+      (!Subtarget->has16BitInsts() || VT != MVT::f16))
     return SDValue();
 
   // Match isinf/isfinite pattern
@@ -12454,6 +12490,14 @@ static int getAlignedAGPRClassID(unsigned UnalignedClassID) {
     return AMDGPU::VReg_224_Align2RegClassID;
   case AMDGPU::VReg_256RegClassID:
     return AMDGPU::VReg_256_Align2RegClassID;
+  case AMDGPU::VReg_288RegClassID:
+    return AMDGPU::VReg_288_Align2RegClassID;
+  case AMDGPU::VReg_320RegClassID:
+    return AMDGPU::VReg_320_Align2RegClassID;
+  case AMDGPU::VReg_352RegClassID:
+    return AMDGPU::VReg_352_Align2RegClassID;
+  case AMDGPU::VReg_384RegClassID:
+    return AMDGPU::VReg_384_Align2RegClassID;
   case AMDGPU::VReg_512RegClassID:
     return AMDGPU::VReg_512_Align2RegClassID;
   case AMDGPU::VReg_1024RegClassID:
@@ -12622,8 +12666,7 @@ Align SITargetLowering::getPrefLoopAlignment(MachineLoop *ML) const {
   const Align CacheLineAlign = Align(64);
 
   // Pre-GFX10 target did not benefit from loop alignment
-  if (!ML || DisableLoopAlignment ||
-      (getSubtarget()->getGeneration() < AMDGPUSubtarget::GFX10) ||
+  if (!ML || DisableLoopAlignment || !getSubtarget()->hasInstPrefetch() ||
       getSubtarget()->hasInstFwdPrefetchBug())
     return PrefAlign;
 

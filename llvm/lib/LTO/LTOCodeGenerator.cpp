@@ -36,7 +36,6 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/PassTimingInfo.h"
 #include "llvm/IR/Verifier.h"
-#include "llvm/InitializePasses.h"
 #include "llvm/LTO/LTO.h"
 #include "llvm/LTO/LTOBackend.h"
 #include "llvm/LTO/legacy/LTOModule.h"
@@ -60,7 +59,6 @@
 #include "llvm/Target/TargetOptions.h"
 #include "llvm/Transforms/IPO.h"
 #include "llvm/Transforms/IPO/Internalize.h"
-#include "llvm/Transforms/IPO/PassManagerBuilder.h"
 #include "llvm/Transforms/IPO/WholeProgramDevirt.h"
 #include "llvm/Transforms/ObjCARC.h"
 #include "llvm/Transforms/Utils/ModuleUtils.h"
@@ -118,7 +116,7 @@ cl::opt<std::string> LTOStatsFile(
 
 cl::opt<std::string> AIXSystemAssemblerPath(
     "lto-aix-system-assembler",
-    cl::desc("Absolute path to the system assembler, picked up on AIX only"),
+    cl::desc("Path to a system assembler, picked up on AIX only"),
     cl::value_desc("path"));
 }
 
@@ -253,9 +251,20 @@ bool LTOCodeGenerator::runAIXSystemAssembler(SmallString<128> &AssemblyFile) {
          "Runing AIX system assembler when integrated assembler is available!");
 
   // Set the system assembler path.
-  std::string AssemblerPath(llvm::AIXSystemAssemblerPath.empty()
-                                ? "/usr/bin/as"
-                                : llvm::AIXSystemAssemblerPath.c_str());
+  SmallString<256> AssemblerPath("/usr/bin/as");
+  if (!llvm::AIXSystemAssemblerPath.empty()) {
+    if (llvm::sys::fs::real_path(llvm::AIXSystemAssemblerPath, AssemblerPath,
+                                 /* expand_tilde */ true)) {
+      emitError(
+          "Cannot find the assembler specified by lto-aix-system-assembler");
+      return false;
+    }
+  }
+
+  // Setup the LDR_CNTRL variable
+  std::string LDR_CNTRL_var = "LDR_CNTRL=MAXDATA32=0xA0000000@DSA";
+  if (Optional<std::string> V = sys::Process::GetEnv("LDR_CNTRL"))
+    LDR_CNTRL_var += ("@" + *V);
 
   // Prepare inputs for the assember.
   const auto &Triple = TargetMach->getTargetTriple();
@@ -263,7 +272,7 @@ bool LTOCodeGenerator::runAIXSystemAssembler(SmallString<128> &AssemblyFile) {
   std::string ObjectFileName(AssemblyFile);
   ObjectFileName[ObjectFileName.size() - 1] = 'o';
   SmallVector<StringRef, 8> Args = {
-      "/bin/env",     "LDR_CNTRL=MAXDATA32=0x80000000@${LDR_CNTRL}",
+      "/bin/env",     LDR_CNTRL_var,
       AssemblerPath,  Arch,
       "-many",        "-o",
       ObjectFileName, AssemblyFile};

@@ -78,7 +78,7 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    srli a1, a1, 1
 ; CHECK-NEXT:    vmv.s.x v10, a1
 ; CHECK-NEXT:    vredmin.vs v10, v8, v10
-; CHECK-NEXT:    vmv.x.s t0, v10
+; CHECK-NEXT:    vmv.x.s a1, v10
 ; CHECK-NEXT:    vredmaxu.vs v10, v8, v9
 ; CHECK-NEXT:    vmv.x.s a3, v10
 ; CHECK-NEXT:    vsetivli zero, 1, e64, m1, ta, ma
@@ -89,16 +89,16 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    vredand.vs v10, v8, v10
 ; CHECK-NEXT:    vmv.x.s a5, v10
 ; CHECK-NEXT:    vredor.vs v10, v8, v9
-; CHECK-NEXT:    vmv.x.s a0, v10
+; CHECK-NEXT:    vmv.x.s a2, v10
 ; CHECK-NEXT:    vredxor.vs v8, v8, v9
-; CHECK-NEXT:    vmv.x.s a2, v8
-; CHECK-NEXT:    add a1, a6, a7
-; CHECK-NEXT:    add a1, a1, t0
+; CHECK-NEXT:    vmv.x.s a0, v8
+; CHECK-NEXT:    add a6, a6, a7
+; CHECK-NEXT:    add a1, a1, a6
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a1, a1, a4
 ; CHECK-NEXT:    add a1, a1, a5
+; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    add a0, a0, a1
-; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    ret
   %add = call i64 @llvm.vector.reduce.add.nxv1i64(<vscale x 1 x i64> %a)
   %smax = call i64 @llvm.vector.reduce.smax.nxv1i64(<vscale x 1 x i64> %a)
@@ -139,7 +139,7 @@ define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    srli a1, a1, 1
 ; CHECK-NEXT:    vmv.s.x v11, a1
 ; CHECK-NEXT:    vredmin.vs v11, v8, v11
-; CHECK-NEXT:    vmv.x.s t0, v11
+; CHECK-NEXT:    vmv.x.s a1, v11
 ; CHECK-NEXT:    vredmaxu.vs v11, v8, v10
 ; CHECK-NEXT:    vmv.x.s a3, v11
 ; CHECK-NEXT:    vsetivli zero, 1, e64, m1, ta, ma
@@ -150,16 +150,16 @@ define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    vredand.vs v11, v8, v11
 ; CHECK-NEXT:    vmv.x.s a5, v11
 ; CHECK-NEXT:    vredor.vs v11, v8, v10
-; CHECK-NEXT:    vmv.x.s a0, v11
+; CHECK-NEXT:    vmv.x.s a2, v11
 ; CHECK-NEXT:    vredxor.vs v8, v8, v10
-; CHECK-NEXT:    vmv.x.s a2, v8
-; CHECK-NEXT:    add a1, a6, a7
-; CHECK-NEXT:    add a1, a1, t0
+; CHECK-NEXT:    vmv.x.s a0, v8
+; CHECK-NEXT:    add a6, a6, a7
+; CHECK-NEXT:    add a1, a1, a6
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a1, a1, a4
 ; CHECK-NEXT:    add a1, a1, a5
+; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    add a0, a0, a1
-; CHECK-NEXT:    add a0, a0, a2
 ; CHECK-NEXT:    ret
   %add = call i64 @llvm.vector.reduce.add.nxv2i64(<vscale x 2 x i64> %a)
   %smax = call i64 @llvm.vector.reduce.smax.nxv2i64(<vscale x 2 x i64> %a)
