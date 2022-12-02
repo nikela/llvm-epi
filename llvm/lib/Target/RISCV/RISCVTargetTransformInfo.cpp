@@ -52,7 +52,7 @@ InstructionCost RISCVTTIImpl::getLMULCost(MVT VT) {
     bool Fractional;
     std::tie(LMul, Fractional) =
         RISCVVType::decodeVLMUL(RISCVTargetLowering::getLMUL(VT));
-    if (Fractional)
+    if (Fractional || ST->hasEPI()) // FIXME: we need a better cost model.
       Cost = 1;
     else
       Cost = LMul;
@@ -378,10 +378,9 @@ InstructionCost RISCVTTIImpl::getSpliceCost(VectorType *Tp, int Index) {
   std::pair<InstructionCost, MVT> LT = getTypeLegalizationCost(Tp);
 
   unsigned Cost = 2; // vslidedown+vslideup.
-  // TODO: LMUL should increase cost.
   // TODO: Multiplying by LT.first implies this legalizes into multiple copies
   // of similar code, but I think we expand through memory.
-  return Cost * LT.first;
+  return Cost * LT.first * getLMULCost(LT.second);
 }
 
 InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
@@ -1443,8 +1442,7 @@ InstructionCost RISCVTTIImpl::getArithmeticInstrCost(
   case ISD::FSUB:
   case ISD::FMUL:
   case ISD::FNEG: {
-    // TODO: We should be accounting for LMUL and scaling costs for LMUL > 1.
-    return ConstantMatCost + LT.first * 1;
+    return ConstantMatCost + getLMULCost(LT.second) * LT.first * 1;
   }
   default:
     return ConstantMatCost +
