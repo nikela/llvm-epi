@@ -62,6 +62,10 @@ static cl::opt<unsigned> RISCVMaxBuildIntsCost(
     cl::desc("The maximum cost used for building integers."), cl::init(0),
     cl::Hidden);
 
+static cl::opt<bool> RISCVUseAA("riscv-use-aa-in-codegen",
+    cl::desc("Enable the use of AA during codegen."),
+    cl::init(true), cl::Hidden);
+
 void RISCVSubtarget::anchor() {}
 
 RISCVSubtarget &
@@ -209,4 +213,8 @@ bool RISCVSubtarget::enableSubRegLiveness() const {
 void RISCVSubtarget::getPostRAMutations(
     std::vector<std::unique_ptr<ScheduleDAGMutation>> &Mutations) const {
   Mutations.push_back(createRISCVMacroFusionDAGMutation());
+}
+
+bool RISCVSubtarget::useAA() const {
+  return hasEPI() && RISCVUseAA;
 }
