@@ -868,8 +868,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    add s6, s6, a3
 ; CHECK-NEXT:    sw s6, 104(sp)
 ; CHECK-NEXT:    lw a3, 4(a0)
-; CHECK-NEXT:    add s0, s0, a3
-; CHECK-NEXT:    sw s0, 108(sp)
+; CHECK-NEXT:    add ra, a3, s0
+; CHECK-NEXT:    sw ra, 108(sp)
 ; CHECK-NEXT:    lw a3, 8(a0)
 ; CHECK-NEXT:    addw a3, a3, s10
 ; CHECK-NEXT:    sw a3, 112(sp)
@@ -920,24 +920,24 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    sb s1, 41(sp)
 ; CHECK-NEXT:    sb a3, 42(sp)
 ; CHECK-NEXT:    sb a4, 43(sp)
-; CHECK-NEXT:    srli a3, s0, 8
-; CHECK-NEXT:    srli a4, s0, 16
-; CHECK-NEXT:    srli s1, s0, 24
-; CHECK-NEXT:    sb s0, 44(sp)
+; CHECK-NEXT:    srli a3, ra, 8
+; CHECK-NEXT:    srli a4, ra, 16
+; CHECK-NEXT:    srli s0, ra, 24
+; CHECK-NEXT:    sb ra, 44(sp)
 ; CHECK-NEXT:    sb a3, 45(sp)
 ; CHECK-NEXT:    sb a4, 46(sp)
-; CHECK-NEXT:    sb s1, 47(sp)
+; CHECK-NEXT:    sb s0, 47(sp)
 ; CHECK-NEXT:  .LBB0_11: # %do.body.do.body_crit_edge.i.do.body.do.body_crit_edge.i_crit_edge
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
 ; CHECK-NEXT:    add a3, t2, a5
-; CHECK-NEXT:    lw s1, 0(a3)
-; CHECK-NEXT:    srli a3, s1, 8
-; CHECK-NEXT:    srli a4, s1, 16
-; CHECK-NEXT:    srli t0, s1, 24
+; CHECK-NEXT:    lw a3, 0(a3)
+; CHECK-NEXT:    srli s1, a3, 8
+; CHECK-NEXT:    srli a4, a3, 16
+; CHECK-NEXT:    srli t0, a3, 24
 ; CHECK-NEXT:    add s0, t3, a5
-; CHECK-NEXT:    sb s1, 0(s0)
-; CHECK-NEXT:    sb a3, 1(s0)
+; CHECK-NEXT:    sb a3, 0(s0)
+; CHECK-NEXT:    sb s1, 1(s0)
 ; CHECK-NEXT:    sb a4, 2(s0)
 ; CHECK-NEXT:    addi a5, a5, 4
 ; CHECK-NEXT:    sb t0, 3(s0)

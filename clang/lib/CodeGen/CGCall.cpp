@@ -4462,7 +4462,7 @@ QualType CodeGenFunction::getVarArgType(const Expr *Arg) {
 
   if (Arg->getType()->isIntegerType() &&
       getContext().getTypeSize(Arg->getType()) <
-          getContext().getTargetInfo().getPointerWidth(0) &&
+          getContext().getTargetInfo().getPointerWidth(LangAS::Default) &&
       Arg->isNullPointerConstant(getContext(),
                                  Expr::NPC_ValueDependentIsNotNull)) {
     return getContext().getIntPtrType();

@@ -35,8 +35,8 @@ define <vscale x 1 x i64> @nxv1i64_3(i64* %ptr, <vscale x 1 x i1> %mask, i32 %ev
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.v.x v8, a0
 ; CHECK-NEXT:    slli a1, a1, 32
-; CHECK-NEXT:    srli a0, a1, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, ma
+; CHECK-NEXT:    srli a1, a1, 32
+; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vluxei64.v v8, (zero), v8, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i64*> undef, i64* %ptr, i32 0
@@ -80,8 +80,8 @@ define <vscale x 2 x float> @nxv2f32_3(float* %ptr, <vscale x 2 x i1> %mask, i32
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, ma
 ; CHECK-NEXT:    vmv.v.x v10, a0
 ; CHECK-NEXT:    slli a1, a1, 32
-; CHECK-NEXT:    srli a0, a1, 32
-; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, ma
+; CHECK-NEXT:    srli a1, a1, 32
+; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-NEXT:    vluxei64.v v8, (zero), v10, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x float*> undef, float* %ptr, i32 0
@@ -161,8 +161,8 @@ define <vscale x 8 x double> @nxv8f64_3(double* %ptr, <vscale x 8 x i1> %mask, i
 ; CHECK-NEXT:    vsetvli a2, zero, e64, m8, ta, ma
 ; CHECK-NEXT:    vmv.v.x v8, a0
 ; CHECK-NEXT:    slli a1, a1, 32
-; CHECK-NEXT:    srli a0, a1, 32
-; CHECK-NEXT:    vsetvli zero, a0, e64, m8, ta, ma
+; CHECK-NEXT:    srli a1, a1, 32
+; CHECK-NEXT:    vsetvli zero, a1, e64, m8, ta, ma
 ; CHECK-NEXT:    vluxei64.v v8, (zero), v8, v0.t
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x double*> undef, double* %ptr, i32 0
