@@ -11434,10 +11434,20 @@ static SDValue combineVPGather(VPGatherSDNode *VPGSN, SelectionDAG &DAG) {
   if (DAG.isSplatValue(Index)) {
     // Create scalar store of splatted value.
     SDLoc DL(VPGSN);
-    const SDValue &SplatValue = DAG.getSplatValue(Index);
+    SDValue SplatValue = DAG.getSplatValue(Index);
+    SDValue Addr = VPGSN->getBasePtr();
+    SDValue Scale = VPGSN->getScale();
+    // FIXME: How to handle this case?
+    if (!isOneConstant(Scale))
+      return SDValue();
+    if (isNullConstant(Addr)) {
+      Addr = SplatValue;
+    } else if (!isNullConstant(SplatValue)) {
+      Addr = DAG.getNode(ISD::ADD, DL, Addr.getValueType(), Addr, SplatValue);
+    }
     SDValue ScalarLoad =
         DAG.getLoad(VPGSN->getValueType(0).getScalarType(), DL,
-                    VPGSN->getChain(), SplatValue, VPGSN->getMemOperand());
+                    VPGSN->getChain(), Addr, VPGSN->getMemOperand());
 
     // Splat the loaded value.
     SDValue SplattedLoad =
