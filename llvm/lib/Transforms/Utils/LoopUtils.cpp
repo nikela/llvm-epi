@@ -259,7 +259,7 @@ llvm::getOptionalElementCountLoopAttribute(const Loop *TheLoop) {
     return ElementCount::get(*Width, IsScalable.value_or(false));
   }
 
-  return None;
+  return std::nullopt;
 }
 
 Optional<MDNode *> llvm::makeFollowupLoopID(
@@ -268,7 +268,7 @@ Optional<MDNode *> llvm::makeFollowupLoopID(
   if (!OrigLoopID) {
     if (AlwaysNew)
       return nullptr;
-    return None;
+    return std::nullopt;
   }
 
   assert(OrigLoopID->getOperand(0) == OrigLoopID);
@@ -327,7 +327,7 @@ Optional<MDNode *> llvm::makeFollowupLoopID(
   // Attributes of the followup loop not specified explicity, so signal to the
   // transformation pass to add suitable attributes.
   if (!AlwaysNew && !HasAnyFollowup)
-    return None;
+    return std::nullopt;
 
   // If no attributes were added or remove, the previous loop Id can be reused.
   if (!AlwaysNew && !Changed)
@@ -791,14 +791,14 @@ getEstimatedTripCount(BranchInst *ExitingBranch, Loop *L,
   // we exited the loop.
   uint64_t LoopWeight, ExitWeight;
   if (!extractBranchWeights(*ExitingBranch, LoopWeight, ExitWeight))
-    return None;
+    return std::nullopt;
 
   if (L->contains(ExitingBranch->getSuccessor(1)))
     std::swap(LoopWeight, ExitWeight);
 
   if (!ExitWeight)
     // Don't have a way to return predicated infinite
-    return None;
+    return std::nullopt;
 
   OrigExitWeight = ExitWeight;
 
@@ -825,7 +825,7 @@ llvm::getLoopEstimatedTripCount(Loop *L,
       return *EstTripCount;
     }
   }
-  return None;
+  return std::nullopt;
 }
 
 bool llvm::setLoopEstimatedTripCount(Loop *L, unsigned EstimatedTripCount,

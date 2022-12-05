@@ -16,8 +16,8 @@
 
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Support/VersionTuple.h"
-#include <vector>
 #include <array>
+#include <vector>
 
 namespace llvm {
 
@@ -27,6 +27,7 @@ namespace AArch64 {
 
 // Arch extension modifiers for CPUs. These are labelled with their Arm ARM
 // feature name (though the canonical reference for those is AArch64.td)
+// clang-format off
 enum ArchExtKind : uint64_t {
   AEK_INVALID =     0,
   AEK_NONE =        1,
@@ -83,6 +84,7 @@ enum ArchExtKind : uint64_t {
   AEK_D128 =        1ULL << 51, // FEAT_D128
   AEK_LSE128 =      1ULL << 52, // FEAT_LSE128
 };
+// clang-format on
 
 // Represents an extension that can be enabled with -march=<arch>+<extension>.
 // Typically these correspond to Arm Architecture extensions, unlike
@@ -111,12 +113,6 @@ struct ArchInfo {
   StringRef Name;        // Human readable name, e.g. "armv8.1-a"
   StringRef ArchFeature; // Command line feature flag, e.g. +v8a
   uint64_t DefaultExts;  // bitfield of default extensions ArchExtKind
-
-  // These are not intended to be copied or created outside of this file.
-  ArchInfo(const ArchInfo &) = delete;
-  ArchInfo(const ArchInfo &&) = delete;
-  ArchInfo &operator=(const ArchInfo &rhs) = delete;
-  ArchInfo &&operator=(const ArchInfo &&rhs) = delete;
 
   // Comparison is done by address. Copies should not exist.
   bool operator==(const ArchInfo &Other) const { return this == &Other; }

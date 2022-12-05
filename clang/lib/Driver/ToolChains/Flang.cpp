@@ -295,34 +295,6 @@ void Flang::AddRISCVTargetArgs(const ArgList &Args,
   }
 }
 
-static void getTargetFeatures(const Driver &D, const llvm::Triple &Triple,
-                              const ArgList &Args, ArgStringList &CmdArgs,
-                              bool ForAS, bool IsAux = false) {
-  std::vector<StringRef> Features;
-  switch (Triple.getArch()) {
-  default:
-    break;
-  case llvm::Triple::aarch64:
-  case llvm::Triple::aarch64_32:
-  case llvm::Triple::aarch64_be:
-    aarch64::getAArch64TargetFeatures(D, Triple, Args, Features, ForAS);
-    break;
-  case llvm::Triple::riscv64:
-    Features.push_back("+64bit");
-    riscv::getRISCVTargetFeatures(D, Triple, Args, Features);
-    break;
-  case llvm::Triple::x86:
-  case llvm::Triple::x86_64:
-    x86::getX86TargetFeatures(D, Triple, Args, Features);
-    break;
-  }
-
-  for (auto Feature : unifyTargetFeatures(Features)) {
-    CmdArgs.push_back(IsAux ? "-aux-target-feature" : "-target-feature");
-    CmdArgs.push_back(Feature.data());
-  }
-}
-
 namespace {
 void RenderAArch64ABI(const llvm::Triple &Triple, const ArgList &Args,
                       ArgStringList &CmdArgs) {
@@ -608,6 +580,32 @@ void Flang::addPicOptions(const ArgList &Args, ArgStringList &CmdArgs) const {
   }
 }
 
+void Flang::addTargetOptions(const ArgList &Args,
+                             ArgStringList &CmdArgs) const {
+  const ToolChain &TC = getToolChain();
+  const llvm::Triple &Triple = TC.getEffectiveTriple();
+  const Driver &D = TC.getDriver();
+
+  std::string CPU = getCPUName(D, Args, Triple);
+  if (!CPU.empty()) {
+    CmdArgs.push_back("-target-cpu");
+    CmdArgs.push_back(Args.MakeArgString(CPU));
+  }
+
+  // Add the target features.
+  switch (TC.getArch()) {
+  default:
+    break;
+  case llvm::Triple::aarch64:
+    [[fallthrough]];
+  case llvm::Triple::x86_64:
+    getTargetFeatures(D, Triple, Args, CmdArgs, /*ForAs*/ false);
+    break;
+  }
+
+  // TODO: Add target specific flags, ABI, mtune option etc.
+}
+
 static void addFloatingPointOptions(const Driver &D, const ArgList &Args,
                                     ArgStringList &CmdArgs) {
   StringRef FPContract;
@@ -778,6 +776,9 @@ void Flang::ConstructJob(Compilation &C, const JobAction &JA,
 
   // Floating point related options
   addFloatingPointOptions(D, Args, CmdArgs);
+
+  // Add target args, features, etc.
+  addTargetOptions(Args, CmdArgs);
 
   // Add other compile options
   addOtherOptions(Args, CmdArgs);

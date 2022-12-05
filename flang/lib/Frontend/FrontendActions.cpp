@@ -88,20 +88,6 @@ bool PrescanAndSemaDebugAction::beginSourceFileAction() {
          (generateRtTypeTables() || true);
 }
 
-static void renderFeatures(CompilerInvocation &invoc, std::string &Features) {
-  auto &FeaturesAsWritten = invoc.getFrontendOpts().FeaturesAsWritten;
-  Features.reserve(FeaturesAsWritten.size() +
-      std::accumulate(FeaturesAsWritten.begin(), FeaturesAsWritten.end(),
-          std::size_t(0), [](size_t Res, const std::string &Curr) {
-            return Res + Curr.size();
-          }));
-  for (auto &Feature : FeaturesAsWritten) {
-    if (!Features.empty())
-      Features += ",";
-    Features += Feature;
-  }
-}
-
 static void setMLIRDataLayout(mlir::ModuleOp &mlirModule,
                               const llvm::DataLayout &dl) {
   mlir::MLIRContext *context = mlirModule.getContext();
@@ -180,10 +166,11 @@ bool CodeGenAction::beginSourceFileAction() {
   // Create a LoweringBridge
   llvm::SmallVector<std::pair<std::string, llvm::Optional<std::string>>, 4>
       funcAttributes;
-  std::string targetFeatures;
-  renderFeatures(invoc, targetFeatures);
-  if (!targetFeatures.empty())
-    funcAttributes.push_back(std::make_pair("target-features", targetFeatures));
+  const TargetOptions &targetOpts = ci.getInvocation().getTargetOpts();
+  std::string featuresStr = llvm::join(targetOpts.featuresAsWritten.begin(),
+                                       targetOpts.featuresAsWritten.end(), ",");
+  if (!featuresStr.empty())
+    funcAttributes.push_back(std::make_pair("target-features", featuresStr));
 
   if (!invoc.getFrontendOpts().FramePointer.empty()) {
     funcAttributes.push_back(
@@ -655,30 +642,29 @@ getCGOptLevel(const Fortran::frontend::CodeGenOptions &opts) {
 
 void CodeGenAction::setUpTargetMachine() {
   CompilerInstance &ci = this->getInstance();
-  auto &invoc = ci.getInvocation();
 
-  const std::string &theTriple = ci.getInvocation().getTargetOpts().triple;
+  const TargetOptions &targetOpts = ci.getInvocation().getTargetOpts();
+  const std::string &theTriple = targetOpts.triple;
 
   llvm::TargetOptions TargetOpts;
   computeTargetOpts(theTriple, TargetOpts);
-  std::string Features;
-  renderFeatures(invoc, Features);
 
   // Create `Target`
   std::string error;
   const llvm::Target *theTarget =
       llvm::TargetRegistry::lookupTarget(theTriple, error);
 
-  if (theTarget) {
-    // Create `TargetMachine`
-    const auto &CGOpts = ci.getInvocation().getCodeGenOpts();
-    llvm::CodeGenOpt::Level OptLevel = getCGOptLevel(CGOpts);
-    tm.reset(theTarget->createTargetMachine(
-        theTriple, /*CPU=*/"", Features, TargetOpts,
-        /*Reloc::Model=*/CGOpts.getRelocationModel(),
-        /*CodeModel::Model=*/llvm::None, OptLevel));
-    assert(tm && "Failed to create TargetMachine");
-  }
+  // Create `TargetMachine`
+  const auto &CGOpts = ci.getInvocation().getCodeGenOpts();
+  llvm::CodeGenOpt::Level OptLevel = getCGOptLevel(CGOpts);
+  std::string featuresStr = llvm::join(targetOpts.featuresAsWritten.begin(),
+                                       targetOpts.featuresAsWritten.end(), ",");
+  tm.reset(theTarget->createTargetMachine(
+      theTriple, /*CPU=*/targetOpts.cpu,
+      /*Features=*/featuresStr, TargetOpts,
+      /*Reloc::Model=*/CGOpts.getRelocationModel(),
+      /*CodeModel::Model=*/llvm::None, OptLevel));
+  assert(tm && "Failed to create TargetMachine");
 }
 
 static std::unique_ptr<llvm::raw_pwrite_stream>

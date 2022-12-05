@@ -247,9 +247,6 @@ struct FrontendOptions {
   };
   GetDefinitionVals getDefVals;
 
-  /// Target features as spelled by the driver.
-  std::vector<std::string> FeaturesAsWritten;
-
   // Frame pointer
   std::string FramePointer;
 

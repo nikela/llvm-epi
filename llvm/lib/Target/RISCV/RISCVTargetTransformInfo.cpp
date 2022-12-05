@@ -22,6 +22,7 @@
 #include "llvm/Transforms/InstCombine/InstCombiner.h"
 #include <algorithm>
 #include <cmath>
+#include <optional>
 using namespace llvm;
 using namespace llvm::PatternMatch;
 
@@ -196,6 +197,13 @@ bool RISCVTTIImpl::preferPredicatedVectorOps() const {
   return ST->hasEPI();
 }
 
+bool RISCVTTIImpl::canUseStridedAccesses() const {
+  if (ST->hasEPI())
+    return true;
+
+  return BaseT::canUseStridedAccesses();
+}
+
 bool RISCVTTIImpl::isLegalMaskedLoadStore(Type *DataType) const {
   if (!ST->hasVInstructions())
     return false;
@@ -339,13 +347,13 @@ bool RISCVTTIImpl::shouldExpandReduction(const IntrinsicInst *II) const {
   }
 }
 
-Optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
+std::optional<unsigned> RISCVTTIImpl::getMaxVScale() const {
   if (ST->hasVInstructions())
     return ST->getRealMaxVLen() / RISCV::RVVBitsPerBlock;
   return BaseT::getMaxVScale();
 }
 
-Optional<unsigned> RISCVTTIImpl::getVScaleForTuning() const {
+std::optional<unsigned> RISCVTTIImpl::getVScaleForTuning() const {
   if (ST->hasVInstructions())
     if (unsigned MinVLen = ST->getRealMinVLen();
         MinVLen >= RISCV::RVVBitsPerBlock)
@@ -1065,7 +1073,7 @@ RISCVTTIImpl::getMinMaxReductionCost(VectorType *Ty, VectorType *CondTy,
 
 InstructionCost
 RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
-                                         Optional<FastMathFlags> FMF,
+                                         std::optional<FastMathFlags> FMF,
                                          TTI::TargetCostKind CostKind) {
   if (isa<ScalableVectorType>(Ty)) {
     std::pair<InstructionCost, MVT> LT =
@@ -1121,7 +1129,7 @@ RISCVTTIImpl::getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
 
 InstructionCost RISCVTTIImpl::getExtendedReductionCost(
     unsigned Opcode, bool IsUnsigned, Type *ResTy, VectorType *ValTy,
-    Optional<FastMathFlags> FMF, TTI::TargetCostKind CostKind) {
+    std::optional<FastMathFlags> FMF, TTI::TargetCostKind CostKind) {
   if (isa<FixedVectorType>(ValTy) && !ST->useRVVForFixedLengthVectors())
     return BaseT::getExtendedReductionCost(Opcode, IsUnsigned, ResTy, ValTy,
                                            FMF, CostKind);
@@ -1547,8 +1555,10 @@ unsigned RISCVTTIImpl::getRegUsageForType(Type *Ty) {
   return BaseT::getRegUsageForType(Ty);
 }
 
-Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II) {
-  assert(II.getIntrinsicID() == Intrinsic::epi_vsetvl && "This is not an epi_vsetvl!");
+std::optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC,
+                                                  IntrinsicInst &II) {
+  assert(II.getIntrinsicID() == Intrinsic::epi_vsetvl &&
+         "This is not an epi_vsetvl!");
 
   // The rvl argument may be the result of a zeroext op;
   // in that case, we retrieve the value being extended,
@@ -1567,7 +1577,8 @@ Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II
       // that compares VL with VLMax.
       Value *VLMax;
       CmpInst::Predicate Pred;
-      if (!match(Assume->getArgOperand(0), m_c_ICmp(Pred, m_Specific(RVL), m_Value(VLMax))))
+      if (!match(Assume->getArgOperand(0),
+                 m_c_ICmp(Pred, m_Specific(RVL), m_Value(VLMax))))
         continue;
       if (Pred != CmpInst::ICMP_UGE && Pred != CmpInst::ICMP_ULE)
         continue;
@@ -1577,9 +1588,11 @@ Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II
       // vscale and the VF value k.
       BinaryOperator *BinOp;
       if (!match(VLMax, m_BinOp(BinOp))) {
-        if (dyn_cast<IntrinsicInst>(VLMax)->getIntrinsicID() != Intrinsic::vscale)
+        if (dyn_cast<IntrinsicInst>(VLMax)->getIntrinsicID() !=
+            Intrinsic::vscale)
           continue;
-      } else if (dyn_cast<IntrinsicInst>(BinOp->getOperand(0))->getIntrinsicID() != Intrinsic::vscale)
+      } else if (dyn_cast<IntrinsicInst>(BinOp->getOperand(0))
+                     ->getIntrinsicID() != Intrinsic::vscale)
         continue;
 
       return IC.replaceInstUsesWith(II, II.getArgOperand(0));
@@ -1589,7 +1602,7 @@ Optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC, IntrinsicInst &II
   return None;
 }
 
-Optional<Instruction *>
+std::optional<Instruction *>
 RISCVTTIImpl::instCombineIntrinsic(InstCombiner &IC, IntrinsicInst &II) const {
   Intrinsic::ID IID = II.getIntrinsicID();
   switch (IID) {

@@ -202,6 +202,14 @@ static void parseTargetArgs(TargetOptions &opts, llvm::opt::ArgList &args) {
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_triple))
     opts.triple = a->getValue();
+
+  if (const llvm::opt::Arg *a =
+          args.getLastArg(clang::driver::options::OPT_target_cpu))
+    opts.cpu = a->getValue();
+
+  for (const llvm::opt::Arg *currentArg :
+       args.filtered(clang::driver::options::OPT_target_feature))
+    opts.featuresAsWritten.emplace_back(currentArg->getValue());
 }
 
 // Tweak the frontend configuration based on the frontend action
@@ -390,10 +398,6 @@ static bool parseFrontendArgs(FrontendOptions &opts, llvm::opt::ArgList &args,
       diags.Report(clang::diag::err_drv_invalid_value)
           << a->getAsString(args) << a->getValue();
   }
-
-  // Keep all the -target-feature so we can honor them later.
-  opts.FeaturesAsWritten =
-      args.getAllArgValues(clang::driver::options::OPT_target_feature);
 
   if (const llvm::opt::Arg *a =
           args.getLastArg(clang::driver::options::OPT_mframe_pointer_EQ)) {

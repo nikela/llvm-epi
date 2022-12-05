@@ -828,7 +828,7 @@ CallInst *IRBuilderBase::CreateGCStatepointCall(
     ArrayRef<Value *> GCArgs, const Twine &Name) {
   return CreateGCStatepointCallCommon<Value *, Value *, Value *, Value *>(
       this, ID, NumPatchBytes, ActualCallee, uint32_t(StatepointFlags::None),
-      CallArgs, None /* No Transition Args */, DeoptArgs, GCArgs, Name);
+      CallArgs, std::nullopt /* No Transition Args */, DeoptArgs, GCArgs, Name);
 }
 
 CallInst *IRBuilderBase::CreateGCStatepointCall(
@@ -847,7 +847,7 @@ CallInst *IRBuilderBase::CreateGCStatepointCall(
     ArrayRef<Value *> GCArgs, const Twine &Name) {
   return CreateGCStatepointCallCommon<Use, Value *, Value *, Value *>(
       this, ID, NumPatchBytes, ActualCallee, uint32_t(StatepointFlags::None),
-      CallArgs, None, DeoptArgs, GCArgs, Name);
+      CallArgs, std::nullopt, DeoptArgs, GCArgs, Name);
 }
 
 template <typename T0, typename T1, typename T2, typename T3>
@@ -883,8 +883,8 @@ InvokeInst *IRBuilderBase::CreateGCStatepointInvoke(
     ArrayRef<Value *> GCArgs, const Twine &Name) {
   return CreateGCStatepointInvokeCommon<Value *, Value *, Value *, Value *>(
       this, ID, NumPatchBytes, ActualInvokee, NormalDest, UnwindDest,
-      uint32_t(StatepointFlags::None), InvokeArgs, None /* No Transition Args*/,
-      DeoptArgs, GCArgs, Name);
+      uint32_t(StatepointFlags::None), InvokeArgs,
+      std::nullopt /* No Transition Args*/, DeoptArgs, GCArgs, Name);
 }
 
 InvokeInst *IRBuilderBase::CreateGCStatepointInvoke(
@@ -905,8 +905,8 @@ InvokeInst *IRBuilderBase::CreateGCStatepointInvoke(
     const Twine &Name) {
   return CreateGCStatepointInvokeCommon<Use, Value *, Value *, Value *>(
       this, ID, NumPatchBytes, ActualInvokee, NormalDest, UnwindDest,
-      uint32_t(StatepointFlags::None), InvokeArgs, None, DeoptArgs, GCArgs,
-      Name);
+      uint32_t(StatepointFlags::None), InvokeArgs, std::nullopt, DeoptArgs,
+      GCArgs, Name);
 }
 
 CallInst *IRBuilderBase::CreateGCResult(Instruction *Statepoint,
