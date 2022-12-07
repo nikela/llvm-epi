@@ -47,6 +47,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    li a5, 12
 ; CHECK-NEXT:    mul a4, a4, a5
 ; CHECK-NEXT:    sub sp, sp, a4
+; CHECK-NEXT:    .cfi_escape 0x0f, 0x0e, 0x72, 0x00, 0x11, 0xa0, 0x02, 0x22, 0x11, 0x0c, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 288 + 12 * vlenb
 ; CHECK-NEXT:    beqz a3, .LBB0_21
 ; CHECK-NEXT:  # %bb.1: # %if.end
 ; CHECK-NEXT:    mv s10, a3

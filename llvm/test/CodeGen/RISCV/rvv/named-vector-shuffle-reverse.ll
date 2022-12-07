@@ -1783,6 +1783,7 @@ define <vscale x 12 x i64> @reverse_nxv12i64(<vscale x 12 x i64> %a) {
 ; RV64-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
 ; RV64-BITS-UNKNOWN-NEXT:    slli a0, a0, 4
 ; RV64-BITS-UNKNOWN-NEXT:    sub sp, sp, a0
+; RV64-BITS-UNKNOWN-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x10, 0x22, 0x11, 0x10, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 16 + 16 * vlenb
 ; RV64-BITS-UNKNOWN-NEXT:    csrr a0, vlenb
 ; RV64-BITS-UNKNOWN-NEXT:    addi a1, a0, -1
 ; RV64-BITS-UNKNOWN-NEXT:    vsetvli a2, zero, e64, m8, ta, ma
@@ -1812,6 +1813,7 @@ define <vscale x 12 x i64> @reverse_nxv12i64(<vscale x 12 x i64> %a) {
 ; RV64-BITS-256-NEXT:    csrr a0, vlenb
 ; RV64-BITS-256-NEXT:    slli a0, a0, 4
 ; RV64-BITS-256-NEXT:    sub sp, sp, a0
+; RV64-BITS-256-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x10, 0x22, 0x11, 0x10, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 16 + 16 * vlenb
 ; RV64-BITS-256-NEXT:    csrr a0, vlenb
 ; RV64-BITS-256-NEXT:    addi a1, a0, -1
 ; RV64-BITS-256-NEXT:    vsetvli a2, zero, e64, m8, ta, ma
@@ -1841,6 +1843,7 @@ define <vscale x 12 x i64> @reverse_nxv12i64(<vscale x 12 x i64> %a) {
 ; RV64-BITS-512-NEXT:    csrr a0, vlenb
 ; RV64-BITS-512-NEXT:    slli a0, a0, 4
 ; RV64-BITS-512-NEXT:    sub sp, sp, a0
+; RV64-BITS-512-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x10, 0x22, 0x11, 0x10, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 16 + 16 * vlenb
 ; RV64-BITS-512-NEXT:    csrr a0, vlenb
 ; RV64-BITS-512-NEXT:    addi a1, a0, -1
 ; RV64-BITS-512-NEXT:    vsetvli a2, zero, e64, m8, ta, ma

@@ -762,6 +762,7 @@ define double @extractelt_nxv16f64_neg1(<vscale x 16 x double> %v) {
 ; CHECK64-NEXT:    csrr a0, vlenb
 ; CHECK64-NEXT:    slli a0, a0, 4
 ; CHECK64-NEXT:    sub sp, sp, a0
+; CHECK64-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x10, 0x22, 0x11, 0x10, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 16 + 16 * vlenb
 ; CHECK64-NEXT:    addi a0, sp, 16
 ; CHECK64-NEXT:    vs8r.v v8, (a0)
 ; CHECK64-NEXT:    csrr a2, vlenb
@@ -842,6 +843,7 @@ define double @extractelt_nxv16f64_idx(<vscale x 16 x double> %v, i32 signext %i
 ; CHECK64-NEXT:    csrr a1, vlenb
 ; CHECK64-NEXT:    slli a1, a1, 4
 ; CHECK64-NEXT:    sub sp, sp, a1
+; CHECK64-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x10, 0x22, 0x11, 0x10, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 16 + 16 * vlenb
 ; CHECK64-NEXT:    addi a1, sp, 16
 ; CHECK64-NEXT:    vs8r.v v8, (a1)
 ; CHECK64-NEXT:    csrr a2, vlenb
