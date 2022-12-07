@@ -247,6 +247,9 @@ end
   if a binding has renaming with "=> proc".
   The colons are not necessary for an unambiguous parse, C768
   notwithstanding.
+* A type-bound procedure binding can be passed as an actual
+  argument corresponding to a dummy procedure and can be used as
+  the target of a procedure pointer assignment statement.
 
 ### Extensions supported when enabled by options
 
@@ -510,3 +513,10 @@ end module
   application codes that expect exterior symbols whose names match
   components to be visible in a derived-type definition's default initialization
   expressions, and so f18 follows that precedent.
+
+* 19.3.1p1 "Within its scope, a local identifier of an entity of class (1)
+  or class (4) shall not be the same as a global identifier used in that scope..."
+  is read so as to allow the name of a module, submodule, main program,
+  or `BLOCK DATA` subprogram to also be the name of an local entity in its
+  scope, with a portability warning, since that global name is not actually
+  capable of being "used" in its scope.
