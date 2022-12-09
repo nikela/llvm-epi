@@ -608,12 +608,12 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O0-NEXT:    call __epi_fmod_nxv2f64_m@plt
 ; CHECK-O0-NEXT:    ld a4, 24(sp) # 8-byte Folded Reload
 ; CHECK-O0-NEXT:    addi a0, sp, 48
-; CHECK-O0-NEXT:    vl2re8.v v12, (a0) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vl2r.v v12, (a0) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    slli a0, a0, 1
 ; CHECK-O0-NEXT:    add a0, sp, a0
 ; CHECK-O0-NEXT:    addi a0, a0, 48
-; CHECK-O0-NEXT:    vl2re8.v v10, (a0) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vl2r.v v10, (a0) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    csrr a0, vlenb
 ; CHECK-O0-NEXT:    li a1, 6
 ; CHECK-O0-NEXT:    mul a0, a0, a1
@@ -626,7 +626,7 @@ define void @test_vp_fp_3(<vscale x 2 x double>* %a0, <vscale x 2 x double>* %a1
 ; CHECK-O0-NEXT:    slli a1, a1, 2
 ; CHECK-O0-NEXT:    add a1, sp, a1
 ; CHECK-O0-NEXT:    addi a1, a1, 48
-; CHECK-O0-NEXT:    vl2re8.v v8, (a1) # Unknown-size Folded Reload
+; CHECK-O0-NEXT:    vl2r.v v8, (a1) # Unknown-size Folded Reload
 ; CHECK-O0-NEXT:    vsetvli zero, a4, e64, m2, ta, mu
 ; CHECK-O0-NEXT:    vfmadd.vv v12, v8, v10, v0.t
 ; CHECK-O0-NEXT:    csrr a1, vlenb

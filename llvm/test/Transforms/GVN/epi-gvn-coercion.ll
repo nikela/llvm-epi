@@ -1,5 +1,5 @@
 ; RUN: opt < %s -S -o - -mtriple riscv64 -mattr +m,+a,+f,+d,+v \
-; RUN:    -gvn | FileCheck %s
+; RUN:    -passes=gvn | FileCheck %s
 ; REQUIRES: riscv-registered-target
 
 ; CHECK-NOT: bitcast <vscale x 1 x i64> {{.*}} to i64
