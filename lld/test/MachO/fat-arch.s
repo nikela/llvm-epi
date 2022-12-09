@@ -1,4 +1,7 @@
-# REQUIRES: x86, aarch64
+# REQUIRES: x86,aarch64
+## FIXME: The tests doesn't run on windows right now because of llvm-mc (can't produce triple=arm64-apple-macos11.0)
+# UNSUPPORTED: system-windows
+
 # RUN: llvm-mc -filetype=obj -triple=i386-apple-darwin %s -o %t.i386.o
 # RUN: llvm-mc -filetype=obj -triple=x86_64-apple-darwin %s -o %t.x86_64.o
 # RUN: llvm-mc -filetype=obj -triple=arm64-apple-macos11.0 %s -o %t.arm64.o
@@ -14,15 +17,14 @@
 # RUN: %lld -o %t.x86_64.out %t.x86_64.o
 # RUN: %lld -arch arm64 -o %t.arm64.out %t.arm64.o
 # RUN: llvm-lipo %t.x86_64.out %t.arm64.out -create -o %t.fat.exec.out
-
-# RUN: llvm-otool -h %t.fat.exec.out | FileCheck %s --check-prefix=PRE-COND
-# PRE-COND:             magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
-# PRE-COND-NEXT:  0xfeedfacf 16777223          3  0x80           2    13        648 0x00200085
-
 # RUN: %lld %t.x86_64.o -bundle_loader %t.fat.exec.out -bundle -o %t.fat.bundle
-# RUN: llvm-otool -h %t.fat.bundle | FileCheck %s --check-prefix=POST-COND
-# POST-COND:            magic cputype cpusubtype  caps    filetype ncmds sizeofcmds      flags
-# POST-COND-NEXT:  0xfeedfacf 16777223          3  0x00           8    10        520 0x00000085
+
+# RUN: llvm-otool -h %t.fat.exec.out %t.fat.bundle| FileCheck %s --check-prefix=CPU-SUB
+# CPU-SUB:            magic     cputype      cpusubtype   caps      filetype   ncmds sizeofcmds      flags
+# CPU-SUB-NEXT:  0xfeedfacf   [[#CPU:]]   [[#CPU_SUB:]]   0x{{.+}}    {{.+}}  {{.+}}    {{.+}}      {{.+}}
+# CPU-SUB-NEXT: Mach header
+# CPU-SUB-NEXT:       magic     cputype       cpusubtype       caps    filetype ncmds sizeofcmds      flags
+# CPU-SUB-NEXT:  0xfeedfacf    [[#CPU]]     [[#CPU_SUB]]   0x{{.+}}    {{.+}}  {{.+}}    {{.+}}      {{.+}}
 
 .text
 .global _main
