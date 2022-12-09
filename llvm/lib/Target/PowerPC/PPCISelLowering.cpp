@@ -96,6 +96,7 @@
 #include <cstdint>
 #include <iterator>
 #include <list>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -3044,7 +3045,7 @@ bool PPCTargetLowering::getPreIndexedAddressParts(SDNode *N, SDValue &Base,
 
   // LDU/STU can only handle immediates that are a multiple of 4.
   if (VT != MVT::i64) {
-    if (!SelectAddressRegImm(Ptr, Offset, Base, DAG, None))
+    if (!SelectAddressRegImm(Ptr, Offset, Base, DAG, std::nullopt))
       return false;
   } else {
     // LDU/STU need an address with at least 4-byte alignment.
@@ -3126,7 +3127,7 @@ SDValue PPCTargetLowering::getTOCEntry(SelectionDAG &DAG, const SDLoc &dl,
   SDValue Ops[] = { GA, Reg };
   return DAG.getMemIntrinsicNode(
       PPCISD::TOC_ENTRY, dl, DAG.getVTList(VT, MVT::Other), Ops, VT,
-      MachinePointerInfo::getGOT(DAG.getMachineFunction()), None,
+      MachinePointerInfo::getGOT(DAG.getMachineFunction()), std::nullopt,
       MachineMemOperand::MOLoad);
 }
 
@@ -18024,7 +18025,7 @@ PPC::AddrMode PPCTargetLowering::SelectForceXFormMode(SDValue N, SDValue &Disp,
 
 bool PPCTargetLowering::splitValueIntoRegisterParts(
     SelectionDAG &DAG, const SDLoc &DL, SDValue Val, SDValue *Parts,
-    unsigned NumParts, MVT PartVT, Optional<CallingConv::ID> CC) const {
+    unsigned NumParts, MVT PartVT, std::optional<CallingConv::ID> CC) const {
   EVT ValVT = Val.getValueType();
   // If we are splitting a scalar integer into f64 parts (i.e. so they
   // can be placed into VFRC registers), we need to zero extend and

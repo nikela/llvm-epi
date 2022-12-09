@@ -100,7 +100,7 @@ namespace AMDGPU {
 
 Optional<uint8_t> getHsaAbiVersion(const MCSubtargetInfo *STI) {
   if (STI && STI->getTargetTriple().getOS() != Triple::AMDHSA)
-    return None;
+    return std::nullopt;
 
   switch (AmdhsaCodeObjectVersion) {
   case 2:
@@ -1018,15 +1018,38 @@ unsigned getAddressableNumVGPRs(const MCSubtargetInfo *STI) {
   return 256;
 }
 
+unsigned getNumWavesPerEUWithNumVGPRs(const MCSubtargetInfo *STI,
+                                      unsigned NumVGPRs) {
+  unsigned MaxWaves = getMaxWavesPerEU(STI);
+  unsigned Granule = getVGPRAllocGranule(STI);
+  if (NumVGPRs < Granule)
+    return MaxWaves;
+  unsigned RoundedRegs = alignTo(NumVGPRs, Granule);
+  return std::min(std::max(getTotalNumVGPRs(STI) / RoundedRegs, 1u), MaxWaves);
+}
+
 unsigned getMinNumVGPRs(const MCSubtargetInfo *STI, unsigned WavesPerEU) {
   assert(WavesPerEU != 0);
 
-  if (WavesPerEU >= getMaxWavesPerEU(STI))
+  unsigned MaxWavesPerEU = getMaxWavesPerEU(STI);
+  if (WavesPerEU >= MaxWavesPerEU)
     return 0;
-  unsigned MinNumVGPRs =
-      alignDown(getTotalNumVGPRs(STI) / (WavesPerEU + 1),
-                getVGPRAllocGranule(STI)) + 1;
-  return std::min(MinNumVGPRs, getAddressableNumVGPRs(STI));
+
+  unsigned TotNumVGPRs = getTotalNumVGPRs(STI);
+  unsigned AddrsableNumVGPRs = getAddressableNumVGPRs(STI);
+  unsigned Granule = getVGPRAllocGranule(STI);
+  unsigned MaxNumVGPRs = alignDown(TotNumVGPRs / WavesPerEU, Granule);
+
+  if (MaxNumVGPRs == alignDown(TotNumVGPRs / MaxWavesPerEU, Granule))
+    return 0;
+
+  unsigned MinWavesPerEU = getNumWavesPerEUWithNumVGPRs(STI, AddrsableNumVGPRs);
+  if (WavesPerEU < MinWavesPerEU)
+    return getMinNumVGPRs(STI, MinWavesPerEU);
+
+  unsigned MaxNumVGPRsNext = alignDown(TotNumVGPRs / (WavesPerEU + 1), Granule);
+  unsigned MinNumVGPRs = 1 + std::min(MaxNumVGPRs - Granule, MaxNumVGPRsNext);
+  return std::min(MinNumVGPRs, AddrsableNumVGPRs);
 }
 
 unsigned getMaxNumVGPRs(const MCSubtargetInfo *STI, unsigned WavesPerEU) {
@@ -2083,6 +2106,13 @@ bool isSISrcOperand(const MCInstrDesc &Desc, unsigned OpNo) {
          OpType <= AMDGPU::OPERAND_SRC_LAST;
 }
 
+bool isKImmOperand(const MCInstrDesc &Desc, unsigned OpNo) {
+  assert(OpNo < Desc.NumOperands);
+  unsigned OpType = Desc.OpInfo[OpNo].OperandType;
+  return OpType >= AMDGPU::OPERAND_KIMM_FIRST &&
+         OpType <= AMDGPU::OPERAND_KIMM_LAST;
+}
+
 bool isSISrcFPOperand(const MCInstrDesc &Desc, unsigned OpNo) {
   assert(OpNo < Desc.NumOperands);
   unsigned OpType = Desc.OpInfo[OpNo].OperandType;
@@ -2441,25 +2471,26 @@ Optional<int64_t> getSMRDEncodedOffset(const MCSubtargetInfo &ST,
   // The signed version is always a byte offset.
   if (!IsBuffer && hasSMRDSignedImmOffset(ST)) {
     assert(hasSMEMByteOffset(ST));
-    return isInt<20>(ByteOffset) ? Optional<int64_t>(ByteOffset) : None;
+    return isInt<20>(ByteOffset) ? Optional<int64_t>(ByteOffset) : std::nullopt;
   }
 
   if (!isDwordAligned(ByteOffset) && !hasSMEMByteOffset(ST))
-    return None;
+    return std::nullopt;
 
   int64_t EncodedOffset = convertSMRDOffsetUnits(ST, ByteOffset);
   return isLegalSMRDEncodedUnsignedOffset(ST, EncodedOffset)
              ? Optional<int64_t>(EncodedOffset)
-             : None;
+             : std::nullopt;
 }
 
 Optional<int64_t> getSMRDEncodedLiteralOffset32(const MCSubtargetInfo &ST,
                                                 int64_t ByteOffset) {
   if (!isCI(ST) || !isDwordAligned(ByteOffset))
-    return None;
+    return std::nullopt;
 
   int64_t EncodedOffset = convertSMRDOffsetUnits(ST, ByteOffset);
-  return isUInt<32>(EncodedOffset) ? Optional<int64_t>(EncodedOffset) : None;
+  return isUInt<32>(EncodedOffset) ? Optional<int64_t>(EncodedOffset)
+                                   : std::nullopt;
 }
 
 unsigned getNumFlatOffsetBits(const MCSubtargetInfo &ST, bool Signed) {

@@ -936,17 +936,8 @@ struct DispatchOpConversion : public FIROpConversion<fir::DispatchOp> {
       return emitError(loc) << "no binding tables found";
 
     // Get derived type information.
-    auto declaredType =
-        llvm::TypeSwitch<mlir::Type, mlir::Type>(
-            dispatch.getObject().getType().getEleTy())
-            .Case<fir::PointerType, fir::HeapType, fir::SequenceType>(
-                [](auto p) {
-                  if (auto seq =
-                          p.getEleTy().template dyn_cast<fir::SequenceType>())
-                    return seq.getEleTy();
-                  return p.getEleTy();
-                })
-            .Default([](mlir::Type t) { return t; });
+    mlir::Type declaredType =
+        fir::getDerivedType(dispatch.getObject().getType().getEleTy());
     assert(declaredType.isa<fir::RecordType>() && "expecting fir.type");
     auto recordType = declaredType.dyn_cast<fir::RecordType>();
 
@@ -2056,14 +2047,14 @@ private:
       if (!rebox.getSubstr().empty())
         substringOffset = operands[rebox.substrOffset()];
       base = genBoxOffsetGep(rewriter, loc, base, zero,
-                             /*cstInteriorIndices=*/llvm::None, fieldIndices,
+                             /*cstInteriorIndices=*/std::nullopt, fieldIndices,
                              substringOffset);
     }
 
     if (rebox.getSlice().empty())
       // The array section is of the form array[%component][substring], keep
       // the input array extents and strides.
-      return finalizeRebox(rebox, dest, base, /*lbounds*/ llvm::None,
+      return finalizeRebox(rebox, dest, base, /*lbounds*/ std::nullopt,
                            inputExtents, inputStrides, rewriter);
 
     // Strides from the fir.box are in bytes.
@@ -2113,7 +2104,7 @@ private:
         slicedStrides.emplace_back(stride);
       }
     }
-    return finalizeRebox(rebox, dest, base, /*lbounds*/ llvm::None,
+    return finalizeRebox(rebox, dest, base, /*lbounds*/ std::nullopt,
                          slicedExtents, slicedStrides, rewriter);
   }
 
@@ -3021,7 +3012,7 @@ static void genBrOp(A caseOp, mlir::Block *dest, llvm::Optional<B> destOps,
   if (destOps)
     rewriter.replaceOpWithNewOp<mlir::LLVM::BrOp>(caseOp, *destOps, dest);
   else
-    rewriter.replaceOpWithNewOp<mlir::LLVM::BrOp>(caseOp, llvm::None, dest);
+    rewriter.replaceOpWithNewOp<mlir::LLVM::BrOp>(caseOp, std::nullopt, dest);
 }
 
 static void genCaseLadderStep(mlir::Location loc, mlir::Value cmp,

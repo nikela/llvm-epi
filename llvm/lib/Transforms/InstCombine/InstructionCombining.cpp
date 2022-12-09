@@ -38,7 +38,6 @@
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/None.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/Statistic.h"
@@ -105,6 +104,7 @@
 #include <cassert>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -169,16 +169,16 @@ MaxArraySize("instcombine-maxarray-size", cl::init(1024),
 static cl::opt<unsigned> ShouldLowerDbgDeclare("instcombine-lower-dbg-declare",
                                                cl::Hidden, cl::init(true));
 
-Optional<Instruction *>
+std::optional<Instruction *>
 InstCombiner::targetInstCombineIntrinsic(IntrinsicInst &II) {
   // Handle target specific intrinsics
   if (II.getCalledFunction()->isTargetIntrinsic()) {
     return TTI.instCombineIntrinsic(*this, II);
   }
-  return None;
+  return std::nullopt;
 }
 
-Optional<Value *> InstCombiner::targetSimplifyDemandedUseBitsIntrinsic(
+std::optional<Value *> InstCombiner::targetSimplifyDemandedUseBitsIntrinsic(
     IntrinsicInst &II, APInt DemandedMask, KnownBits &Known,
     bool &KnownBitsComputed) {
   // Handle target specific intrinsics
@@ -186,10 +186,10 @@ Optional<Value *> InstCombiner::targetSimplifyDemandedUseBitsIntrinsic(
     return TTI.simplifyDemandedUseBitsIntrinsic(*this, II, DemandedMask, Known,
                                                 KnownBitsComputed);
   }
-  return None;
+  return std::nullopt;
 }
 
-Optional<Value *> InstCombiner::targetSimplifyDemandedVectorEltsIntrinsic(
+std::optional<Value *> InstCombiner::targetSimplifyDemandedVectorEltsIntrinsic(
     IntrinsicInst &II, APInt DemandedElts, APInt &UndefElts, APInt &UndefElts2,
     APInt &UndefElts3,
     std::function<void(Instruction *, unsigned, APInt, APInt &)>
@@ -200,7 +200,7 @@ Optional<Value *> InstCombiner::targetSimplifyDemandedVectorEltsIntrinsic(
         *this, II, DemandedElts, UndefElts, UndefElts2, UndefElts3,
         SimplifyAndSetOp);
   }
-  return None;
+  return std::nullopt;
 }
 
 Value *InstCombinerImpl::EmitGEPOffset(User *GEP) {
@@ -2713,7 +2713,7 @@ static bool isRemovableWrite(CallBase &CB, Value *UsedV,
   // If the only possible side effect of the call is writing to the alloca,
   // and the result isn't used, we can safely remove any reads implied by the
   // call including those which might read the alloca itself.
-  Optional<MemoryLocation> Dest = MemoryLocation::getForDest(&CB, TLI);
+  std::optional<MemoryLocation> Dest = MemoryLocation::getForDest(&CB, TLI);
   return Dest && Dest->Ptr == UsedV;
 }
 
@@ -2891,7 +2891,7 @@ Instruction *InstCombinerImpl::visitAllocSite(Instruction &MI) {
       Module *M = II->getModule();
       Function *F = Intrinsic::getDeclaration(M, Intrinsic::donothing);
       InvokeInst::Create(F, II->getNormalDest(), II->getUnwindDest(),
-                         None, "", II->getParent());
+                         std::nullopt, "", II->getParent());
     }
 
     // Remove debug intrinsics which describe the value contained within the
@@ -4007,7 +4007,7 @@ static bool SoleWriteToDeadLocal(Instruction *I, TargetLibraryInfo &TLI) {
     // to allow reload along used path as described below.  Otherwise, this
     // is simply a store to a dead allocation which will be removed.
     return false;
-  Optional<MemoryLocation> Dest = MemoryLocation::getForDest(CB, TLI);
+  std::optional<MemoryLocation> Dest = MemoryLocation::getForDest(CB, TLI);
   if (!Dest)
     return false;
   auto *AI = dyn_cast<AllocaInst>(getUnderlyingObject(Dest->Ptr));
@@ -4217,7 +4217,7 @@ bool InstCombinerImpl::run() {
     auto getOptionalSinkBlockForInst =
         [this](Instruction *I) -> std::optional<BasicBlock *> {
       if (!EnableCodeSinking)
-        return None;
+        return std::nullopt;
 
       BasicBlock *BB = I->getParent();
       BasicBlock *UserParent = nullptr;
@@ -4227,7 +4227,7 @@ bool InstCombinerImpl::run() {
         if (U->isDroppable())
           continue;
         if (NumUsers > MaxSinkNumUsers)
-          return None;
+          return std::nullopt;
 
         Instruction *UserInst = cast<Instruction>(U);
         // Special handling for Phi nodes - get the block the use occurs in.
@@ -4238,14 +4238,14 @@ bool InstCombinerImpl::run() {
               // sophisticated analysis (i.e finding NearestCommonDominator of
               // these use blocks).
               if (UserParent && UserParent != PN->getIncomingBlock(i))
-                return None;
+                return std::nullopt;
               UserParent = PN->getIncomingBlock(i);
             }
           }
           assert(UserParent && "expected to find user block!");
         } else {
           if (UserParent && UserParent != UserInst->getParent())
-            return None;
+            return std::nullopt;
           UserParent = UserInst->getParent();
         }
 
@@ -4255,7 +4255,7 @@ bool InstCombinerImpl::run() {
           // Try sinking to another block. If that block is unreachable, then do
           // not bother. SimplifyCFG should handle it.
           if (UserParent == BB || !DT.isReachableFromEntry(UserParent))
-            return None;
+            return std::nullopt;
 
           auto *Term = UserParent->getTerminator();
           // See if the user is one of our successors that has only one
@@ -4267,7 +4267,7 @@ bool InstCombinerImpl::run() {
           //   - the User will be executed at most once.
           // So sinking I down to User is always profitable or neutral.
           if (UserParent->getUniquePredecessor() != BB && !succ_empty(Term))
-            return None;
+            return std::nullopt;
 
           assert(DT.dominates(BB, UserParent) && "Dominance relation broken?");
         }
@@ -4277,7 +4277,7 @@ bool InstCombinerImpl::run() {
 
       // No user or only has droppable users.
       if (!UserParent)
-        return None;
+        return std::nullopt;
 
       return UserParent;
     };

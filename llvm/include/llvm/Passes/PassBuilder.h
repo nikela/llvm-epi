@@ -100,7 +100,7 @@ public:
 class PassBuilder {
   TargetMachine *TM;
   PipelineTuningOptions PTO;
-  Optional<PGOOptions> PGOOpt;
+  std::optional<PGOOptions> PGOOpt;
   PassInstrumentationCallbacks *PIC;
 
 public:
@@ -119,7 +119,7 @@ public:
 
   explicit PassBuilder(TargetMachine *TM = nullptr,
                        PipelineTuningOptions PTO = PipelineTuningOptions(),
-                       Optional<PGOOptions> PGOOpt = None,
+                       std::optional<PGOOptions> PGOOpt = std::nullopt,
                        PassInstrumentationCallbacks *PIC = nullptr);
 
   /// Cross register the analysis managers through their proxies.
@@ -590,7 +590,7 @@ private:
   void addVectorPasses(OptimizationLevel Level, ModulePassManager &MPM,
                        FunctionPassManager &FPM, bool IsFullLTO);
 
-  static Optional<std::vector<PipelineElement>>
+  static std::optional<std::vector<PipelineElement>>
   parsePipelineText(StringRef Text);
 
   Error parseModulePass(ModulePassManager &MPM, const PipelineElement &E);

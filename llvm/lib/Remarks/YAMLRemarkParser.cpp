@@ -168,7 +168,7 @@ remarks::createYAMLParserFromMeta(StringRef Buf,
 }
 
 YAMLRemarkParser::YAMLRemarkParser(StringRef Buf)
-    : YAMLRemarkParser(Buf, None) {}
+    : YAMLRemarkParser(Buf, std::nullopt) {}
 
 YAMLRemarkParser::YAMLRemarkParser(StringRef Buf,
                                    Optional<ParsedStringTable> StrTab)
@@ -367,7 +367,7 @@ Expected<Argument> YAMLRemarkParser::parseArg(yaml::Node &Node) {
 
   std::optional<StringRef> KeyStr;
   std::optional<StringRef> ValueStr;
-  Optional<RemarkLocation> Loc;
+  std::optional<RemarkLocation> Loc;
 
   for (yaml::KeyValueNode &ArgEntry : *ArgMap) {
     Expected<StringRef> MaybeKey = parseKey(ArgEntry);

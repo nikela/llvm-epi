@@ -2,20 +2,20 @@
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi \
 ; RUN:    -scalable-vectorization=only -prefer-predicate-over-epilogue=predicate-dont-vectorize \
 ; RUN:    -S --passes=loop-vectorize,instcombine,simplifycfg -riscv-v-vector-bits-min=64 < %s -o - \
+; RUN:    -vectorizer-use-vp-strided-load-store=false \
 ; RUN:    | FileCheck --check-prefix=GATHER %s
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi \
 ; RUN:    -scalable-vectorization=only -prefer-predicate-over-epilogue=predicate-dont-vectorize \
 ; RUN:    -S --passes=loop-vectorize,instcombine,simplifycfg -riscv-v-vector-bits-min=64 < %s -o - \
 ; RUN:    -interleave-no-scalar-epilogue=true \
+; RUN:    -vectorizer-use-vp-strided-load-store=false \
 ; RUN:    | FileCheck --check-prefix=GATHER-INTERLEAVE %s
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi \
 ; RUN:    -scalable-vectorization=only -prefer-predicate-over-epilogue=predicate-dont-vectorize \
-; RUN:    -vectorizer-use-vp-strided-load-store \
 ; RUN:    -S --passes=loop-vectorize,instcombine,simplifycfg -riscv-v-vector-bits-min=64 < %s -o - \
 ; RUN:    | FileCheck --check-prefix=STRIDED %s
 ; RUN: opt -mtriple riscv64 -mattr +m,+a,+f,+d,+zepi \
 ; RUN:    -scalable-vectorization=only -prefer-predicate-over-epilogue=predicate-dont-vectorize \
-; RUN:    -vectorizer-use-vp-strided-load-store \
 ; RUN:    -interleave-no-scalar-epilogue=true \
 ; RUN:    -S --passes=loop-vectorize,instcombine,simplifycfg -riscv-v-vector-bits-min=64 < %s -o - \
 ; RUN:    | FileCheck --check-prefix=STRIDED-INTERLEAVE %s

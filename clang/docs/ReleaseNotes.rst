@@ -184,6 +184,9 @@ code bases.
 - To match GCC, ``__ppc64__`` is no longer defined on PowerPC64 targets. Use
   ``__powerpc64__`` instead.
 
+- ``-p`` is rejected for all targets which are not AIX or OpenBSD. ``-p`` led
+  to an ``-Wunused-command-line-argument`` warning in previous releases.
+
 What's New in Clang |release|?
 ==============================
 Some of the major new features and improvements to Clang are listed
@@ -311,6 +314,13 @@ Bug Fixes
   `Issue 58067 <https://github.com/llvm/llvm-project/issues/58057>`_
   `Issue 59014 <https://github.com/llvm/llvm-project/issues/59014>`_
   `Issue 54746 <https://github.com/llvm/llvm-project/issues/54746>`_
+- Fix assert that triggers a crash during some types of list initialization that
+  generate a CXXTemporaryObjectExpr instead of a InitListExpr. This fixes
+  `Issue 58302 <https://github.com/llvm/llvm-project/issues/58302>`_
+  `Issue 58753 <https://github.com/llvm/llvm-project/issues/58753>`_
+  `Issue 59100 <https://github.com/llvm/llvm-project/issues/59100>`_
+- Fix issue using __attribute__((format)) on non-variadic functions that expect
+  more than one formatted argument.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -755,6 +765,7 @@ X86 Support in Clang
   * Support intrinsic of ``_mm(256)_cvtneps_avx_pbh``.
 - ``-march=raptorlake`` and ``-march=meteorlake`` are now supported.
 - ``-march=sierraforest``, ``-march=graniterapids`` and ``-march=grandridge`` are now supported.
+- Lift _BitInt() supported max width from 128 to 8388608.
 
 WebAssembly Support in Clang
 ----------------------------
@@ -834,8 +845,8 @@ libclang
 - Introduced the new function ``clang_CXXMethod_isMoveAssignmentOperator``,
   which identifies whether a method cursor is a move-assignment
   operator.
-- ``clang_Cursor_getNumTemplateArguments``, ``clang_Cursor_getTemplateArgumentKind``, 
-  ``clang_Cursor_getTemplateArgumentType``, ``clang_Cursor_getTemplateArgumentValue`` and 
+- ``clang_Cursor_getNumTemplateArguments``, ``clang_Cursor_getTemplateArgumentKind``,
+  ``clang_Cursor_getTemplateArgumentType``, ``clang_Cursor_getTemplateArgumentValue`` and
   ``clang_Cursor_getTemplateArgumentUnsignedValue`` now work on struct, class,
   and partial template specialization cursors in addition to function cursors.
 

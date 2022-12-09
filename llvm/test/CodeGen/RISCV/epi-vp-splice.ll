@@ -61,11 +61,11 @@ define <vscale x 2 x i64> @test_vp_splice_nxv2i64_offset_in_register(<vscale x 2
 ; CHECK-NEXT:  .LBB2_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m2, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m2, ta, ma
 ; CHECK-NEXT:    vid.v v12
-; CHECK-NEXT:    vmsltu.vx v0, v12, a0
-; CHECK-NEXT:    vslideup.vx v12, v10, a0
+; CHECK-NEXT:    vmsltu.vx v0, v12, a1
+; CHECK-NEXT:    vslideup.vx v12, v10, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v12, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -142,11 +142,11 @@ define <vscale x 1 x i64> @test_vp_splice_nxv1i64_offset_in_register(<vscale x 1
 ; CHECK-NEXT:  .LBB6_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-NEXT:    vid.v v10
-; CHECK-NEXT:    vmsltu.vx v0, v10, a0
-; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmsltu.vx v0, v10, a1
+; CHECK-NEXT:    vslideup.vx v10, v9, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -223,11 +223,11 @@ define <vscale x 2 x i32> @test_vp_splice_nxv2i32_offset_in_register(<vscale x 2
 ; CHECK-NEXT:  .LBB10_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-NEXT:    vid.v v10
-; CHECK-NEXT:    vmsltu.vx v0, v10, a0
-; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmsltu.vx v0, v10, a1
+; CHECK-NEXT:    vslideup.vx v10, v9, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0
@@ -304,11 +304,11 @@ define <vscale x 4 x i16> @test_vp_splice_nxv4i16_offset_in_register(<vscale x 4
 ; CHECK-NEXT:  .LBB14_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e16, m1, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e16, m1, ta, ma
 ; CHECK-NEXT:    vid.v v10
-; CHECK-NEXT:    vmsltu.vx v0, v10, a0
-; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmsltu.vx v0, v10, a1
+; CHECK-NEXT:    vslideup.vx v10, v9, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 4 x i1> undef, i1 1, i32 0
@@ -385,11 +385,11 @@ define <vscale x 8 x i8> @test_vp_splice_nxv8i8_offset_in_register(<vscale x 8 x
 ; CHECK-NEXT:  .LBB18_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e8, m1, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e8, m1, ta, ma
 ; CHECK-NEXT:    vid.v v10
-; CHECK-NEXT:    vmsltu.vx v0, v10, a0
-; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmsltu.vx v0, v10, a1
+; CHECK-NEXT:    vslideup.vx v10, v9, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 8 x i1> undef, i1 1, i32 0
@@ -466,11 +466,11 @@ define <vscale x 1 x double> @test_vp_splice_nxv1f64_offset_in_register(<vscale 
 ; CHECK-NEXT:  .LBB22_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m1, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e64, m1, ta, ma
 ; CHECK-NEXT:    vid.v v10
-; CHECK-NEXT:    vmsltu.vx v0, v10, a0
-; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmsltu.vx v0, v10, a1
+; CHECK-NEXT:    vslideup.vx v10, v9, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 1 x i1> undef, i1 1, i32 0
@@ -547,11 +547,11 @@ define <vscale x 2 x float> @test_vp_splice_nxv2f32_offset_in_register(<vscale x
 ; CHECK-NEXT:  .LBB26_2:
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m1, ta, ma
 ; CHECK-NEXT:    vslidedown.vx v8, v8, a0
-; CHECK-NEXT:    sub a0, a1, a0
+; CHECK-NEXT:    sub a1, a1, a0
 ; CHECK-NEXT:    vsetvli zero, a2, e32, m1, ta, ma
 ; CHECK-NEXT:    vid.v v10
-; CHECK-NEXT:    vmsltu.vx v0, v10, a0
-; CHECK-NEXT:    vslideup.vx v10, v9, a0
+; CHECK-NEXT:    vmsltu.vx v0, v10, a1
+; CHECK-NEXT:    vslideup.vx v10, v9, a1
 ; CHECK-NEXT:    vmerge.vvm v8, v10, v8, v0
 ; CHECK-NEXT:    ret
   %head = insertelement <vscale x 2 x i1> undef, i1 1, i32 0

@@ -287,6 +287,10 @@ bool MCELFStreamer::emitSymbolAttribute(MCSymbol *S, MCSymbolAttr Attribute) {
     Symbol->setVisibility(ELF::STV_PROTECTED);
     break;
 
+  case MCSA_Memtag:
+    Symbol->setMemtag(true);
+    break;
+
   case MCSA_Hidden:
     Symbol->setVisibility(ELF::STV_HIDDEN);
     break;
@@ -497,7 +501,7 @@ void MCELFStreamer::finalizeCGProfileEntry(const MCSymbolRefExpr *&SRE,
   }
   const MCConstantExpr *MCOffset = MCConstantExpr::create(Offset, getContext());
   MCObjectStreamer::visitUsedExpr(*SRE);
-  if (Optional<std::pair<bool, std::string>> Err =
+  if (std::optional<std::pair<bool, std::string>> Err =
           MCObjectStreamer::emitRelocDirective(
               *MCOffset, "BFD_RELOC_NONE", SRE, SRE->getLoc(),
               *getContext().getSubtargetInfo()))

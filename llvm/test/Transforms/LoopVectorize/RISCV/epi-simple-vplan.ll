@@ -26,7 +26,7 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT:   vector.body:
 ; CHECK-NEXT:     EMIT vp<%4> = CANONICAL-INDUCTION
 ; CHECK-NEXT:     EMIT vp<%5> = GENERATE-EXPLICIT-VECTOR-LENGTH vp<%3>
-; CHECK-NEXT:     vp<%6>    = SCALAR-STEPS vp<%4>, ir<0>, ir<1>
+; CHECK-NEXT:     vp<%6>    = SCALAR-STEPS vp<%4>, ir<1>
 ; CHECK-NEXT:     EMIT vp<%7> = WIDEN-CANONICAL-INDUCTION vp<%4>
 ; CHECK-NEXT:     EMIT vp<%8> = icmp ule vp<%7> vp<%2>
 ; CHECK-NEXT:     CLONE ir<%arrayidx> = getelementptr ir<%a>, vp<%6>

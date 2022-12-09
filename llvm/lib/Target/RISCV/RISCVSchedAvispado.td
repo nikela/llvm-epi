@@ -265,23 +265,23 @@ let Latency = 1 in
 
 let Latency = 16, ResourceCycles = [8] in
 {
-  def : WriteRes<WriteVLDE, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDM, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDS8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDS16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDS32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDS64, [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDE", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDM", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDS8", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDS16", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDS32", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDS64", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDUX8", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDUX16", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDUX32", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDUX64", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDOX8", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDOX16", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDOX32", [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDOX64", [AvispadoVPUMemLoad]>;
 
-  def : WriteRes<WriteVLDUX8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDUX16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDUX32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDUX64, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDOX8, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDOX16, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDOX32, [AvispadoVPUMemLoad]>;
-  def : WriteRes<WriteVLDOX64, [AvispadoVPUMemLoad]>;
+  defm "" : LMULWriteRes<"WriteVLDFF", [AvispadoVPUMemLoad]>;
 
-  def : WriteRes<WriteVLDFF, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLD1R, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLD2R, [AvispadoVPUMemLoad]>;
   def : WriteRes<WriteVLD4R, [AvispadoVPUMemLoad]>;
@@ -289,37 +289,37 @@ let Latency = 16, ResourceCycles = [8] in
 
   foreach nf=2-8 in {
     foreach eew = [8, 16, 32, 64] in {
-      def : WriteRes<!cast<SchedWrite>("WriteVLSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVSSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVLSEGFF" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVLSSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVSSSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVLUXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVSUXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVLOXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
-      def : WriteRes<!cast<SchedWrite>("WriteVSOXSEG" # nf # "e" # eew), [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVLSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVSSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVLSEGFF" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVLSSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVSSSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVLUXSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVSUXSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVLOXSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
+      defm "" : LMULWriteRes<"WriteVSOXSEG" # nf # "e" # eew, [AvispadoVPUMemLoad]>;
     }
   }
 }
 
 let Latency = 16, ResourceCycles = [16] in
 {
-  def : WriteRes<WriteVSTUX8, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTUX16, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTUX32, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTUX64, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTOX8, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTOX16, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTOX32, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTOX64, [AvispadoVPUMemStore]>;
-  
-  def : WriteRes<WriteVSTM, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTE, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTS8, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTS16, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTS32, [AvispadoVPUMemStore]>;
-  def : WriteRes<WriteVSTS64, [AvispadoVPUMemStore]>;
-  
+  defm "" : LMULWriteRes<"WriteVSTUX8", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTUX16", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTUX32", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTUX64", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTOX8", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTOX16", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTOX32", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTOX64", [AvispadoVPUMemStore]>;
+
+  defm "" : LMULWriteRes<"WriteVSTM", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTE", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTS8", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTS16", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTS32", [AvispadoVPUMemStore]>;
+  defm "" : LMULWriteRes<"WriteVSTS64", [AvispadoVPUMemStore]>;
+
   def : WriteRes<WriteVST1R, [AvispadoVPUMemStore]>;
   def : WriteRes<WriteVST2R, [AvispadoVPUMemStore]>;
   def : WriteRes<WriteVST4R, [AvispadoVPUMemStore]>;
@@ -329,103 +329,100 @@ let Latency = 16, ResourceCycles = [16] in
 let Latency = 8, ResourceCycles = [8] in
 {
   // FIXME: Values are likely unrealistic for LMUL>1
-  foreach mx = SchedMxList in {
-    def : WriteRes<!cast<SchedWrite>("WriteVIALUV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIALUX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIALUI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVExtV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVICALUV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVICALUX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVICALUI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVShiftV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVShiftX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVShiftI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVICmpV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVICmpX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVICmpI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMulV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMulX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIDivV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIDivX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMulAddV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMulAddX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMergeV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMergeX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMergeI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMovV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMovX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIMovI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSALUV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSALUX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSALUI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVAALUV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVAALUX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSMulV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSMulX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSShiftV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSShiftX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVSShiftI_" # mx), [AvispadoVPUIArith]>;
-  }
-  foreach mx = SchedMxListW in {
-    def : WriteRes<!cast<SchedWrite>("WriteVIWALUV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIWALUX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIWALUI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVNShiftV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVNShiftX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVNShiftI_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIWMulV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIWMulX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIWMulAddV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVIWMulAddX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVNClipV_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVNClipX_" # mx), [AvispadoVPUIArith]>;
-    def : WriteRes<!cast<SchedWrite>("WriteVNClipI_" # mx), [AvispadoVPUIArith]>;
-  }
+  defm "" : LMULWriteRes<"WriteVIALUV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIALUX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIALUI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVExtV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVICALUV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVICALUX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVICALUI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVShiftV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVShiftX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVShiftI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVICmpV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVICmpX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVICmpI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMulV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMulX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIDivV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIDivX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMulAddV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMulAddX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMergeV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMergeX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMergeI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMovV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMovX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVIMovI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSALUV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSALUX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSALUI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVAALUV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVAALUX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSMulV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSMulX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSShiftV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSShiftX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVSShiftI", [AvispadoVPUIArith]>;
+
+  defm "" : LMULWriteResW<"WriteVIWALUV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVIWALUX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVIWALUI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVNShiftV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVNShiftX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVNShiftI", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVIWMulV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVIWMulX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVIWMulAddV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVIWMulAddX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVNClipV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVNClipX", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteResW<"WriteVNClipI", [AvispadoVPUIArith]>;
 
   def : WriteRes<WriteVIRedV, [AvispadoVPUIArith]>;
   def : WriteRes<WriteVIWRedV, [AvispadoVPUIArith]>;
 
-  def : WriteRes<WriteVMALUV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVMPopV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVMFFSV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVMSFSV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVMIotV, [AvispadoVPUIArith]>;
-  def : WriteRes<WriteVMIdxV, [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVMALUV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVMPopV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVMFFSV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVMSFSV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVMIotV", [AvispadoVPUIArith]>;
+  defm "" : LMULWriteRes<"WriteVMIdxV", [AvispadoVPUIArith]>;
 }
 
 let Latency = 10, ResourceCycles = [10] in
 {
-  def : WriteRes<WriteVFALUV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFALUF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWALUV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWALUF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFMulV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFMulF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFDivV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFDivF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWMulV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWMulF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFMulAddV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFMulAddF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWMulAddV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWMulAddF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFSqrtV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFRecpV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFCmpV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFCmpF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFSgnjV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFSgnjF, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFClassV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFMergeV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFMovV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFCvtIToFV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFCvtFToIV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWCvtIToFV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWCvtFToIV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFWCvtFToFV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFNCvtIToFV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFNCvtFToIV, [AvispadoVPUFArith]>;
-  def : WriteRes<WriteVFNCvtFToFV, [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFALUV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFALUF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWALUV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWALUF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFMulV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFMulF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFDivV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFDivF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWMulV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWMulF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFMulAddV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFMulAddF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWMulAddV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWMulAddF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFSqrtV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFRecpV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFCmpV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFCmpF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFSgnjV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFSgnjF", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFClassV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFMergeV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFMovV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFCvtIToFV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteRes<"WriteVFCvtFToIV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResW<"WriteVFWCvtIToFV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWCvtFToIV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFWCvtFToFV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFNCvtIToFV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResW<"WriteVFNCvtFToIV", [AvispadoVPUFArith]>;
+  defm "" : LMULWriteResFW<"WriteVFNCvtFToFV", [AvispadoVPUFArith]>;
 
   def : WriteRes<WriteVFRedV, [AvispadoVPUFArith]>;
   def : WriteRes<WriteVFRedOV, [AvispadoVPUFArith]>;
@@ -434,18 +431,18 @@ let Latency = 10, ResourceCycles = [10] in
 }
 
 // FIXME
-def : WriteRes<WriteVIMovVX, []>;
-def : WriteRes<WriteVIMovXV, []>;
-def : WriteRes<WriteVFMovVF, []>;
-def : WriteRes<WriteVFMovFV, []>;
-def : WriteRes<WriteVISlideX, []>;
-def : WriteRes<WriteVISlideI, []>;
-def : WriteRes<WriteVISlide1X, []>;
-def : WriteRes<WriteVFSlide1F, []>;
-def : WriteRes<WriteVGatherV, []>;
-def : WriteRes<WriteVGatherX, []>;
-def : WriteRes<WriteVGatherI, []>;
-def : WriteRes<WriteVCompressV, []>;
+defm "" : LMULWriteRes<"WriteVIMovVX", []>;
+defm "" : LMULWriteRes<"WriteVIMovXV", []>;
+defm "" : LMULWriteRes<"WriteVFMovVF", []>;
+defm "" : LMULWriteRes<"WriteVFMovFV", []>;
+defm "" : LMULWriteRes<"WriteVISlideX", []>;
+defm "" : LMULWriteRes<"WriteVISlideI", []>;
+defm "" : LMULWriteRes<"WriteVISlide1X", []>;
+defm "" : LMULWriteRes<"WriteVFSlide1F", []>;
+defm "" : LMULWriteRes<"WriteVGatherV", []>;
+defm "" : LMULWriteRes<"WriteVGatherX", []>;
+defm "" : LMULWriteRes<"WriteVGatherI", []>;
+defm "" : LMULWriteRes<"WriteVCompressV", []>;
 def : WriteRes<WriteVMov1V, []>;
 def : WriteRes<WriteVMov2V, []>;
 def : WriteRes<WriteVMov4V, []>;
@@ -458,120 +455,116 @@ def : ReadAdvance<ReadVSETVLI, 0>;
 def : ReadAdvance<ReadVSETVL, 0>;
 
 // 7. Vector Loads and Stores
-def : ReadAdvance<ReadVLDX, 0>;
-def : ReadAdvance<ReadVSTX, 0>;
-def : ReadAdvance<ReadVSTEV, 0>;
-def : ReadAdvance<ReadVSTM, 0>;
-def : ReadAdvance<ReadVLDSX, 0>;
-def : ReadAdvance<ReadVSTSX, 0>;
-def : ReadAdvance<ReadVSTS8V, 0>;
-def : ReadAdvance<ReadVSTS16V, 0>;
-def : ReadAdvance<ReadVSTS32V, 0>;
-def : ReadAdvance<ReadVSTS64V, 0>;
-def : ReadAdvance<ReadVLDUXV, 0>;
-def : ReadAdvance<ReadVLDOXV, 0>;
-def : ReadAdvance<ReadVSTUXV, 0>;
-def : ReadAdvance<ReadVSTUX8, 0>;
-def : ReadAdvance<ReadVSTUX16, 0>;
-def : ReadAdvance<ReadVSTUX32, 0>;
-def : ReadAdvance<ReadVSTUX64, 0>;
-def : ReadAdvance<ReadVSTUX8V, 0>;
-def : ReadAdvance<ReadVSTUX16V, 0>;
-def : ReadAdvance<ReadVSTUX32V, 0>;
-def : ReadAdvance<ReadVSTUX64V, 0>;
-def : ReadAdvance<ReadVSTOX8, 0>;
-def : ReadAdvance<ReadVSTOX16, 0>;
-def : ReadAdvance<ReadVSTOX32, 0>;
-def : ReadAdvance<ReadVSTOX64, 0>;
-def : ReadAdvance<ReadVSTOXV, 0>;
-def : ReadAdvance<ReadVSTOX8V, 0>;
-def : ReadAdvance<ReadVSTOX16V, 0>;
-def : ReadAdvance<ReadVSTOX32V, 0>;
-def : ReadAdvance<ReadVSTOX64V, 0>;
+defm "" : LMULReadAdvance<"ReadVLDX", 0>;
+defm "" : LMULReadAdvance<"ReadVSTX", 0>;
+defm "" : LMULReadAdvance<"ReadVSTEV", 0>;
+defm "" : LMULReadAdvance<"ReadVSTM", 0>;
+defm "" : LMULReadAdvance<"ReadVLDSX", 0>;
+defm "" : LMULReadAdvance<"ReadVSTSX", 0>;
+defm "" : LMULReadAdvance<"ReadVSTS8V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTS16V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTS32V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTS64V", 0>;
+defm "" : LMULReadAdvance<"ReadVLDUXV", 0>;
+defm "" : LMULReadAdvance<"ReadVLDOXV", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUXV", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX8", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX16", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX32", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX64", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX8V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX16V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX32V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTUX64V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX8", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX16", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX32", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX64", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOXV", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX8V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX16V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX32V", 0>;
+defm "" : LMULReadAdvance<"ReadVSTOX64V", 0>;
 def : ReadAdvance<ReadVST1R, 0>;
 def : ReadAdvance<ReadVST2R, 0>;
 def : ReadAdvance<ReadVST4R, 0>;
 def : ReadAdvance<ReadVST8R, 0>;
 
 // 12. Vector Integer Arithmetic Instructions
-foreach mx = SchedMxList in {
-  def : ReadAdvance<!cast<SchedRead>("ReadVICALUV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVICALUX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVExtV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIALUV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIALUX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVShiftV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVShiftX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVICmpV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVICmpX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMulV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMulX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIDivV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIDivX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMulAddV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMulAddX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMergeV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMergeX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMovV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIMovX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVSALUV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVSALUX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVAALUV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVAALUX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVSMulV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVSMulX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVSShiftV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVSShiftX_" # mx), 0>;
-}
+defm "" : LMULReadAdvance<"ReadVICALUV", 0>;
+defm "" : LMULReadAdvance<"ReadVICALUX", 0>;
+defm "" : LMULReadAdvance<"ReadVExtV", 0>;
+defm "" : LMULReadAdvance<"ReadVIALUV", 0>;
+defm "" : LMULReadAdvance<"ReadVIALUX", 0>;
+defm "" : LMULReadAdvance<"ReadVShiftV", 0>;
+defm "" : LMULReadAdvance<"ReadVShiftX", 0>;
+defm "" : LMULReadAdvance<"ReadVICmpV", 0>;
+defm "" : LMULReadAdvance<"ReadVICmpX", 0>;
+defm "" : LMULReadAdvance<"ReadVIMulV", 0>;
+defm "" : LMULReadAdvance<"ReadVIMulX", 0>;
+defm "" : LMULReadAdvance<"ReadVIDivV", 0>;
+defm "" : LMULReadAdvance<"ReadVIDivX", 0>;
+defm "" : LMULReadAdvance<"ReadVIMulAddV", 0>;
+defm "" : LMULReadAdvance<"ReadVIMulAddX", 0>;
+defm "" : LMULReadAdvance<"ReadVIMergeV", 0>;
+defm "" : LMULReadAdvance<"ReadVIMergeX", 0>;
+defm "" : LMULReadAdvance<"ReadVIMovV", 0>;
+defm "" : LMULReadAdvance<"ReadVIMovX", 0>;
+defm "" : LMULReadAdvance<"ReadVSALUV", 0>;
+defm "" : LMULReadAdvance<"ReadVSALUX", 0>;
+defm "" : LMULReadAdvance<"ReadVAALUV", 0>;
+defm "" : LMULReadAdvance<"ReadVAALUX", 0>;
+defm "" : LMULReadAdvance<"ReadVSMulV", 0>;
+defm "" : LMULReadAdvance<"ReadVSMulX", 0>;
+defm "" : LMULReadAdvance<"ReadVSShiftV", 0>;
+defm "" : LMULReadAdvance<"ReadVSShiftX", 0>;
 
-foreach mx = SchedMxListW in {
-  def : ReadAdvance<!cast<SchedRead>("ReadVIWALUV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIWALUX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVNShiftV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVNShiftX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulAddV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVIWMulAddX_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVNClipV_" # mx), 0>;
-  def : ReadAdvance<!cast<SchedRead>("ReadVNClipX_" # mx), 0>;
-}
+defm "" : LMULReadAdvanceW<"ReadVIWALUV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVIWALUX", 0>;
+defm "" : LMULReadAdvanceW<"ReadVNShiftV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVNShiftX", 0>;
+defm "" : LMULReadAdvanceW<"ReadVIWMulV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVIWMulX", 0>;
+defm "" : LMULReadAdvanceW<"ReadVIWMulAddV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVIWMulAddX", 0>;
+defm "" : LMULReadAdvanceW<"ReadVNClipV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVNClipX", 0>;
 
 // 13. Vector Fixed-Point Arithmetic Instructions
 
 // 14. Vector Floating-Point Instructions
-def : ReadAdvance<ReadVFALUV, 0>;
-def : ReadAdvance<ReadVFALUF, 0>;
-def : ReadAdvance<ReadVFWALUV, 0>;
-def : ReadAdvance<ReadVFWALUF, 0>;
-def : ReadAdvance<ReadVFMulV, 0>;
-def : ReadAdvance<ReadVFMulF, 0>;
-def : ReadAdvance<ReadVFDivV, 0>;
-def : ReadAdvance<ReadVFDivF, 0>;
-def : ReadAdvance<ReadVFWMulV, 0>;
-def : ReadAdvance<ReadVFWMulF, 0>;
-def : ReadAdvance<ReadVFMulAddV, 0>;
-def : ReadAdvance<ReadVFMulAddF, 0>;
-def : ReadAdvance<ReadVFWMulAddV, 0>;
-def : ReadAdvance<ReadVFWMulAddF, 0>;
-def : ReadAdvance<ReadVFSqrtV, 0>;
-def : ReadAdvance<ReadVFRecpV, 0>;
-def : ReadAdvance<ReadVFCmpV, 0>;
-def : ReadAdvance<ReadVFCmpF, 0>;
-def : ReadAdvance<ReadVFSgnjV, 0>;
-def : ReadAdvance<ReadVFSgnjF, 0>;
-def : ReadAdvance<ReadVFClassV, 0>;
-def : ReadAdvance<ReadVFMergeV, 0>;
-def : ReadAdvance<ReadVFMergeF, 0>;
-def : ReadAdvance<ReadVFMovF, 0>;
-def : ReadAdvance<ReadVFCvtIToFV, 0>;
-def : ReadAdvance<ReadVFCvtFToIV, 0>;
-def : ReadAdvance<ReadVFWCvtIToFV, 0>;
-def : ReadAdvance<ReadVFWCvtFToIV, 0>;
-def : ReadAdvance<ReadVFWCvtFToFV, 0>;
-def : ReadAdvance<ReadVFNCvtIToFV, 0>;
-def : ReadAdvance<ReadVFNCvtFToIV, 0>;
-def : ReadAdvance<ReadVFNCvtFToFV, 0>;
+defm "" : LMULReadAdvance<"ReadVFALUV", 0>;
+defm "" : LMULReadAdvance<"ReadVFALUF", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWALUV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWALUF", 0>;
+defm "" : LMULReadAdvance<"ReadVFMulV", 0>;
+defm "" : LMULReadAdvance<"ReadVFMulF", 0>;
+defm "" : LMULReadAdvance<"ReadVFDivV", 0>;
+defm "" : LMULReadAdvance<"ReadVFDivF", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWMulV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWMulF", 0>;
+defm "" : LMULReadAdvance<"ReadVFMulAddV", 0>;
+defm "" : LMULReadAdvance<"ReadVFMulAddF", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWMulAddV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWMulAddF", 0>;
+defm "" : LMULReadAdvance<"ReadVFSqrtV", 0>;
+defm "" : LMULReadAdvance<"ReadVFRecpV", 0>;
+defm "" : LMULReadAdvance<"ReadVFCmpV", 0>;
+defm "" : LMULReadAdvance<"ReadVFCmpF", 0>;
+defm "" : LMULReadAdvance<"ReadVFSgnjV", 0>;
+defm "" : LMULReadAdvance<"ReadVFSgnjF", 0>;
+defm "" : LMULReadAdvance<"ReadVFClassV", 0>;
+defm "" : LMULReadAdvance<"ReadVFMergeV", 0>;
+defm "" : LMULReadAdvance<"ReadVFMergeF", 0>;
+defm "" : LMULReadAdvance<"ReadVFMovF", 0>;
+defm "" : LMULReadAdvance<"ReadVFCvtIToFV", 0>;
+defm "" : LMULReadAdvance<"ReadVFCvtFToIV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVFWCvtIToFV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWCvtFToIV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFWCvtFToFV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFNCvtIToFV", 0>;
+defm "" : LMULReadAdvanceW<"ReadVFNCvtFToIV", 0>;
+defm "" : LMULReadAdvanceFW<"ReadVFNCvtFToFV", 0>;
 
 // 15. Vector Reduction Operations
 def : ReadAdvance<ReadVIRedV, 0>;
@@ -588,26 +581,26 @@ def : ReadAdvance<ReadVFWRedOV, 0>;
 def : ReadAdvance<ReadVFWRedOV0, 0>;
 
 // 16. Vector Mask Instructions
-def : ReadAdvance<ReadVMALUV, 0>;
-def : ReadAdvance<ReadVMPopV, 0>;
-def : ReadAdvance<ReadVMFFSV, 0>;
-def : ReadAdvance<ReadVMSFSV, 0>;
-def : ReadAdvance<ReadVMIotV, 0>;
+defm "" : LMULReadAdvance<"ReadVMALUV", 0>;
+defm "" : LMULReadAdvance<"ReadVMPopV", 0>;
+defm "" : LMULReadAdvance<"ReadVMFFSV", 0>;
+defm "" : LMULReadAdvance<"ReadVMSFSV", 0>;
+defm "" : LMULReadAdvance<"ReadVMIotV", 0>;
 
 // 17. Vector Permutation Instructions
-def : ReadAdvance<ReadVIMovVX, 0>;
-def : ReadAdvance<ReadVIMovXV, 0>;
-def : ReadAdvance<ReadVIMovXX, 0>;
-def : ReadAdvance<ReadVFMovVF, 0>;
-def : ReadAdvance<ReadVFMovFV, 0>;
-def : ReadAdvance<ReadVFMovFX, 0>;
-def : ReadAdvance<ReadVISlideV, 0>;
-def : ReadAdvance<ReadVISlideX, 0>;
-def : ReadAdvance<ReadVFSlideV, 0>;
-def : ReadAdvance<ReadVFSlideF, 0>;
-def : ReadAdvance<ReadVGatherV, 0>;
-def : ReadAdvance<ReadVGatherX, 0>;
-def : ReadAdvance<ReadVCompressV, 0>;
+defm "" : LMULReadAdvance<"ReadVIMovVX", 0>;
+defm "" : LMULReadAdvance<"ReadVIMovXV", 0>;
+defm "" : LMULReadAdvance<"ReadVIMovXX", 0>;
+defm "" : LMULReadAdvance<"ReadVFMovVF", 0>;
+defm "" : LMULReadAdvance<"ReadVFMovFV", 0>;
+defm "" : LMULReadAdvance<"ReadVFMovFX", 0>;
+defm "" : LMULReadAdvance<"ReadVISlideV", 0>;
+defm "" : LMULReadAdvance<"ReadVISlideX", 0>;
+defm "" : LMULReadAdvance<"ReadVFSlideV", 0>;
+defm "" : LMULReadAdvance<"ReadVFSlideF", 0>;
+defm "" : LMULReadAdvance<"ReadVGatherV", 0>;
+defm "" : LMULReadAdvance<"ReadVGatherX", 0>;
+defm "" : LMULReadAdvance<"ReadVCompressV", 0>;
 def : ReadAdvance<ReadVMov1V, 0>;
 def : ReadAdvance<ReadVMov2V, 0>;
 def : ReadAdvance<ReadVMov4V, 0>;
@@ -625,5 +618,4 @@ defm : UnsupportedSchedZbkb;
 defm : UnsupportedSchedZbkx;
 defm : UnsupportedSchedZfh;
 defm : UnsupportedSchedSFB;
-
 }

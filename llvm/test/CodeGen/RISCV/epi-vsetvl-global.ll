@@ -189,15 +189,15 @@ define <vscale x 1 x double> @test5(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    bnez a2, .LBB4_3
 ; CHECK-NEXT:  # %bb.1: # %if.else
 ; CHECK-NEXT:    vfsub.vv v9, v8, v9
-; CHECK-NEXT:    andi a0, a1, 2
-; CHECK-NEXT:    beqz a0, .LBB4_4
+; CHECK-NEXT:    andi a1, a1, 2
+; CHECK-NEXT:    beqz a1, .LBB4_4
 ; CHECK-NEXT:  .LBB4_2: # %if.then4
 ; CHECK-NEXT:    vfmul.vv v8, v9, v8
 ; CHECK-NEXT:    ret
 ; CHECK-NEXT:  .LBB4_3: # %if.then
 ; CHECK-NEXT:    vfadd.vv v9, v8, v9
-; CHECK-NEXT:    andi a0, a1, 2
-; CHECK-NEXT:    bnez a0, .LBB4_2
+; CHECK-NEXT:    andi a1, a1, 2
+; CHECK-NEXT:    bnez a1, .LBB4_2
 ; CHECK-NEXT:  .LBB4_4: # %if.else5
 ; CHECK-NEXT:    vfmul.vv v8, v8, v9
 ; CHECK-NEXT:    ret

@@ -34,6 +34,7 @@ define <vscale x 64 x i8> @caller() {
 ; RV64IV-NEXT:    csrr a0, vlenb
 ; RV64IV-NEXT:    slli a0, a0, 5
 ; RV64IV-NEXT:    sub sp, sp, a0
+; RV64IV-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x20, 0x22, 0x11, 0x20, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 32 + 32 * vlenb
 ; RV64IV-NEXT:    csrr a0, vlenb
 ; RV64IV-NEXT:    li a1, 24
 ; RV64IV-NEXT:    mul a0, a0, a1

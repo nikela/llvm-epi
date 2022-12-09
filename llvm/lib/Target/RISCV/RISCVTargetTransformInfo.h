@@ -23,6 +23,7 @@
 #include "llvm/CodeGen/BasicTTIImpl.h"
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/Function.h"
+#include <optional>
 
 namespace llvm {
 
@@ -132,6 +133,10 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
   /// the true cost significantly if getVScaleForTuning is wildly off for the
   /// actual target hardware.
   unsigned getEstimatedVLFor(VectorType *Ty);
+
+  /// Return the cost of LMUL. The larger the LMUL, the higher the cost.
+  InstructionCost getLMULCost(MVT VT);
+
 public:
   explicit RISCVTTIImpl(const RISCVTargetMachine *TM, const Function &F)
       : BaseT(TM, F.getParent()->getDataLayout()), ST(TM->getSubtargetImpl(F)),
@@ -154,6 +159,7 @@ public:
 
   unsigned getMaxElementWidth() const;
   bool preferPredicatedVectorOps() const;
+  bool canUseStridedAccesses() const;
   bool isLegalMaskedLoad(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
@@ -193,8 +199,8 @@ public:
     return (ST->hasVInstructions() && !ST->hasEPI()) ? PredicationStyle::Data
                                                      : PredicationStyle::None;
   }
-  Optional<unsigned> getMaxVScale() const;
-  Optional<unsigned> getVScaleForTuning() const;
+  std::optional<unsigned> getMaxVScale() const;
+  std::optional<unsigned> getVScaleForTuning() const;
 
   TypeSize getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const;
 
@@ -229,7 +235,7 @@ public:
                                  ArrayRef<int> Mask,
                                  TTI::TargetCostKind CostKind, int Index,
                                  VectorType *SubTp,
-                                 ArrayRef<const Value *> Args = None);
+                                 ArrayRef<const Value *> Args = std::nullopt);
 
   InstructionCost getIntrinsicInstrCost(const IntrinsicCostAttributes &ICA,
                                         TTI::TargetCostKind CostKind);
@@ -250,12 +256,12 @@ public:
                                          TTI::TargetCostKind CostKind);
 
   InstructionCost getArithmeticReductionCost(unsigned Opcode, VectorType *Ty,
-                                             Optional<FastMathFlags> FMF,
+                                             std::optional<FastMathFlags> FMF,
                                              TTI::TargetCostKind CostKind);
 
   InstructionCost getExtendedReductionCost(unsigned Opcode, bool IsUnsigned,
                                            Type *ResTy, VectorType *ValTy,
-                                           Optional<FastMathFlags> FMF,
+                                           std::optional<FastMathFlags> FMF,
                                            TTI::TargetCostKind CostKind);
 
   InstructionCost
@@ -454,7 +460,7 @@ public:
       return RISCVRegisterClass::GPRRC;
 
     Type *ScalarTy = Ty->getScalarType();
-    if ((ScalarTy->isHalfTy() && ST->hasStdExtZfh()) ||
+    if ((ScalarTy->isHalfTy() && ST->hasStdExtZfhOrZfhmin()) ||
         (ScalarTy->isFloatTy() && ST->hasStdExtF()) ||
         (ScalarTy->isDoubleTy() && ST->hasStdExtD())) {
       return RISCVRegisterClass::FPRRC;
@@ -475,8 +481,8 @@ public:
     llvm_unreachable("unknown register class");
   }
 
-  Optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
-                                               IntrinsicInst &II) const;
+  std::optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
+                                                    IntrinsicInst &II) const;
 };
 
 } // end namespace llvm
