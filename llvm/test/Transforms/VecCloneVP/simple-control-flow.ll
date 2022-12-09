@@ -1,4 +1,4 @@
-; RUN: opt -S --vec-clone-vp %s | FileCheck %s
+; RUN: opt -S -passes=vec-clone-vp %s | FileCheck %s
 
 define i32 @simple_control_flow(i32 %X, i32 %Y, i32 %W) #0 {
 entry:

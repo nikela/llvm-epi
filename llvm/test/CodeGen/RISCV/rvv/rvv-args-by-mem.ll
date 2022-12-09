@@ -29,6 +29,7 @@ define <vscale x 16 x i32> @foo(i32 %0, i32 %1, i32 %2, i32 %3, i32 %4, i32 %5, 
 ; CHECK-NEXT:    csrr t0, vlenb
 ; CHECK-NEXT:    slli t0, t0, 4
 ; CHECK-NEXT:    sub sp, sp, t0
+; CHECK-NEXT:    .cfi_escape 0x0f, 0x0d, 0x72, 0x00, 0x11, 0x30, 0x22, 0x11, 0x10, 0x92, 0xa2, 0x38, 0x00, 0x1e, 0x22 # sp + 48 + 16 * vlenb
 ; CHECK-NEXT:    addi t0, sp, 32
 ; CHECK-NEXT:    vs8r.v v8, (t0)
 ; CHECK-NEXT:    csrr t1, vlenb

@@ -1,5 +1,5 @@
 ; Check that this does not crash in SROA.
-; RUN: opt -sroa -o /dev/null < %s
+; RUN: opt -passes=sroa -o /dev/null < %s
 
 ; Function Attrs: nounwind
 define dso_local void @target_inner_3d(i64 %nx, i64 %ny, i64 %nz, i64 %x3, i64 %x4, i64 %y3, i64 %y4, i64 %z3, i64 %z4, i64 %lx, i64 %ly, i64 %lz, float* noalias %coefx, float* noalias %coefy, float* noalias %coefz, float* noalias %u, float* noalias %v, float* noalias %vp) #0 !dbg !9 {

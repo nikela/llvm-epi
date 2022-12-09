@@ -1878,7 +1878,7 @@ void ASTWriter::WriteHeaderSearch(const HeaderSearch &HS) {
       // headers list when emitting resolved headers in the first loop below.
       // FIXME: It'd be preferable to avoid doing this if we were given
       // sufficient stat information in the module map.
-      HS.getModuleMap().resolveHeaderDirectives(M, /*File=*/llvm::None);
+      HS.getModuleMap().resolveHeaderDirectives(M, /*File=*/std::nullopt);
 
       // If the file didn't exist, we can still create a module if we were given
       // enough information in the module map.
@@ -5945,7 +5945,7 @@ void ASTRecordWriter::AddCXXDefinitionData(const CXXRecordDecl *D) {
     AddDeclRef(D->getLambdaContextDecl());
     AddTypeSourceInfo(Lambda.MethodTyInfo);
     for (unsigned I = 0, N = Lambda.NumCaptures; I != N; ++I) {
-      const LambdaCapture &Capture = Lambda.Captures[I];
+      const LambdaCapture &Capture = Lambda.Captures.front()[I];
       AddSourceLocation(Capture.getLocation());
       Record->push_back(Capture.isImplicit());
       Record->push_back(Capture.getCaptureKind());

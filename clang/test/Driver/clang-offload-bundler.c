@@ -1,6 +1,6 @@
 // REQUIRES: x86-registered-target
 // REQUIRES: powerpc-registered-target
-// UNSUPPORTED: darwin, target={{.*}}-aix{{.*}}, riscv
+// UNSUPPORTED: target={{.*}}-darwin{{.*}}, target={{.*}}-aix{{.*}}, riscv
 
 //
 // Generate all the types of files we can bundle.

@@ -41,6 +41,7 @@
 #include "llvm/Transforms/Utils/UnrollLoop.h"
 
 #include <cstdint>
+#include <optional>
 
 #define DEBUG_TYPE "openmp-ir-builder"
 
@@ -624,7 +625,7 @@ Constant *OpenMPIRBuilder::getOrCreateSrcLocStr(DebugLoc DL,
     return getOrCreateDefaultSrcLocStr(SrcLocStrSize);
   StringRef FileName = M.getName();
   if (DIFile *DIF = DIL->getFile())
-    if (Optional<StringRef> Source = DIF->getSource())
+    if (std::optional<StringRef> Source = DIF->getSource())
       FileName = *Source;
   StringRef Function = DIL->getScope()->getSubprogram()->getName();
   if (Function.empty() && F)
@@ -1249,23 +1250,26 @@ void OpenMPIRBuilder::createFlush(const LocationDescription &Loc) {
   emitFlush(Loc);
 }
 
-void OpenMPIRBuilder::emitTaskwaitImpl(const LocationDescription &Loc) {
+void OpenMPIRBuilder::emitTaskwaitImpl(const LocationDescription &Loc,
+                                       bool HasNowaitClause) {
   // Build call kmp_int32 __kmpc_omp_taskwait(ident_t *loc, kmp_int32
   // global_tid);
   uint32_t SrcLocStrSize;
   Constant *SrcLocStr = getOrCreateSrcLocStr(Loc, SrcLocStrSize);
   Value *Ident = getOrCreateIdent(SrcLocStr, SrcLocStrSize);
-  Value *Args[] = {Ident, getOrCreateThreadID(Ident)};
+  Value *NowaitClauseValue = ConstantInt::get(Int32, HasNowaitClause);
+  Value *Args[] = {Ident, getOrCreateThreadID(Ident), NowaitClauseValue};
 
   // Ignore return result until untied tasks are supported.
-  Builder.CreateCall(getOrCreateRuntimeFunctionPtr(OMPRTL___kmpc_omp_taskwait),
-                     Args);
+  Builder.CreateCall(
+      getOrCreateRuntimeFunctionPtr(OMPRTL___kmpc_omp_taskwait_51), Args);
 }
 
-void OpenMPIRBuilder::createTaskwait(const LocationDescription &Loc) {
+void OpenMPIRBuilder::createTaskwait(const LocationDescription &Loc,
+                                     bool HasNowaitClause) {
   if (!updateToLocation(Loc))
     return;
-  emitTaskwaitImpl(Loc);
+  emitTaskwaitImpl(Loc, HasNowaitClause);
 }
 
 void OpenMPIRBuilder::emitTaskyieldImpl(const LocationDescription &Loc) {
@@ -2388,7 +2392,7 @@ OpenMPIRBuilder::InsertPointTy OpenMPIRBuilder::applyWorkshareLoop(
   case OMPScheduleType::BaseRuntimeSimd:
     assert(!ChunkSize &&
            "schedule type does not support user-defined chunk sizes");
-    [[fallthrough]];
+    LLVM_FALLTHROUGH;
   case OMPScheduleType::BaseDynamicChunked:
   case OMPScheduleType::BaseGuidedChunked:
   case OMPScheduleType::BaseGuidedIterativeChunked:

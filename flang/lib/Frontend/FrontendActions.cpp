@@ -663,7 +663,7 @@ void CodeGenAction::setUpTargetMachine() {
       theTriple, /*CPU=*/targetOpts.cpu,
       /*Features=*/featuresStr, TargetOpts,
       /*Reloc::Model=*/CGOpts.getRelocationModel(),
-      /*CodeModel::Model=*/llvm::None, OptLevel));
+      /*CodeModel::Model=*/std::nullopt, OptLevel));
   assert(tm && "Failed to create TargetMachine");
 }
 
@@ -763,9 +763,9 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
   printPassOpts.SkipAnalyses = /*opts.DebugPassStructure*/ false;
   llvm::StandardInstrumentations si(
       llvmModule->getContext(), opts.DebugPassManager);
-  llvm::Optional<llvm::PGOOptions> pgoOpt;
   si.registerCallbacks(pic, &fam);
 
+  std::optional<llvm::PGOOptions> pgoOpt;
   llvm::PassBuilder pb(tm.get(), pto, pgoOpt, &pic);
 
   // Register the AA manager first so that our version is the one used.

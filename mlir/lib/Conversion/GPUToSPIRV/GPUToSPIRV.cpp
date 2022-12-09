@@ -224,9 +224,9 @@ lowerAsEntryFunction(gpu::GPUFuncOp funcOp, TypeConverter &typeConverter,
   auto newFuncOp = rewriter.create<spirv::FuncOp>(
       funcOp.getLoc(), funcOp.getName(),
       rewriter.getFunctionType(signatureConverter.getConvertedTypes(),
-                               llvm::None));
+                               std::nullopt));
   for (const auto &namedAttr : funcOp->getAttrs()) {
-    if (namedAttr.getName() == FunctionOpInterface::getTypeAttrName() ||
+    if (namedAttr.getName() == funcOp.getFunctionTypeAttrName() ||
         namedAttr.getName() == SymbolTable::getSymbolAttrName())
       continue;
     newFuncOp->setAttr(namedAttr.getName(), namedAttr.getValue());
@@ -329,7 +329,7 @@ LogicalResult GPUModuleConversion::matchAndRewrite(
   // Add a keyword to the module name to avoid symbolic conflict.
   std::string spvModuleName = (kSPIRVModule + moduleOp.getName()).str();
   auto spvModule = rewriter.create<spirv::ModuleOp>(
-      moduleOp.getLoc(), addressingModel, *memoryModel, llvm::None,
+      moduleOp.getLoc(), addressingModel, *memoryModel, std::nullopt,
       StringRef(spvModuleName));
 
   // Move the region from the module op into the SPIR-V module.
