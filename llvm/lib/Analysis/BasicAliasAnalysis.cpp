@@ -484,7 +484,7 @@ struct BasicAAResult::DecomposedGEP {
   // Scaled variable (non-constant) indices.
   SmallVector<VariableGEPIndex, 4> VarIndices;
   // Are all operations inbounds GEPs or non-indexing operations?
-  // (None iff expression doesn't involve any geps)
+  // (std::nullopt iff expression doesn't involve any geps)
   std::optional<bool> InBounds;
 
   void dump() const {
@@ -1398,6 +1398,10 @@ AliasResult BasicAAResult::aliasPHI(const PHINode *PN, LocationSize PNSize,
     SmallPtrSet<Value *, 4> UniqueSrc;
     Value *OnePhi = nullptr;
     for (Value *PV1 : PN->incoming_values()) {
+      // Skip the phi itself being the incoming value.
+      if (PV1 == PN)
+        continue;
+
       if (isa<PHINode>(PV1)) {
         if (OnePhi && OnePhi != PV1) {
           // To control potential compile time explosion, we choose to be

@@ -5272,7 +5272,6 @@ void CodeGenFunction::EmitOMPTaskwaitDirective(const OMPTaskwaitDirective &S) {
   OMPTaskDataTy Data;
   // Build list of dependences
   buildDependences(S, Data);
-  Data.HasNowaitClause = S.hasClausesOfKind<OMPNowaitClause>();
   CGM.getOpenMPRuntime().emitTaskwaitCall(*this, S.getBeginLoc(), Data);
 }
 

@@ -13,7 +13,6 @@
 #include "llvm/AsmParser/LLParser.h"
 #include "llvm/ADT/APSInt.h"
 #include "llvm/ADT/DenseMap.h"
-#include "llvm/ADT/None.h"
 #include "llvm/ADT/ScopeExit.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallPtrSet.h"
@@ -1802,10 +1801,15 @@ bool LLParser::parseOptionalAddrSpace(unsigned &AddrSpace, unsigned DefaultAS) {
       }
       Lex.Lex();
       return false;
-    } else if (Lex.getKind() != lltok::APSInt) {
-      return tokError("expected integer or string constant");
     }
-    return parseUInt32(AddrSpace);
+    if (Lex.getKind() != lltok::APSInt)
+      return tokError("expected integer or string constant");
+    SMLoc Loc = Lex.getLoc();
+    if (parseUInt32(AddrSpace))
+      return true;
+    if (!isUInt<24>(AddrSpace))
+      return error(Loc, "invalid address space, must be a 24-bit integer");
+    return false;
   };
 
   return parseToken(lltok::lparen, "expected '(' in address space") ||

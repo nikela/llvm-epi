@@ -338,7 +338,6 @@ define fastcc <vscale x 32 x i32> @ret_nxv32i32_call_nxv32i32_nxv32i32_i32(<vsca
 ; RV64-NEXT:    addi a0, sp, 16
 ; RV64-NEXT:    vs8r.v v8, (a0)
 ; RV64-NEXT:    add a1, a0, a1
-; RV64-NEXT:    addi a0, sp, 16
 ; RV64-NEXT:    li a3, 2
 ; RV64-NEXT:    vs8r.v v16, (a1)
 ; RV64-NEXT:    vmv8r.v v8, v0
@@ -471,7 +470,6 @@ define fastcc <vscale x 32 x i32> @ret_nxv32i32_call_nxv32i32_nxv32i32_nxv32i32_
 ; RV64-NEXT:    add a2, sp, a2
 ; RV64-NEXT:    addi a2, a2, 32
 ; RV64-NEXT:    li a5, 42
-; RV64-NEXT:    addi a3, sp, 32
 ; RV64-NEXT:    vl8r.v v8, (a3) # Unknown-size Folded Reload
 ; RV64-NEXT:    vs8r.v v8, (a1)
 ; RV64-NEXT:    vmv8r.v v8, v0

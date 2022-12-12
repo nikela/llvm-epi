@@ -88,6 +88,10 @@ void populateDataLayoutPropagationPatterns(RewritePatternSet &patterns);
 /// This is effectively DCE for a linalg op.
 void populateEraseUnusedOperandsAndResultsPatterns(RewritePatternSet &patterns);
 
+/// Patterns to promote inputs to outputs and remove unused inputs of
+/// `linalg.generic` ops.
+void populateEraseUnnecessaryInputsPatterns(RewritePatternSet &patterns);
+
 /// Function type to control generic op dimension collapsing. It is expected
 /// to return an array of `ReassociationIndices` representing dimensions that
 /// should be merged.
@@ -926,7 +930,7 @@ struct ExtractSliceOfPadTensorSwapPattern
   /// A function to control pattern application and rewrite logic.
   ///
   /// The function will be given the slice op and should return:
-  /// -  None: to fail the match and not apply the pattern;
+  /// -  std::nullopt: to fail the match and not apply the pattern;
   /// -  true: to apply the pattern with zero slice guard;
   /// - false: to apply the pattern without zero slice guard.
   ///

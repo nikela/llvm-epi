@@ -28,6 +28,7 @@
 ! HELP-NEXT: -fdefault-double-8      Set the default double precision kind to an 8 byte wide type
 ! HELP-NEXT: -fdefault-integer-8     Set the default integer kind to an 8 byte wide type
 ! HELP-NEXT: -fdefault-real-8        Set the default real kind to an 8 byte wide type
+! HELP-NEXT: -ffast-math             Allow aggressive, lossy floating-point optimizations
 ! HELP-NEXT: -ffixed-form            Process source files in fixed form
 ! HELP-NEXT: -ffixed-line-length=<value>
 ! HELP-NEXT:                         Use <value> as character line width in fixed mode
@@ -42,21 +43,21 @@
 ! HELP-NEXT: -fno-automatic          Implies the SAVE attribute for non-automatic local objects in subprograms unless RECURSIVE
 ! HELP-NEXT: -fno-color-diagnostics  Disable colors in diagnostics
 ! HELP-NEXT: -fno-integrated-as      Disable the integrated assembler
-! HELP-NEXT: -fno-signed-zeros      Allow optimizations that ignore the sign of floating point zeros
-! HELP-NEXT: -fopenacc              Enable OpenACC
-! HELP-NEXT: -fopenmp               Parse OpenMP pragmas and generate parallel code.
+! HELP-NEXT: -fno-signed-zeros       Allow optimizations that ignore the sign of floating point zeros
+! HELP-NEXT: -fopenacc               Enable OpenACC
+! HELP-NEXT: -fopenmp                Parse OpenMP pragmas and generate parallel code.
 ! HELP-NEXT: -fpass-plugin=<dsopath> Load pass plugin from a dynamic shared object file (only with new pass manager).
-! HELP-NEXT: -freciprocal-math      Allow division operations to be reassociated
-! HELP-NEXT: -fsyntax-only          Run the preprocessor, parser and semantic analysis stages
-! HELP-NEXT: -fxor-operator         Enable .XOR. as a synonym of .NEQV.
-! HELP-NEXT: -help                  Display available options
-! HELP-NEXT: -I <dir>               Add directory to the end of the list of include search paths
-! HELP-NEXT: -mllvm <value>         Additional arguments to forward to LLVM's option processing
-! HELP-NEXT: -mmlir <value>         Additional arguments to forward to MLIR's option processing
-! HELP-NEXT: -module-dir <dir>      Put MODULE files in <dir>
-! HELP-NEXT: -nocpp                 Disable predefined and command line preprocessor macros
-! HELP-NEXT: -o <file>              Write output to <file>
-! HELP-NEXT: -pedantic              Warn on language extensions
+! HELP-NEXT: -freciprocal-math       Allow division operations to be reassociated
+! HELP-NEXT: -fsyntax-only           Run the preprocessor, parser and semantic analysis stages
+! HELP-NEXT: -fxor-operator          Enable .XOR. as a synonym of .NEQV.
+! HELP-NEXT: -help                   Display available options
+! HELP-NEXT: -I <dir>                Add directory to the end of the list of include search paths
+! HELP-NEXT: -mllvm <value>          Additional arguments to forward to LLVM's option processing
+! HELP-NEXT: -mmlir <value>          Additional arguments to forward to MLIR's option processing
+! HELP-NEXT: -module-dir <dir>       Put MODULE files in <dir>
+! HELP-NEXT: -nocpp                  Disable predefined and command line preprocessor macros
+! HELP-NEXT: -o <file>               Write output to <file>
+! HELP-NEXT: -pedantic               Warn on language extensions
 ! HELP-NEXT: -print-effective-triple Print the effective target triple
 ! HELP-NEXT: -print-target-triple    Print the normalized target triple
 ! HELP-NEXT: -P                      Disable linemarker output in -E mode
@@ -139,6 +140,9 @@
 ! HELP-FC1-NEXT:                          Emit PCs for atomic operations used by binary analysis sanitizers
 ! HELP-FC1-NEXT:  -fexperimental-sanitize-metadata=covered
 ! HELP-FC1-NEXT:                          Emit PCs for code covered with binary analysis sanitizers
+! HELP-FC1-NEXT:  -fexperimental-sanitize-metadata=uar
+! HELP-FC1-NEXT:                          Emit PCs for start of functions that are subject for use-after-return checking.
+! HELP-FC1-NEXT:  -ffast-math             Allow aggressive, lossy floating-point optimizations
 ! HELP-FC1-NEXT:  -ffixed-form            Process source files in fixed form
 ! HELP-FC1-NEXT:  -ffixed-line-length=<value>
 ! HELP-FC1-NEXT:                          Use <value> as character line width in fixed mode

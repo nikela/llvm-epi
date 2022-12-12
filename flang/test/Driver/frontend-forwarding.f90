@@ -9,7 +9,6 @@
 ! RUN:     -flarge-sizes \
 ! RUN:     -fconvert=little-endian \
 ! RUN:     -ffp-contract=fast \
-! RUN:     -fno-honor-infinities \
 ! RUN:     -fno-honor-nans \
 ! RUN:     -fapprox-func \
 ! RUN:     -fno-signed-zeros \
@@ -29,7 +28,6 @@
 ! CHECK: "-flarge-sizes"
 ! CHECK: "-O2"
 ! CHECK: "-ffp-contract=fast"
-! CHECK: "-menable-no-infs"
 ! CHECK: "-menable-no-nans"
 ! CHECK: "-fapprox-func"
 ! CHECK: "-fno-signed-zeros"
