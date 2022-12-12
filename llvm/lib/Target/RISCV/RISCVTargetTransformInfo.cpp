@@ -809,6 +809,41 @@ static const CostTblEntry VectorIntrinsicCostTable[]{
     {Intrinsic::bitreverse, MVT::nxv2i64, 52},
     {Intrinsic::bitreverse, MVT::nxv4i64, 52},
     {Intrinsic::bitreverse, MVT::nxv8i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::v2i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::v4i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::v8i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::v16i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::nxv1i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::nxv2i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::nxv4i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::nxv8i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::nxv16i8, 17},
+    {Intrinsic::vp_bitreverse, MVT::v2i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::v4i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::v8i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::v16i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::nxv1i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::nxv2i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::nxv4i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::nxv8i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::nxv16i16, 24},
+    {Intrinsic::vp_bitreverse, MVT::v2i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::v4i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::v8i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::v16i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::nxv1i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::nxv2i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::nxv4i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::nxv8i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::nxv16i32, 33},
+    {Intrinsic::vp_bitreverse, MVT::v2i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::v4i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::v8i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::v16i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::nxv1i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::nxv2i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::nxv4i64, 52},
+    {Intrinsic::vp_bitreverse, MVT::nxv8i64, 52},
     {Intrinsic::ctpop, MVT::v2i8, 12},
     {Intrinsic::ctpop, MVT::v4i8, 12},
     {Intrinsic::ctpop, MVT::v8i8, 12},
@@ -1700,7 +1735,7 @@ std::optional<Instruction *> instCombineEPIVSetVL(InstCombiner &IC,
     }
   }
 
-  return None;
+  return std::nullopt;
 }
 
 std::optional<Instruction *>
@@ -1713,7 +1748,7 @@ RISCVTTIImpl::instCombineIntrinsic(InstCombiner &IC, IntrinsicInst &II) const {
     return instCombineEPIVSetVL(IC, II);
   }
 
-  return None;
+  return std::nullopt;
 }
 
 unsigned RISCVTTIImpl::getMaximumVF(unsigned ElemWidth, unsigned Opcode) const {

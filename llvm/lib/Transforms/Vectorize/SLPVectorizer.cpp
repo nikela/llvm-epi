@@ -12325,7 +12325,7 @@ private:
 static Optional<unsigned> getAggregateSize(Instruction *InsertInst) {
   if (auto *IE = dyn_cast<InsertElementInst>(InsertInst)) {
     if (isa<ScalableVectorType>(IE->getType()))
-      return None;
+      return std::nullopt;
     return cast<FixedVectorType>(IE->getType())->getNumElements();
   }
 

@@ -1147,7 +1147,7 @@ struct AAPointerInfoImpl
     // succeeded for all or not.
     unsigned NumInterferingAccesses = InterferingAccesses.size();
     for (auto &It : InterferingAccesses) {
-      if (NumInterferingAccesses > MaxInterferingAccesses ||
+      if (!CanUseCFGResoning || NumInterferingAccesses > MaxInterferingAccesses ||
           !CanSkipAccess(*It.first, It.second)) {
         if (!UserCB(*It.first, It.second))
           return false;
@@ -6156,7 +6156,7 @@ struct AAHeapToStackFunction final : public AAHeapToStack {
 
       const DataLayout &DL = A.getInfoCache().getDL();
       Value *Size;
-      Optional<APInt> SizeAPI = getSize(A, *this, AI);
+      std::optional<APInt> SizeAPI = getSize(A, *this, AI);
       if (SizeAPI) {
         Size = ConstantInt::get(AI.CB->getContext(), *SizeAPI);
       } else {
@@ -6234,8 +6234,8 @@ struct AAHeapToStackFunction final : public AAHeapToStack {
     return std::nullopt;
   }
 
-  Optional<APInt> getSize(Attributor &A, const AbstractAttribute &AA,
-                          AllocationInfo &AI) {
+  std::optional<APInt> getSize(Attributor &A, const AbstractAttribute &AA,
+                               AllocationInfo &AI) {
     auto Mapper = [&](const Value *V) -> const Value * {
       bool UsedAssumedInformation = false;
       if (std::optional<Constant *> SimpleV =
@@ -6510,7 +6510,7 @@ ChangeStatus AAHeapToStackFunction::updateImpl(Attributor &A) {
       }
     }
 
-    Optional<APInt> Size = getSize(A, *this, AI);
+    std::optional<APInt> Size = getSize(A, *this, AI);
     if (MaxHeapToStackSize != -1) {
       if (!Size || Size.value().ugt(MaxHeapToStackSize)) {
         LLVM_DEBUG({
