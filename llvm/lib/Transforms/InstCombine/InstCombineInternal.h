@@ -104,7 +104,8 @@ public:
   Instruction *visitUDiv(BinaryOperator &I);
   Instruction *visitSDiv(BinaryOperator &I);
   Instruction *visitFDiv(BinaryOperator &I);
-  Value *simplifyRangeCheck(ICmpInst *Cmp0, ICmpInst *Cmp1, bool Inverted);
+  Value *simplifyRangeCheck(ICmpInst *Cmp0, ICmpInst *Cmp1, bool Inverted,
+                            bool IsLogical);
   Instruction *visitAnd(BinaryOperator &I);
   Instruction *visitOr(BinaryOperator &I);
   bool sinkNotIntoOtherHandOfAndOrOr(BinaryOperator &I);
@@ -361,6 +362,9 @@ private:
   /// already be inserted into the function.
   Value *foldLogicOfFCmps(FCmpInst *LHS, FCmpInst *RHS, bool IsAnd,
                           bool IsLogicalSelect = false);
+
+  Instruction *foldLogicOfIsFPClass(BinaryOperator &Operator, Value *LHS,
+                                    Value *RHS);
 
   Value *foldAndOrOfICmpsOfAndWithPow2(ICmpInst *LHS, ICmpInst *RHS,
                                        Instruction *CxtI, bool IsAnd,
@@ -810,7 +814,7 @@ class Negator final {
 
   /// Recurse depth-first and attempt to sink the negation.
   /// FIXME: use worklist?
-  [[nodiscard]] Optional<Result> run(Value *Root);
+  [[nodiscard]] std::optional<Result> run(Value *Root);
 
   Negator(const Negator &) = delete;
   Negator(Negator &&) = delete;
