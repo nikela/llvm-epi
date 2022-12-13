@@ -5850,7 +5850,7 @@ static Instruction *foldICmpUsingBoolRange(ICmpInst &I,
   return nullptr;
 }
 
-llvm::Optional<std::pair<CmpInst::Predicate, Constant *>>
+std::optional<std::pair<CmpInst::Predicate, Constant *>>
 InstCombiner::getFlippedStrictnessPredicateAndConstant(CmpInst::Predicate Pred,
                                                        Constant *C) {
   assert(ICmpInst::isRelational(Pred) && ICmpInst::isIntPredicate(Pred) &&
@@ -7076,7 +7076,7 @@ Instruction *InstCombinerImpl::visitFCmpInst(FCmpInst &I) {
       APFloat Fabs = TruncC;
       Fabs.clearSign();
       if (!Lossy &&
-          (!(Fabs < APFloat::getSmallestNormalized(FPSem)) || Fabs.isZero())) {
+          (Fabs.isZero() || !(Fabs < APFloat::getSmallestNormalized(FPSem)))) {
         Constant *NewC = ConstantFP::get(X->getType(), TruncC);
         return new FCmpInst(Pred, X, NewC, "", &I);
       }
