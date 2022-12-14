@@ -11274,8 +11274,8 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
         NewLI =
             Builder.CreateMaskedGather(DataTy, VectorGep, Alignment, MaskPart,
                                        nullptr, "wide.masked.gather");
-        State.addMetadata(NewLI, LI);
       }
+      State.addMetadata(NewLI, LI);
     } else {
       auto *VecPtr =
           CreateVecPtr(Part, State.get(getAddr(), VPIteration(0, 0)));
