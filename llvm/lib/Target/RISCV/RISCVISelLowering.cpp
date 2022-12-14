@@ -661,6 +661,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::BSWAP, VT, Expand);
       setOperationAction({ISD::VP_BSWAP, ISD::VP_BITREVERSE}, VT, Expand);
       setOperationAction({ISD::VP_FSHL, ISD::VP_FSHR}, VT, Expand);
+      setOperationAction(ISD::VP_CTPOP, VT, Expand);
 
       // Custom-lower extensions and truncations from/to mask types.
       setOperationAction({ISD::ANY_EXTEND, ISD::SIGN_EXTEND, ISD::ZERO_EXTEND},
@@ -2114,7 +2115,7 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
   SDValue Result;
   std::vector<SDValue> Operands;
   if (ISD::isVPOpcode(Op.getOpcode())) {
-    Optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
+    std::optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
     if (!NeedsMask && MaskIdx) {
       for (const auto &OpIdx : enumerate(Op->ops())) {
         if (OpIdx.index() == *MaskIdx)
@@ -4247,7 +4248,7 @@ static SDValue lowerConstant(SDValue Op, SelectionDAG &DAG,
 SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
                                             SelectionDAG &DAG) const {
   auto NeedsMask = [](SDValue Op) {
-    Optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
+    std::optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
     return MaskIdx &&
            !ISD::isConstantSplatVectorAllOnes(Op.getOperand(*MaskIdx).getNode());
   };
@@ -7247,18 +7248,22 @@ static SDValue lowerReductionSeq(unsigned RVVOpcode, MVT ResVT,
   const MVT VecVT = Vec.getSimpleValueType();
   const MVT M1VT = getLMUL1VT(VecVT);
   const MVT XLenVT = Subtarget.getXLenVT();
+  const bool NonZeroAVL = hasNonZeroAVL(VL);
 
   // The reduction needs an LMUL1 input; do the splat at either LMUL1
   // or the original VT if fractional.
   auto InnerVT = VecVT.bitsLE(M1VT) ? VecVT : M1VT;
-  SDValue InitialValue =
-    lowerScalarInsert(StartValue, DAG.getConstant(1, DL, XLenVT),
-                      InnerVT, DL, DAG, Subtarget);
+  // We reuse the VL of the reduction to reduce vsetvli toggles if we can
+  // prove it is non-zero.  For the AVL=0 case, we need the scalar to
+  // be the result of the reduction operation.
+  auto InnerVL = NonZeroAVL ? VL : DAG.getConstant(1, DL, XLenVT);
+  SDValue InitialValue = lowerScalarInsert(StartValue, InnerVL, InnerVT, DL,
+                                           DAG, Subtarget);
   if (M1VT != InnerVT)
     InitialValue = DAG.getNode(ISD::INSERT_SUBVECTOR, DL, M1VT,
                                DAG.getUNDEF(M1VT),
                                InitialValue, DAG.getConstant(0, DL, XLenVT));
-  SDValue PassThru = hasNonZeroAVL(VL) ? DAG.getUNDEF(M1VT) : InitialValue;
+  SDValue PassThru = NonZeroAVL ? DAG.getUNDEF(M1VT) : InitialValue;
   SDValue Reduction = DAG.getNode(RVVOpcode, DL, M1VT, PassThru, Vec,
                                   InitialValue, Mask, VL);
   return DAG.getNode(ISD::EXTRACT_VECTOR_ELT, DL, ResVT, Reduction,
@@ -8595,7 +8600,7 @@ SDValue RISCVTargetLowering::lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
   MVT VT = Op.getSimpleValueType();
   SmallVector<SDValue, 3> Ops;
 
-  Optional<unsigned> MaskIndex = ISD::getVPMaskIdx(Op.getOpcode());
+  std::optional<unsigned> MaskIndex = ISD::getVPMaskIdx(Op.getOpcode());
   assert(MaskIndex.has_value() && "RISCVISD::VM*_VL node does not have a mask");
   for (const auto &OpIdx : enumerate(Op->ops())) {
     if (OpIdx.index() == MaskIndex.value()) // Ignore the mask argument
@@ -10026,7 +10031,7 @@ static SDValue combineBinOpToReduce(SDNode *N, SelectionDAG &DAG,
       ScalarV.getOpcode() != RISCVISD::VMV_V_X_VL)
     return SDValue();
 
-  if (!isOneConstant(ScalarV.getOperand(2)))
+  if (!hasNonZeroAVL(ScalarV.getOperand(2)))
     return SDValue();
 
   // Check the scalar of ScalarV is neutral element
