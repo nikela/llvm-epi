@@ -2115,7 +2115,7 @@ SDValue RISCVTargetLowering::lowerVECLIBCALL(SDValue Op, SelectionDAG &DAG,
   SDValue Result;
   std::vector<SDValue> Operands;
   if (ISD::isVPOpcode(Op.getOpcode())) {
-    Optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
+    std::optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
     if (!NeedsMask && MaskIdx) {
       for (const auto &OpIdx : enumerate(Op->ops())) {
         if (OpIdx.index() == *MaskIdx)
@@ -4248,7 +4248,7 @@ static SDValue lowerConstant(SDValue Op, SelectionDAG &DAG,
 SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
                                             SelectionDAG &DAG) const {
   auto NeedsMask = [](SDValue Op) {
-    Optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
+    std::optional<unsigned> MaskIdx = ISD::getVPMaskIdx(Op.getOpcode());
     return MaskIdx &&
            !ISD::isConstantSplatVectorAllOnes(Op.getOperand(*MaskIdx).getNode());
   };
@@ -8600,7 +8600,7 @@ SDValue RISCVTargetLowering::lowerVPMaskOp(SDValue Op, SelectionDAG &DAG,
   MVT VT = Op.getSimpleValueType();
   SmallVector<SDValue, 3> Ops;
 
-  Optional<unsigned> MaskIndex = ISD::getVPMaskIdx(Op.getOpcode());
+  std::optional<unsigned> MaskIndex = ISD::getVPMaskIdx(Op.getOpcode());
   assert(MaskIndex.has_value() && "RISCVISD::VM*_VL node does not have a mask");
   for (const auto &OpIdx : enumerate(Op->ops())) {
     if (OpIdx.index() == MaskIndex.value()) // Ignore the mask argument
