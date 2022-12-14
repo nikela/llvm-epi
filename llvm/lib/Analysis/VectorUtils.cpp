@@ -1625,50 +1625,8 @@ bool VFShape::hasValidParameterList() const {
   return true;
 }
 
-class SCEVHasAddRecExpr : SCEVVisitor<SCEVHasAddRecExpr, void> {
-public:
-  static bool hasAddRecExpr(const SCEV *V) {
-    SCEVHasAddRecExpr HasAddRecExpr;
-
-    HasAddRecExpr.visit(V);
-
-    return HasAddRecExpr.Found;
-  }
-
-  void visitPtrToIntExpr(const SCEVPtrToIntExpr *S) { visitGeneric(S); }
-  void visitTruncateExpr(const SCEVTruncateExpr *S) { visitGeneric(S); }
-  void visitZeroExtendExpr(const SCEVZeroExtendExpr *S) { visitGeneric(S); }
-  void visitSignExtendExpr(const SCEVSignExtendExpr *S) { visitGeneric(S); }
-  void visitUDivExpr(const SCEVUDivExpr *S) { visitGeneric(S); }
-  void visitSMaxExpr(const SCEVSMaxExpr *S) { visitGeneric(S); }
-
-  void visitUMaxExpr(const SCEVUMaxExpr *S) { visitGeneric(S); }
-  void visitSMinExpr(const SCEVSMinExpr *S) { visitGeneric(S); }
-  void visitUMinExpr(const SCEVUMinExpr *S) { visitGeneric(S); }
-  void visitSequentialUMinExpr(const SCEVSequentialUMinExpr *S) {
-    visitGeneric(S);
-  }
-  void visitUnknown(const SCEVUnknown *S) {}
-  void visitCouldNotCompute(const SCEVCouldNotCompute *S) {}
-  void visitConstant(const SCEVConstant *S) {}
-  void visitAddRecExpr(const SCEVAddRecExpr *S) { Found = true; }
-  void visitAddExpr(const SCEVAddExpr *S) { visitGeneric(S); }
-  void visitMulExpr(const SCEVMulExpr *S) { visitGeneric(S); }
-
-private:
-  bool Found = false;
-
-  // This is overly generic and it will instantiate too many classes.
-  template <typename T> void visitGeneric(const T *E) {
-    for (const auto *Op : E->operands()) {
-      visit(Op);
-    }
-  }
-};
-
-// FIXME: Reorganise this
 const SCEV *llvm::isStridedAddressing(Value *Ptr, ScalarEvolution *SE,
-                                      const Loop *L, bool OneLevelAddrec) {
+                                      const Loop *L) {
   auto *PtrTy = dyn_cast<PointerType>(Ptr->getType());
   if (!PtrTy || PtrTy->isAggregateType())
     return nullptr;
@@ -1684,12 +1642,6 @@ const SCEV *llvm::isStridedAddressing(Value *Ptr, ScalarEvolution *SE,
 
   if (!S->isAffine())
     return nullptr;
-
-  if (OneLevelAddrec) {
-    if (SCEVHasAddRecExpr::hasAddRecExpr(S->getStart()) ||
-        SCEVHasAddRecExpr::hasAddRecExpr(S->getStepRecurrence(*SE)))
-      return nullptr;
-  }
 
   return V;
 }

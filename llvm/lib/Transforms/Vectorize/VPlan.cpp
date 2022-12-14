@@ -1146,36 +1146,17 @@ VPValue *vputils::getOrCreateVPValueForSCEVExpr(VPlan &Plan, const SCEV *Expr,
   return Step;
 }
 
-llvm::StridedAccessValues
-llvm::computeStrideAddressing(unsigned Part, VPTransformState &State,
-                              Type *PtrTy, const SCEV *SCEVExpr,
-                              VPValue *CanonicalIV, VPValue *EVL) {
+llvm::StridedAccessValues llvm::computeStrideAddressing(
+    unsigned Part, VPTransformState &State, Type *PtrTy, Value *PointerStart,
+    Value *BytesStride, VPValue *CanonicalIV, VPValue *EVL) {
   // FIXME: This does not seem to adhere to the VPlan principles but I'm unsure
   // what part of it should. We should be using Addr but AFAIU it represents
   // the vectorised address already, which is not useful. When doing
   // interleaving, we should use the Part to adjust the access correctly.
   // Perhaps we should not have received a WIDEN-GEP here in the first place
   // and make the VP build process aware of the stride access option?
-  auto &DL = State.CFG.ExitBB->getModule()->getDataLayout();
   auto &Builder = State.Builder;
   LLVMContext &Context = PtrTy->getContext();
-
-  SCEVExpander Exp(*(State.SE), DL, "stride");
-  const SCEVAddRecExpr *S = cast<SCEVAddRecExpr>(SCEVExpr);
-
-  LLVM_DEBUG(llvm::dbgs() << "SCEV = " << *S << "\n";);
-
-  const SCEV *Stride = S->getStepRecurrence(*(State.SE));
-  assert(Stride);
-  LLVM_DEBUG(llvm::dbgs() << "Stride = " << *Stride << "\n";);
-
-  const SCEV *Start = S->getStart();
-  auto *PointerStart =
-      Exp.expandCodeFor(Start, Start->getType(), &*Builder.GetInsertPoint());
-  LLVM_DEBUG(llvm::dbgs() << "PointerStart = " << *PointerStart << "\n";);
-  auto *BytesStride =
-      Exp.expandCodeFor(Stride, Stride->getType(), &*Builder.GetInsertPoint());
-  LLVM_DEBUG(llvm::dbgs() << "BytesStride = " << *BytesStride << "\n";);
 
   Value *CanonicalIVValue = State.get(CanonicalIV, 0);
   Value *Multiplier = nullptr;
