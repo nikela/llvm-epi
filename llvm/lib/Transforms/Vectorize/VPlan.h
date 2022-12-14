@@ -2034,10 +2034,9 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase {
     return isStore() ? getNumOperands() == 3 : getNumOperands() == 2;
   }
 
-// FIXME
 protected:
-  // Wheter NonConsecutive loads/stores can be strided
-  bool Strided = false;
+  // BaseAddress and StrideValue for strided loads/stores.
+  std::optional<std::pair<Value *, Value *>> StrideValues;
 
 public:
   VPWidenMemoryInstructionRecipe(
@@ -2096,7 +2095,7 @@ public:
   bool isReverse() const { return Reverse; }
 
   // Return wheter NonConsecutive loads/stores can be strided
-  bool isStrided() const { return Strided; }
+  bool isStrided() const { return StrideValues.has_value(); }
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
@@ -2130,26 +2129,24 @@ class VPPredicatedWidenMemoryInstructionRecipe
     : public VPWidenMemoryInstructionRecipe {
 
 public:
-  VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
-                                           VPValue *Mask, bool Consecutive,
-                                           bool Reverse, bool Strided,
-                                           VPValue *EVL)
-      : VPWidenMemoryInstructionRecipe(
-            Load, Addr, Mask, Consecutive, Reverse,
-            VPPredicatedWidenMemoryInstructionSC) {
-    this->Strided = Strided;
+  VPPredicatedWidenMemoryInstructionRecipe(
+      LoadInst &Load, VPValue *Addr, VPValue *Mask, bool Consecutive,
+      bool Reverse, std::optional<std::pair<Value *, Value *>> StrideValues,
+      VPValue *EVL)
+      : VPWidenMemoryInstructionRecipe(Load, Addr, Mask, Consecutive, Reverse,
+                                       VPPredicatedWidenMemoryInstructionSC) {
+    this->StrideValues = StrideValues;
     addOperand(EVL);
   }
 
-  VPPredicatedWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
-                                           VPValue *StoredValue, VPValue *Mask,
-                                           bool Consecutive, bool Reverse,
-                                           bool Strided,
-                                           VPValue *EVL)
-      : VPWidenMemoryInstructionRecipe(
-            Store, Addr, StoredValue, Mask, Consecutive, Reverse,
-            VPPredicatedWidenMemoryInstructionSC) {
-    this->Strided = Strided;
+  VPPredicatedWidenMemoryInstructionRecipe(
+      StoreInst &Store, VPValue *Addr, VPValue *StoredValue, VPValue *Mask,
+      bool Consecutive, bool Reverse,
+      std::optional<std::pair<Value *, Value *>> StrideValues, VPValue *EVL)
+      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Mask,
+                                       Consecutive, Reverse,
+                                       VPPredicatedWidenMemoryInstructionSC) {
+    this->StrideValues = StrideValues;
     addOperand(EVL);
   }
 
@@ -3581,7 +3578,8 @@ struct StridedAccessValues {
 
 StridedAccessValues computeStrideAddressing(unsigned Part,
                                             VPTransformState &State,
-                                            Type *PtrTy, const SCEV *SCEVExpr,
+                                            Type *PtrTy, Value *PointerStart,
+                                            Value *BytesStride,
                                             VPValue *CanonicalIV, VPValue *EVL);
 
 } // end namespace llvm
