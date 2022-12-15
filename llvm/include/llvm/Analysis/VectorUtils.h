@@ -284,8 +284,9 @@ static constexpr char const *_LLVM_Scalarize_ = "_LLVM_Scalarize_";
 /// MangledName regardless of the existence of the Vector function. Note that
 /// for some scalable cases this does not work (as specified in the description
 /// of \a M)
-Optional<VFInfo> tryDemangleForVFABI(StringRef MangledName, const Module &M,
-                                     bool RequireDeclaration = true);
+std::optional<VFInfo> tryDemangleForVFABI(StringRef MangledName,
+                                          const Module &M,
+                                          bool RequireDeclaration = true);
 
 /// This routine mangles the given VectorName according to the LangRef
 /// specification for vector-function-abi-variant attribute and is specific to
@@ -353,7 +354,7 @@ class VFDatabase {
     if (ListOfStrings.empty())
       return;
     for (const auto &MangledName : ListOfStrings) {
-      const Optional<VFInfo> Shape =
+      const std::optional<VFInfo> Shape =
           VFABI::tryDemangleForVFABI(MangledName, *(CI.getModule()));
       // A match is found via scalar and vector names, and also by
       // ensuring that the variant described in the attribute has a

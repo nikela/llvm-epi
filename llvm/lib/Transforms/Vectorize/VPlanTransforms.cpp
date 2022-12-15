@@ -127,6 +127,7 @@ bool VPlanTransforms::sinkScalarOperands(VPlan &Plan) {
     }
   }
 
+  bool ScalarVFOnly = Plan.hasScalarVFOnly();
   // Try to sink each replicate or scalar IV steps recipe in the worklist.
   while (!WorkList.empty()) {
     VPBasicBlock *SinkTo;
@@ -137,7 +138,7 @@ bool VPlanTransforms::sinkScalarOperands(VPlan &Plan) {
         SinkCandidate->mayReadOrWriteMemory())
       continue;
     if (auto *RepR = dyn_cast<VPReplicateRecipe>(SinkCandidate)) {
-      if (RepR->isUniform())
+      if (!ScalarVFOnly && RepR->isUniform())
         continue;
     } else if (!isa<VPScalarIVStepsRecipe>(SinkCandidate))
       continue;
@@ -163,6 +164,8 @@ bool VPlanTransforms::sinkScalarOperands(VPlan &Plan) {
       continue;
 
     if (NeedsDuplicating) {
+      if (ScalarVFOnly)
+        continue;
       Instruction *I = cast<Instruction>(
           cast<VPReplicateRecipe>(SinkCandidate)->getUnderlyingValue());
       auto *Clone =

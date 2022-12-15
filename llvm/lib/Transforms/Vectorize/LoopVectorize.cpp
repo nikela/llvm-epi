@@ -66,7 +66,6 @@
 #include "llvm/ADT/DenseMapInfo.h"
 #include "llvm/ADT/Hashing.h"
 #include "llvm/ADT/MapVector.h"
-#include "llvm/ADT/Optional.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallSet.h"
@@ -3631,7 +3630,7 @@ InstructionCost LoopVectorizationCostModel::getDeclareSimdFnCallCost(
   for (const auto &Attr : F->getAttributes().getFnAttrs()) {
     if (!Attr.isStringAttribute())
       continue;
-    Optional<VFInfo> VFInfo =
+    std::optional<VFInfo> VFInfo =
         VFABI::tryDemangleForVFABI(Attr.getKindAsString(), *F->getParent(),
                                    /*RequireDeclaration*/ false);
     if (VFInfo && (VFInfo.value().Shape.isCompatibleWith(ExactMatch)))
