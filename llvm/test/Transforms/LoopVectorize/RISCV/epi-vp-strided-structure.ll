@@ -355,13 +355,15 @@ define dso_local void @struct_gather(i32* noalias nocapture %A, %struct.foo* noa
 ;
 ; STRIDED-LABEL: @struct_gather(
 ; STRIDED-NEXT:  entry:
-; STRIDED-NEXT:    [[SCEVGEP:%.*]] = getelementptr [[STRUCT_FOO:%.*]], %struct.foo* [[B:%.*]], i64 0, i32 1
 ; STRIDED-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
 ; STRIDED-NEXT:    [[TMP1:%.*]] = shl i64 [[TMP0]], 1
 ; STRIDED-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP1]], -1025
-; STRIDED-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
+; STRIDED-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_PH:%.*]]
+; STRIDED:       vector.ph:
+; STRIDED-NEXT:    [[SCEVGEP:%.*]] = getelementptr [[STRUCT_FOO:%.*]], %struct.foo* [[B:%.*]], i64 0, i32 1
+; STRIDED-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; STRIDED:       vector.body:
-; STRIDED-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
+; STRIDED-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; STRIDED-NEXT:    [[TMP3:%.*]] = sub i64 1024, [[INDEX]]
 ; STRIDED-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 0)
 ; STRIDED-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
@@ -381,7 +383,7 @@ define dso_local void @struct_gather(i32* noalias nocapture %A, %struct.foo* noa
 ; STRIDED:       for.cond.cleanup:
 ; STRIDED-NEXT:    ret void
 ; STRIDED:       for.body:
-; STRIDED-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY]] ]
+; STRIDED-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
 ; STRIDED-NEXT:    [[B_2:%.*]] = getelementptr inbounds [[STRUCT_FOO]], %struct.foo* [[B]], i64 [[INDVARS_IV]], i32 1
 ; STRIDED-NEXT:    [[TMP13:%.*]] = load i32, i32* [[B_2]], align 4
 ; STRIDED-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[INDVARS_IV]]
@@ -394,13 +396,15 @@ define dso_local void @struct_gather(i32* noalias nocapture %A, %struct.foo* noa
 ;
 ; STRIDED-INTERLEAVE-LABEL: @struct_gather(
 ; STRIDED-INTERLEAVE-NEXT:  entry:
-; STRIDED-INTERLEAVE-NEXT:    [[SCEVGEP:%.*]] = getelementptr [[STRUCT_FOO:%.*]], %struct.foo* [[B:%.*]], i64 0, i32 1
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP0:%.*]] = call i64 @llvm.vscale.i64()
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP1:%.*]] = shl i64 [[TMP0]], 4
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP1]], -1025
-; STRIDED-INTERLEAVE-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
+; STRIDED-INTERLEAVE-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_PH:%.*]]
+; STRIDED-INTERLEAVE:       vector.ph:
+; STRIDED-INTERLEAVE-NEXT:    [[SCEVGEP:%.*]] = getelementptr [[STRUCT_FOO:%.*]], %struct.foo* [[B:%.*]], i64 0, i32 1
+; STRIDED-INTERLEAVE-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; STRIDED-INTERLEAVE:       vector.body:
-; STRIDED-INTERLEAVE-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
+; STRIDED-INTERLEAVE-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP3:%.*]] = sub i64 1024, [[INDEX]]
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 0)
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
@@ -623,7 +627,7 @@ define dso_local void @struct_gather(i32* noalias nocapture %A, %struct.foo* noa
 ; STRIDED-INTERLEAVE:       for.cond.cleanup:
 ; STRIDED-INTERLEAVE-NEXT:    ret void
 ; STRIDED-INTERLEAVE:       for.body:
-; STRIDED-INTERLEAVE-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY]] ]
+; STRIDED-INTERLEAVE-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
 ; STRIDED-INTERLEAVE-NEXT:    [[B_2:%.*]] = getelementptr inbounds [[STRUCT_FOO]], %struct.foo* [[B]], i64 [[INDVARS_IV]], i32 1
 ; STRIDED-INTERLEAVE-NEXT:    [[TMP188:%.*]] = load i32, i32* [[B_2]], align 4
 ; STRIDED-INTERLEAVE-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i32, i32* [[A]], i64 [[INDVARS_IV]]

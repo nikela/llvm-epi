@@ -2034,8 +2034,8 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase {
   }
 
 protected:
-  // BaseAddress and StrideValue for strided loads/stores.
-  std::optional<std::pair<Value *, Value *>> StrideValues;
+  // Whether the loaded/stored addresses are strided.
+  bool Strided = false;
 
 public:
   VPWidenMemoryInstructionRecipe(
@@ -2094,7 +2094,7 @@ public:
   bool isReverse() const { return Reverse; }
 
   // Return wheter NonConsecutive loads/stores can be strided
-  bool isStrided() const { return StrideValues.has_value(); }
+  bool isStrided() const { return Strided; }
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
@@ -2123,29 +2123,49 @@ public:
 /// A Recipe for widening load/store operations to VP intrinsics.
 /// The recipe uses the following VPValues:
 /// - For load: Address, mask, EVL
+/// - For strided.load: Address, mask, base_address, stride, EVL
 /// - For store: Address, stored value, mask, EVL
+/// - For strided.store: Address, stored value, mask, base_address, stride, EVL
 class VPPredicatedWidenMemoryInstructionRecipe
     : public VPWidenMemoryInstructionRecipe {
+  bool isMasked() const override {
+    if (isStrided())
+      return isStore() ? getNumOperands() == 6 : getNumOperands() == 5;
+
+    return isStore() ? getNumOperands() == 4 : getNumOperands() == 3;
+  }
 
 public:
   VPPredicatedWidenMemoryInstructionRecipe(
       LoadInst &Load, VPValue *Addr, VPValue *Mask, bool Consecutive,
-      bool Reverse, std::optional<std::pair<Value *, Value *>> StrideValues,
+      bool Reverse,
+      std::optional<std::pair<VPValue *, VPValue *>> VPStridedValues,
       VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(Load, Addr, Mask, Consecutive, Reverse,
                                        VPPredicatedWidenMemoryInstructionSC) {
-    this->StrideValues = StrideValues;
+    if (VPStridedValues.has_value()) {
+      assert(!Consecutive && "Strided implies not consecutive");
+      this->Strided = true;
+      addOperand(VPStridedValues->first); // Base address
+      addOperand(VPStridedValues->second); // Stride
+    }
     addOperand(EVL);
   }
 
   VPPredicatedWidenMemoryInstructionRecipe(
       StoreInst &Store, VPValue *Addr, VPValue *StoredValue, VPValue *Mask,
       bool Consecutive, bool Reverse,
-      std::optional<std::pair<Value *, Value *>> StrideValues, VPValue *EVL)
+      std::optional<std::pair<VPValue *, VPValue *>> VPStridedValues,
+      VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Mask,
                                        Consecutive, Reverse,
                                        VPPredicatedWidenMemoryInstructionSC) {
-    this->StrideValues = StrideValues;
+    if (VPStridedValues.has_value()) {
+      assert(!Consecutive && "Strided implies not consecutive");
+      this->Strided = true;
+      addOperand(VPStridedValues->first); // Base address
+      addOperand(VPStridedValues->second); // Stride
+    }
     addOperand(EVL);
   }
 
@@ -2164,7 +2184,18 @@ public:
   /// Return the mask used by this recipe. Note that a full mask is represented
   /// by a nullptr.
   VPValue *getMask() const override {
-    // Mask is the before the last, mandatory operand.
+    // Mask is the before the last, mandatory operand, unless there is a stride.
+    return isStrided() ? getOperand(getNumOperands() - 4)
+                       : getOperand(getNumOperands() - 2);
+  }
+
+  VPValue *getBaseAddress() const {
+    assert(isStrided());
+    return getOperand(getNumOperands() - 3);
+  }
+
+  VPValue *getStride() const {
+    assert(isStrided());
     return getOperand(getNumOperands() - 2);
   }
 
@@ -3577,11 +3608,11 @@ struct StridedAccessValues {
   Value *Stride;
 };
 
-StridedAccessValues computeStrideAddressing(unsigned Part,
-                                            VPTransformState &State,
-                                            Type *PtrTy, Value *PointerStart,
-                                            Value *BytesStride,
-                                            VPValue *CanonicalIV, VPValue *EVL);
+StridedAccessValues computeStrideAddressing(VPTransformState &State,
+                                            unsigned Part, Type *PtrTy,
+                                            VPValue *CanonicalIV,
+                                            VPValue *VPBaseAddress,
+                                            VPValue *VPStride, VPValue *EVL);
 
 } // end namespace llvm
 
