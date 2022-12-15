@@ -33,7 +33,7 @@ define <vscale x 2 x i32> @insert_nxv2i32(<vscale x 2 x i32> %merge, i32 %e, i64
 define <vscale x 2 x i64> @insert_nxv2i64(<vscale x 2 x i64> %merge, i64 %e, i64 %idx)
 ; CHECK-LABEL: insert_nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a2, zero, e64, m2, ta, ma
+; CHECK-NEXT:    vsetvli a2, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vmv.s.x v10, a0
 ; CHECK-NEXT:    addi a0, a1, 1
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m2, tu, ma
@@ -75,7 +75,7 @@ define <vscale x 2 x float> @insert_nxv2f32(<vscale x 2 x float> %merge, float %
 define <vscale x 2 x double> @insert_nxv2f64(<vscale x 2 x double> %merge, double %e, i64 %idx)
 ; CHECK-LABEL: insert_nxv2f64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e64, m2, ta, ma
+; CHECK-NEXT:    vsetvli a1, zero, e64, m1, ta, ma
 ; CHECK-NEXT:    vfmv.s.f v10, fa0
 ; CHECK-NEXT:    addi a1, a0, 1
 ; CHECK-NEXT:    vsetvli zero, a1, e64, m2, tu, ma
@@ -89,7 +89,7 @@ define <vscale x 2 x double> @insert_nxv2f64(<vscale x 2 x double> %merge, doubl
 define <vscale x 4 x float> @insert_nxv4f32(<vscale x 4 x float> %merge, float %e, i64 %idx)
 ; CHECK-LABEL: insert_nxv4f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a1, zero, e32, m2, ta, ma
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfmv.s.f v10, fa0
 ; CHECK-NEXT:    addi a1, a0, 1
 ; CHECK-NEXT:    vsetvli zero, a1, e32, m2, tu, ma

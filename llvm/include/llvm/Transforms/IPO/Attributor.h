@@ -128,6 +128,7 @@
 #include "llvm/Support/TimeProfiler.h"
 #include "llvm/Transforms/Utils/CallGraphUpdater.h"
 
+#include <limits>
 #include <map>
 #include <optional>
 
@@ -275,11 +276,13 @@ struct RangeTy {
   }
 
   /// Constants used to represent special offsets or sizes.
-  /// - This assumes that Offset and Size are non-negative.
+  /// - We cannot assume that Offsets and Size are non-negative.
   /// - The constants should not clash with DenseMapInfo, such as EmptyKey
   ///   (INT64_MAX) and TombstoneKey (INT64_MIN).
-  static constexpr int64_t Unassigned = -1;
-  static constexpr int64_t Unknown = -2;
+  /// We use values "in the middle" of the 64 bit range to represent these
+  /// special cases.
+  static constexpr int64_t Unassigned = std::numeric_limits<int32_t>::min();
+  static constexpr int64_t Unknown = std::numeric_limits<int32_t>::max();
 };
 
 inline raw_ostream &operator<<(raw_ostream &OS, const RangeTy &R) {
@@ -1142,6 +1145,10 @@ struct InformationCache {
     // the destructor manually.
     for (auto &It : FuncInfoMap)
       It.getSecond()->~FunctionInfo();
+    // Same is true for the instruction exclusions sets.
+    using AA::InstExclusionSetTy;
+    for (auto *BES : BESets)
+      BES->~InstExclusionSetTy();
   }
 
   /// Apply \p CB to all uses of \p F. If \p LookThroughConstantExprUses is
@@ -1338,7 +1345,7 @@ private:
   SetVector<const Instruction *> AssumeOnlyValues;
 
   /// Cache for block sets to allow reuse.
-  DenseSet<const AA::InstExclusionSetTy *> BESets;
+  DenseSet<AA::InstExclusionSetTy *> BESets;
 
   /// Getters for analysis.
   AnalysisGetter &AG;
@@ -1515,13 +1522,15 @@ struct Attributor {
     // Use the static create method.
     auto &AA = AAType::createForPosition(IRP, *this);
 
+    // Always register a new attribute to make sure we clean up the allocated
+    // memory properly.
+    registerAA(AA);
+
     // If we are currenty seeding attributes, enforce seeding rules.
     if (Phase == AttributorPhase::SEEDING && !shouldSeedAttribute(AA)) {
       AA.getState().indicatePessimisticFixpoint();
       return AA;
     }
-
-    registerAA(AA);
 
     // For now we ignore naked and optnone functions.
     bool Invalidate =
