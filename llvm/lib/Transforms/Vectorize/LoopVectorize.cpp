@@ -9135,40 +9135,36 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
       Reverse || Decision == LoopVectorizationCostModel::CM_Widen;
   bool Strided = Decision == LoopVectorizationCostModel::CM_Strided;
 
-  // Retrieve the SCEV for the Stride in order to generate IR code that
-  // has to be placed in a basic block dominating the vectorized loop
-  // one; the resulting Base and Stride Values must then be passed to the
-  // VPPredicatedWidenMemoryRecipe.
-  std::optional<std::pair<Value *, Value *>> StrideValues;
+  // Retrieve the SCEV expression for the Stride in order to generate
+  // VPExpandSCEVRecipe for both the BaseAddress and the Stride; these two
+  // VPValue must then be passed to the VPPredicatedWidenMemoryRecipe.
+  std::optional<std::pair<VPValue *, VPValue *>> VPStridedValues;
   if (Strided) {
     auto *StrideSCEV = CM.getStrideSCEVExpr(I, Range.Start);
     const SCEVAddRecExpr *StrideSCEVExpr = cast<SCEVAddRecExpr>(StrideSCEV);
-    const SCEV *Start = StrideSCEVExpr->getStart();
-    const SCEV *Stride = StrideSCEVExpr ->getStepRecurrence(*PSE.getSE());
+    const SCEV *BaseAddress = StrideSCEVExpr->getStart();
+    const SCEV *Stride = StrideSCEVExpr->getStepRecurrence(*PSE.getSE());
     assert(Stride && "Stride: failed to get step recurrence from SCEVExpr");
 
-    BasicBlock *LoopPreheader = OrigLoop->getLoopPreheader();
-    Instruction *InsertPt = LoopPreheader->getTerminator();
-    const DataLayout &DL = LoopPreheader->getModule()->getDataLayout();
-    SCEVExpander Exp(*PSE.getSE(), DL, "stride");
-    Value *BaseAddress  =
-        Exp.expandCodeFor(Start, Start->getType(), InsertPt);
-    Value *StrideValue =
-        Exp.expandCodeFor(Stride, Stride->getType(), InsertPt);
+    VPValue *VPBaseAddress = vputils::getOrCreateVPValueForSCEVExpr(
+        *Plan, BaseAddress, *PSE.getSE());
+    VPValue *VPStride =
+        vputils::getOrCreateVPValueForSCEVExpr(*Plan, Stride, *PSE.getSE());
 
-    StrideValues = std::make_optional(std::make_pair(BaseAddress, StrideValue));
+    VPStridedValues =
+        std::make_optional(std::make_pair(VPBaseAddress, VPStride));
   }
 
   VPValue *Mask = createBlockInMask(I->getParent(), Plan);
   VPValue *EVL = getOrCreateEVL(Plan);
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
     return new VPPredicatedWidenMemoryInstructionRecipe(
-        *Load, Operands[0], Mask, Consecutive, Reverse, StrideValues, EVL);
+        *Load, Operands[0], Mask, Consecutive, Reverse, VPStridedValues, EVL);
 
   StoreInst *Store = cast<StoreInst>(I);
   return new VPPredicatedWidenMemoryInstructionRecipe(
       *Store, Operands[1], Operands[0], Mask, Consecutive, Reverse,
-      StrideValues, EVL);
+      VPStridedValues, EVL);
 }
 
 /// Creates a VPWidenIntOrFpInductionRecpipe for \p Phi. If needed, it will also
@@ -11168,10 +11164,12 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
             LLVM_DEBUG(llvm::dbgs() << "Found stride for store\n");
 
             auto *PtrTy = cast<PointerType>(PtrsTy->getElementType());
+            auto *VPPredicatedRecipe =
+                cast<VPPredicatedWidenMemoryInstructionRecipe>(this);
             StridedAccessValues SAV = computeStrideAddressing(
-                Part, State, PtrTy, /*Base*/ StrideValues->first,
-                /*Stride*/ StrideValues->second,
-                getParent()->getPlan()->getCanonicalIV(), EVL);
+                State, Part, PtrTy, getParent()->getPlan()->getCanonicalIV(),
+                VPPredicatedRecipe->getBaseAddress(),
+                VPPredicatedRecipe->getStride(), EVL);
             Value *Operands[] = {StoredVal, SAV.BaseAddress, SAV.Stride,
                                  BlockInMaskPart, EVLPart};
             NewSI = Builder.CreateIntrinsic(
@@ -11260,10 +11258,12 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
         if (isStrided()) {
           LLVM_DEBUG(llvm::dbgs() << "Found stride for load\n");
 
+          auto *VPPredicatedRecipe =
+              cast<VPPredicatedWidenMemoryInstructionRecipe>(this);
           StridedAccessValues SAV = computeStrideAddressing(
-              Part, State, PtrTy, /*Base*/ StrideValues->first,
-              /*Stride*/ StrideValues->second,
-              getParent()->getPlan()->getCanonicalIV(), EVL);
+              State, Part, PtrTy, getParent()->getPlan()->getCanonicalIV(),
+              VPPredicatedRecipe->getBaseAddress(),
+              VPPredicatedRecipe->getStride(), EVL);
           Value *Operands[] = {SAV.BaseAddress, SAV.Stride, BlockInMaskPart,
                                EVLPart};
           NewLI =

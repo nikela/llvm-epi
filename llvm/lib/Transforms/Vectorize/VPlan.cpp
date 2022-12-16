@@ -1147,41 +1147,42 @@ VPValue *vputils::getOrCreateVPValueForSCEVExpr(VPlan &Plan, const SCEV *Expr,
 }
 
 llvm::StridedAccessValues llvm::computeStrideAddressing(
-    unsigned Part, VPTransformState &State, Type *PtrTy, Value *PointerStart,
-    Value *BytesStride, VPValue *CanonicalIV, VPValue *EVL) {
+    VPTransformState &State, unsigned Part, Type *PtrTy, VPValue *CanonicalIV,
+    VPValue *VPBaseAddress, VPValue *VPStride, VPValue *EVL) {
   // FIXME: This does not seem to adhere to the VPlan principles but I'm unsure
   // what part of it should. We should be using Addr but AFAIU it represents
-  // the vectorised address already, which is not useful. When doing
-  // interleaving, we should use the Part to adjust the access correctly.
+  // the vectorised address already, which is not useful.
   // Perhaps we should not have received a WIDEN-GEP here in the first place
   // and make the VP build process aware of the stride access option?
   auto &Builder = State.Builder;
   LLVMContext &Context = PtrTy->getContext();
 
   Value *CanonicalIVValue = State.get(CanonicalIV, 0);
+  Value *BaseAddress = State.get(VPBaseAddress, {0, 0});
+  Value *Stride = State.get(VPStride, {0, 0});
   Value *Multiplier = nullptr;
-  if (Part == 0)
+  if (Part == 0) {
     Multiplier =
-        Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType());
-  else {
+     Builder.CreateSExtOrTrunc(Stride, CanonicalIVValue->getType());
+  } else {
     Value *PrevEVL = State.get(EVL, 0);
     for (unsigned P = 1; P < Part; P++)
       PrevEVL = Builder.CreateAdd(PrevEVL, State.get(EVL, P));
 
     Multiplier = Builder.CreateMul(
-        Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType()),
+        Builder.CreateSExtOrTrunc(Stride, CanonicalIVValue->getType()),
         Builder.CreateZExtOrTrunc(PrevEVL, CanonicalIVValue->getType()));
   }
   auto *BytesStrideIter = Builder.CreateMul(CanonicalIVValue, Multiplier);
   auto *StrideBaseAddress = Builder.CreateGEP(
       Type::getInt8Ty(Context),
-      Builder.CreatePointerCast(PointerStart, Type::getInt8PtrTy(Context)),
+      Builder.CreatePointerCast(BaseAddress, Type::getInt8PtrTy(Context)),
       BytesStrideIter);
   StrideBaseAddress = Builder.CreateBitCast(StrideBaseAddress, PtrTy);
 
   StridedAccessValues Ret;
   Ret.BaseAddress = StrideBaseAddress;
-  Ret.Stride = BytesStride;
+  Ret.Stride = Stride;
 
   return Ret;
 }
