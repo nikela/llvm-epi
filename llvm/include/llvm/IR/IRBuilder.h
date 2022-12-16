@@ -67,7 +67,7 @@ public:
                             BasicBlock *BB,
                             BasicBlock::iterator InsertPt) const {
     if (BB)
-      I->insertAt(BB, InsertPt);
+      I->insertInto(BB, InsertPt);
     I->setName(Name);
   }
 };
