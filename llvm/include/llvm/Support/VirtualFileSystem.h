@@ -15,7 +15,6 @@
 #define LLVM_SUPPORT_VIRTUALFILESYSTEM_H
 
 #include "llvm/ADT/IntrusiveRefCntPtr.h"
-#include "llvm/ADT/None.h"
 #include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
@@ -451,7 +450,7 @@ public:
   }
 
 protected:
-  FileSystem &getUnderlyingFS() { return *FS; }
+  FileSystem &getUnderlyingFS() const { return *FS; }
 
 private:
   IntrusiveRefCntPtr<FileSystem> FS;

@@ -181,7 +181,7 @@ void VecCloneVPPass::getFunctionsToVectorize(llvm::Module &M,
       if (!Attr.isStringAttribute())
         continue;
       StringRef AttrText = Attr.getKindAsString();
-      Optional<VFInfo> VFInfo = VFABI::tryDemangleForVFABI(
+      std::optional<VFInfo> VFInfo = VFABI::tryDemangleForVFABI(
           AttrText, M, /* RequireDeclaration */ false);
       if (!VFInfo) {
         LLVM_DEBUG(llvm::dbgs()

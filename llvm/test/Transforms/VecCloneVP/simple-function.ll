@@ -1,4 +1,4 @@
-; RUN: opt -S --vec-clone-vp %s | FileCheck %s
+; RUN: opt -S -passes=vec-clone-vp %s | FileCheck %s
 
 define i64 @simple_function(i64 %x, i64 %y) #0 {
 entry:

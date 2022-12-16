@@ -226,7 +226,7 @@ bool AA::isDynamicallyUnique(Attributor &A, const AbstractAttribute &QueryingAA,
 Constant *AA::getInitialValueForObj(Value &Obj, Type &Ty,
                                     const TargetLibraryInfo *TLI,
                                     const DataLayout &DL,
-                                    AA::OffsetAndSize *OASPtr) {
+                                    AA::RangeTy *RangePtr) {
   if (isa<AllocaInst>(Obj))
     return UndefValue::get(&Ty);
   if (Constant *Init = getInitialValueOfAllocation(&Obj, TLI, &Ty))
@@ -239,8 +239,8 @@ Constant *AA::getInitialValueForObj(Value &Obj, Type &Ty,
   if (!GV->hasInitializer())
     return UndefValue::get(&Ty);
 
-  if (OASPtr && !OASPtr->offsetOrSizeAreUnknown()) {
-    APInt Offset = APInt(64, OASPtr->Offset);
+  if (RangePtr && !RangePtr->offsetOrSizeAreUnknown()) {
+    APInt Offset = APInt(64, RangePtr->Offset);
     return ConstantFoldLoadFromConst(GV->getInitializer(), &Ty, Offset, DL);
   }
 
@@ -405,7 +405,7 @@ static bool getPotentialCopiesOfMemoryValue(
     };
 
     auto CheckAccess = [&](const AAPointerInfo::Access &Acc, bool IsExact) {
-      if ((IsLoad && !Acc.isWrite()) || (!IsLoad && !Acc.isRead()))
+      if ((IsLoad && !Acc.isWriteOrAssumption()) || (!IsLoad && !Acc.isRead()))
         return true;
       if (IsLoad && Acc.isWrittenValueYetUndetermined())
         return true;
@@ -456,11 +456,11 @@ static bool getPotentialCopiesOfMemoryValue(
     // object.
     bool HasBeenWrittenTo = false;
 
-    AA::OffsetAndSize OAS;
+    AA::RangeTy Range;
     auto &PI = A.getAAFor<AAPointerInfo>(QueryingAA, IRPosition::value(*Obj),
                                          DepClassTy::NONE);
     if (!PI.forallInterferingAccesses(A, QueryingAA, I, CheckAccess,
-                                      HasBeenWrittenTo, OAS)) {
+                                      HasBeenWrittenTo, Range)) {
       LLVM_DEBUG(
           dbgs()
           << "Failed to verify all interfering accesses for underlying object: "
@@ -468,10 +468,10 @@ static bool getPotentialCopiesOfMemoryValue(
       return false;
     }
 
-    if (IsLoad && !HasBeenWrittenTo && !OAS.isUnassigned()) {
+    if (IsLoad && !HasBeenWrittenTo && !Range.isUnassigned()) {
       const DataLayout &DL = A.getDataLayout();
       Value *InitialValue =
-          AA::getInitialValueForObj(*Obj, *I.getType(), TLI, DL, &OAS);
+          AA::getInitialValueForObj(*Obj, *I.getType(), TLI, DL, &Range);
       if (!InitialValue) {
         LLVM_DEBUG(dbgs() << "Could not determine required initial value of "
                              "underlying object, abort!\n");
@@ -570,19 +570,27 @@ static bool
 isPotentiallyReachable(Attributor &A, const Instruction &FromI,
                        const Instruction *ToI, const Function &ToFn,
                        const AbstractAttribute &QueryingAA,
+                       const AA::InstExclusionSetTy *ExclusionSet,
                        std::function<bool(const Function &F)> GoBackwardsCB) {
-  LLVM_DEBUG(dbgs() << "[AA] isPotentiallyReachable @" << ToFn.getName()
-                    << " from " << FromI << " [GBCB: " << bool(GoBackwardsCB)
-                    << "]\n");
+  LLVM_DEBUG({
+    dbgs() << "[AA] isPotentiallyReachable @" << ToFn.getName() << " from "
+           << FromI << " [GBCB: " << bool(GoBackwardsCB) << "][#ExS: "
+           << (ExclusionSet ? std::to_string(ExclusionSet->size()) : "none")
+           << "]\n";
+    if (ExclusionSet)
+      for (auto *ES : *ExclusionSet)
+        dbgs() << *ES << "\n";
+  });
 
-  // TODO: If we can go arbitrarily backwards we will eventually reach an
-  // entry point that can reach ToI. Only once this takes a set of blocks
-  // through which we cannot go, or once we track internal functions not
-  // accessible from the outside, it makes sense to perform backwards analysis
-  // in the absence of a GoBackwardsCB.
-  if (!GoBackwardsCB) {
+  // If we can go arbitrarily backwards we will eventually reach an entry point
+  // that can reach ToI. Only if a set of blocks through which we cannot go is
+  // provided, or once we track internal functions not accessible from the
+  // outside, it makes sense to perform backwards analysis in the absence of a
+  // GoBackwardsCB.
+  if (!GoBackwardsCB && !ExclusionSet) {
     LLVM_DEBUG(dbgs() << "[AA] check @" << ToFn.getName() << " from " << FromI
-                      << " is not checked backwards, abort\n");
+                      << " is not checked backwards and does not have an "
+                         "exclusion set, abort\n");
     return true;
   }
 
@@ -601,9 +609,10 @@ isPotentiallyReachable(Attributor &A, const Instruction &FromI,
         return true;
       LLVM_DEBUG(dbgs() << "[AA] check " << *ToI << " from " << *CurFromI
                         << " intraprocedurally\n");
-      const auto &ReachabilityAA = A.getAAFor<AAReachability>(
+      const auto &ReachabilityAA = A.getAAFor<AAIntraFnReachability>(
           QueryingAA, IRPosition::function(ToFn), DepClassTy::OPTIONAL);
-      bool Result = ReachabilityAA.isAssumedReachable(A, *CurFromI, *ToI);
+      bool Result =
+          ReachabilityAA.isAssumedReachable(A, *CurFromI, *ToI, ExclusionSet);
       LLVM_DEBUG(dbgs() << "[AA] " << *CurFromI << " "
                         << (Result ? "can potentially " : "cannot ") << "reach "
                         << *ToI << " [Intra]\n");
@@ -611,15 +620,57 @@ isPotentiallyReachable(Attributor &A, const Instruction &FromI,
         return true;
     }
 
-    // Check if the current instruction is already known to reach the ToFn.
-    const auto &FnReachabilityAA = A.getAAFor<AAFunctionReachability>(
+    bool Result = true;
+    if (!ToFn.isDeclaration() && ToI) {
+      const auto &ToReachabilityAA = A.getAAFor<AAIntraFnReachability>(
+          QueryingAA, IRPosition::function(ToFn), DepClassTy::OPTIONAL);
+      const Instruction &EntryI = ToFn.getEntryBlock().front();
+      Result =
+          ToReachabilityAA.isAssumedReachable(A, EntryI, *ToI, ExclusionSet);
+      LLVM_DEBUG(dbgs() << "[AA] Entry " << EntryI << " of @" << ToFn.getName()
+                        << " " << (Result ? "can potentially " : "cannot ")
+                        << "reach @" << *ToI << " [ToFn]\n");
+    }
+
+    if (Result) {
+      // The entry of the ToFn can reach the instruction ToI. If the current
+      // instruction is already known to reach the ToFn.
+      const auto &FnReachabilityAA = A.getAAFor<AAInterFnReachability>(
+          QueryingAA, IRPosition::function(*FromFn), DepClassTy::OPTIONAL);
+      Result = FnReachabilityAA.instructionCanReach(A, *CurFromI, ToFn,
+                                                    ExclusionSet);
+      LLVM_DEBUG(dbgs() << "[AA] " << *CurFromI << " in @" << FromFn->getName()
+                        << " " << (Result ? "can potentially " : "cannot ")
+                        << "reach @" << ToFn.getName() << " [FromFn]\n");
+      if (Result)
+        return true;
+    }
+
+    // TODO: Check assumed nounwind.
+    const auto &ReachabilityAA = A.getAAFor<AAIntraFnReachability>(
         QueryingAA, IRPosition::function(*FromFn), DepClassTy::OPTIONAL);
-    bool Result = FnReachabilityAA.instructionCanReach(A, *CurFromI, ToFn);
-    LLVM_DEBUG(dbgs() << "[AA] " << *CurFromI << " in @" << FromFn->getName()
-                      << " " << (Result ? "can potentially " : "cannot ")
-                      << "reach @" << ToFn.getName() << " [FromFn]\n");
-    if (Result)
+    auto ReturnInstCB = [&](Instruction &Ret) {
+      bool Result =
+          ReachabilityAA.isAssumedReachable(A, *CurFromI, Ret, ExclusionSet);
+      LLVM_DEBUG(dbgs() << "[AA][Ret] " << *CurFromI << " "
+                        << (Result ? "can potentially " : "cannot ") << "reach "
+                        << Ret << " [Intra]\n");
+      return !Result;
+    };
+
+    // Check if we can reach returns.
+    bool UsedAssumedInformation = false;
+    if (A.checkForAllInstructions(ReturnInstCB, FromFn, QueryingAA,
+                                  {Instruction::Ret}, UsedAssumedInformation)) {
+      LLVM_DEBUG(dbgs() << "[AA] No return is reachable, done\n");
+      return false;
+    }
+
+    if (!GoBackwardsCB) {
+      LLVM_DEBUG(dbgs() << "[AA] check @" << ToFn.getName() << " from " << FromI
+                        << " is not checked backwards, abort\n");
       return true;
+    }
 
     // If we do not go backwards from the FromFn we are done here and so far we
     // could not find a way to reach ToFn/ToI.
@@ -642,7 +693,6 @@ isPotentiallyReachable(Attributor &A, const Instruction &FromI,
       return true;
     };
 
-    bool UsedAssumedInformation = false;
     Result = !A.checkForAllCallSites(CheckCallSite, *FromFn,
                                      /* RequireAllCallSites */ true,
                                      &QueryingAA, UsedAssumedInformation);
@@ -663,20 +713,20 @@ isPotentiallyReachable(Attributor &A, const Instruction &FromI,
 bool AA::isPotentiallyReachable(
     Attributor &A, const Instruction &FromI, const Instruction &ToI,
     const AbstractAttribute &QueryingAA,
+    const AA::InstExclusionSetTy *ExclusionSet,
     std::function<bool(const Function &F)> GoBackwardsCB) {
-  LLVM_DEBUG(dbgs() << "[AA] isPotentiallyReachable " << ToI << " from "
-                    << FromI << " [GBCB: " << bool(GoBackwardsCB) << "]\n");
   const Function *ToFn = ToI.getFunction();
   return ::isPotentiallyReachable(A, FromI, &ToI, *ToFn, QueryingAA,
-                                  GoBackwardsCB);
+                                  ExclusionSet, GoBackwardsCB);
 }
 
 bool AA::isPotentiallyReachable(
     Attributor &A, const Instruction &FromI, const Function &ToFn,
     const AbstractAttribute &QueryingAA,
+    const AA::InstExclusionSetTy *ExclusionSet,
     std::function<bool(const Function &F)> GoBackwardsCB) {
   return ::isPotentiallyReachable(A, FromI, /* ToI */ nullptr, ToFn, QueryingAA,
-                                  GoBackwardsCB);
+                                  ExclusionSet, GoBackwardsCB);
 }
 
 /// Return true if \p New is equal or worse than \p Old.
@@ -2636,8 +2686,7 @@ ChangeStatus Attributor::rewriteFunctionSignatures(
     // Since we have now created the new function, splice the body of the old
     // function right into the new function, leaving the old rotting hulk of the
     // function empty.
-    NewFn->getBasicBlockList().splice(NewFn->begin(),
-                                      OldFn->getBasicBlockList());
+    NewFn->splice(NewFn->begin(), OldFn);
 
     // Fixup block addresses to reference new function.
     SmallVector<BlockAddress *, 8u> BlockAddresses;
@@ -2823,6 +2872,7 @@ void InformationCache::initializeInformationCache(const Function &CF,
       // For `llvm.assume` calls we also fill the KnowledgeMap as we find them.
       // For `must-tail` calls we remember the caller and callee.
       if (auto *Assume = dyn_cast<AssumeInst>(&I)) {
+        AssumeOnlyValues.insert(Assume);
         fillMapFromAssume(*Assume, KnowledgeMap);
         AddToAssumeUsesMap(*Assume->getArgOperand(0));
       } else if (cast<CallInst>(I).isMustTailCall()) {

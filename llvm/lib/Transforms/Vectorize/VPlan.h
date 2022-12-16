@@ -30,7 +30,6 @@
 #include "llvm/ADT/DepthFirstIterator.h"
 #include "llvm/ADT/GraphTraits.h"
 #include "llvm/ADT/MapVector.h"
-#include "llvm/ADT/Optional.h"
 #include "llvm/ADT/SmallBitVector.h"
 #include "llvm/ADT/SmallPtrSet.h"
 #include "llvm/ADT/SmallVector.h"
@@ -222,7 +221,7 @@ struct VPTransformState {
   /// Hold the indices to generate specific scalar instructions. Null indicates
   /// that all instances are to be generated, using either scalar or vector
   /// instructions.
-  Optional<VPIteration> Instance;
+  std::optional<VPIteration> Instance;
 
   struct DataState {
     /// A type for vectorized values in the new loop. Each value from the
@@ -1298,6 +1297,25 @@ public:
 /// phis for first order recurrences, pointer inductions and reductions. The
 /// start value is the first operand of the recipe and the incoming value from
 /// the backedge is the second operand.
+///
+/// Inductions are modeled using the following sub-classes:
+///  * VPCanonicalIVPHIRecipe: Canonical scalar induction of the vector loop,
+///    starting at a specified value (zero for the main vector loop, the resume
+///    value for the epilogue vector loop) and stepping by 1. The induction
+///    controls exiting of the vector loop by comparing against the vector trip
+///    count. Produces a single scalar PHI for the induction value per
+///    iteration.
+///  * VPWidenIntOrFpInductionRecipe: Generates vector values for integer and
+///    floating point inductions with arbitrary start and step values. Produces
+///    a vector PHI per-part.
+///  * VPDerivedIVRecipe: Converts the canonical IV value to the corresponding
+///    value of an IV with different start and step values. Produces a single
+///    scalar value per iteration
+///  * VPScalarIVStepsRecipe: Generates scalar values per-lane based on a
+///    canonical or derived induction.
+///  * VPWidenPointerInductionRecipe: Generate vector and scalar values for a
+///    pointer induction. Produces either a vector PHI per-part or scalar values
+///    per-lane based on the canonical induction.
 class VPHeaderPHIRecipe : public VPRecipeBase, public VPValue {
 protected:
   VPHeaderPHIRecipe(unsigned char VPVID, unsigned char VPDefID, PHINode *Phi,
@@ -2015,10 +2033,9 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase {
     return isStore() ? getNumOperands() == 3 : getNumOperands() == 2;
   }
 
-// FIXME
 protected:
-  // Wheter NonConsecutive loads/stores can be strided
-  bool Strided = false;
+  // BaseAddress and StrideValue for strided loads/stores.
+  std::optional<std::pair<Value *, Value *>> StrideValues;
 
 public:
   VPWidenMemoryInstructionRecipe(
@@ -2077,7 +2094,7 @@ public:
   bool isReverse() const { return Reverse; }
 
   // Return wheter NonConsecutive loads/stores can be strided
-  bool isStrided() const { return Strided; }
+  bool isStrided() const { return StrideValues.has_value(); }
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
@@ -2111,26 +2128,24 @@ class VPPredicatedWidenMemoryInstructionRecipe
     : public VPWidenMemoryInstructionRecipe {
 
 public:
-  VPPredicatedWidenMemoryInstructionRecipe(LoadInst &Load, VPValue *Addr,
-                                           VPValue *Mask, bool Consecutive,
-                                           bool Reverse, bool Strided,
-                                           VPValue *EVL)
-      : VPWidenMemoryInstructionRecipe(
-            Load, Addr, Mask, Consecutive, Reverse,
-            VPPredicatedWidenMemoryInstructionSC) {
-    this->Strided = Strided;
+  VPPredicatedWidenMemoryInstructionRecipe(
+      LoadInst &Load, VPValue *Addr, VPValue *Mask, bool Consecutive,
+      bool Reverse, std::optional<std::pair<Value *, Value *>> StrideValues,
+      VPValue *EVL)
+      : VPWidenMemoryInstructionRecipe(Load, Addr, Mask, Consecutive, Reverse,
+                                       VPPredicatedWidenMemoryInstructionSC) {
+    this->StrideValues = StrideValues;
     addOperand(EVL);
   }
 
-  VPPredicatedWidenMemoryInstructionRecipe(StoreInst &Store, VPValue *Addr,
-                                           VPValue *StoredValue, VPValue *Mask,
-                                           bool Consecutive, bool Reverse,
-                                           bool Strided,
-                                           VPValue *EVL)
-      : VPWidenMemoryInstructionRecipe(
-            Store, Addr, StoredValue, Mask, Consecutive, Reverse,
-            VPPredicatedWidenMemoryInstructionSC) {
-    this->Strided = Strided;
+  VPPredicatedWidenMemoryInstructionRecipe(
+      StoreInst &Store, VPValue *Addr, VPValue *StoredValue, VPValue *Mask,
+      bool Consecutive, bool Reverse,
+      std::optional<std::pair<Value *, Value *>> StrideValues, VPValue *EVL)
+      : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Mask,
+                                       Consecutive, Reverse,
+                                       VPPredicatedWidenMemoryInstructionSC) {
+    this->StrideValues = StrideValues;
     addOperand(EVL);
   }
 
@@ -3087,6 +3102,8 @@ public:
 
   bool hasVF(ElementCount VF) { return VFs.count(VF); }
 
+  bool hasScalarVFOnly() const { return VFs.size() == 1 && VFs[0].isScalar(); }
+
   const std::string &getName() const { return Name; }
 
   void setName(const Twine &newName) { Name = newName.str(); }
@@ -3562,7 +3579,8 @@ struct StridedAccessValues {
 
 StridedAccessValues computeStrideAddressing(unsigned Part,
                                             VPTransformState &State,
-                                            Type *PtrTy, const SCEV *SCEVExpr,
+                                            Type *PtrTy, Value *PointerStart,
+                                            Value *BytesStride,
                                             VPValue *CanonicalIV, VPValue *EVL);
 
 } // end namespace llvm

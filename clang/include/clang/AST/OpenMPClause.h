@@ -1756,7 +1756,7 @@ class OMPMessageClause final : public OMPClause {
 public:
   /// Build 'message' clause with message string argument
   ///
-  /// \param A Argument of the clause (message string).
+  /// \param MS Argument of the clause (message string).
   /// \param StartLoc Starting location of the clause.
   /// \param LParenLoc Location of '('.
   /// \param EndLoc Ending location of the clause.
@@ -7926,6 +7926,12 @@ class OMPOrderClause final : public OMPClause {
   /// Start location of the kind in source code.
   SourceLocation KindKwLoc;
 
+  /// A modifier for order clause
+  OpenMPOrderClauseModifier Modifier = OMPC_ORDER_MODIFIER_unknown;
+
+  /// Start location of the modifier in source code.
+  SourceLocation ModifierKwLoc;
+
   /// Set kind of the clause.
   ///
   /// \param K Argument of clause.
@@ -7936,6 +7942,16 @@ class OMPOrderClause final : public OMPClause {
   /// \param KLoc Argument location.
   void setKindKwLoc(SourceLocation KLoc) { KindKwLoc = KLoc; }
 
+  /// Set modifier of the clause.
+  ///
+  /// \param M Argument of clause.
+  void setModifier(OpenMPOrderClauseModifier M) { Modifier = M; }
+
+  /// Set modifier location.
+  ///
+  /// \param MLoc Modifier keyword location.
+  void setModifierKwLoc(SourceLocation MLoc) { ModifierKwLoc = MLoc; }
+
 public:
   /// Build 'order' clause with argument \p A ('concurrent').
   ///
@@ -7944,11 +7960,15 @@ public:
   /// \param StartLoc Starting location of the clause.
   /// \param LParenLoc Location of '('.
   /// \param EndLoc Ending location of the clause.
+  /// \param Modifier The modifier applied to 'order' clause.
+  /// \param MLoc Location of the modifier
   OMPOrderClause(OpenMPOrderClauseKind A, SourceLocation ALoc,
                  SourceLocation StartLoc, SourceLocation LParenLoc,
-                 SourceLocation EndLoc)
+                 SourceLocation EndLoc, OpenMPOrderClauseModifier M,
+                 SourceLocation MLoc)
       : OMPClause(llvm::omp::OMPC_order, StartLoc, EndLoc),
-        LParenLoc(LParenLoc), Kind(A), KindKwLoc(ALoc) {}
+        LParenLoc(LParenLoc), Kind(A), KindKwLoc(ALoc), Modifier(M),
+        ModifierKwLoc(MLoc) {}
 
   /// Build an empty clause.
   OMPOrderClause()
@@ -7965,6 +7985,12 @@ public:
 
   /// Returns location of clause kind.
   SourceLocation getKindKwLoc() const { return KindKwLoc; }
+
+  /// Returns Modifier of the clause.
+  OpenMPOrderClauseModifier getModifier() const { return Modifier; }
+
+  /// Returns location of clause modifier.
+  SourceLocation getModifierKwLoc() const { return ModifierKwLoc; }
 
   child_range children() {
     return child_range(child_iterator(), child_iterator());

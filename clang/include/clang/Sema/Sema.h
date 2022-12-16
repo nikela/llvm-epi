@@ -7097,7 +7097,8 @@ public:
                                           unsigned InitStyle, Expr *Init);
 
   /// Add an init-capture to a lambda scope.
-  void addInitCapture(sema::LambdaScopeInfo *LSI, VarDecl *Var);
+  void addInitCapture(sema::LambdaScopeInfo *LSI, VarDecl *Var,
+                      bool isReferenceType);
 
   /// Note that we have finished the explicit captures for the
   /// given lambda.
@@ -11725,10 +11726,11 @@ public:
                                        SourceLocation LParenLoc,
                                        SourceLocation EndLoc);
   /// Called on well-formed 'order' clause.
-  OMPClause *ActOnOpenMPOrderClause(OpenMPOrderClauseKind Kind,
-                                    SourceLocation KindLoc,
+  OMPClause *ActOnOpenMPOrderClause(OpenMPOrderClauseModifier Modifier,
+                                    OpenMPOrderClauseKind Kind,
                                     SourceLocation StartLoc,
                                     SourceLocation LParenLoc,
+                                    SourceLocation MLoc, SourceLocation KindLoc,
                                     SourceLocation EndLoc);
   /// Called on well-formed 'update' clause.
   OMPClause *ActOnOpenMPUpdateClause(OpenMPDependClauseKind Kind,

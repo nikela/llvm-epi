@@ -34,8 +34,9 @@ using namespace llvm::PatternMatch;
 #define DEBUG_TYPE "epi-fma-contraction"
 
 static cl::opt<bool>
-    DisableFMAContraction("no-epi-fma-contraction", cl::init(false), cl::Hidden,
-                          cl::desc("Disable FMA contraction in EPI"));
+    EnableFMAContraction("epi-enable-fma-contraction", cl::init(true),
+                         cl::Hidden,
+                         cl::desc("Disable FMA contraction in EPI"));
 
 #define PASS_NAME "EPI FMA Contraction"
 
@@ -217,7 +218,7 @@ bool EPIFMAContraction::optimizeFunctions(
 }
 
 bool EPIFMAContraction::runOnModule(Module &M) {
-  if (DisableFMAContraction)
+  if (!EnableFMAContraction)
     return false;
 
   bool Changed = false;

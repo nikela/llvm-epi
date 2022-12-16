@@ -1484,8 +1484,9 @@ private:
         // A barrier in a barrier pair is removeable if all instructions
         // between the barriers in the pair are side-effect free modulo the
         // barrier operation.
-        auto IsBarrierRemoveable = [&Kernel](BarrierInfo *StartBI,
-                                             BarrierInfo *EndBI) {
+        auto IsBarrierRemoveable = [&Kernel](
+                                       BarrierInfo *StartBI, BarrierInfo *EndBI,
+                                       SmallVector<AssumeInst *> &Assumptions) {
           assert(
               !StartBI->isImplicitExit() &&
               "Expected start barrier to be other than a kernel exit barrier");
@@ -1552,6 +1553,11 @@ private:
               continue;
             }
 
+            if (auto *AI = dyn_cast<AssumeInst>(I)) {
+              Assumptions.push_back(AI);
+              continue;
+            }
+
             if (auto *LI = dyn_cast<LoadInst>(I))
               if (LI->hasMetadata(LLVMContext::MD_invariant_load))
                 continue;
@@ -1577,11 +1583,15 @@ private:
           if (StartBI->isImplicit() && EndBI->isImplicit())
             continue;
 
-          if (!IsBarrierRemoveable(StartBI, EndBI))
+          SmallVector<AssumeInst *> Assumptions;
+          if (!IsBarrierRemoveable(StartBI, EndBI, Assumptions))
             continue;
 
           assert(!(StartBI->isImplicit() && EndBI->isImplicit()) &&
                  "Expected at least one explicit barrier to remove.");
+
+          for (auto *Assumption : Assumptions)
+            Assumption->eraseFromParent();
 
           // Remove an explicit barrier, check first, then second.
           if (!StartBI->isImplicit()) {
@@ -3280,8 +3290,6 @@ struct AAKernelInfoFunction : AAKernelInfo {
     constexpr const int InitModeArgNo = 1;
     constexpr const int DeinitModeArgNo = 1;
     constexpr const int InitUseStateMachineArgNo = 2;
-    constexpr const int InitRequiresFullRuntimeArgNo = 3;
-    constexpr const int DeinitRequiresFullRuntimeArgNo = 2;
     A.registerSimplificationCallback(
         IRPosition::callsite_argument(*KernelInitCB, InitUseStateMachineArgNo),
         StateMachineSimplifyCB);
@@ -3291,14 +3299,6 @@ struct AAKernelInfoFunction : AAKernelInfo {
     A.registerSimplificationCallback(
         IRPosition::callsite_argument(*KernelDeinitCB, DeinitModeArgNo),
         ModeSimplifyCB);
-    A.registerSimplificationCallback(
-        IRPosition::callsite_argument(*KernelInitCB,
-                                      InitRequiresFullRuntimeArgNo),
-        IsGenericModeSimplifyCB);
-    A.registerSimplificationCallback(
-        IRPosition::callsite_argument(*KernelDeinitCB,
-                                      DeinitRequiresFullRuntimeArgNo),
-        IsGenericModeSimplifyCB);
 
     // Check if we know we are in SPMD-mode already.
     ConstantInt *ModeArg =
@@ -3692,8 +3692,6 @@ struct AAKernelInfoFunction : AAKernelInfo {
     const int InitModeArgNo = 1;
     const int DeinitModeArgNo = 1;
     const int InitUseStateMachineArgNo = 2;
-    const int InitRequiresFullRuntimeArgNo = 3;
-    const int DeinitRequiresFullRuntimeArgNo = 2;
 
     auto &Ctx = getAnchorValue().getContext();
     A.changeUseAfterManifest(
@@ -3707,12 +3705,6 @@ struct AAKernelInfoFunction : AAKernelInfo {
         KernelDeinitCB->getArgOperandUse(DeinitModeArgNo),
         *ConstantInt::getSigned(IntegerType::getInt8Ty(Ctx),
                                 OMP_TGT_EXEC_MODE_SPMD));
-    A.changeUseAfterManifest(
-        KernelInitCB->getArgOperandUse(InitRequiresFullRuntimeArgNo),
-        *ConstantInt::getBool(Ctx, false));
-    A.changeUseAfterManifest(
-        KernelDeinitCB->getArgOperandUse(DeinitRequiresFullRuntimeArgNo),
-        *ConstantInt::getBool(Ctx, false));
 
     ++NumOpenMPTargetRegionKernelsSPMD;
 

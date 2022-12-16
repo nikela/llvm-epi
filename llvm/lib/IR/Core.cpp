@@ -61,6 +61,17 @@ void LLVMShutdown() {
   llvm_shutdown();
 }
 
+/*===-- Version query -----------------------------------------------------===*/
+
+void LLVMGetVersion(unsigned *Major, unsigned *Minor, unsigned *Patch) {
+    if (Major)
+        *Major = LLVM_VERSION_MAJOR;
+    if (Minor)
+        *Minor = LLVM_VERSION_MINOR;
+    if (Patch)
+        *Patch = LLVM_VERSION_PATCH;
+}
+
 /*===-- Error handling ----------------------------------------------------===*/
 
 char *LLVMCreateMessage(const char *Message) {
@@ -2644,13 +2655,12 @@ void LLVMInsertExistingBasicBlockAfterInsertBlock(LLVMBuilderRef Builder,
   BasicBlock *ToInsert = unwrap(BB);
   BasicBlock *CurBB = unwrap(Builder)->GetInsertBlock();
   assert(CurBB && "current insertion point is invalid!");
-  CurBB->getParent()->getBasicBlockList().insertAfter(CurBB->getIterator(),
-                                                      ToInsert);
+  CurBB->getParent()->insert(std::next(CurBB->getIterator()), ToInsert);
 }
 
 void LLVMAppendExistingBasicBlock(LLVMValueRef Fn,
                                   LLVMBasicBlockRef BB) {
-  unwrap<Function>(Fn)->getBasicBlockList().push_back(unwrap(BB));
+  unwrap<Function>(Fn)->insert(unwrap<Function>(Fn)->end(), unwrap(BB));
 }
 
 LLVMBasicBlockRef LLVMAppendBasicBlockInContext(LLVMContextRef C,
