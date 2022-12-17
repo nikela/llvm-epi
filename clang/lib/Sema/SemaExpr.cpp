@@ -9105,7 +9105,7 @@ static QualType computeConditionalNullability(QualType ResTy, bool IsBin,
   if (!ResTy->isAnyPointerType())
     return ResTy;
 
-  auto GetNullability = [&Ctx](QualType Ty) {
+  auto GetNullability = [](QualType Ty) {
     Optional<NullabilityKind> Kind = Ty->getNullability();
     if (Kind) {
       // For our purposes, treat _Nullable_result as _Nullable.
