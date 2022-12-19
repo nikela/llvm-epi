@@ -1125,23 +1125,6 @@ bool TargetLowering::SimplifyDemandedBits(
 
   KnownBits Known2;
   switch (Op.getOpcode()) {
-  case ISD::VSCALE: {
-    Function const &F = TLO.DAG.getMachineFunction().getFunction();
-    Attribute const &Attr = F.getFnAttribute(Attribute::VScaleRange);
-    if (!Attr.isValid())
-      return false;
-    std::optional<unsigned> MaxVScale = Attr.getVScaleRangeMax();
-    if (!MaxVScale.has_value())
-      return false;
-    APInt VScaleResultUpperbound = *MaxVScale * Op.getConstantOperandAPInt(0);
-    bool Negative = VScaleResultUpperbound.isNegative();
-    if (Negative)
-      VScaleResultUpperbound = ~VScaleResultUpperbound;
-    unsigned RequiredBits = VScaleResultUpperbound.getActiveBits();
-    if (RequiredBits < BitWidth)
-      (Negative ? Known.One : Known.Zero).setHighBits(BitWidth - RequiredBits);
-    return false;
-  }
   case ISD::SCALAR_TO_VECTOR: {
     if (VT.isScalableVector())
       return false;
@@ -2630,6 +2613,11 @@ bool TargetLowering::SimplifyDemandedBits(
       }
       return true;
     }
+
+    // neg x with only low bit demanded is simply x.
+    if (Op.getOpcode() == ISD::SUB && DemandedBits.isOne() &&
+        isa<ConstantSDNode>(Op0) && cast<ConstantSDNode>(Op0)->isZero())
+      return TLO.CombineTo(Op, Op1);
 
     // Attempt to avoid multi-use ops if we don't need anything from them.
     if (!LoMask.isAllOnes() || !DemandedElts.isAllOnes()) {
