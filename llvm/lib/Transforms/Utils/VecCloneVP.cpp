@@ -832,7 +832,7 @@ bool VecCloneVPPass::runImpl(
   // know where to replace the return instructions with a store to the return
   // vector.
   SmallVector<ReturnInst *> OldReturns;
-  for (BasicBlock &BB : Clone->getBasicBlockList())
+  for (BasicBlock &BB : *Clone)
     if (auto *RetInst = dyn_cast<ReturnInst>(BB.getTerminator()))
       OldReturns.push_back(RetInst);
 
