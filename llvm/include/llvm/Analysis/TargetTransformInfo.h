@@ -67,7 +67,6 @@ class User;
 class Value;
 class VPIntrinsic;
 struct KnownBits;
-template <typename T> class Optional;
 
 /// Information about a load/store intrinsic defined by the target.
 struct MemIntrinsicInfo {
