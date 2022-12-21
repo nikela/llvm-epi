@@ -332,18 +332,13 @@ void VPInstruction::generateInstruction(VPTransformState &State,
       Value *EVLPhi = State.get(getOperand(3), Part);
 
       auto *IdxTy = Builder.getInt32Ty();
-      Value *Vlen = Builder.CreateVScale(
-          ConstantInt::get(IdxTy, State.VF.getKnownMinValue()));
-      Value *Shift = Builder.CreateSub(Vlen, ConstantInt::get(IdxTy, 1));
-      // We should do this, but first we need to find a way to test it though.
-      // Value *Shift = Builder.CreateSub(EVLPhi, ConstantInt::get(IdxTy, 1));
-      Value *Mask =
-          Builder.CreateVectorSplat(State.VF, ConstantInt::get(Builder.getInt1Ty(), 1));
+      Value *Shift = Builder.CreateSub(EVLPhi, ConstantInt::get(IdxTy, 1));
+      Value *Mask = Builder.CreateVectorSplat(
+          State.VF, ConstantInt::get(Builder.getInt1Ty(), 1));
 
       Value *Splice = Builder.CreateIntrinsic(
-          Intrinsic::experimental_vp_splice,
-          {PartMinus1->getType()}, {PartMinus1, V2, Shift, Mask, EVLPhi, EVL},
-          nullptr);
+          Intrinsic::experimental_vp_splice, {PartMinus1->getType()},
+          {PartMinus1, V2, Shift, Mask, EVLPhi, EVL}, nullptr);
 
       State.set(this, Splice, Part);
     }
