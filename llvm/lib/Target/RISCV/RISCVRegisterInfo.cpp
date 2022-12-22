@@ -35,6 +35,11 @@ static cl::opt<bool>
                          cl::desc("Disable two address hints for register "
                                   "allocation"));
 
+static cl::opt<bool>
+    EnableLocalStackAllocation("riscv-local-stack-allocation", cl::Hidden,
+                               cl::init(false),
+                               cl::desc("Enable LocalStackSlotAllocation"));
+
 static_assert(RISCV::X1 == RISCV::X0 + 1, "Register list not consecutive");
 static_assert(RISCV::X31 == RISCV::X0 + 31, "Register list not consecutive");
 static_assert(RISCV::F1_H == RISCV::F0_H + 1, "Register list not consecutive");
@@ -507,7 +512,7 @@ bool RISCVRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
 
 bool RISCVRegisterInfo::requiresVirtualBaseRegisters(
     const MachineFunction &MF) const {
-  return true;
+  return EnableLocalStackAllocation;
 }
 
 // Returns true if the instruction's frame index reference would be better
