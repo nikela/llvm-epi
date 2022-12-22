@@ -83,7 +83,7 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCVTarget() {
   initializeRISCVPreRAExpandPseudoPass(*PR);
   initializeRISCVExpandPseudoPass(*PR);
   initializeRISCVInsertVSETVLIPass(*PR);
-
+  initializeRISCVDAGToDAGISelPass(*PR);
   initializeEPIFoldBroadcastPass(*PR);
   initializeEPIFMAContractionPass(*PR);
 }
@@ -200,6 +200,13 @@ RISCVTargetMachine::getSubtargetImpl(const Function &F) const {
         TargetTriple, CPU, TuneCPU, FS, ABIName, RVVBitsMin, RVVBitsMax, *this);
   }
   return I.get();
+}
+
+MachineFunctionInfo *RISCVTargetMachine::createMachineFunctionInfo(
+    BumpPtrAllocator &Allocator, const Function &F,
+    const TargetSubtargetInfo *STI) const {
+  return RISCVMachineFunctionInfo::create<RISCVMachineFunctionInfo>(Allocator,
+                                                                    F, STI);
 }
 
 TargetTransformInfo

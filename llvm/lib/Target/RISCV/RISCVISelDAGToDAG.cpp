@@ -29,6 +29,7 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "riscv-isel"
+#define PASS_NAME "RISCV DAG->DAG Pattern Instruction Selection"
 
 namespace llvm::RISCV {
 #define GET_RISCVVSSEGTable_IMPL
@@ -3357,3 +3358,5 @@ FunctionPass *llvm::createRISCVISelDag(RISCVTargetMachine &TM,
 }
 
 char RISCVDAGToDAGISel::ID = 0;
+
+INITIALIZE_PASS(RISCVDAGToDAGISel, DEBUG_TYPE, PASS_NAME, false, false)
