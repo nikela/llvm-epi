@@ -16,7 +16,7 @@ define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    addiw a1, a1, -1
 ; CHECK-NEXT:    vmv.s.x v10, a1
 ; CHECK-NEXT:    vredmin.vs v10, v8, v10
-; CHECK-NEXT:    vmv.x.s t0, v10
+; CHECK-NEXT:    vmv.x.s a1, v10
 ; CHECK-NEXT:    vredmaxu.vs v10, v8, v9
 ; CHECK-NEXT:    vmv.x.s a3, v10
 ; CHECK-NEXT:    vmv.v.i v10, -1
@@ -28,12 +28,12 @@ define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    vmv.x.s a0, v10
 ; CHECK-NEXT:    vredxor.vs v8, v8, v9
 ; CHECK-NEXT:    vmv.x.s a2, v8
-; CHECK-NEXT:    addw a1, a6, a7
-; CHECK-NEXT:    addw a1, a1, t0
-; CHECK-NEXT:    addw a1, a1, a3
-; CHECK-NEXT:    addw a1, a1, a4
-; CHECK-NEXT:    addw a1, a1, a5
-; CHECK-NEXT:    addw a0, a0, a1
+; CHECK-NEXT:    add a6, a6, a7
+; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    add a1, a1, a3
+; CHECK-NEXT:    add a1, a1, a4
+; CHECK-NEXT:    add a1, a1, a5
+; CHECK-NEXT:    add a0, a0, a1
 ; CHECK-NEXT:    addw a0, a0, a2
 ; CHECK-NEXT:    ret
   %add = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> %a)
