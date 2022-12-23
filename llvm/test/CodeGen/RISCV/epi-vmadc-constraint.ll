@@ -666,8 +666,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    lwu a3, 36(a0)
 ; CHECK-NEXT:    lwu a4, 32(a0)
 ; CHECK-NEXT:    slli a3, a3, 32
-; CHECK-NEXT:    or t0, a3, a4
-; CHECK-NEXT:    sd t0, 136(sp)
+; CHECK-NEXT:    or s11, a3, a4
+; CHECK-NEXT:    sd s11, 136(sp)
 ; CHECK-NEXT:    lwu a3, 12(a0)
 ; CHECK-NEXT:    lwu a5, 8(a0)
 ; CHECK-NEXT:    slli a3, a3, 32
@@ -681,17 +681,17 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    lwu a3, 60(a0)
 ; CHECK-NEXT:    lwu a5, 56(a0)
 ; CHECK-NEXT:    slli a3, a3, 32
-; CHECK-NEXT:    or s9, a3, a5
-; CHECK-NEXT:    sd s9, 160(sp)
+; CHECK-NEXT:    or a7, a3, a5
+; CHECK-NEXT:    sd a7, 160(sp)
 ; CHECK-NEXT:    lwu a3, 44(a0)
 ; CHECK-NEXT:    lwu a5, 40(a0)
 ; CHECK-NEXT:    slli a3, a3, 32
 ; CHECK-NEXT:    or s2, a3, a5
 ; CHECK-NEXT:    sd s2, 144(sp)
-; CHECK-NEXT:    lw s0, 108(sp)
+; CHECK-NEXT:    lw a5, 108(sp)
 ; CHECK-NEXT:    lw s8, 124(sp)
-; CHECK-NEXT:    lw s11, 156(sp)
-; CHECK-NEXT:    lw a7, 140(sp)
+; CHECK-NEXT:    lw t0, 156(sp)
+; CHECK-NEXT:    lw s9, 140(sp)
 ; CHECK-NEXT:    lw t1, 116(sp)
 ; CHECK-NEXT:    lw s7, 132(sp)
 ; CHECK-NEXT:    lw t6, 164(sp)
@@ -700,167 +700,167 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:  .LBB0_9: # %for.body5.i
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
-; CHECK-NEXT:    addw a3, s6, s1
+; CHECK-NEXT:    add a3, s6, s1
 ; CHECK-NEXT:    xor a4, a3, s5
-; CHECK-NEXT:    srliw a5, a4, 16
-; CHECK-NEXT:    slliw a4, a4, 16
-; CHECK-NEXT:    or a4, a4, a5
-; CHECK-NEXT:    addw a5, a4, t0
-; CHECK-NEXT:    xor s1, s1, a5
-; CHECK-NEXT:    srliw a0, s1, 20
-; CHECK-NEXT:    slliw s1, s1, 12
-; CHECK-NEXT:    or a0, a0, s1
-; CHECK-NEXT:    addw s6, a0, a3
+; CHECK-NEXT:    srliw s0, a4, 16
+; CHECK-NEXT:    slli a4, a4, 16
+; CHECK-NEXT:    or a4, a4, s0
+; CHECK-NEXT:    add s11, s11, a4
+; CHECK-NEXT:    xor s0, s11, s1
+; CHECK-NEXT:    srliw s1, s0, 20
+; CHECK-NEXT:    slli s0, s0, 12
+; CHECK-NEXT:    or s0, s0, s1
+; CHECK-NEXT:    add s6, s0, a3
 ; CHECK-NEXT:    xor a4, s6, a4
 ; CHECK-NEXT:    srliw s1, a4, 24
-; CHECK-NEXT:    slliw a4, a4, 8
+; CHECK-NEXT:    slli a4, a4, 8
 ; CHECK-NEXT:    or s5, a4, s1
-; CHECK-NEXT:    addw t0, s5, a5
-; CHECK-NEXT:    xor a0, t0, a0
-; CHECK-NEXT:    srliw a5, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
-; CHECK-NEXT:    or ra, a0, a5
-; CHECK-NEXT:    addw a0, s0, s8
-; CHECK-NEXT:    xor a5, a0, s11
-; CHECK-NEXT:    srliw s1, a5, 16
-; CHECK-NEXT:    slliw a5, a5, 16
-; CHECK-NEXT:    or a5, a5, s1
-; CHECK-NEXT:    addw s1, a5, a7
-; CHECK-NEXT:    xor s0, s1, s8
-; CHECK-NEXT:    srliw a4, s0, 20
-; CHECK-NEXT:    slliw s0, s0, 12
-; CHECK-NEXT:    or a4, a4, s0
-; CHECK-NEXT:    addw s0, a4, a0
-; CHECK-NEXT:    xor a5, a5, s0
-; CHECK-NEXT:    srliw a0, a5, 24
-; CHECK-NEXT:    slliw a5, a5, 8
-; CHECK-NEXT:    or s11, a5, a0
-; CHECK-NEXT:    addw a7, s11, s1
-; CHECK-NEXT:    xor a0, a7, a4
-; CHECK-NEXT:    srliw a4, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
-; CHECK-NEXT:    or s8, a0, a4
-; CHECK-NEXT:    addw a4, s10, s4
-; CHECK-NEXT:    xor a5, a4, s9
-; CHECK-NEXT:    srliw s1, a5, 16
-; CHECK-NEXT:    slliw a5, a5, 16
-; CHECK-NEXT:    or a5, a5, s1
-; CHECK-NEXT:    addw a3, a5, s2
-; CHECK-NEXT:    xor s1, a3, s4
+; CHECK-NEXT:    add a4, s5, s11
+; CHECK-NEXT:    xor s0, s0, a4
+; CHECK-NEXT:    srliw s1, s0, 25
+; CHECK-NEXT:    slli s0, s0, 7
+; CHECK-NEXT:    or ra, s0, s1
+; CHECK-NEXT:    add a5, a5, s8
+; CHECK-NEXT:    xor s1, a5, t0
+; CHECK-NEXT:    srliw s0, s1, 16
+; CHECK-NEXT:    slli s1, s1, 16
+; CHECK-NEXT:    or s0, s0, s1
+; CHECK-NEXT:    add s9, s9, s0
+; CHECK-NEXT:    xor s1, s9, s8
 ; CHECK-NEXT:    srliw a0, s1, 20
-; CHECK-NEXT:    slliw s1, s1, 12
+; CHECK-NEXT:    slli s1, s1, 12
 ; CHECK-NEXT:    or a0, a0, s1
-; CHECK-NEXT:    addw s10, a0, a4
-; CHECK-NEXT:    xor a5, s10, a5
-; CHECK-NEXT:    srliw a4, a5, 24
-; CHECK-NEXT:    slliw a5, a5, 8
-; CHECK-NEXT:    or s9, a5, a4
-; CHECK-NEXT:    addw s2, s9, a3
-; CHECK-NEXT:    xor a0, s2, a0
-; CHECK-NEXT:    srliw a4, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
-; CHECK-NEXT:    or s4, a0, a4
-; CHECK-NEXT:    addw a4, t1, s7
-; CHECK-NEXT:    xor a5, a4, t6
-; CHECK-NEXT:    srliw s1, a5, 16
-; CHECK-NEXT:    slliw a5, a5, 16
-; CHECK-NEXT:    or s1, s1, a5
-; CHECK-NEXT:    addw a5, s1, s3
-; CHECK-NEXT:    xor a0, a5, s7
-; CHECK-NEXT:    srliw a3, a0, 20
-; CHECK-NEXT:    slliw a0, a0, 12
-; CHECK-NEXT:    or a0, a0, a3
-; CHECK-NEXT:    addw t1, a0, a4
-; CHECK-NEXT:    xor s1, t1, s1
-; CHECK-NEXT:    srliw a3, s1, 24
-; CHECK-NEXT:    slliw s1, s1, 8
-; CHECK-NEXT:    or a3, a3, s1
-; CHECK-NEXT:    addw s3, a3, a5
-; CHECK-NEXT:    xor a0, s3, a0
+; CHECK-NEXT:    add t0, a0, a5
+; CHECK-NEXT:    xor s0, t0, s0
+; CHECK-NEXT:    srliw s1, s0, 24
+; CHECK-NEXT:    slli s0, s0, 8
+; CHECK-NEXT:    or s11, s0, s1
+; CHECK-NEXT:    add s9, s9, s11
+; CHECK-NEXT:    xor a0, s9, a0
 ; CHECK-NEXT:    srliw s1, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
-; CHECK-NEXT:    or s7, a0, s1
-; CHECK-NEXT:    addw s1, s8, s6
-; CHECK-NEXT:    xor a3, a3, s1
-; CHECK-NEXT:    srliw a4, a3, 16
-; CHECK-NEXT:    slliw a3, a3, 16
-; CHECK-NEXT:    or a3, a3, a4
-; CHECK-NEXT:    addw a4, a3, s2
-; CHECK-NEXT:    xor a0, a4, s8
-; CHECK-NEXT:    srliw a5, a0, 20
-; CHECK-NEXT:    slliw a0, a0, 12
-; CHECK-NEXT:    or a0, a0, a5
-; CHECK-NEXT:    addw s6, a0, s1
-; CHECK-NEXT:    xor a3, s6, a3
-; CHECK-NEXT:    srliw a5, a3, 24
-; CHECK-NEXT:    slliw a3, a3, 8
-; CHECK-NEXT:    or t6, a3, a5
-; CHECK-NEXT:    addw s2, t6, a4
-; CHECK-NEXT:    xor a0, s2, a0
-; CHECK-NEXT:    srliw a3, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
-; CHECK-NEXT:    or s8, a0, a3
-; CHECK-NEXT:    addw a0, s4, s0
-; CHECK-NEXT:    xor a3, s5, a0
-; CHECK-NEXT:    srliw a4, a3, 16
-; CHECK-NEXT:    slliw a3, a3, 16
-; CHECK-NEXT:    or a3, a3, a4
-; CHECK-NEXT:    addw a4, a3, s3
-; CHECK-NEXT:    xor a5, a4, s4
-; CHECK-NEXT:    srliw s0, a5, 20
-; CHECK-NEXT:    slliw a5, a5, 12
+; CHECK-NEXT:    slli a0, a0, 7
+; CHECK-NEXT:    or a0, a0, s1
+; CHECK-NEXT:    add s1, s10, s4
+; CHECK-NEXT:    xor s0, s1, a7
+; CHECK-NEXT:    srliw a3, s0, 16
+; CHECK-NEXT:    slli s0, s0, 16
+; CHECK-NEXT:    or a3, a3, s0
+; CHECK-NEXT:    add s2, s2, a3
+; CHECK-NEXT:    xor s0, s2, s4
+; CHECK-NEXT:    srliw a5, s0, 20
+; CHECK-NEXT:    slli s0, s0, 12
 ; CHECK-NEXT:    or a5, a5, s0
-; CHECK-NEXT:    addw s0, a5, a0
-; CHECK-NEXT:    xor a3, a3, s0
-; CHECK-NEXT:    srliw a0, a3, 24
-; CHECK-NEXT:    slliw a3, a3, 8
-; CHECK-NEXT:    or s5, a3, a0
-; CHECK-NEXT:    addw s3, s5, a4
-; CHECK-NEXT:    xor a0, s3, a5
+; CHECK-NEXT:    add s10, a5, s1
+; CHECK-NEXT:    xor a3, s10, a3
+; CHECK-NEXT:    srliw s0, a3, 24
+; CHECK-NEXT:    slli a3, a3, 8
+; CHECK-NEXT:    or a7, a3, s0
+; CHECK-NEXT:    add s2, s2, a7
+; CHECK-NEXT:    xor a3, s2, a5
+; CHECK-NEXT:    srliw a5, a3, 25
+; CHECK-NEXT:    slli a3, a3, 7
+; CHECK-NEXT:    or a3, a3, a5
+; CHECK-NEXT:    add t1, t1, s7
+; CHECK-NEXT:    xor a5, t1, t6
+; CHECK-NEXT:    srliw s0, a5, 16
+; CHECK-NEXT:    slli a5, a5, 16
+; CHECK-NEXT:    or a5, a5, s0
+; CHECK-NEXT:    add s3, s3, a5
+; CHECK-NEXT:    xor s0, s3, s7
+; CHECK-NEXT:    srliw s1, s0, 20
+; CHECK-NEXT:    slli s0, s0, 12
+; CHECK-NEXT:    or s1, s1, s0
+; CHECK-NEXT:    add t1, t1, s1
+; CHECK-NEXT:    xor a5, t1, a5
+; CHECK-NEXT:    srliw s0, a5, 24
+; CHECK-NEXT:    slli a5, a5, 8
+; CHECK-NEXT:    or a5, a5, s0
+; CHECK-NEXT:    add s3, s3, a5
+; CHECK-NEXT:    xor s1, s3, s1
+; CHECK-NEXT:    srliw s0, s1, 25
+; CHECK-NEXT:    slli s1, s1, 7
+; CHECK-NEXT:    or s0, s0, s1
+; CHECK-NEXT:    add s6, s6, a0
+; CHECK-NEXT:    xor a5, s6, a5
+; CHECK-NEXT:    srliw s1, a5, 16
+; CHECK-NEXT:    slli a5, a5, 16
+; CHECK-NEXT:    or a5, a5, s1
+; CHECK-NEXT:    add s2, s2, a5
+; CHECK-NEXT:    xor a0, s2, a0
+; CHECK-NEXT:    srliw s1, a0, 20
+; CHECK-NEXT:    slli a0, a0, 12
+; CHECK-NEXT:    or a0, a0, s1
+; CHECK-NEXT:    addw s6, a0, s6
+; CHECK-NEXT:    xor a5, s6, a5
+; CHECK-NEXT:    srliw s1, a5, 24
+; CHECK-NEXT:    slli a5, a5, 8
+; CHECK-NEXT:    or t6, a5, s1
+; CHECK-NEXT:    add s2, s2, t6
+; CHECK-NEXT:    xor a0, s2, a0
+; CHECK-NEXT:    srliw a5, a0, 25
+; CHECK-NEXT:    slli a0, a0, 7
+; CHECK-NEXT:    or s8, a0, a5
+; CHECK-NEXT:    add t0, t0, a3
+; CHECK-NEXT:    xor a0, s5, t0
+; CHECK-NEXT:    srliw a5, a0, 16
+; CHECK-NEXT:    slli a0, a0, 16
+; CHECK-NEXT:    or a0, a0, a5
+; CHECK-NEXT:    add s3, s3, a0
+; CHECK-NEXT:    xor a3, s3, a3
+; CHECK-NEXT:    srliw a5, a3, 20
+; CHECK-NEXT:    slli a3, a3, 12
+; CHECK-NEXT:    or a3, a3, a5
+; CHECK-NEXT:    addw a5, a3, t0
+; CHECK-NEXT:    xor a0, a0, a5
+; CHECK-NEXT:    srliw s1, a0, 24
+; CHECK-NEXT:    slli a0, a0, 8
+; CHECK-NEXT:    or s5, a0, s1
+; CHECK-NEXT:    add s3, s3, s5
+; CHECK-NEXT:    xor a0, s3, a3
 ; CHECK-NEXT:    srliw a3, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
+; CHECK-NEXT:    slli a0, a0, 7
 ; CHECK-NEXT:    or s4, a0, a3
-; CHECK-NEXT:    addw a0, s7, s10
-; CHECK-NEXT:    xor a3, s11, a0
-; CHECK-NEXT:    srliw a4, a3, 16
-; CHECK-NEXT:    slliw a3, a3, 16
-; CHECK-NEXT:    or a3, a3, a4
-; CHECK-NEXT:    addw a4, t0, a3
-; CHECK-NEXT:    xor a5, a4, s7
-; CHECK-NEXT:    srliw s1, a5, 20
-; CHECK-NEXT:    slliw a5, a5, 12
-; CHECK-NEXT:    or a5, a5, s1
-; CHECK-NEXT:    addw s10, a5, a0
-; CHECK-NEXT:    xor a0, s10, a3
-; CHECK-NEXT:    srliw a3, a0, 24
-; CHECK-NEXT:    slliw a0, a0, 8
-; CHECK-NEXT:    or s11, a0, a3
-; CHECK-NEXT:    addw t0, s11, a4
-; CHECK-NEXT:    xor a0, t0, a5
+; CHECK-NEXT:    add s10, s10, s0
+; CHECK-NEXT:    xor a0, s11, s10
+; CHECK-NEXT:    srliw a3, a0, 16
+; CHECK-NEXT:    slli a0, a0, 16
+; CHECK-NEXT:    or a0, a0, a3
+; CHECK-NEXT:    add a4, a4, a0
+; CHECK-NEXT:    xor s0, s0, a4
+; CHECK-NEXT:    srliw a3, s0, 20
+; CHECK-NEXT:    slli s0, s0, 12
+; CHECK-NEXT:    or a3, a3, s0
+; CHECK-NEXT:    add s10, s10, a3
+; CHECK-NEXT:    xor a0, s10, a0
+; CHECK-NEXT:    srliw s1, a0, 24
+; CHECK-NEXT:    slli a0, a0, 8
+; CHECK-NEXT:    or t0, a0, s1
+; CHECK-NEXT:    add s11, t0, a4
+; CHECK-NEXT:    xor a0, s11, a3
 ; CHECK-NEXT:    srliw a3, a0, 25
-; CHECK-NEXT:    slliw a0, a0, 7
+; CHECK-NEXT:    slli a0, a0, 7
 ; CHECK-NEXT:    or s7, a0, a3
-; CHECK-NEXT:    addw a0, ra, t1
-; CHECK-NEXT:    xor a3, a0, s9
-; CHECK-NEXT:    srliw a4, a3, 16
-; CHECK-NEXT:    slliw a3, a3, 16
+; CHECK-NEXT:    add t1, t1, ra
+; CHECK-NEXT:    xor a0, t1, a7
+; CHECK-NEXT:    srliw a3, a0, 16
+; CHECK-NEXT:    slli a0, a0, 16
+; CHECK-NEXT:    or a0, a0, a3
+; CHECK-NEXT:    add s9, s9, a0
+; CHECK-NEXT:    xor a3, s9, ra
+; CHECK-NEXT:    srliw a4, a3, 20
+; CHECK-NEXT:    slli a3, a3, 12
 ; CHECK-NEXT:    or a3, a3, a4
-; CHECK-NEXT:    addw a4, a3, a7
-; CHECK-NEXT:    xor a5, a4, ra
-; CHECK-NEXT:    srliw s1, a5, 20
-; CHECK-NEXT:    slliw a5, a5, 12
-; CHECK-NEXT:    or a5, a5, s1
-; CHECK-NEXT:    addw t1, a5, a0
-; CHECK-NEXT:    xor a0, t1, a3
-; CHECK-NEXT:    srliw a3, a0, 24
-; CHECK-NEXT:    slliw a0, a0, 8
-; CHECK-NEXT:    or s9, a0, a3
-; CHECK-NEXT:    addw a7, s9, a4
-; CHECK-NEXT:    xor a0, a7, a5
+; CHECK-NEXT:    add t1, t1, a3
+; CHECK-NEXT:    xor a0, t1, a0
+; CHECK-NEXT:    srliw a4, a0, 24
+; CHECK-NEXT:    slli a0, a0, 8
+; CHECK-NEXT:    or a7, a0, a4
+; CHECK-NEXT:    add s9, s9, a7
+; CHECK-NEXT:    xor a0, s9, a3
 ; CHECK-NEXT:    srliw a3, a0, 25
-; CHECK-NEXT:    slliw s1, a0, 7
+; CHECK-NEXT:    slli a0, a0, 7
 ; CHECK-NEXT:    addiw a6, a6, -2
-; CHECK-NEXT:    or s1, s1, a3
+; CHECK-NEXT:    or s1, a0, a3
 ; CHECK-NEXT:    bltu t4, a6, .LBB0_9
 ; CHECK-NEXT:  # %bb.10: # %for.cond451.preheader.i
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
@@ -869,86 +869,86 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    add s6, s6, a3
 ; CHECK-NEXT:    sw s6, 104(sp)
 ; CHECK-NEXT:    lw a3, 4(a0)
-; CHECK-NEXT:    add ra, a3, s0
+; CHECK-NEXT:    add ra, a3, a5
 ; CHECK-NEXT:    sw ra, 108(sp)
 ; CHECK-NEXT:    lw a3, 8(a0)
-; CHECK-NEXT:    addw a3, a3, s10
+; CHECK-NEXT:    add a3, a3, s10
 ; CHECK-NEXT:    sw a3, 112(sp)
 ; CHECK-NEXT:    lw a3, 12(a0)
-; CHECK-NEXT:    addw a3, a3, t1
+; CHECK-NEXT:    add a3, a3, t1
 ; CHECK-NEXT:    sw a3, 116(sp)
 ; CHECK-NEXT:    lw a3, 16(a0)
-; CHECK-NEXT:    addw a3, a3, s1
+; CHECK-NEXT:    add a3, a3, s1
 ; CHECK-NEXT:    sw a3, 120(sp)
 ; CHECK-NEXT:    lw a3, 20(a0)
-; CHECK-NEXT:    addw a3, a3, s8
+; CHECK-NEXT:    add a3, a3, s8
 ; CHECK-NEXT:    sw a3, 124(sp)
 ; CHECK-NEXT:    lw a3, 24(a0)
-; CHECK-NEXT:    addw a3, a3, s4
+; CHECK-NEXT:    add a3, a3, s4
 ; CHECK-NEXT:    sw a3, 128(sp)
 ; CHECK-NEXT:    lw a3, 28(a0)
-; CHECK-NEXT:    addw a3, a3, s7
+; CHECK-NEXT:    add a3, a3, s7
 ; CHECK-NEXT:    sw a3, 132(sp)
 ; CHECK-NEXT:    lw a3, 32(a0)
-; CHECK-NEXT:    addw a3, a3, t0
+; CHECK-NEXT:    add a3, a3, s11
 ; CHECK-NEXT:    sw a3, 136(sp)
 ; CHECK-NEXT:    lw a3, 36(a0)
-; CHECK-NEXT:    addw a3, a3, a7
+; CHECK-NEXT:    add a3, a3, s9
 ; CHECK-NEXT:    sw a3, 140(sp)
 ; CHECK-NEXT:    lw a3, 40(a0)
-; CHECK-NEXT:    addw a3, a3, s2
+; CHECK-NEXT:    add a3, a3, s2
 ; CHECK-NEXT:    sw a3, 144(sp)
 ; CHECK-NEXT:    lw a3, 44(a0)
-; CHECK-NEXT:    addw a3, a3, s3
+; CHECK-NEXT:    add a3, a3, s3
 ; CHECK-NEXT:    sw a3, 148(sp)
-; CHECK-NEXT:    lw a7, 48(a0)
-; CHECK-NEXT:    addw a3, a7, s5
-; CHECK-NEXT:    sw a3, 152(sp)
+; CHECK-NEXT:    lw s2, 48(a0)
+; CHECK-NEXT:    add s5, s5, s2
+; CHECK-NEXT:    sw s5, 152(sp)
 ; CHECK-NEXT:    lw a6, 52(a0)
-; CHECK-NEXT:    addw a5, a6, s11
-; CHECK-NEXT:    sw a5, 156(sp)
-; CHECK-NEXT:    lw a5, 56(a0)
-; CHECK-NEXT:    addw a5, a5, s9
-; CHECK-NEXT:    sw a5, 160(sp)
-; CHECK-NEXT:    lw s1, 60(a0)
-; CHECK-NEXT:    li a5, 0
-; CHECK-NEXT:    addw s1, s1, t6
-; CHECK-NEXT:    sw s1, 164(sp)
-; CHECK-NEXT:    srli s1, s6, 8
+; CHECK-NEXT:    add s11, a6, t0
+; CHECK-NEXT:    sw s11, 156(sp)
+; CHECK-NEXT:    lw s1, 56(a0)
+; CHECK-NEXT:    add a7, a7, s1
+; CHECK-NEXT:    sw a7, 160(sp)
+; CHECK-NEXT:    lw s0, 60(a0)
+; CHECK-NEXT:    li s1, 0
+; CHECK-NEXT:    add t6, t6, s0
+; CHECK-NEXT:    sw t6, 164(sp)
+; CHECK-NEXT:    srli s0, s6, 8
 ; CHECK-NEXT:    srli a3, s6, 16
 ; CHECK-NEXT:    srli a4, s6, 24
 ; CHECK-NEXT:    sb s6, 40(sp)
-; CHECK-NEXT:    sb s1, 41(sp)
+; CHECK-NEXT:    sb s0, 41(sp)
 ; CHECK-NEXT:    sb a3, 42(sp)
 ; CHECK-NEXT:    sb a4, 43(sp)
 ; CHECK-NEXT:    srli a3, ra, 8
 ; CHECK-NEXT:    srli a4, ra, 16
-; CHECK-NEXT:    srli s0, ra, 24
+; CHECK-NEXT:    srli a5, ra, 24
 ; CHECK-NEXT:    sb ra, 44(sp)
 ; CHECK-NEXT:    sb a3, 45(sp)
 ; CHECK-NEXT:    sb a4, 46(sp)
-; CHECK-NEXT:    sb s0, 47(sp)
+; CHECK-NEXT:    sb a5, 47(sp)
 ; CHECK-NEXT:  .LBB0_11: # %do.body.do.body_crit_edge.i.do.body.do.body_crit_edge.i_crit_edge
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
-; CHECK-NEXT:    add a3, t2, a5
+; CHECK-NEXT:    add a3, t2, s1
 ; CHECK-NEXT:    lw a3, 0(a3)
-; CHECK-NEXT:    srli s1, a3, 8
+; CHECK-NEXT:    srli a5, a3, 8
 ; CHECK-NEXT:    srli a4, a3, 16
-; CHECK-NEXT:    srli t0, a3, 24
-; CHECK-NEXT:    add s0, t3, a5
+; CHECK-NEXT:    srli a7, a3, 24
+; CHECK-NEXT:    add s0, t3, s1
 ; CHECK-NEXT:    sb a3, 0(s0)
-; CHECK-NEXT:    sb s1, 1(s0)
+; CHECK-NEXT:    sb a5, 1(s0)
 ; CHECK-NEXT:    sb a4, 2(s0)
-; CHECK-NEXT:    addi a5, a5, 4
-; CHECK-NEXT:    sb t0, 3(s0)
-; CHECK-NEXT:    bne a5, t5, .LBB0_11
+; CHECK-NEXT:    addi s1, s1, 4
+; CHECK-NEXT:    sb a7, 3(s0)
+; CHECK-NEXT:    bne s1, t5, .LBB0_11
 ; CHECK-NEXT:  # %bb.12: # %salsa20_wordtobyte.exit
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
-; CHECK-NEXT:    addiw a7, a7, 1
-; CHECK-NEXT:    sw a7, 48(a0)
-; CHECK-NEXT:    ld t0, 32(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    bnez a7, .LBB0_14
+; CHECK-NEXT:    addiw s2, s2, 1
+; CHECK-NEXT:    sw s2, 48(a0)
+; CHECK-NEXT:    ld a7, 32(sp) # 8-byte Folded Reload
+; CHECK-NEXT:    bnez s2, .LBB0_14
 ; CHECK-NEXT:  # %bb.13: # %if.then217
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    addiw a6, a6, 1
@@ -956,7 +956,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:  .LBB0_14: # %if.end221
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    li a3, 65
-; CHECK-NEXT:    bltu t0, a3, .LBB0_18
+; CHECK-NEXT:    bltu a7, a3, .LBB0_18
 ; CHECK-NEXT:  # %bb.15: # %for.body243.preheader
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
 ; CHECK-NEXT:    li a3, 0
@@ -977,8 +977,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    bne a3, a5, .LBB0_16
 ; CHECK-NEXT:  # %bb.17: # %for.end256
 ; CHECK-NEXT:    # in Loop: Header=BB0_8 Depth=1
-; CHECK-NEXT:    addiw t0, t0, -64
-; CHECK-NEXT:    sd t0, 32(sp) # 8-byte Folded Spill
+; CHECK-NEXT:    addiw a7, a7, -64
+; CHECK-NEXT:    sd a7, 32(sp) # 8-byte Folded Spill
 ; CHECK-NEXT:    addi a2, a2, 64
 ; CHECK-NEXT:    addi a1, a1, 64
 ; CHECK-NEXT:    addi a6, a6, -64
@@ -986,7 +986,7 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    j .LBB0_8
 ; CHECK-NEXT:  .LBB0_18: # %for.cond225.preheader
 ; CHECK-NEXT:    ld s1, 24(sp) # 8-byte Folded Reload
-; CHECK-NEXT:    beqz t0, .LBB0_21
+; CHECK-NEXT:    beqz a7, .LBB0_21
 ; CHECK-NEXT:  # %bb.19: # %for.body228.preheader
 ; CHECK-NEXT:    li a0, 0
 ; CHECK-NEXT:    addi a3, sp, 40

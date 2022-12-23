@@ -45,7 +45,7 @@ define void @s16axpy(i16 signext %N, i16* noalias nocapture %y, i16* noalias noc
 ; CHECK-NEXT:    lh a4, 0(a2)
 ; CHECK-NEXT:    lh a5, 0(a1)
 ; CHECK-NEXT:    mulw a4, a4, a3
-; CHECK-NEXT:    addw a4, a4, a5
+; CHECK-NEXT:    add a4, a4, a5
 ; CHECK-NEXT:    sh a4, 0(a1)
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    addi a1, a1, 2
@@ -157,7 +157,7 @@ define void @s32axpy(i32 signext %N, i32* noalias nocapture %y, i32* noalias noc
 ; CHECK-NEXT:    lw a4, 0(a2)
 ; CHECK-NEXT:    lw a5, 0(a1)
 ; CHECK-NEXT:    mulw a4, a4, a3
-; CHECK-NEXT:    addw a4, a4, a5
+; CHECK-NEXT:    add a4, a4, a5
 ; CHECK-NEXT:    sw a4, 0(a1)
 ; CHECK-NEXT:    addi a0, a0, -1
 ; CHECK-NEXT:    addi a1, a1, 4
