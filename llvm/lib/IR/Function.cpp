@@ -942,6 +942,15 @@ static std::string getMangledTypeStr(Type *Ty, bool &HasUnnamedType) {
       Result += "nx";
     Result += "v" + utostr(EC.getKnownMinValue()) +
               getMangledTypeStr(VTy->getElementType(), HasUnnamedType);
+  } else if (TargetExtType *TETy = dyn_cast<TargetExtType>(Ty)) {
+    Result += "t";
+    Result += TETy->getName();
+    for (Type *ParamTy : TETy->type_params())
+      Result += "_" + getMangledTypeStr(ParamTy, HasUnnamedType);
+    for (unsigned IntParam : TETy->int_params())
+      Result += "_" + utostr(IntParam);
+    // Ensure nested target extension types are distinguishable.
+    Result += "t";
   } else if (Ty) {
     switch (Ty->getTypeID()) {
     default: llvm_unreachable("Unhandled type");
@@ -1906,10 +1915,6 @@ std::optional<Function *> Intrinsic::remangleIntrinsicFunction(Function *F) {
   return NewDecl;
 }
 
-static bool isPointerCastOperator(const User *U) {
-  return isa<AddrSpaceCastOperator>(U) || isa<BitCastOperator>(U);
-}
-
 /// hasAddressTaken - returns true if there are any uses of this function
 /// other than direct calls or invokes to it. Optionally ignores callback
 /// uses, assume like pointer annotation calls, and references in llvm.used
@@ -1931,7 +1936,8 @@ bool Function::hasAddressTaken(const User **PutOffender,
 
     const auto *Call = dyn_cast<CallBase>(FU);
     if (!Call) {
-      if (IgnoreAssumeLikeCalls && isPointerCastOperator(FU) &&
+      if (IgnoreAssumeLikeCalls &&
+          isa<BitCastOperator, AddrSpaceCastOperator>(FU) &&
           all_of(FU->users(), [](const User *U) {
             if (const auto *I = dyn_cast<IntrinsicInst>(U))
               return I->isAssumeLikeIntrinsic();
@@ -1942,8 +1948,8 @@ bool Function::hasAddressTaken(const User **PutOffender,
 
       if (IgnoreLLVMUsed && !FU->user_empty()) {
         const User *FUU = FU;
-        if (isa<BitCastOperator>(FU) && FU->hasOneUse() &&
-            !FU->user_begin()->user_empty())
+        if (isa<BitCastOperator, AddrSpaceCastOperator>(FU) &&
+            FU->hasOneUse() && !FU->user_begin()->user_empty())
           FUU = *FU->user_begin();
         if (llvm::all_of(FUU->users(), [](const User *U) {
               if (const auto *GV = dyn_cast<GlobalVariable>(U))

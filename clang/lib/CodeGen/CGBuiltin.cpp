@@ -3093,7 +3093,11 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
   case Builtin::BI__builtin_elementwise_trunc:
     return RValue::get(
         emitUnaryBuiltin(*this, E, llvm::Intrinsic::trunc, "elt.trunc"));
-
+  case Builtin::BI__builtin_elementwise_canonicalize:
+    return RValue::get(
+        emitUnaryBuiltin(*this, E, llvm::Intrinsic::canonicalize, "elt.trunc"));
+  case Builtin::BI__builtin_elementwise_copysign:
+    return RValue::get(emitBinaryBuiltin(*this, E, llvm::Intrinsic::copysign));
   case Builtin::BI__builtin_elementwise_add_sat:
   case Builtin::BI__builtin_elementwise_sub_sat: {
     Value *Op0 = EmitScalarExpr(E->getArg(0));
@@ -3327,7 +3331,7 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
   }
 
   case Builtin::BI__builtin_flt_rounds: {
-    Function *F = CGM.getIntrinsic(Intrinsic::flt_rounds);
+    Function *F = CGM.getIntrinsic(Intrinsic::get_rounding);
 
     llvm::Type *ResultType = ConvertType(E->getType());
     Value *Result = Builder.CreateCall(F);
@@ -9751,29 +9755,6 @@ Value *CodeGenFunction::EmitAArch64BuiltinExpr(unsigned BuiltinID,
     return Builder.CreateCall(F, llvm::ConstantInt::get(Int32Ty, HintID));
   }
 
-  if (BuiltinID == clang::AArch64::BI__builtin_arm_prefetch) {
-    Value *Address         = EmitScalarExpr(E->getArg(0));
-    Value *RW              = EmitScalarExpr(E->getArg(1));
-    Value *CacheLevel      = EmitScalarExpr(E->getArg(2));
-    Value *RetentionPolicy = EmitScalarExpr(E->getArg(3));
-    Value *IsData          = EmitScalarExpr(E->getArg(4));
-
-    Value *Locality = nullptr;
-    if (cast<llvm::ConstantInt>(RetentionPolicy)->isZero()) {
-      // Temporal fetch, needs to convert cache level to locality.
-      Locality = llvm::ConstantInt::get(Int32Ty,
-        -cast<llvm::ConstantInt>(CacheLevel)->getValue() + 3);
-    } else {
-      // Streaming fetch.
-      Locality = llvm::ConstantInt::get(Int32Ty, 0);
-    }
-
-    // FIXME: We need AArch64 specific LLVM intrinsic if we want to specify
-    // PLDL3STRM or PLDL2STRM.
-    Function *F = CGM.getIntrinsic(Intrinsic::prefetch, Address->getType());
-    return Builder.CreateCall(F, {Address, RW, Locality, IsData});
-  }
-
   if (BuiltinID == clang::AArch64::BI__builtin_arm_rbit) {
     assert((getContext().getTypeSize(E->getType()) == 32) &&
            "rbit of unusual size!");
@@ -12980,7 +12961,7 @@ Value *CodeGenFunction::EmitX86CpuIs(StringRef CPUStr) {
   .Case(ALIAS, {2u, static_cast<unsigned>(llvm::X86::ENUM)})
 #define X86_CPU_SUBTYPE(ENUM, STR)                                             \
   .Case(STR, {2u, static_cast<unsigned>(llvm::X86::ENUM)})
-#include "llvm/Support/X86TargetParser.def"
+#include "llvm/TargetParser/X86TargetParser.def"
                                .Default({0, 0});
   assert(Value != 0 && "Invalid CPUStr passed to CpuIs");
 
@@ -19470,6 +19451,7 @@ Value *CodeGenFunction::EmitRISCVBuiltinExpr(unsigned BuiltinID,
   constexpr unsigned TAIL_AGNOSTIC = 1;
   constexpr unsigned TAIL_AGNOSTIC_MASK_AGNOSTIC = 3;
   int DefaultPolicy = TAIL_UNDISTURBED;
+  bool IsMasked = false;
 
   // Required for overloaded intrinsics.
   llvm::SmallVector<llvm::Type *, 2> IntrinsicTypes;
@@ -19751,6 +19733,21 @@ Value *CodeGenFunction::EmitLoongArchBuiltinExpr(unsigned BuiltinID,
     break;
   case LoongArch::BI__builtin_loongarch_iocsrwr_d:
     ID = Intrinsic::loongarch_iocsrwr_d;
+    break;
+  case LoongArch::BI__builtin_loongarch_cpucfg:
+    ID = Intrinsic::loongarch_cpucfg;
+    break;
+  case LoongArch::BI__builtin_loongarch_asrtle_d:
+    ID = Intrinsic::loongarch_asrtle_d;
+    break;
+  case LoongArch::BI__builtin_loongarch_asrtgt_d:
+    ID = Intrinsic::loongarch_asrtgt_d;
+    break;
+  case LoongArch::BI__builtin_loongarch_lddir_d:
+    ID = Intrinsic::loongarch_lddir_d;
+    break;
+  case LoongArch::BI__builtin_loongarch_ldpte_d:
+    ID = Intrinsic::loongarch_ldpte_d;
     break;
     // TODO: Support more Intrinsics.
   }

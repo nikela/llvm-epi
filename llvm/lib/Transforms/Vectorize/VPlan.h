@@ -55,14 +55,17 @@ class InductionDescriptor;
 class InnerLoopVectorizer;
 class IRBuilderBase;
 class LoopInfo;
+class PredicateScalarEvolution;
 class raw_ostream;
 class RecurrenceDescriptor;
-class Value;
+class SCEV;
+class Type;
 class VPBasicBlock;
 class VPRegionBlock;
 class VPlan;
 class VPReplicateRecipe;
 class VPlanSlp;
+class Value;
 
 namespace Intrinsic {
 typedef unsigned ID;
@@ -76,6 +79,8 @@ Value *getRuntimeVF(IRBuilderBase &B, Type *Ty, ElementCount VF);
 /// Return a value for Step multiplied by VF.
 Value *createStepForVF(IRBuilderBase &B, Type *Ty, ElementCount VF,
                        int64_t Step);
+
+const SCEV *createTripCountSCEV(Type *IdxTy, PredicatedScalarEvolution &PSE);
 
 /// A range of powers-of-2 vectorization factors with fixed start and
 /// adjustable end. The range includes start and excludes end, e.g.,:
@@ -784,6 +789,22 @@ inline bool VPUser::classof(const VPDef *Def) {
          Def->getVPDefID() == VPRecipeBase::VPWidenMemoryInstructionSC;
 }
 
+// Helper macro to define common classof implementations for recipes.
+#define VP_CLASSOF_IMPL(VPDefID, VPValueID)                                    \
+  static inline bool classof(const VPDef *D) {                                 \
+    return D->getVPDefID() == VPDefID;                                         \
+  }                                                                            \
+  static inline bool classof(const VPValue *V) {                               \
+    return V->getVPValueID() == VPValueID;                                     \
+  }                                                                            \
+  static inline bool classof(const VPUser *U) {                                \
+    auto *R = dyn_cast<VPRecipeBase>(U);                                       \
+    return R && R->getVPDefID() == VPDefID;                                    \
+  }                                                                            \
+  static inline bool classof(const VPRecipeBase *R) {                          \
+    return R->getVPDefID() == VPDefID;                                         \
+  }
+
 /// This is a concrete Recipe that models a single VPlan-level instruction.
 /// While as any Recipe it may generate a sequence of IR instructions when
 /// executed, these instructions would always form a single-def expression as
@@ -846,29 +867,11 @@ public:
                 DebugLoc DL = {}, const Twine &Name = "")
       : VPInstruction(Opcode, ArrayRef<VPValue *>(Operands), DL, Name) {}
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVInstructionSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPInstructionSC, VPValue::VPVInstructionSC)
 
   VPInstruction *clone() const {
     SmallVector<VPValue *, 2> Operands(operands());
     return new VPInstruction(Opcode, Operands, DL, Name);
-  }
-
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *R) {
-    return R->getVPDefID() == VPRecipeBase::VPInstructionSC;
-  }
-
-  /// Extra classof implementations to allow directly casting from VPUser ->
-  /// VPInstruction.
-  static inline bool classof(const VPUser *U) {
-    auto *R = dyn_cast<VPRecipeBase>(U);
-    return R && R->getVPDefID() == VPRecipeBase::VPInstructionSC;
-  }
-  static inline bool classof(const VPRecipeBase *R) {
-    return R->getVPDefID() == VPRecipeBase::VPInstructionSC;
   }
 
   unsigned getOpcode() const { return Opcode; }
@@ -959,13 +962,7 @@ public:
 
   ~VPWidenRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPWidenSC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVWidenSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenSC, VPValue::VPVWidenSC)
 
   /// Produce widened copies of all Ingredients.
   void execute(VPTransformState &State) override;
@@ -1034,10 +1031,7 @@ public:
 
   ~VPWidenCallRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPWidenCallSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenCallSC, VPValue::VPVWidenCallSC)
 
   /// Produce a widened version of the call instruction.
   void execute(VPTransformState &State) override;
@@ -1109,10 +1103,7 @@ public:
 
   ~VPWidenSelectRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPWidenSelectSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenSelectSC, VPValue::VPVWidenSelectSC)
 
   /// Produce a widened version of the select instruction.
   void execute(VPTransformState &State) override;
@@ -1188,10 +1179,7 @@ public:
   }
   ~VPWidenGEPRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPWidenGEPSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenGEPSC, VPValue::VPVWidenGEPSC)
 
   /// Generate the gep nodes.
   void execute(VPTransformState &State) override;
@@ -1237,10 +1225,8 @@ public:
 
   ~VPWidenIntOrFpInductionRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPWidenIntOrFpInductionSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenIntOrFpInductionSC,
+                  VPValue::VPVWidenIntOrFpInductionSC)
 
   /// Generate the vectorized and scalarized versions of the phi node as
   /// needed by their users.
@@ -1355,6 +1341,9 @@ public:
     return getNumOperands() == 0 ? nullptr : getOperand(0);
   }
 
+  /// Update the start value of the recipe.
+  void setStartValue(VPValue *V) { setOperand(0, V); }
+
   /// Returns the incoming value from the loop backedge.
   VPValue *getBackedgeValue() {
     return getOperand(1);
@@ -1388,22 +1377,17 @@ public:
 
   ~VPWidenPointerInductionRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *B) {
-    return B->getVPDefID() == VPRecipeBase::VPWidenPointerInductionSC;
-  }
-  static inline bool classof(const VPHeaderPHIRecipe *R) {
-    return R->getVPDefID() == VPRecipeBase::VPWidenPointerInductionSC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVWidenPointerInductionSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenPointerInductionSC,
+                  VPValue::VPVWidenPointerInductionSC)
 
   /// Generate vector values for the pointer induction.
   void execute(VPTransformState &State) override;
 
   /// Returns true if only scalar values will be generated.
   bool onlyScalarsGenerated(ElementCount VF);
+
+  /// Returns the induction descriptor for the recipe.
+  const InductionDescriptor &getInductionDescriptor() const { return IndDesc; }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
@@ -1429,16 +1413,7 @@ public:
 
   ~VPWidenPHIRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *B) {
-    return B->getVPDefID() == VPRecipeBase::VPWidenPHISC;
-  }
-  static inline bool classof(const VPHeaderPHIRecipe *R) {
-    return R->getVPDefID() == VPRecipeBase::VPWidenPHISC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVWidenPHISC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPWidenPHISC, VPValue::VPVWidenPHISC)
 
   /// Generate the phi/select nodes.
   void execute(VPTransformState &State) override;
@@ -1470,15 +1445,11 @@ struct VPFirstOrderRecurrencePHIRecipe : public VPHeaderPHIRecipe {
       : VPHeaderPHIRecipe(VPVFirstOrderRecurrencePHISC,
                           VPFirstOrderRecurrencePHISC, Phi, &Start) {}
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *R) {
-    return R->getVPDefID() == VPRecipeBase::VPFirstOrderRecurrencePHISC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPFirstOrderRecurrencePHISC,
+                  VPValue::VPVFirstOrderRecurrencePHISC)
+
   static inline bool classof(const VPHeaderPHIRecipe *R) {
     return R->getVPDefID() == VPRecipeBase::VPFirstOrderRecurrencePHISC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVFirstOrderRecurrencePHISC;
   }
 
   void execute(VPTransformState &State) override;
@@ -1582,15 +1553,10 @@ public:
 
   ~VPReductionPHIRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPRecipeBase *R) {
-    return R->getVPDefID() == VPRecipeBase::VPReductionPHISC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPReductionPHISC, VPValue::VPVReductionPHISC)
+
   static inline bool classof(const VPHeaderPHIRecipe *R) {
     return R->getVPDefID() == VPRecipeBase::VPReductionPHISC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVReductionPHISC;
   }
 
   /// Generate the phi/select nodes.
@@ -1631,10 +1597,7 @@ public:
            "of operands");
   }
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPBlendSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPBlendSC, VPValue::VPVBlendSC)
 
   /// Return the number of incoming values, taking into account that a single
   /// incoming value has no mask.
@@ -1756,7 +1719,6 @@ public:
   }
   ~VPInterleaveRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPDef *D) {
     return D->getVPDefID() == VPRecipeBase::VPInterleaveSC;
   }
@@ -1828,10 +1790,7 @@ public:
 
   ~VPReductionRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVReductionSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPReductionSC, VPValue::VPVReductionSC)
 
   /// Generate the reduction in the loop
   void execute(VPTransformState &State) override;
@@ -1882,14 +1841,7 @@ public:
 
   ~VPReplicateRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPReplicateSC;
-  }
-
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVReplicateSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPReplicateSC, VPValue::VPVReplicateSC)
 
   /// Generate replicas of the desired Ingredient. Replicas will be generated
   /// for all parts and lanes unless a specific part and lane are specified in
@@ -2034,8 +1986,8 @@ class VPWidenMemoryInstructionRecipe : public VPRecipeBase {
   }
 
 protected:
-  // BaseAddress and StrideValue for strided loads/stores.
-  std::optional<std::pair<Value *, Value *>> StrideValues;
+  // Whether the loaded/stored addresses are strided.
+  bool Strided = false;
 
 public:
   VPWidenMemoryInstructionRecipe(
@@ -2094,7 +2046,7 @@ public:
   bool isReverse() const { return Reverse; }
 
   // Return wheter NonConsecutive loads/stores can be strided
-  bool isStrided() const { return StrideValues.has_value(); }
+  bool isStrided() const { return Strided; }
 
   /// Generate the wide load/store.
   void execute(VPTransformState &State) override;
@@ -2123,29 +2075,49 @@ public:
 /// A Recipe for widening load/store operations to VP intrinsics.
 /// The recipe uses the following VPValues:
 /// - For load: Address, mask, EVL
+/// - For strided.load: Address, mask, base_address, stride, EVL
 /// - For store: Address, stored value, mask, EVL
+/// - For strided.store: Address, stored value, mask, base_address, stride, EVL
 class VPPredicatedWidenMemoryInstructionRecipe
     : public VPWidenMemoryInstructionRecipe {
+  bool isMasked() const override {
+    if (isStrided())
+      return isStore() ? getNumOperands() == 6 : getNumOperands() == 5;
+
+    return isStore() ? getNumOperands() == 4 : getNumOperands() == 3;
+  }
 
 public:
   VPPredicatedWidenMemoryInstructionRecipe(
       LoadInst &Load, VPValue *Addr, VPValue *Mask, bool Consecutive,
-      bool Reverse, std::optional<std::pair<Value *, Value *>> StrideValues,
+      bool Reverse,
+      std::optional<std::pair<VPValue *, VPValue *>> VPStridedValues,
       VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(Load, Addr, Mask, Consecutive, Reverse,
                                        VPPredicatedWidenMemoryInstructionSC) {
-    this->StrideValues = StrideValues;
+    if (VPStridedValues.has_value()) {
+      assert(!Consecutive && "Strided implies not consecutive");
+      this->Strided = true;
+      addOperand(VPStridedValues->first); // Base address
+      addOperand(VPStridedValues->second); // Stride
+    }
     addOperand(EVL);
   }
 
   VPPredicatedWidenMemoryInstructionRecipe(
       StoreInst &Store, VPValue *Addr, VPValue *StoredValue, VPValue *Mask,
       bool Consecutive, bool Reverse,
-      std::optional<std::pair<Value *, Value *>> StrideValues, VPValue *EVL)
+      std::optional<std::pair<VPValue *, VPValue *>> VPStridedValues,
+      VPValue *EVL)
       : VPWidenMemoryInstructionRecipe(Store, Addr, StoredValue, Mask,
                                        Consecutive, Reverse,
                                        VPPredicatedWidenMemoryInstructionSC) {
-    this->StrideValues = StrideValues;
+    if (VPStridedValues.has_value()) {
+      assert(!Consecutive && "Strided implies not consecutive");
+      this->Strided = true;
+      addOperand(VPStridedValues->first); // Base address
+      addOperand(VPStridedValues->second); // Stride
+    }
     addOperand(EVL);
   }
 
@@ -2164,7 +2136,18 @@ public:
   /// Return the mask used by this recipe. Note that a full mask is represented
   /// by a nullptr.
   VPValue *getMask() const override {
-    // Mask is the before the last, mandatory operand.
+    // Mask is the before the last, mandatory operand, unless there is a stride.
+    return isStrided() ? getOperand(getNumOperands() - 4)
+                       : getOperand(getNumOperands() - 2);
+  }
+
+  VPValue *getBaseAddress() const {
+    assert(isStrided());
+    return getOperand(getNumOperands() - 3);
+  }
+
+  VPValue *getStride() const {
+    assert(isStrided());
     return getOperand(getNumOperands() - 2);
   }
 
@@ -2219,15 +2202,11 @@ public:
 
   ~VPCanonicalIVPHIRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPCanonicalIVPHISC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPCanonicalIVPHISC,
+                  VPValue::VPVCanonicalIVPHISC)
+
   static inline bool classof(const VPHeaderPHIRecipe *D) {
     return D->getVPDefID() == VPCanonicalIVPHISC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVCanonicalIVPHISC;
   }
 
   /// Generate the canonical scalar induction phi of the vector loop.
@@ -2271,15 +2250,11 @@ public:
 
   ~VPActiveLaneMaskPHIRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPActiveLaneMaskPHISC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPActiveLaneMaskPHISC,
+                  VPValue::VPVActiveLaneMaskPHISC)
+
   static inline bool classof(const VPHeaderPHIRecipe *D) {
     return D->getVPDefID() == VPActiveLaneMaskPHISC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVActiveLaneMaskPHISC;
   }
 
   /// Generate the active lane mask phi of the vector loop.
@@ -2424,22 +2399,7 @@ public:
 
   ~VPDerivedIVRecipe() override = default;
 
-  /// Method to support type inquiry through isa, cast, and dyn_cast.
-  static inline bool classof(const VPDef *D) {
-    return D->getVPDefID() == VPRecipeBase::VPDerivedIVSC;
-  }
-  /// Extra classof implementations to allow directly casting from VPUser ->
-  /// VPDerivedIVRecipe.
-  static inline bool classof(const VPUser *U) {
-    auto *R = dyn_cast<VPRecipeBase>(U);
-    return R && R->getVPDefID() == VPRecipeBase::VPDerivedIVSC;
-  }
-  static inline bool classof(const VPRecipeBase *R) {
-    return R->getVPDefID() == VPRecipeBase::VPDerivedIVSC;
-  }
-  static inline bool classof(const VPValue *V) {
-    return V->getVPValueID() == VPValue::VPVDerivedIVSC;
-  }
+  VP_CLASSOF_IMPL(VPRecipeBase::VPDerivedIVSC, VPValue::VPVInstructionSC)
 
   /// Generate the transformed value of the induction at offset StartValue (1.
   /// operand) + IV (2. operand) * StepValue (3, operand).
@@ -3001,6 +2961,10 @@ class VPlan {
   /// Holds the VFs applicable to this VPlan.
   SmallSetVector<ElementCount, 2> VFs;
 
+  /// Holds the UFs applicable to this VPlan. If empty, the VPlan is valid for
+  /// any UF.
+  SmallSetVector<unsigned, 2> UFs;
+
   /// Holds the name of the VPlan, for printing.
   std::string Name;
 
@@ -3104,7 +3068,16 @@ public:
 
   bool hasScalarVFOnly() const { return VFs.size() == 1 && VFs[0].isScalar(); }
 
-  const std::string &getName() const { return Name; }
+  bool hasUF(unsigned UF) const { return UFs.empty() || UFs.contains(UF); }
+
+  void setUF(unsigned UF) {
+    assert(hasUF(UF) && "Cannot set the UF not already in plan");
+    UFs.clear();
+    UFs.insert(UF);
+  }
+
+  /// Return a string with the name of the plan and the applicable VFs and UFs.
+  std::string getName() const;
 
   void setName(const Twine &newName) { Name = newName.str(); }
 
@@ -3577,11 +3550,11 @@ struct StridedAccessValues {
   Value *Stride;
 };
 
-StridedAccessValues computeStrideAddressing(unsigned Part,
-                                            VPTransformState &State,
-                                            Type *PtrTy, Value *PointerStart,
-                                            Value *BytesStride,
-                                            VPValue *CanonicalIV, VPValue *EVL);
+StridedAccessValues computeStrideAddressing(VPTransformState &State,
+                                            unsigned Part, Type *PtrTy,
+                                            VPValue *CanonicalIV,
+                                            VPValue *VPBaseAddress,
+                                            VPValue *VPStride, VPValue *EVL);
 
 } // end namespace llvm
 

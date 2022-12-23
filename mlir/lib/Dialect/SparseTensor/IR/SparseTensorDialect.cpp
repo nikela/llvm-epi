@@ -63,6 +63,14 @@ SparseTensorEncodingAttr SparseTensorEncodingAttr::withoutOrdering() const {
       getPointerBitWidth(), getIndexBitWidth());
 }
 
+bool SparseTensorEncodingAttr::isAllDense() const {
+  return llvm::all_of(getDimLevelType(), isDenseDLT);
+}
+
+bool SparseTensorEncodingAttr::hasIdDimOrdering() const {
+  return !getDimOrdering() || getDimOrdering().isIdentity();
+}
+
 Attribute SparseTensorEncodingAttr::parse(AsmParser &parser, Type type) {
   if (failed(parser.parseLess()))
     return {};
@@ -172,7 +180,7 @@ void SparseTensorEncodingAttr::print(AsmPrinter &printer) const {
   }
   printer << " ]";
   // Print remaining members only for non-default values.
-  if (getDimOrdering() && !getDimOrdering().isIdentity())
+  if (!hasIdDimOrdering())
     printer << ", dimOrdering = affine_map<" << getDimOrdering() << ">";
   if (getHigherOrdering())
     printer << ", higherOrdering = affine_map<" << getHigherOrdering() << ">";
@@ -315,6 +323,28 @@ uint64_t mlir::sparse_tensor::toStoredDim(RankedTensorType type, uint64_t d) {
 // SparseTensorDialect Types.
 //===----------------------------------------------------------------------===//
 
+/// We normalized sparse tensor encoding attribute by always using
+/// ordered/unique DLT such that "compressed-nu-no" and "compressed-nu" (as well
+/// as other variants) lead to the same storage specifier type, and stripping
+/// irrelevant fields that does not alter the sparse tensor memory layout.
+static SparseTensorEncodingAttr
+getNormalizedEncodingForSpecifier(SparseTensorEncodingAttr enc) {
+  SmallVector<DimLevelType> dlts;
+  for (auto dlt : enc.getDimLevelType())
+    dlts.push_back(*getDimLevelType(*getLevelFormat(dlt), true, true));
+
+  return SparseTensorEncodingAttr::get(
+      enc.getContext(), dlts,
+      AffineMap(), // dimOrdering (irrelavant to storage speicifer)
+      AffineMap(), // highLvlOrdering (irrelavant to storage specifer)
+      enc.getPointerBitWidth(), enc.getIndexBitWidth());
+}
+
+StorageSpecifierType
+StorageSpecifierType::get(MLIRContext *ctx, SparseTensorEncodingAttr encoding) {
+  return Base::get(ctx, getNormalizedEncodingForSpecifier(encoding));
+}
+
 IntegerType StorageSpecifierType::getSizesType() const {
   unsigned idxBitWidth =
       getEncoding().getIndexBitWidth() ? getEncoding().getIndexBitWidth() : 64u;
@@ -325,7 +355,7 @@ IntegerType StorageSpecifierType::getSizesType() const {
 }
 
 Type StorageSpecifierType::getFieldType(StorageSpecifierKind kind,
-                                        Optional<unsigned> dim) const {
+                                        std::optional<unsigned> dim) const {
   if (kind != StorageSpecifierKind::ValMemSize)
     assert(dim);
 
@@ -336,8 +366,8 @@ Type StorageSpecifierType::getFieldType(StorageSpecifierKind kind,
 }
 
 Type StorageSpecifierType::getFieldType(StorageSpecifierKind kind,
-                                        Optional<APInt> dim) const {
-  Optional<unsigned> intDim = std::nullopt;
+                                        std::optional<APInt> dim) const {
+  std::optional<unsigned> intDim = std::nullopt;
   if (dim)
     intDim = dim.value().getZExtValue();
   return getFieldType(kind, intDim);
@@ -361,10 +391,9 @@ static LogicalResult isMatchingWidth(Value result, unsigned width) {
   return failure();
 }
 
-static LogicalResult
-verifySparsifierGetterSetter(StorageSpecifierKind mdKind, Optional<APInt> dim,
-                             TypedValue<StorageSpecifierType> md,
-                             Operation *op) {
+static LogicalResult verifySparsifierGetterSetter(
+    StorageSpecifierKind mdKind, std::optional<APInt> dim,
+    TypedValue<StorageSpecifierType> md, Operation *op) {
   if (mdKind == StorageSpecifierKind::ValMemSize && dim) {
     return op->emitError(
         "redundant dimension argument for querying value memory size");
@@ -474,7 +503,7 @@ static SetStorageSpecifierOp getSpecifierSetDef(SpecifierOp op) {
 
 OpFoldResult GetStorageSpecifierOp::fold(ArrayRef<Attribute> operands) {
   StorageSpecifierKind kind = getSpecifierKind();
-  Optional<APInt> dim = getDim();
+  std::optional<APInt> dim = getDim();
   for (auto op = getSpecifierSetDef(*this); op; op = getSpecifierSetDef(op))
     if (kind == op.getSpecifierKind() && dim == op.getDim())
       return op.getValue();
@@ -665,10 +694,8 @@ LogicalResult InsertOp::verify() {
 }
 
 void PushBackOp::build(OpBuilder &builder, OperationState &result,
-                       Type outBuffer, Value bufferSizes, Value inBuffer,
-                       Value value, APInt idx) {
-  build(builder, result, outBuffer, bufferSizes, inBuffer, value,
-        std::move(idx), Value());
+                       Value curSize, Value inBuffer, Value value) {
+  build(builder, result, curSize, inBuffer, value, Value());
 }
 
 LogicalResult PushBackOp::verify() {

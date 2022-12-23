@@ -231,8 +231,14 @@ std::optional<MemoryBufferRef> macho::readFile(StringRef path) {
       return std::nullopt;
     }
 
-    if (read32be(&arch[i].cputype) != static_cast<uint32_t>(target->cpuType) ||
-        read32be(&arch[i].cpusubtype) != target->cpuSubtype)
+    uint32_t cpuType = read32be(&arch[i].cputype);
+    uint32_t cpuSubtype =
+        read32be(&arch[i].cpusubtype) & ~MachO::CPU_SUBTYPE_MASK;
+
+    // FIXME: LD64 has a more complex fallback logic here.
+    // Consider implementing that as well?
+    if (cpuType != static_cast<uint32_t>(target->cpuType) ||
+        cpuSubtype != target->cpuSubtype)
       continue;
 
     uint32_t offset = read32be(&arch[i].offset);
@@ -264,7 +270,7 @@ static std::optional<size_t> getRecordSize(StringRef segname, StringRef name) {
     if (segname == segment_names::ld)
       return target->wordSize == 8 ? 32 : 20;
   }
-  if (!config->dedupLiterals)
+  if (!config->dedupStrings)
     return {};
 
   if (name == section_names::cfString && segname == segment_names::data)
@@ -323,38 +329,38 @@ void ObjFile::parseSections(ArrayRef<SectionHeader> sectionHeaders) {
                                                     : buf + sec.offset,
                               static_cast<size_t>(sec.size)};
 
-    auto splitRecords = [&](int recordSize) -> void {
+    auto splitRecords = [&](size_t recordSize) -> void {
       if (data.empty())
         return;
       Subsections &subsections = section.subsections;
       subsections.reserve(data.size() / recordSize);
       for (uint64_t off = 0; off < data.size(); off += recordSize) {
         auto *isec = make<ConcatInputSection>(
-            section, data.slice(off, recordSize), align);
+            section, data.slice(off, std::min(data.size(), recordSize)), align);
         subsections.push_back({off, isec});
       }
       section.doneSplitting = true;
     };
 
-    if (sectionType(sec.flags) == S_CSTRING_LITERALS ||
-        (config->dedupLiterals && isWordLiteralSection(sec.flags))) {
-      if (sec.nreloc && config->dedupLiterals)
+    if (sectionType(sec.flags) == S_CSTRING_LITERALS) {
+      if (sec.nreloc && config->dedupStrings)
         fatal(toString(this) + " contains relocations in " + sec.segname + "," +
               sec.sectname +
-              ", so LLD cannot deduplicate literals. Try re-running without "
-              "--deduplicate-literals.");
+              ", so LLD cannot deduplicate strings. Try re-running with "
+              "--no-deduplicate-strings.");
 
-      InputSection *isec;
-      if (sectionType(sec.flags) == S_CSTRING_LITERALS) {
-        isec = make<CStringInputSection>(section, data, align,
-                                         /*dedupLiterals=*/name ==
-                                                 section_names::objcMethname ||
-                                             config->dedupLiterals);
-        // FIXME: parallelize this?
-        cast<CStringInputSection>(isec)->splitIntoPieces();
-      } else {
-        isec = make<WordLiteralInputSection>(section, data, align);
-      }
+      InputSection *isec = make<CStringInputSection>(
+          section, data, align,
+          /*dedupLiterals=*/name == section_names::objcMethname ||
+              config->dedupStrings);
+      // FIXME: parallelize this?
+      cast<CStringInputSection>(isec)->splitIntoPieces();
+      section.subsections.push_back({0, isec});
+    } else if (isWordLiteralSection(sec.flags)) {
+      if (sec.nreloc)
+        fatal(toString(this) + " contains unsupported relocations in " +
+              sec.segname + "," + sec.sectname);
+      InputSection *isec = make<WordLiteralInputSection>(section, data, align);
       section.subsections.push_back({0, isec});
     } else if (auto recordSize = getRecordSize(segname, name)) {
       splitRecords(*recordSize);

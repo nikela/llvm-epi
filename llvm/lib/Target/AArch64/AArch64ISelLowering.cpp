@@ -740,7 +740,7 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
 
   setOperationAction(ISD::PREFETCH, MVT::Other, Custom);
 
-  setOperationAction(ISD::FLT_ROUNDS_, MVT::i32, Custom);
+  setOperationAction(ISD::GET_ROUNDING, MVT::i32, Custom);
   setOperationAction(ISD::SET_ROUNDING, MVT::Other, Custom);
 
   setOperationAction(ISD::ATOMIC_CMP_SWAP, MVT::i128, Custom);
@@ -930,6 +930,7 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
                        ISD::VECTOR_SPLICE, ISD::SIGN_EXTEND_INREG,
                        ISD::CONCAT_VECTORS, ISD::EXTRACT_SUBVECTOR,
                        ISD::INSERT_SUBVECTOR, ISD::STORE, ISD::BUILD_VECTOR});
+  setTargetDAGCombine(ISD::TRUNCATE);
   setTargetDAGCombine(ISD::LOAD);
 
   setTargetDAGCombine(ISD::MSTORE);
@@ -1188,9 +1189,6 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
       setOperationAction(ISD::EXTRACT_VECTOR_ELT, VT, Custom);
     }
   }
-
-  if (Subtarget->hasSME())
-    setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 
   if (Subtarget->hasSVE()) {
     for (auto VT : {MVT::nxv16i8, MVT::nxv8i16, MVT::nxv4i32, MVT::nxv2i64}) {
@@ -1519,6 +1517,8 @@ AArch64TargetLowering::AArch64TargetLowering(const TargetMachine &TM,
     // Only required for llvm.aarch64.mops.memset.tag
     setOperationAction(ISD::INTRINSIC_W_CHAIN, MVT::i8, Custom);
   }
+
+  setOperationAction(ISD::INTRINSIC_VOID, MVT::Other, Custom);
 
   PredictableSelectIsExpensive = Subtarget->predictableSelectIsExpensive();
 
@@ -4469,8 +4469,8 @@ static bool isAddSubZExt(SDNode *N, SelectionDAG &DAG) {
   return false;
 }
 
-SDValue AArch64TargetLowering::LowerFLT_ROUNDS_(SDValue Op,
-                                                SelectionDAG &DAG) const {
+SDValue AArch64TargetLowering::LowerGET_ROUNDING(SDValue Op,
+                                                 SelectionDAG &DAG) const {
   // The rounding mode is in bits 23:22 of the FPSCR.
   // The ARM rounding mode value to FLT_ROUNDS mapping is 0->1, 1->2, 2->3, 3->0
   // The formula we use to implement this is (((FPSCR + 1 << 22) >> 22) & 3)
@@ -4568,8 +4568,42 @@ static unsigned selectUmullSmull(SDNode *&N0, SDNode *&N1, SelectionDAG &DAG,
       return AArch64ISD::SMULL;
     }
   }
+
+  // Select UMULL if we can replace the other operand with an extend.
+  if (IsN0ZExt || IsN1ZExt) {
+    EVT VT = N0->getValueType(0);
+    APInt Mask = APInt::getHighBitsSet(VT.getScalarSizeInBits(),
+                                       VT.getScalarSizeInBits() / 2);
+    if (DAG.MaskedValueIsZero(SDValue(IsN0ZExt ? N1 : N0, 0), Mask)) {
+      EVT HalfVT;
+      switch (VT.getSimpleVT().SimpleTy) {
+      case MVT::v2i64:
+        HalfVT = MVT::v2i32;
+        break;
+      case MVT::v4i32:
+        HalfVT = MVT::v4i16;
+        break;
+      case MVT::v8i16:
+        HalfVT = MVT::v8i8;
+        break;
+      default:
+        return 0;
+      }
+      // Truncate and then extend the result.
+      SDValue NewExt = DAG.getNode(ISD::TRUNCATE, DL, HalfVT,
+                                   SDValue(IsN0ZExt ? N1 : N0, 0));
+      NewExt = DAG.getZExtOrTrunc(NewExt, DL, VT);
+      if (IsN0ZExt)
+        N1 = NewExt.getNode();
+      else
+        N0 = NewExt.getNode();
+      return AArch64ISD::UMULL;
+    }
+  }
+
   if (!IsN1SExt && !IsN1ZExt)
     return 0;
+
   // Look for (s/zext A + s/zext B) * (s/zext C). We want to turn these
   // into (s/zext A * s/zext C) + (s/zext B * s/zext C)
   if (IsN1SExt && isAddSubSExt(N0, DAG)) {
@@ -4648,6 +4682,45 @@ static inline SDValue getPTrue(SelectionDAG &DAG, SDLoc DL, EVT VT,
                      DAG.getTargetConstant(Pattern, DL, MVT::i32));
 }
 
+static SDValue optimizeWhile(SDValue Op, SelectionDAG &DAG, bool IsSigned,
+                             bool IsLess, bool IsEqual) {
+  if (!isa<ConstantSDNode>(Op.getOperand(1)) ||
+      !isa<ConstantSDNode>(Op.getOperand(2)))
+    return SDValue();
+
+  SDLoc dl(Op);
+  APInt X = Op.getConstantOperandAPInt(1);
+  APInt Y = Op.getConstantOperandAPInt(2);
+  APInt NumActiveElems;
+  bool Overflow;
+  if (IsLess)
+    NumActiveElems = IsSigned ? Y.ssub_ov(X, Overflow) : Y.usub_ov(X, Overflow);
+  else
+    NumActiveElems = IsSigned ? X.ssub_ov(Y, Overflow) : X.usub_ov(Y, Overflow);
+
+  if (Overflow)
+    return SDValue();
+
+  if (IsEqual) {
+    APInt One(NumActiveElems.getBitWidth(), 1, IsSigned);
+    NumActiveElems = IsSigned ? NumActiveElems.sadd_ov(One, Overflow)
+                              : NumActiveElems.uadd_ov(One, Overflow);
+    if (Overflow)
+      return SDValue();
+  }
+
+  std::optional<unsigned> PredPattern =
+      getSVEPredPatternFromNumElements(NumActiveElems.getZExtValue());
+  unsigned MinSVEVectorSize = std::max(
+      DAG.getSubtarget<AArch64Subtarget>().getMinSVEVectorSizeInBits(), 128u);
+  unsigned ElementSize = 128 / Op.getValueType().getVectorMinNumElements();
+  if (PredPattern != std::nullopt &&
+      NumActiveElems.getZExtValue() <= (MinSVEVectorSize / ElementSize))
+    return getPTrue(DAG, dl, Op.getValueType(), *PredPattern);
+
+  return SDValue();
+}
+
 // Returns a safe bitcast between two scalable vector predicates, where
 // any newly created lanes from a widening bitcast are defined as zero.
 static SDValue getSVEPredicateBitCast(EVT VT, SDValue Op, SelectionDAG &DAG) {
@@ -4724,6 +4797,44 @@ static std::optional<SMEAttrs> getCalleeAttrsFromExternalFunction(SDValue V) {
   return std::nullopt;
 }
 
+SDValue AArch64TargetLowering::LowerINTRINSIC_VOID(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  unsigned IntNo = Op.getConstantOperandVal(1);
+  SDLoc DL(Op);
+  switch (IntNo) {
+  default:
+    return SDValue(); // Don't custom lower most intrinsics.
+  case Intrinsic::aarch64_prefetch: {
+    SDValue Chain = Op.getOperand(0);
+    SDValue Addr = Op.getOperand(2);
+
+    unsigned IsWrite = cast<ConstantSDNode>(Op.getOperand(3))->getZExtValue();
+    unsigned Locality = cast<ConstantSDNode>(Op.getOperand(4))->getZExtValue();
+    unsigned IsStream = cast<ConstantSDNode>(Op.getOperand(5))->getZExtValue();
+    unsigned IsData = cast<ConstantSDNode>(Op.getOperand(6))->getZExtValue();
+    unsigned PrfOp = (IsWrite << 4) |    // Load/Store bit
+                     (!IsData << 3) |    // IsDataCache bit
+                     (Locality << 1) |   // Cache level bits
+                     (unsigned)IsStream; // Stream bit
+
+    return DAG.getNode(AArch64ISD::PREFETCH, DL, MVT::Other, Chain,
+                       DAG.getTargetConstant(PrfOp, DL, MVT::i32), Addr);
+  }
+  case Intrinsic::aarch64_sme_za_enable:
+    return DAG.getNode(
+        AArch64ISD::SMSTART, DL, MVT::Other,
+        Op->getOperand(0), // Chain
+        DAG.getTargetConstant((int32_t)(AArch64SVCR::SVCRZA), DL, MVT::i32),
+        DAG.getConstant(0, DL, MVT::i64), DAG.getConstant(1, DL, MVT::i64));
+  case Intrinsic::aarch64_sme_za_disable:
+    return DAG.getNode(
+        AArch64ISD::SMSTOP, DL, MVT::Other,
+        Op->getOperand(0), // Chain
+        DAG.getTargetConstant((int32_t)(AArch64SVCR::SVCRZA), DL, MVT::i32),
+        DAG.getConstant(0, DL, MVT::i64), DAG.getConstant(1, DL, MVT::i64));
+  }
+}
+
 SDValue AArch64TargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
                                                       SelectionDAG &DAG) const {
   unsigned IntNo = Op.getConstantOperandVal(1);
@@ -4754,18 +4865,6 @@ SDValue AArch64TargetLowering::LowerINTRINSIC_W_CHAIN(SDValue Op,
     // changed.
     return DAG.getMergeValues({MS.getValue(0), MS.getValue(2)}, DL);
   }
-  case Intrinsic::aarch64_sme_za_enable:
-    return DAG.getNode(
-        AArch64ISD::SMSTART, DL, MVT::Other,
-        Op->getOperand(0), // Chain
-        DAG.getTargetConstant((int32_t)(AArch64SVCR::SVCRZA), DL, MVT::i32),
-        DAG.getConstant(0, DL, MVT::i64), DAG.getConstant(1, DL, MVT::i64));
-  case Intrinsic::aarch64_sme_za_disable:
-    return DAG.getNode(
-        AArch64ISD::SMSTOP, DL, MVT::Other,
-        Op->getOperand(0), // Chain
-        DAG.getTargetConstant((int32_t)(AArch64SVCR::SVCRZA), DL, MVT::i32),
-        DAG.getConstant(0, DL, MVT::i64), DAG.getConstant(1, DL, MVT::i64));
   }
 }
 
@@ -4874,22 +4973,30 @@ SDValue AArch64TargetLowering::LowerINTRINSIC_WO_CHAIN(SDValue Op,
                                                  Op.getOperand(1))));
     return SDValue();
   }
-  case Intrinsic::aarch64_sve_whilelo: {
-    if (isa<ConstantSDNode>(Op.getOperand(1)) &&
-        isa<ConstantSDNode>(Op.getOperand(2))) {
-      unsigned MinSVEVectorSize =
-          std::max(Subtarget->getMinSVEVectorSizeInBits(), 128u);
-      unsigned ElementSize = 128 / Op.getValueType().getVectorMinNumElements();
-      unsigned NumActiveElems =
-          Op.getConstantOperandVal(2) - Op.getConstantOperandVal(1);
-      std::optional<unsigned> PredPattern =
-          getSVEPredPatternFromNumElements(NumActiveElems);
-      if ((PredPattern != std::nullopt) &&
-          NumActiveElems <= (MinSVEVectorSize / ElementSize))
-        return getPTrue(DAG, dl, Op.getValueType(), *PredPattern);
-    }
-    return SDValue();
-  }
+  case Intrinsic::aarch64_sve_whilelo:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/false, /*IsLess=*/true,
+                         /*IsEqual=*/false);
+  case Intrinsic::aarch64_sve_whilelt:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/true, /*IsLess=*/true,
+                         /*IsEqual=*/false);
+  case Intrinsic::aarch64_sve_whilels:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/false, /*IsLess=*/true,
+                         /*IsEqual=*/true);
+  case Intrinsic::aarch64_sve_whilele:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/true, /*IsLess=*/true,
+                         /*IsEqual=*/true);
+  case Intrinsic::aarch64_sve_whilege:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/true, /*IsLess=*/false,
+                         /*IsEqual=*/true);
+  case Intrinsic::aarch64_sve_whilegt:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/true, /*IsLess=*/false,
+                         /*IsEqual=*/false);
+  case Intrinsic::aarch64_sve_whilehs:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/false, /*IsLess=*/false,
+                         /*IsEqual=*/true);
+  case Intrinsic::aarch64_sve_whilehi:
+    return optimizeWhile(Op, DAG, /*IsSigned=*/false, /*IsLess=*/false,
+                         /*IsEqual=*/false);
   case Intrinsic::aarch64_sve_sunpkhi:
     return DAG.getNode(AArch64ISD::SUNPKHI, dl, Op.getValueType(),
                        Op.getOperand(1));
@@ -5862,8 +5969,8 @@ SDValue AArch64TargetLowering::LowerOperation(SDValue Op,
     return LowerFP_TO_INT_SAT(Op, DAG);
   case ISD::FSINCOS:
     return LowerFSINCOS(Op, DAG);
-  case ISD::FLT_ROUNDS_:
-    return LowerFLT_ROUNDS_(Op, DAG);
+  case ISD::GET_ROUNDING:
+    return LowerGET_ROUNDING(Op, DAG);
   case ISD::SET_ROUNDING:
     return LowerSET_ROUNDING(Op, DAG);
   case ISD::MUL:
@@ -5872,11 +5979,12 @@ SDValue AArch64TargetLowering::LowerOperation(SDValue Op,
     return LowerToPredicatedOp(Op, DAG, AArch64ISD::MULHS_PRED);
   case ISD::MULHU:
     return LowerToPredicatedOp(Op, DAG, AArch64ISD::MULHU_PRED);
-  case ISD::INTRINSIC_VOID:
   case ISD::INTRINSIC_W_CHAIN:
     return LowerINTRINSIC_W_CHAIN(Op, DAG);
   case ISD::INTRINSIC_WO_CHAIN:
     return LowerINTRINSIC_WO_CHAIN(Op, DAG);
+  case ISD::INTRINSIC_VOID:
+    return LowerINTRINSIC_VOID(Op, DAG);
   case ISD::ATOMIC_STORE:
     if (cast<MemSDNode>(Op)->getMemoryVT() == MVT::i128) {
       assert(Subtarget->hasLSE2());
@@ -17285,6 +17393,22 @@ static SDValue performBuildVectorCombine(SDNode *N,
   return SDValue();
 }
 
+static SDValue performTruncateCombine(SDNode *N,
+                                      SelectionDAG &DAG) {
+  EVT VT = N->getValueType(0);
+  SDValue N0 = N->getOperand(0);
+  if (VT.isFixedLengthVector() && VT.is64BitVector() && N0.hasOneUse() &&
+      N0.getOpcode() == AArch64ISD::DUP) {
+    SDValue Op = N0.getOperand(0);
+    if (VT.getScalarType() == MVT::i32 &&
+        N0.getOperand(0).getValueType().getScalarType() == MVT::i64)
+      Op = DAG.getNode(ISD::TRUNCATE, SDLoc(N), MVT::i32, Op);
+    return DAG.getNode(N0.getOpcode(), SDLoc(N), VT, Op);
+  }
+
+  return SDValue();
+}
+
 // Check an node is an extend or shift operand
 static bool isExtendOrShiftOperand(SDValue N) {
   unsigned Opcode = N.getOpcode();
@@ -17907,6 +18031,17 @@ static SDValue performIntrinsicCombine(SDNode *N,
   case Intrinsic::aarch64_neon_sshl:
   case Intrinsic::aarch64_neon_ushl:
     return tryCombineShiftImm(IID, N, DAG);
+  case Intrinsic::aarch64_neon_rshrn: {
+    EVT VT = N->getOperand(1).getValueType();
+    SDLoc DL(N);
+    SDValue Imm =
+        DAG.getConstant(1LLU << (N->getConstantOperandVal(2) - 1), DL, VT);
+    SDValue Add = DAG.getNode(ISD::ADD, DL, VT, N->getOperand(1), Imm);
+    SDValue Sht =
+        DAG.getNode(ISD::SRL, DL, VT, Add,
+                    DAG.getConstant(N->getConstantOperandVal(2), DL, VT));
+    return DAG.getNode(ISD::TRUNCATE, DL, N->getValueType(0), Sht);
+  }
   case Intrinsic::aarch64_crc32b:
   case Intrinsic::aarch64_crc32cb:
     return tryCombineCRC32(0xff, N, DAG);
@@ -21085,6 +21220,8 @@ SDValue AArch64TargetLowering::PerformDAGCombine(SDNode *N,
     return performAddSubCombine(N, DCI, DAG);
   case ISD::BUILD_VECTOR:
     return performBuildVectorCombine(N, DCI, DAG);
+  case ISD::TRUNCATE:
+    return performTruncateCombine(N, DAG);
   case AArch64ISD::ANDS:
     return performFlagSettingCombine(N, DCI, ISD::AND);
   case AArch64ISD::ADC:
@@ -21423,12 +21560,36 @@ bool AArch64TargetLowering::mayBeEmittedAsTailCall(const CallInst *CI) const {
   return CI->isTailCall();
 }
 
-bool AArch64TargetLowering::getIndexedAddressParts(SDNode *Op, SDValue &Base,
-                                                   SDValue &Offset,
-                                                   ISD::MemIndexedMode &AM,
-                                                   bool &IsInc,
-                                                   SelectionDAG &DAG) const {
+bool AArch64TargetLowering::getIndexedAddressParts(
+    SDNode *N, SDNode *Op, SDValue &Base, SDValue &Offset,
+    ISD::MemIndexedMode &AM, bool &IsInc, SelectionDAG &DAG) const {
   if (Op->getOpcode() != ISD::ADD && Op->getOpcode() != ISD::SUB)
+    return false;
+
+  // Non-null if there is exactly one user of the loaded value (ignoring chain).
+  SDNode *ValOnlyUser = nullptr;
+  for (SDNode::use_iterator UI = N->use_begin(), UE = N->use_end(); UI != UE;
+       ++UI) {
+    if (UI.getUse().getResNo() == 1)
+      continue; // Ignore chain.
+    if (ValOnlyUser == nullptr)
+      ValOnlyUser = *UI;
+    else {
+      ValOnlyUser = nullptr; // Multiple non-chain uses, bail out.
+      break;
+    }
+  }
+
+  auto IsUndefOrZero = [](SDValue V) {
+    return V.isUndef() || isNullOrNullSplat(V, /*AllowUndefs*/ true);
+  };
+
+  // If the only user of the value is a scalable vector splat, it is
+  // preferable to do a replicating load (ld1r*).
+  if (ValOnlyUser && ValOnlyUser->getValueType(0).isScalableVector() &&
+      (ValOnlyUser->getOpcode() == ISD::SPLAT_VECTOR ||
+       (ValOnlyUser->getOpcode() == AArch64ISD::DUP_MERGE_PASSTHRU &&
+        IsUndefOrZero(ValOnlyUser->getOperand(2)))))
     return false;
 
   Base = Op->getOperand(0);
@@ -21463,7 +21624,7 @@ bool AArch64TargetLowering::getPreIndexedAddressParts(SDNode *N, SDValue &Base,
     return false;
 
   bool IsInc;
-  if (!getIndexedAddressParts(Ptr.getNode(), Base, Offset, AM, IsInc, DAG))
+  if (!getIndexedAddressParts(N, Ptr.getNode(), Base, Offset, AM, IsInc, DAG))
     return false;
   AM = IsInc ? ISD::PRE_INC : ISD::PRE_DEC;
   return true;
@@ -21484,7 +21645,7 @@ bool AArch64TargetLowering::getPostIndexedAddressParts(
     return false;
 
   bool IsInc;
-  if (!getIndexedAddressParts(Op, Base, Offset, AM, IsInc, DAG))
+  if (!getIndexedAddressParts(N, Op, Base, Offset, AM, IsInc, DAG))
     return false;
   // Post-indexing updates the base, so it's not a valid transform
   // if that's not the same as the load's pointer.

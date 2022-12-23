@@ -19,6 +19,7 @@
 #include "llvm/Analysis/InstructionSimplify.h"
 #include "llvm/Analysis/OverflowInstAnalysis.h"
 #include "llvm/Analysis/ValueTracking.h"
+#include "llvm/Analysis/VectorUtils.h"
 #include "llvm/IR/BasicBlock.h"
 #include "llvm/IR/Constant.h"
 #include "llvm/IR/ConstantRange.h"
@@ -1169,6 +1170,28 @@ static Instruction *canonicalizeSPF(SelectInst &Sel, ICmpInst &Cmp,
   return nullptr;
 }
 
+static bool replaceInInstruction(Value *V, Value *Old, Value *New,
+                                 InstCombiner &IC, unsigned Depth = 0) {
+  // Conservatively limit replacement to two instructions upwards.
+  if (Depth == 2)
+    return false;
+
+  auto *I = dyn_cast<Instruction>(V);
+  if (!I || !I->hasOneUse() || !isSafeToSpeculativelyExecute(I))
+    return false;
+
+  bool Changed = false;
+  for (Use &U : I->operands()) {
+    if (U == Old) {
+      IC.replaceUse(U, New);
+      Changed = true;
+    } else {
+      Changed |= replaceInInstruction(U, Old, New, IC, Depth + 1);
+    }
+  }
+  return Changed;
+}
+
 /// If we have a select with an equality comparison, then we know the value in
 /// one of the arms of the select. See if substituting this value into an arm
 /// and simplifying the result yields the same value as the other arm.
@@ -1216,17 +1239,11 @@ Instruction *InstCombinerImpl::foldSelectValueEquivalence(SelectInst &Sel,
     // with different operands, which should not cause side-effects or trigger
     // undefined behavior). Only do this if CmpRHS is a constant, as
     // profitability is not clear for other cases.
-    // FIXME: The replacement could be performed recursively.
     // FIXME: Support vectors.
     if (match(CmpRHS, m_ImmConstant()) && !match(CmpLHS, m_ImmConstant()) &&
         !Cmp.getType()->isVectorTy())
-      if (auto *I = dyn_cast<Instruction>(TrueVal))
-        if (I->hasOneUse() && isSafeToSpeculativelyExecute(I))
-          for (Use &U : I->operands())
-            if (U == CmpLHS) {
-              replaceUse(U, CmpRHS);
-              return &Sel;
-            }
+      if (replaceInInstruction(TrueVal, CmpLHS, CmpRHS, *this))
+        return &Sel;
   }
   if (TrueVal != CmpRHS &&
       isGuaranteedNotToBeUndefOrPoison(CmpLHS, SQ.AC, &Sel, &DT))
@@ -2336,6 +2353,41 @@ static Instruction *foldSelectToCopysign(SelectInst &Sel,
 }
 
 Instruction *InstCombinerImpl::foldVectorSelect(SelectInst &Sel) {
+  if (!isa<VectorType>(Sel.getType()))
+    return nullptr;
+
+  Value *Cond = Sel.getCondition();
+  Value *TVal = Sel.getTrueValue();
+  Value *FVal = Sel.getFalseValue();
+  Value *C, *X, *Y;
+
+  if (match(Cond, m_VecReverse(m_Value(C)))) {
+    auto createSelReverse = [&](Value *C, Value *X, Value *Y) {
+      Value *V = Builder.CreateSelect(C, X, Y, Sel.getName(), &Sel);
+      if (auto *I = dyn_cast<Instruction>(V))
+        I->copyIRFlags(&Sel);
+      Module *M = Sel.getModule();
+      Function *F = Intrinsic::getDeclaration(
+          M, Intrinsic::experimental_vector_reverse, V->getType());
+      return CallInst::Create(F, V);
+    };
+
+    if (match(TVal, m_VecReverse(m_Value(X)))) {
+      // select rev(C), rev(X), rev(Y) --> rev(select C, X, Y)
+      if (match(FVal, m_VecReverse(m_Value(Y))) &&
+          (Cond->hasOneUse() || TVal->hasOneUse() || FVal->hasOneUse()))
+        return createSelReverse(C, X, Y);
+
+      // select rev(C), rev(X), FValSplat --> rev(select C, X, FValSplat)
+      if ((Cond->hasOneUse() || TVal->hasOneUse()) && isSplatValue(FVal))
+        return createSelReverse(C, X, FVal);
+    }
+    // select rev(C), TValSplat, rev(Y) --> rev(select C, TValSplat, Y)
+    else if (isSplatValue(TVal) && match(FVal, m_VecReverse(m_Value(Y))) &&
+             (Cond->hasOneUse() || FVal->hasOneUse()))
+      return createSelReverse(C, TVal, Y);
+  }
+
   auto *VecTy = dyn_cast<FixedVectorType>(Sel.getType());
   if (!VecTy)
     return nullptr;
@@ -2352,10 +2404,6 @@ Instruction *InstCombinerImpl::foldVectorSelect(SelectInst &Sel) {
   // A select of a "select shuffle" with a common operand can be rearranged
   // to select followed by "select shuffle". Because of poison, this only works
   // in the case of a shuffle with no undefined mask elements.
-  Value *Cond = Sel.getCondition();
-  Value *TVal = Sel.getTrueValue();
-  Value *FVal = Sel.getFalseValue();
-  Value *X, *Y;
   ArrayRef<int> Mask;
   if (match(TVal, m_OneUse(m_Shuffle(m_Value(X), m_Value(Y), m_Mask(Mask)))) &&
       !is_contained(Mask, UndefMaskElem) &&
@@ -2683,80 +2731,6 @@ foldRoundUpIntegerWithPow2Alignment(SelectInst &SI,
   Value *R = Builder.CreateAnd(XOffset, ConstantInt::get(Ty, *HighBitMaskCst));
   R->takeName(&SI);
   return R;
-}
-
-/// Look for patterns like
-///   %outer.cond = select i1 %inner.cond, i1 %alt.cond, i1 false
-///   %inner.sel = select i1 %inner.cond, i8 %inner.sel.t, i8 %inner.sel.f
-///   %outer.sel = select i1 %outer.cond, i8 %outer.sel.t, i8 %inner.sel
-/// and rewrite it as
-///   %inner.sel = select i1 %cond.alternative, i8 %sel.outer.t, i8 %sel.inner.t
-///   %sel.outer = select i1 %cond.inner, i8 %inner.sel, i8 %sel.inner.f
-static Instruction *foldNestedSelects(SelectInst &OuterSel,
-                                      InstCombiner::BuilderTy &Builder) {
-  // We must start with a `select`.
-  Value *OuterCond, *InnerSel, *OuterSelFalseVal;
-  match(&OuterSel, m_Select(m_Value(OuterCond), m_Value(InnerSel),
-                            m_Value(OuterSelFalseVal)));
-
-  // Canonicalize inversion of the outermost `select`'s condition.
-  if (match(OuterCond, m_Not(m_Value(OuterCond))))
-    std::swap(InnerSel, OuterSelFalseVal);
-
-  auto m_c_LogicalOp = [](auto L, auto R) {
-    return m_CombineOr(m_c_LogicalAnd(L, R), m_c_LogicalOr(L, R));
-  };
-
-  // The condition of the outermost select must be an `and`/`or`.
-  if (!match(OuterCond, m_c_LogicalOp(m_Value(), m_Value())))
-    return nullptr;
-
-  // To simplify logic, prefer the pattern variant with an `or`.
-  bool IsAndVariant = match(OuterCond, m_LogicalAnd());
-  if (match(OuterCond, m_LogicalAnd()))
-    std::swap(InnerSel, OuterSelFalseVal);
-
-  // Profitability check - avoid increasing instruction count.
-  if (none_of(ArrayRef<Value *>({OuterSel.getCondition(), InnerSel}),
-              [](Value *V) { return V->hasOneUse(); }))
-    return nullptr;
-
-  // The appropriate hand of the outermost `select` must be a select itself.
-  Value *InnerCond, *InnerSelTrueVal, *InnerSelFalseVal;
-  if (!match(InnerSel, m_Select(m_Value(InnerCond), m_Value(InnerSelTrueVal),
-                                m_Value(InnerSelFalseVal))))
-    return nullptr;
-
-  // Canonicalize inversion of the innermost `select`'s condition.
-  if (match(InnerCond, m_Not(m_Value(InnerCond))))
-    std::swap(InnerSelTrueVal, InnerSelFalseVal);
-
-  Value *AltCond = nullptr;
-  auto matchOuterCond = [OuterCond, m_c_LogicalOp, &AltCond](auto m_InnerCond) {
-    return match(OuterCond, m_c_LogicalOp(m_InnerCond, m_Value(AltCond)));
-  };
-
-  // Finally, match the condition that was driving the outermost `select`,
-  // it should be a logical operation between the condition that was driving
-  // the innermost `select` (after accounting for the possible inversions
-  // of the condition), and some other condition.
-  if (matchOuterCond(m_Specific(InnerCond))) {
-    // Done!
-  } else if (Value * NotInnerCond; matchOuterCond(m_CombineAnd(
-                 m_Not(m_Specific(InnerCond)), m_Value(NotInnerCond)))) {
-    // Done!
-    std::swap(InnerSelTrueVal, InnerSelFalseVal);
-    InnerCond = NotInnerCond;
-  } else // Not the pattern we were looking for.
-    return nullptr;
-
-  Value *SelInner = Builder.CreateSelect(
-      AltCond, IsAndVariant ? OuterSelFalseVal : InnerSelFalseVal,
-      IsAndVariant ? InnerSelTrueVal : OuterSelFalseVal);
-  SelInner->takeName(InnerSel);
-  return SelectInst::Create(InnerCond,
-                            IsAndVariant ? SelInner : InnerSelTrueVal,
-                            IsAndVariant ? InnerSelFalseVal : SelInner);
 }
 
 Instruction *InstCombinerImpl::foldSelectOfBools(SelectInst &SI) {
@@ -3425,8 +3399,12 @@ Instruction *InstCombinerImpl::visitSelectInst(SelectInst &SI) {
     }
   }
 
-  if (Instruction *I = foldNestedSelects(SI, Builder))
-    return I;
+  // Match logical variants of the pattern,
+  // and transform them iff that gets rid of inversions.
+  //   (~x) | y  -->  ~(x & (~y))
+  //   (~x) & y  -->  ~(x | (~y))
+  if (sinkNotIntoOtherHandOfLogicalOp(SI))
+    return &SI;
 
   return nullptr;
 }

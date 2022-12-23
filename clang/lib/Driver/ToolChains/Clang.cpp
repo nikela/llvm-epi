@@ -2294,8 +2294,8 @@ void Clang::AddHexagonTargetArgs(const ArgList &Args,
 
   if (auto G = toolchains::HexagonToolChain::getSmallDataThreshold(Args)) {
     CmdArgs.push_back("-mllvm");
-    CmdArgs.push_back(Args.MakeArgString("-hexagon-small-data-threshold=" +
-                                         Twine(G.value())));
+    CmdArgs.push_back(
+        Args.MakeArgString("-hexagon-small-data-threshold=" + Twine(*G)));
   }
 
   if (!Args.hasArg(options::OPT_fno_short_enums))
@@ -6403,9 +6403,6 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     CmdArgs.push_back(
         Args.MakeArgString(Twine("-fcf-protection=") + A->getValue()));
   }
-
-  if (IsUsingLTO)
-    Args.AddLastArg(CmdArgs, options::OPT_mibt_seal);
 
   if (Arg *A = Args.getLastArg(options::OPT_mfunction_return_EQ))
     CmdArgs.push_back(

@@ -361,11 +361,17 @@ public:
   TargetTransformInfo::VPLegalization
   getVPLegalizationStrategy(const VPIntrinsic &PI) const {
     // FIXME: we may want to be more selective.
-    if (ST->hasVInstructions())
+    if (ST->hasEPI())
       return {/* EVL */ TargetTransformInfo::VPLegalization::Legal,
               /* Op */ TargetTransformInfo::VPLegalization::Legal};
 
-    return BaseT::getVPLegalizationStrategy(PI);
+    using VPLegalization = TargetTransformInfo::VPLegalization;
+    if (PI.getIntrinsicID() == Intrinsic::vp_reduce_mul &&
+        cast<VectorType>(PI.getArgOperand(1)->getType())
+                ->getElementType()
+                ->getIntegerBitWidth() != 1)
+      return VPLegalization(VPLegalization::Discard, VPLegalization::Convert);
+    return VPLegalization(VPLegalization::Legal, VPLegalization::Legal);
   }
 
   bool isLegalToVectorizeReduction(const RecurrenceDescriptor &RdxDesc,

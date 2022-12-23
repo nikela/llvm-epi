@@ -315,7 +315,8 @@ OpFoldResult MultiDimReductionOp::fold(ArrayRef<Attribute> operands) {
   return {};
 }
 
-Optional<SmallVector<int64_t, 4>> MultiDimReductionOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>>
+MultiDimReductionOp::getShapeForUnroll() {
   return llvm::to_vector<4>(getSourceVectorType().getShape());
 }
 
@@ -500,7 +501,7 @@ Value mlir::vector::getVectorReductionOp(arith::AtomicRMWKind op,
   return nullptr;
 }
 
-Optional<SmallVector<int64_t, 4>> ReductionOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>> ReductionOp::getShapeForUnroll() {
   return llvm::to_vector<4>(getVectorType().getShape());
 }
 
@@ -939,7 +940,7 @@ std::vector<std::pair<int64_t, int64_t>> ContractionOp::getBatchDimMap() {
                    getContext());
 }
 
-Optional<SmallVector<int64_t, 4>> ContractionOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>> ContractionOp::getShapeForUnroll() {
   SmallVector<int64_t, 4> shape;
   getIterationBounds(shape);
   return shape;
@@ -1046,6 +1047,11 @@ OpFoldResult vector::ExtractElementOp::fold(ArrayRef<Attribute> operands) {
   if (auto splat = getVector().getDefiningOp<vector::SplatOp>())
     return splat.getInput();
 
+  // Fold extractelement(broadcast(X)) -> X.
+  if (auto broadcast = getVector().getDefiningOp<vector::BroadcastOp>())
+    if (!broadcast.getSource().getType().isa<VectorType>())
+      return broadcast.getSource();
+
   if (!pos || !src)
     return {};
 
@@ -1077,7 +1083,7 @@ void vector::ExtractOp::build(OpBuilder &builder, OperationState &result,
 }
 
 LogicalResult
-ExtractOp::inferReturnTypes(MLIRContext *, Optional<Location>,
+ExtractOp::inferReturnTypes(MLIRContext *, std::optional<Location>,
                             ValueRange operands, DictionaryAttr attributes,
                             RegionRange,
                             SmallVectorImpl<Type> &inferredReturnTypes) {
@@ -1290,7 +1296,7 @@ ExtractFromInsertTransposeChainState::handleInsertOpWithMatchingPos(
   // Case 2.a. early-exit fold.
   res = nextInsertOp.getSource();
   // Case 2.b. if internal transposition is present, canFold will be false.
-  return success();
+  return success(canFold());
 }
 
 /// Case 3: if inserted position is a prefix of extractPosition,
@@ -1721,7 +1727,7 @@ static void populateFromInt64AttrArray(ArrayAttr arrayAttr,
 // FmaOp
 //===----------------------------------------------------------------------===//
 
-Optional<SmallVector<int64_t, 4>> FMAOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>> FMAOp::getShapeForUnroll() {
   return llvm::to_vector<4>(getVectorType().getShape());
 }
 
@@ -2001,7 +2007,7 @@ LogicalResult ShuffleOp::verify() {
 }
 
 LogicalResult
-ShuffleOp::inferReturnTypes(MLIRContext *, Optional<Location>,
+ShuffleOp::inferReturnTypes(MLIRContext *, std::optional<Location>,
                             ValueRange operands, DictionaryAttr attributes,
                             RegionRange,
                             SmallVectorImpl<Type> &inferredReturnTypes) {
@@ -3178,7 +3184,7 @@ void TransferReadOp::build(OpBuilder &builder, OperationState &result,
 void TransferReadOp::build(OpBuilder &builder, OperationState &result,
                            VectorType vectorType, Value source,
                            ValueRange indices, AffineMap permutationMap,
-                           Optional<ArrayRef<bool>> inBounds) {
+                           std::optional<ArrayRef<bool>> inBounds) {
   auto permutationMapAttr = AffineMapAttr::get(permutationMap);
   auto inBoundsAttr = (inBounds && !inBounds.value().empty())
                           ? builder.getBoolArrayAttr(inBounds.value())
@@ -3191,7 +3197,7 @@ void TransferReadOp::build(OpBuilder &builder, OperationState &result,
 void TransferReadOp::build(OpBuilder &builder, OperationState &result,
                            VectorType vectorType, Value source,
                            ValueRange indices, Value padding,
-                           Optional<ArrayRef<bool>> inBounds) {
+                           std::optional<ArrayRef<bool>> inBounds) {
   AffineMap permutationMap = getTransferMinorIdentityMap(
       source.getType().cast<ShapedType>(), vectorType);
   auto permutationMapAttr = AffineMapAttr::get(permutationMap);
@@ -3208,7 +3214,7 @@ void TransferReadOp::build(OpBuilder &builder, OperationState &result,
 void TransferReadOp::build(OpBuilder &builder, OperationState &result,
                            VectorType vectorType, Value source,
                            ValueRange indices,
-                           Optional<ArrayRef<bool>> inBounds) {
+                           std::optional<ArrayRef<bool>> inBounds) {
   Type elemType = source.getType().cast<ShapedType>().getElementType();
   Value padding = builder.create<arith::ConstantOp>(
       result.location, elemType, builder.getZeroAttr(elemType));
@@ -3573,7 +3579,7 @@ OpFoldResult TransferReadOp::fold(ArrayRef<Attribute>) {
   return OpFoldResult();
 }
 
-Optional<SmallVector<int64_t, 4>> TransferReadOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>> TransferReadOp::getShapeForUnroll() {
   return llvm::to_vector<4>(getVectorType().getShape());
 }
 
@@ -3800,7 +3806,7 @@ void TransferWriteOp::build(OpBuilder &builder, OperationState &result,
 void TransferWriteOp::build(OpBuilder &builder, OperationState &result,
                             Value vector, Value dest, ValueRange indices,
                             AffineMap permutationMap,
-                            Optional<ArrayRef<bool>> inBounds) {
+                            std::optional<ArrayRef<bool>> inBounds) {
   auto permutationMapAttr = AffineMapAttr::get(permutationMap);
   auto inBoundsAttr = (inBounds && !inBounds.value().empty())
                           ? builder.getBoolArrayAttr(inBounds.value())
@@ -3813,7 +3819,7 @@ void TransferWriteOp::build(OpBuilder &builder, OperationState &result,
 ///    map to 'getMinorIdentityMap'.
 void TransferWriteOp::build(OpBuilder &builder, OperationState &result,
                             Value vector, Value dest, ValueRange indices,
-                            Optional<ArrayRef<bool>> inBounds) {
+                            std::optional<ArrayRef<bool>> inBounds) {
   auto vectorType = vector.getType().cast<VectorType>();
   AffineMap permutationMap = getTransferMinorIdentityMap(
       dest.getType().cast<ShapedType>(), vectorType);
@@ -4046,7 +4052,7 @@ LogicalResult TransferWriteOp::fold(ArrayRef<Attribute> operands,
   return memref::foldMemRefCast(*this);
 }
 
-Optional<SmallVector<int64_t, 4>> TransferWriteOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>> TransferWriteOp::getShapeForUnroll() {
   return llvm::to_vector<4>(getVectorType().getShape());
 }
 
@@ -5037,7 +5043,7 @@ LogicalResult vector::TransposeOp::verify() {
   return success();
 }
 
-Optional<SmallVector<int64_t, 4>> TransposeOp::getShapeForUnroll() {
+std::optional<SmallVector<int64_t, 4>> TransposeOp::getShapeForUnroll() {
   return llvm::to_vector<4>(getResultType().getShape());
 }
 
@@ -5580,7 +5586,7 @@ ParseResult WarpExecuteOnLane0Op::parse(OpAsmParser &parser,
 }
 
 void WarpExecuteOnLane0Op::getSuccessorRegions(
-    Optional<unsigned> index, ArrayRef<Attribute> operands,
+    std::optional<unsigned> index, ArrayRef<Attribute> operands,
     SmallVectorImpl<RegionSuccessor> &regions) {
   if (index) {
     regions.push_back(RegionSuccessor(getResults()));

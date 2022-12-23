@@ -270,7 +270,7 @@ void VPTransformState::setDebugLocFromInst(const Value *V) {
   const DILocation *DIL = Inst->getDebugLoc();
   // When a FSDiscriminator is enabled, we don't need to add the multiply
   // factors to the discriminators.
-  if (DIL && Inst->getFunction()->isDebugInfoForProfiling() &&
+  if (DIL && Inst->getFunction()->shouldEmitDebugInfoForProfiling() &&
       !isa<DbgInfoIntrinsic>(Inst) && !EnableFSDiscriminator) {
     // FIXME: For scalable vectors, assume vscale=1.
     auto NewDIL =
@@ -778,7 +778,7 @@ LLVM_DUMP_METHOD
 void VPlan::print(raw_ostream &O) const {
   VPSlotTracker SlotTracker(this);
 
-  O << "VPlan '" << Name << "' {";
+  O << "VPlan '" << getName() << "' {";
 
   if (VectorTripCount.getNumUsers() > 0) {
     O << "\nLive-in ";
@@ -808,6 +808,29 @@ void VPlan::print(raw_ostream &O) const {
   }
 
   O << "}\n";
+}
+
+std::string VPlan::getName() const {
+  std::string Out;
+  raw_string_ostream RSO(Out);
+  RSO << Name << " for ";
+  if (!VFs.empty()) {
+    RSO << "VF={" << VFs[0];
+    for (ElementCount VF : drop_begin(VFs))
+      RSO << "," << VF;
+    RSO << "},";
+  }
+
+  if (UFs.empty()) {
+    RSO << "UF>=1";
+  } else {
+    RSO << "UF={" << UFs[0];
+    for (unsigned UF : drop_begin(UFs))
+      RSO << "," << UF;
+    RSO << "}";
+  }
+
+  return Out;
 }
 
 LLVM_DUMP_METHOD
@@ -1147,41 +1170,42 @@ VPValue *vputils::getOrCreateVPValueForSCEVExpr(VPlan &Plan, const SCEV *Expr,
 }
 
 llvm::StridedAccessValues llvm::computeStrideAddressing(
-    unsigned Part, VPTransformState &State, Type *PtrTy, Value *PointerStart,
-    Value *BytesStride, VPValue *CanonicalIV, VPValue *EVL) {
+    VPTransformState &State, unsigned Part, Type *PtrTy, VPValue *CanonicalIV,
+    VPValue *VPBaseAddress, VPValue *VPStride, VPValue *EVL) {
   // FIXME: This does not seem to adhere to the VPlan principles but I'm unsure
   // what part of it should. We should be using Addr but AFAIU it represents
-  // the vectorised address already, which is not useful. When doing
-  // interleaving, we should use the Part to adjust the access correctly.
+  // the vectorised address already, which is not useful.
   // Perhaps we should not have received a WIDEN-GEP here in the first place
   // and make the VP build process aware of the stride access option?
   auto &Builder = State.Builder;
   LLVMContext &Context = PtrTy->getContext();
 
   Value *CanonicalIVValue = State.get(CanonicalIV, 0);
+  Value *BaseAddress = State.get(VPBaseAddress, {0, 0});
+  Value *Stride = State.get(VPStride, {0, 0});
   Value *Multiplier = nullptr;
-  if (Part == 0)
+  if (Part == 0) {
     Multiplier =
-        Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType());
-  else {
+     Builder.CreateSExtOrTrunc(Stride, CanonicalIVValue->getType());
+  } else {
     Value *PrevEVL = State.get(EVL, 0);
     for (unsigned P = 1; P < Part; P++)
       PrevEVL = Builder.CreateAdd(PrevEVL, State.get(EVL, P));
 
     Multiplier = Builder.CreateMul(
-        Builder.CreateZExtOrTrunc(BytesStride, CanonicalIVValue->getType()),
+        Builder.CreateSExtOrTrunc(Stride, CanonicalIVValue->getType()),
         Builder.CreateZExtOrTrunc(PrevEVL, CanonicalIVValue->getType()));
   }
   auto *BytesStrideIter = Builder.CreateMul(CanonicalIVValue, Multiplier);
   auto *StrideBaseAddress = Builder.CreateGEP(
       Type::getInt8Ty(Context),
-      Builder.CreatePointerCast(PointerStart, Type::getInt8PtrTy(Context)),
+      Builder.CreatePointerCast(BaseAddress, Type::getInt8PtrTy(Context)),
       BytesStrideIter);
   StrideBaseAddress = Builder.CreateBitCast(StrideBaseAddress, PtrTy);
 
   StridedAccessValues Ret;
   Ret.BaseAddress = StrideBaseAddress;
-  Ret.Stride = BytesStride;
+  Ret.Stride = Stride;
 
   return Ret;
 }

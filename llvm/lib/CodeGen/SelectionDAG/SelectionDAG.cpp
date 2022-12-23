@@ -4736,6 +4736,7 @@ bool SelectionDAG::canCreateUndefOrPoison(SDValue Op, const APInt &DemandedElts,
   case ISD::SIGN_EXTEND_VECTOR_INREG:
   case ISD::ZERO_EXTEND_VECTOR_INREG:
   case ISD::BITCAST:
+  case ISD::BUILD_VECTOR:
     return false;
 
   case ISD::ADD:
@@ -11497,7 +11498,7 @@ bool SelectionDAG::areNonVolatileConsecutiveLoads(LoadSDNode *LD,
     return false;
   if (LD->getChain() != Base->getChain())
     return false;
-  EVT VT = LD->getValueType(0);
+  EVT VT = LD->getMemoryVT();
   if (VT.getSizeInBits() / 8 != Bytes)
     return false;
 
