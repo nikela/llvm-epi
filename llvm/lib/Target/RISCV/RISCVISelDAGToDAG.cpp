@@ -19,7 +19,6 @@
 #include "llvm/IR/IntrinsicsRISCV.h"
 #include "llvm/Support/Alignment.h"
 #include "llvm/Support/Debug.h"
-#include "llvm/Support/KnownBits.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
 #include <optional>
@@ -2368,6 +2367,7 @@ bool RISCVDAGToDAGISel::hasAllNBitUsers(SDNode *Node, unsigned Bits,
     case RISCV::AND:
     case RISCV::OR:
     case RISCV::XOR:
+    case RISCV::XORI:
     case RISCV::ANDN:
     case RISCV::ORN:
     case RISCV::XNOR:
