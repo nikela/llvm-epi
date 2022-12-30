@@ -136,7 +136,7 @@ llvm::Constant *CodeGenModule::getBuiltinLibFunction(const FunctionDecl *FD,
                  AIXLongDouble64Builtins.end())
       Name = AIXLongDouble64Builtins[BuiltinID];
     else
-      Name = Context.BuiltinInfo.getName(BuiltinID) + 10;
+      Name = Context.BuiltinInfo.getName(BuiltinID).substr(10);
   }
 
   llvm::FunctionType *Ty =
@@ -5304,7 +5304,7 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
     LargestVectorWidth = std::max(LargestVectorWidth, VectorWidth);
 
   // See if we have a target specific intrinsic.
-  const char *Name = getContext().BuiltinInfo.getName(BuiltinID);
+  StringRef Name = getContext().BuiltinInfo.getName(BuiltinID);
   Intrinsic::ID IntrinsicID = Intrinsic::not_intrinsic;
   StringRef Prefix =
       llvm::Triple::getArchTypePrefix(getTarget().getTriple().getArch());
@@ -14743,6 +14743,7 @@ Value *CodeGenFunction::EmitX86BuiltinExpr(unsigned BuiltinID,
   case X86::BI__builtin_ia32_reduce_fadd_ph128: {
     Function *F =
         CGM.getIntrinsic(Intrinsic::vector_reduce_fadd, Ops[1]->getType());
+    IRBuilder<>::FastMathFlagGuard FMFGuard(Builder);
     Builder.getFastMathFlags().setAllowReassoc();
     return Builder.CreateCall(F, {Ops[0], Ops[1]});
   }
@@ -14753,6 +14754,7 @@ Value *CodeGenFunction::EmitX86BuiltinExpr(unsigned BuiltinID,
   case X86::BI__builtin_ia32_reduce_fmul_ph128: {
     Function *F =
         CGM.getIntrinsic(Intrinsic::vector_reduce_fmul, Ops[1]->getType());
+    IRBuilder<>::FastMathFlagGuard FMFGuard(Builder);
     Builder.getFastMathFlags().setAllowReassoc();
     return Builder.CreateCall(F, {Ops[0], Ops[1]});
   }
@@ -14763,6 +14765,7 @@ Value *CodeGenFunction::EmitX86BuiltinExpr(unsigned BuiltinID,
   case X86::BI__builtin_ia32_reduce_fmax_ph128: {
     Function *F =
         CGM.getIntrinsic(Intrinsic::vector_reduce_fmax, Ops[0]->getType());
+    IRBuilder<>::FastMathFlagGuard FMFGuard(Builder);
     Builder.getFastMathFlags().setNoNaNs();
     return Builder.CreateCall(F, {Ops[0]});
   }
@@ -14773,6 +14776,7 @@ Value *CodeGenFunction::EmitX86BuiltinExpr(unsigned BuiltinID,
   case X86::BI__builtin_ia32_reduce_fmin_ph128: {
     Function *F =
         CGM.getIntrinsic(Intrinsic::vector_reduce_fmin, Ops[0]->getType());
+    IRBuilder<>::FastMathFlagGuard FMFGuard(Builder);
     Builder.getFastMathFlags().setNoNaNs();
     return Builder.CreateCall(F, {Ops[0]});
   }
