@@ -331,9 +331,6 @@ Bug Fixes
   `Issue 58800 <https://github.com/llvm/llvm-project/issues/58800>`_
 - Fix an issue that triggers a crash if we instantiate a hidden friend functions.
   This fixes `Issue 54457 <https://github.com/llvm/llvm-project/issues/54457>`_
-- Fix an issue about ``decltype`` in the members of class templates derived from
-  templates with related parameters.
-  `Issue 58674 <https://github.com/llvm/llvm-project/issues/58674>`_
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -716,10 +713,6 @@ C++20 Feature Support
 - Do not hide templated base members introduced via using-decl in derived class
   (useful specially for constrained members). Fixes `GH50886 <https://github.com/llvm/llvm-project/issues/50886>`_.
 - Implemented CWG2635 as a Defect Report, which prohibits structured bindings from being constrained.
-
-- Implemented `P0960R3: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p0960r3.html>`_
-  and `P1975R0: <https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/p1975r0.html>`_,
-  which allows parenthesized aggregate-initialization.
 
 C++2b Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
