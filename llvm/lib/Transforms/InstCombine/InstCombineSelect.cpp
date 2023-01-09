@@ -466,44 +466,44 @@ Instruction *InstCombinerImpl::foldSelectIntoOp(SelectInst &SI, Value *TrueVal,
   auto TryFoldSelectIntoOp = [&](SelectInst &SI, Value *TrueVal,
                                  Value *FalseVal,
                                  bool Swapped) -> Instruction * {
-    if (auto *TVI = dyn_cast<BinaryOperator>(TrueVal)) {
-      if (TVI->hasOneUse() && !isa<Constant>(FalseVal)) {
-        if (unsigned SFO = getSelectFoldableOperands(TVI)) {
-          unsigned OpToFold = 0;
-          if ((SFO & 1) && FalseVal == TVI->getOperand(0))
-            OpToFold = 1;
-          else if ((SFO & 2) && FalseVal == TVI->getOperand(1))
-            OpToFold = 2;
+    auto *TVI = dyn_cast<BinaryOperator>(TrueVal);
+    if (!TVI || !TVI->hasOneUse() || isa<Constant>(FalseVal))
+      return nullptr;
 
-          if (OpToFold) {
-            FastMathFlags FMF;
-            // TODO: We probably ought to revisit cases where the select and FP
-            // instructions have different flags and add tests to ensure the
-            // behaviour is correct.
-            if (isa<FPMathOperator>(&SI))
-              FMF = SI.getFastMathFlags();
-            Constant *C = ConstantExpr::getBinOpIdentity(
-                TVI->getOpcode(), TVI->getType(), true, FMF.noSignedZeros());
-            Value *OOp = TVI->getOperand(2 - OpToFold);
-            // Avoid creating select between 2 constants unless it's selecting
-            // between 0, 1 and -1.
-            const APInt *OOpC;
-            bool OOpIsAPInt = match(OOp, m_APInt(OOpC));
-            if (!isa<Constant>(OOp) ||
-                (OOpIsAPInt && isSelect01(C->getUniqueInteger(), *OOpC))) {
-              Value *NewSel = Builder.CreateSelect(
-                  SI.getCondition(), Swapped ? C : OOp, Swapped ? OOp : C);
-              if (isa<FPMathOperator>(&SI))
-                cast<Instruction>(NewSel)->setFastMathFlags(FMF);
-              NewSel->takeName(TVI);
-              BinaryOperator *BO =
-                  BinaryOperator::Create(TVI->getOpcode(), FalseVal, NewSel);
-              BO->copyIRFlags(TVI);
-              return BO;
-            }
-          }
-        }
-      }
+    unsigned SFO = getSelectFoldableOperands(TVI);
+    unsigned OpToFold = 0;
+    if ((SFO & 1) && FalseVal == TVI->getOperand(0))
+      OpToFold = 1;
+    else if ((SFO & 2) && FalseVal == TVI->getOperand(1))
+      OpToFold = 2;
+
+    if (!OpToFold)
+      return nullptr;
+
+    // TODO: We probably ought to revisit cases where the select and FP
+    // instructions have different flags and add tests to ensure the
+    // behaviour is correct.
+    FastMathFlags FMF;
+    if (isa<FPMathOperator>(&SI))
+      FMF = SI.getFastMathFlags();
+    Constant *C = ConstantExpr::getBinOpIdentity(
+        TVI->getOpcode(), TVI->getType(), true, FMF.noSignedZeros());
+    Value *OOp = TVI->getOperand(2 - OpToFold);
+    // Avoid creating select between 2 constants unless it's selecting
+    // between 0, 1 and -1.
+    const APInt *OOpC;
+    bool OOpIsAPInt = match(OOp, m_APInt(OOpC));
+    if (!isa<Constant>(OOp) ||
+        (OOpIsAPInt && isSelect01(C->getUniqueInteger(), *OOpC))) {
+      Value *NewSel = Builder.CreateSelect(SI.getCondition(), Swapped ? C : OOp,
+                                           Swapped ? OOp : C);
+      if (isa<FPMathOperator>(&SI))
+        cast<Instruction>(NewSel)->setFastMathFlags(FMF);
+      NewSel->takeName(TVI);
+      BinaryOperator *BO =
+          BinaryOperator::Create(TVI->getOpcode(), FalseVal, NewSel);
+      BO->copyIRFlags(TVI);
+      return BO;
     }
     return nullptr;
   };
@@ -2634,7 +2634,11 @@ static Instruction *foldSelectWithFCmpToFabs(SelectInst &SI,
     // when 'Swap' is true:
     // fold (X > +/-0.0) ? X : -X or (X >= +/-0.0) ? X : -X to fabs(X)
     // fold (X < +/-0.0) ? X : -X or (X <= +/-0.0) ? X : -X to -fabs(X)
-    if (!SI.hasNoSignedZeros())
+    //
+    // Note: We require "nnan" for this fold because fcmp ignores the signbit
+    //       of NAN, but IEEE-754 specifies the signbit of NAN values with
+    //       fneg/fabs operations.
+    if (!SI.hasNoSignedZeros() || !SI.hasNoNaNs())
       return nullptr;
 
     if (Swap)
@@ -2771,20 +2775,26 @@ Instruction *InstCombinerImpl::foldSelectOfBools(SelectInst &SI) {
         (CondVal->hasOneUse() || FalseVal->hasOneUse())) {
       bool CondLogicAnd = isa<SelectInst>(CondVal);
       bool FalseLogicAnd = isa<SelectInst>(FalseVal);
-      if (CondLogicAnd && FalseLogicAnd) {
-        // (A ? B : 0) ? 1 : (A ? D : 0) --> A ? (B ? 1 : D) : 0
-        if (A == C)
-          return SelectInst::Create(A, Builder.CreateSelect(B, One, D), Zero);
-        // (A ? B : 0) ? 1 : (C ? A : 0) --> A ? (B ? 1 : C) : 0
-        if (A == D)
-          return SelectInst::Create(A, Builder.CreateSelect(B, One, C), Zero);
-        // (A ? B : 0) ? 1 : (B ? D : 0) --> B ? (A ? 1 : D) : 0
-        if (B == C)
-          return SelectInst::Create(B, Builder.CreateSelect(A, One, D), Zero);
-        // (A ? B : 0) ? 1 : (C ? B : 0) --> (A ? 1 : C) ? B : 0
-        if (B == D)
-          return SelectInst::Create(Builder.CreateSelect(A, One, C), B, Zero);
-      }
+      auto AndFactorization = [&](Value *Common, Value *InnerCond,
+                                  Value *InnerVal,
+                                  bool SelFirst = false) -> Instruction * {
+        Value *InnerSel = Builder.CreateSelect(InnerCond, One, InnerVal);
+        if (SelFirst)
+          std::swap(Common, InnerSel);
+        if (FalseLogicAnd || (CondLogicAnd && Common == A))
+          return SelectInst::Create(Common, InnerSel, Zero);
+        else
+          return BinaryOperator::CreateAnd(Common, InnerSel);
+      };
+
+      if (A == C)
+        return AndFactorization(A, B, D);
+      if (A == D)
+        return AndFactorization(A, B, C);
+      if (B == C)
+        return AndFactorization(B, A, D);
+      if (B == D)
+        return AndFactorization(B, A, C, CondLogicAnd && FalseLogicAnd);
     }
   }
 
@@ -2806,20 +2816,26 @@ Instruction *InstCombinerImpl::foldSelectOfBools(SelectInst &SI) {
         (CondVal->hasOneUse() || TrueVal->hasOneUse())) {
       bool CondLogicOr = isa<SelectInst>(CondVal);
       bool TrueLogicOr = isa<SelectInst>(TrueVal);
-      if (CondLogicOr && TrueLogicOr) {
-        // (A ? 1 : B) ? (A ? 1 : D) : 0 --> A ? 1 : (B ? D : 0)
-        if (A == C)
-          return SelectInst::Create(A, One, Builder.CreateSelect(B, D, Zero));
-        // (A ? 1 : B) ? (C ? 1 : A) : 0 --> A ? 1 : (B ? C : 0)
-        if (A == D)
-          return SelectInst::Create(A, One, Builder.CreateSelect(B, C, Zero));
-        // (A ? 1 : B) ? (B ? 1 : D) : 0 --> B ? 1 : (A ? D : 0)
-        if (B == C)
-          return SelectInst::Create(B, One, Builder.CreateSelect(A, D, Zero));
-        // (A ? 1 : B) ? (C ? 1 : B) : 0 --> (A ? C : 0) ? 1 : B
-        if (B == D)
-          return SelectInst::Create(Builder.CreateSelect(A, C, Zero), One, B);
-      }
+      auto OrFactorization = [&](Value *Common, Value *InnerCond,
+                                 Value *InnerVal,
+                                 bool SelFirst = false) -> Instruction * {
+        Value *InnerSel = Builder.CreateSelect(InnerCond, InnerVal, Zero);
+        if (SelFirst)
+          std::swap(Common, InnerSel);
+        if (TrueLogicOr || (CondLogicOr && Common == A))
+          return SelectInst::Create(Common, One, InnerSel);
+        else
+          return BinaryOperator::CreateOr(Common, InnerSel);
+      };
+
+      if (A == C)
+        return OrFactorization(A, B, D);
+      if (A == D)
+        return OrFactorization(A, B, C);
+      if (B == C)
+        return OrFactorization(B, A, D);
+      if (B == D)
+        return OrFactorization(B, A, C, CondLogicOr && TrueLogicOr);
     }
   }
 

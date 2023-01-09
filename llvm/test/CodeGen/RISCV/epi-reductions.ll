@@ -28,13 +28,13 @@ define i32 @red_nxv2i32(<vscale x 2 x i32> %a) nounwind {
 ; CHECK-NEXT:    vmv.x.s a0, v10
 ; CHECK-NEXT:    vredxor.vs v8, v8, v9
 ; CHECK-NEXT:    vmv.x.s a2, v8
-; CHECK-NEXT:    add a6, a6, a7
-; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    add a1, a1, a7
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a1, a1, a4
 ; CHECK-NEXT:    add a1, a1, a5
 ; CHECK-NEXT:    add a0, a0, a1
-; CHECK-NEXT:    addw a0, a0, a2
+; CHECK-NEXT:    add a0, a0, a2
+; CHECK-NEXT:    addw a0, a6, a0
 ; CHECK-NEXT:    ret
   %add = call i32 @llvm.vector.reduce.add.nxv2i32(<vscale x 2 x i32> %a)
   %smax = call i32 @llvm.vector.reduce.smax.nxv2i32(<vscale x 2 x i32> %a)
@@ -83,16 +83,16 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 ; CHECK-NEXT:    vredand.vs v10, v8, v10
 ; CHECK-NEXT:    vmv.x.s a5, v10
 ; CHECK-NEXT:    vredor.vs v10, v8, v9
-; CHECK-NEXT:    vmv.x.s a2, v10
+; CHECK-NEXT:    vmv.x.s a0, v10
 ; CHECK-NEXT:    vredxor.vs v8, v8, v9
-; CHECK-NEXT:    vmv.x.s a0, v8
-; CHECK-NEXT:    add a6, a6, a7
-; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    vmv.x.s a2, v8
+; CHECK-NEXT:    add a1, a1, a7
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a1, a1, a4
 ; CHECK-NEXT:    add a1, a1, a5
-; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    add a0, a0, a1
+; CHECK-NEXT:    add a0, a0, a2
+; CHECK-NEXT:    add a0, a0, a6
 ; CHECK-NEXT:    ret
   %add = call i64 @llvm.vector.reduce.add.nxv1i64(<vscale x 1 x i64> %a)
   %smax = call i64 @llvm.vector.reduce.smax.nxv1i64(<vscale x 1 x i64> %a)
@@ -120,9 +120,8 @@ define i64 @red_nxv1i64(<vscale x 1 x i64> %a) nounwind {
 define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-LABEL: red_nxv2i64:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
-; CHECK-NEXT:    vmv.s.x v10, zero
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, ma
+; CHECK-NEXT:    vmv.s.x v10, zero
 ; CHECK-NEXT:    vredsum.vs v11, v8, v10
 ; CHECK-NEXT:    vmv.x.s a6, v11
 ; CHECK-NEXT:    li a1, -1
@@ -144,16 +143,16 @@ define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 ; CHECK-NEXT:    vredand.vs v11, v8, v11
 ; CHECK-NEXT:    vmv.x.s a5, v11
 ; CHECK-NEXT:    vredor.vs v11, v8, v10
-; CHECK-NEXT:    vmv.x.s a2, v11
+; CHECK-NEXT:    vmv.x.s a0, v11
 ; CHECK-NEXT:    vredxor.vs v8, v8, v10
-; CHECK-NEXT:    vmv.x.s a0, v8
-; CHECK-NEXT:    add a6, a6, a7
-; CHECK-NEXT:    add a1, a1, a6
+; CHECK-NEXT:    vmv.x.s a2, v8
+; CHECK-NEXT:    add a1, a1, a7
 ; CHECK-NEXT:    add a1, a1, a3
 ; CHECK-NEXT:    add a1, a1, a4
 ; CHECK-NEXT:    add a1, a1, a5
-; CHECK-NEXT:    add a1, a1, a2
 ; CHECK-NEXT:    add a0, a0, a1
+; CHECK-NEXT:    add a0, a0, a2
+; CHECK-NEXT:    add a0, a0, a6
 ; CHECK-NEXT:    ret
   %add = call i64 @llvm.vector.reduce.add.nxv2i64(<vscale x 2 x i64> %a)
   %smax = call i64 @llvm.vector.reduce.smax.nxv2i64(<vscale x 2 x i64> %a)
@@ -263,9 +262,8 @@ define double @red_nxv2f64(<vscale x 2 x double> %a) nounwind {
 ; CHECK:       # %bb.0:
 ; CHECK-NEXT:    lui a0, %hi(.LCPI5_0)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI5_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e64, m1, ta, ma
-; CHECK-NEXT:    vfmv.s.f v10, ft0
 ; CHECK-NEXT:    vsetvli a0, zero, e64, m2, ta, ma
+; CHECK-NEXT:    vfmv.s.f v10, ft0
 ; CHECK-NEXT:    vfredosum.vs v11, v8, v10
 ; CHECK-NEXT:    vfmv.f.s ft0, v11
 ; CHECK-NEXT:    vfredusum.vs v10, v8, v10

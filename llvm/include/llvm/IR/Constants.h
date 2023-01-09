@@ -699,7 +699,7 @@ public:
   /// ArrayRef<ElementTy>. Calls get(LLVMContext, ArrayRef<ElementTy>).
   template <typename ArrayTy>
   static Constant *get(LLVMContext &Context, ArrayTy &Elts) {
-    return ConstantDataArray::get(Context, makeArrayRef(Elts));
+    return ConstantDataArray::get(Context, ArrayRef(Elts));
   }
 
   /// getRaw() constructor - Return a constant with array type with an element
@@ -1248,7 +1248,7 @@ public:
                    std::optional<unsigned> InRangeIndex = std::nullopt,
                    Type *OnlyIfReducedTy = nullptr) {
     return getGetElementPtr(
-        Ty, C, makeArrayRef((Value *const *)IdxList.data(), IdxList.size()),
+        Ty, C, ArrayRef((Value *const *)IdxList.data(), IdxList.size()),
         InBounds, InRangeIndex, OnlyIfReducedTy);
   }
   static Constant *
