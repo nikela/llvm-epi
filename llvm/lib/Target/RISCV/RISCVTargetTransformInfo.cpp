@@ -288,7 +288,7 @@ ElementCount RISCVTTIImpl::getMinimumVF(unsigned ElemWidth,
              ? ElementCount::get(
                    std::max<unsigned>(1, ST->getRealMinVLen() / ElemWidth),
                    IsScalable)
-             : ElementCount::getNull();
+             : ElementCount::getFixed(0);
 }
 
 std::pair<ElementCount, ElementCount>
@@ -299,7 +299,7 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
                                     bool IsScalable) const {
   // check for SEW <= ELEN in the base ISA
   if (WidestType > getMaxElementWidth() || SmallestType > getMaxElementWidth())
-    return {ElementCount::getNull(), ElementCount::getNull()};
+    return {ElementCount::getFixed(0), ElementCount::getFixed(0)};
 
   // Smallest SEW supported = 8. For 1 bit wide Type, clip to 8 bit to get a
   // valid range of VFs.
