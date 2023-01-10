@@ -32,7 +32,7 @@
 @printed.str.float.0 = private addrspace(4) constant float 0.0, align 4
 @printed.str.ptr.null = private addrspace(4) constant ptr null, align 4
 @printed.str.ptr.undef = private addrspace(4) constant ptr undef, align 4
-@format.str.f = private unnamed_addr addrspace(4) constant [30 x i8] c"%f %f %f %f %f %f %f %f %f %f\00", align 1
+@format.str.f = private unnamed_addr addrspace(4) constant [33 x i8] c"%f %f %f %f %f %f %f %f %f %f %f\00", align 1
 @format.str.p = private unnamed_addr addrspace(4) constant [15 x i8] c"%p %p %p %p %p\00", align 1
 @format.str.d = private unnamed_addr addrspace(4) constant [30 x i8] c"%d %d %d %d %d %d %d %d %d %d\00", align 1
 
@@ -45,66 +45,65 @@
 @format.str.u = private unnamed_addr addrspace(4) constant [30 x i8] c"%u %u %u %u %u %u %u %u %u %u\00", align 1
 
 
-; FIXME: Crashes on half
-define amdgpu_kernel void @format_str_f(float %f32.0, double %f64, float %f32.1, i16 %i16, i32 %i32, i64 %i64) {
+define amdgpu_kernel void @format_str_f(float %f32.0, double %f64, float %f32.1, i16 %i16, i32 %i32, i64 %i64, half %f16) {
 ; R600-LABEL: @format_str_f(
 ; R600-NEXT:    [[FPEXT_F32_TO_F64:%.*]] = fpext float [[F32_1:%.*]] to double
-; R600-NEXT:    [[CALL1:%.*]] = call i32 @printf(ptr addrspace(4) @format.str.f, float [[F32_0:%.*]], double [[F64:%.*]], double [[FPEXT_F32_TO_F64]], float 1.000000e+00, double 2.000000e+00, i16 [[I16:%.*]], i32 [[I32:%.*]], i64 [[I64:%.*]], <2 x float> <float 1.000000e+00, float 2.000000e+00>, <2 x i32> <i32 8, i32 234>)
+; R600-NEXT:    [[CALL1:%.*]] = call i32 @printf(ptr addrspace(4) @format.str.f, float [[F32_0:%.*]], double [[F64:%.*]], double [[FPEXT_F32_TO_F64]], float 1.000000e+00, double 2.000000e+00, i16 [[I16:%.*]], i32 [[I32:%.*]], i64 [[I64:%.*]], <2 x float> <float 1.000000e+00, float 2.000000e+00>, <2 x i32> <i32 8, i32 234>, half [[F16:%.*]])
 ; R600-NEXT:    ret void
 ;
 ; GCN-LABEL: @format_str_f(
 ; GCN-NEXT:    [[FPEXT_F32_TO_F64:%.*]] = fpext float [[F32_1:%.*]] to double
 ; GCN-NEXT:    [[TMP1:%.*]] = sext i16 [[I16:%.*]] to i32
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 60)
+; GCN-NEXT:    [[TMP2:%.*]] = bitcast half [[F16:%.*]] to i16
+; GCN-NEXT:    [[TMP3:%.*]] = sext i16 [[TMP2]] to i32
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 64)
 ; GCN-NEXT:    br label [[DOTSPLIT:%.*]]
 ; GCN:       .split:
-; GCN-NEXT:    [[TMP2:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
-; GCN-NEXT:    br i1 [[TMP2]], label [[TMP3:%.*]], label [[TMP4:%.*]]
-; GCN:       3:
+; GCN-NEXT:    [[TMP4:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
+; GCN-NEXT:    br i1 [[TMP4]], label [[TMP5:%.*]], label [[TMP6:%.*]]
+; GCN:       5:
 ; GCN-NEXT:    [[PRINTBUFFID:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 0
 ; GCN-NEXT:    [[PRINTBUFFIDCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFID]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 1, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
-; GCN-NEXT:    [[PRINTARGFP:%.*]] = bitcast float [[F32_0:%.*]] to i32
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[PRINTARGFP]], ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store float [[F32_0:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
-; GCN-NEXT:    [[PRINTARGFP1:%.*]] = bitcast double [[F64:%.*]] to i64
-; GCN-NEXT:    [[PRINTBUFFPTRCAST2:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i64 [[PRINTARGFP1]], ptr addrspace(1) [[PRINTBUFFPTRCAST2]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR3:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 8
-; GCN-NEXT:    [[PRINTARGFP4:%.*]] = bitcast float [[F32_1]] to i32
-; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR3]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[PRINTARGFP4]], ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR3]], i32 4
-; GCN-NEXT:    [[PRINTARGFP7:%.*]] = bitcast float 1.000000e+00 to i32
-; GCN-NEXT:    [[PRINTBUFFPTRCAST8:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[PRINTARGFP7]], ptr addrspace(1) [[PRINTBUFFPTRCAST8]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR9:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR6]], i32 4
-; GCN-NEXT:    [[PRINTARGFP10:%.*]] = bitcast float 2.000000e+00 to i32
-; GCN-NEXT:    [[PRINTBUFFPTRCAST11:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR9]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[PRINTARGFP10]], ptr addrspace(1) [[PRINTBUFFPTRCAST11]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR12:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR9]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
+; GCN-NEXT:    store double [[F64:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 8
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 8
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store float [[F32_1]], ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
+; GCN-NEXT:    store float 1.000000e+00, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
+; GCN-NEXT:    store float 2.000000e+00, ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR8:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR6]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST9:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR8]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[TMP1]], ptr addrspace(1) [[PRINTBUFFPTRCAST9]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR10:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR8]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST11:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR10]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[I32:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST11]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR12:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR10]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST13:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR12]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[TMP1]], ptr addrspace(1) [[PRINTBUFFPTRCAST13]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR14:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR12]], i32 4
+; GCN-NEXT:    store i64 [[I64:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST13]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR14:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR12]], i32 8
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST15:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR14]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[I32:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST15]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR16:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR14]], i32 4
+; GCN-NEXT:    store <2 x float> <float 1.000000e+00, float 2.000000e+00>, ptr addrspace(1) [[PRINTBUFFPTRCAST15]], align 8
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR16:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR14]], i32 8
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST17:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR16]] to ptr addrspace(1)
-; GCN-NEXT:    store i64 [[I64:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST17]], align 4
+; GCN-NEXT:    store <2 x i32> <i32 8, i32 234>, ptr addrspace(1) [[PRINTBUFFPTRCAST17]], align 8
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR18:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR16]], i32 8
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST19:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR18]] to ptr addrspace(1)
-; GCN-NEXT:    store <2 x float> <float 1.000000e+00, float 2.000000e+00>, ptr addrspace(1) [[PRINTBUFFPTRCAST19]], align 8
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR20:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR18]], i32 8
-; GCN-NEXT:    [[PRINTBUFFPTRCAST21:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR20]] to ptr addrspace(1)
-; GCN-NEXT:    store <2 x i32> <i32 8, i32 234>, ptr addrspace(1) [[PRINTBUFFPTRCAST21]], align 8
-; GCN-NEXT:    br label [[TMP4]]
-; GCN:       4:
+; GCN-NEXT:    store i32 [[TMP3]], ptr addrspace(1) [[PRINTBUFFPTRCAST19]], align 4
+; GCN-NEXT:    br label [[TMP6]]
+; GCN:       6:
 ; GCN-NEXT:    ret void
 ;
   %fpext.f32.to.f64 = fpext float %f32.1 to double
-  %call1 = call i32 @printf(ptr addrspace(4) @format.str.f, float %f32.0, double %f64, double %fpext.f32.to.f64, float 1.0, double 2.0, i16 %i16, i32 %i32, i64 %i64, <2 x float> <float 1.0, float 2.0>, <2 x i32> <i32 8, i32 234>)
+  %call1 = call i32 @printf(ptr addrspace(4) @format.str.f, float %f32.0, double %f64, double %fpext.f32.to.f64, float 1.0, double 2.0, i16 %i16, i32 %i32, i64 %i64, <2 x float> <float 1.0, float 2.0>, <2 x i32> <i32 8, i32 234>, half %f16)
   ret void
 }
 
@@ -873,7 +872,7 @@ define amdgpu_kernel void @test_print_string_literal_size0(i32 %n) {
 ; GCN-NEXT:    store i32 17, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -905,7 +904,7 @@ define amdgpu_kernel void @test_print_string_literal_1ai8.zero(i32 %n) {
 ; GCN-NEXT:    store i32 18, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -937,7 +936,7 @@ define amdgpu_kernel void @test_print_string_literal_1ai8.undef(i32 %n) {
 ; GCN-NEXT:    store i32 19, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -969,7 +968,7 @@ define amdgpu_kernel void @test_print_string_literal_i8.zero(i32 %n) {
 ; GCN-NEXT:    store i32 20, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1001,7 +1000,7 @@ define amdgpu_kernel void @test_print_string_literal_size2(i32 %n) {
 ; GCN-NEXT:    store i32 21, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 27, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1033,7 +1032,7 @@ define amdgpu_kernel void @test_print_string_literal_size3(i32 %n) {
 ; GCN-NEXT:    store i32 22, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 7195, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1065,7 +1064,7 @@ define amdgpu_kernel void @test_print_string_literal_size3_zero(i32 %n) {
 ; GCN-NEXT:    store i32 23, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1097,7 +1096,7 @@ define amdgpu_kernel void @test_print_string_literal_size4(i32 %n) {
 ; GCN-NEXT:    store i32 24, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 6513249, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1118,7 +1117,7 @@ define amdgpu_kernel void @test_print_string_literal_size4_nonull_term(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size4_nonull_term(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 16)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1129,7 +1128,7 @@ define amdgpu_kernel void @test_print_string_literal_size4_nonull_term(i32 %n) {
 ; GCN-NEXT:    store i32 25, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1684234849, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1150,7 +1149,7 @@ define amdgpu_kernel void @test_print_string_literal_size5(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size5(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 16)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1161,7 +1160,7 @@ define amdgpu_kernel void @test_print_string_literal_size5(i32 %n) {
 ; GCN-NEXT:    store i32 26, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1684234849, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1182,7 +1181,7 @@ define amdgpu_kernel void @test_print_string_literal_size6(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size6(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 16)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1193,10 +1192,13 @@ define amdgpu_kernel void @test_print_string_literal_size6(i32 %n) {
 ; GCN-NEXT:    store i32 27, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1684234849, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 101, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1214,7 +1216,7 @@ define amdgpu_kernel void @test_print_string_literal_size7(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size7(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 16)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1225,10 +1227,13 @@ define amdgpu_kernel void @test_print_string_literal_size7(i32 %n) {
 ; GCN-NEXT:    store i32 28, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1684234849, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 101, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1246,7 +1251,7 @@ define amdgpu_kernel void @test_print_string_literal_size8(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size8(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 16)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1257,10 +1262,13 @@ define amdgpu_kernel void @test_print_string_literal_size8(i32 %n) {
 ; GCN-NEXT:    store i32 29, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 7565921, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1278,7 +1286,7 @@ define amdgpu_kernel void @test_print_string_literal_size9(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size9(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 20)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1289,10 +1297,13 @@ define amdgpu_kernel void @test_print_string_literal_size9(i32 %n) {
 ; GCN-NEXT:    store i32 30, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1684104548, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 1717921122, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1310,7 +1321,7 @@ define amdgpu_kernel void @test_print_string_literal_size16(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size16(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 24)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1321,10 +1332,19 @@ define amdgpu_kernel void @test_print_string_literal_size16(i32 %n) {
 ; GCN-NEXT:    store i32 31, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 909194801, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 909194801, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 909194801, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 3225137, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1342,7 +1362,7 @@ define amdgpu_kernel void @test_print_string_literal_size17(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size17(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 28)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1353,10 +1373,19 @@ define amdgpu_kernel void @test_print_string_literal_size17(i32 %n) {
 ; GCN-NEXT:    store i32 32, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 925972273, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 925972273, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 925972273, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 925972273, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1374,7 +1403,7 @@ define amdgpu_kernel void @test_print_string_literal_size20(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size20(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 28)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1385,10 +1414,22 @@ define amdgpu_kernel void @test_print_string_literal_size20(i32 %n) {
 ; GCN-NEXT:    store i32 33, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1684234849, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 1751606885, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1818978921, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1886350957, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 7565937, ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR8:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR6]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST9:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR8]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST9]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1406,7 +1447,7 @@ define amdgpu_kernel void @test_print_string_literal_size32(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_size32(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 40)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1417,10 +1458,31 @@ define amdgpu_kernel void @test_print_string_literal_size32(i32 %n) {
 ; GCN-NEXT:    store i32 34, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR8:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR6]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST9:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR8]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST9]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR10:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR8]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST11:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR10]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST11]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR12:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR10]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST13:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR12]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 7565921, ptr addrspace(1) [[PRINTBUFFPTRCAST13]], align 4
+; GCN-NEXT:    [[PRINTBUFFNEXTPTR14:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR12]], i32 4
+; GCN-NEXT:    [[PRINTBUFFPTRCAST15:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR14]] to ptr addrspace(1)
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST15]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1502,7 +1564,7 @@ define amdgpu_kernel void @test_print_string_literal_v4i8(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_literal_v4i8(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 16)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1513,7 +1575,7 @@ define amdgpu_kernel void @test_print_string_literal_v4i8(i32 %n) {
 ; GCN-NEXT:    store i32 37, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 67305985, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1545,7 +1607,7 @@ define amdgpu_kernel void @test_print_string_literal_v4i32(i32 %n) {
 ; GCN-NEXT:    store i32 38, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1577,7 +1639,7 @@ define amdgpu_kernel void @test_print_string_literal_struct(i32 %n) {
 ; GCN-NEXT:    store i32 39, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 66, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1737,7 +1799,7 @@ define amdgpu_kernel void @test_print_string_float_neg0(i32 %n) {
 ; GCN-NEXT:    store i32 44, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1769,7 +1831,7 @@ define amdgpu_kernel void @test_print_string_float_0(i32 %n) {
 ; GCN-NEXT:    store i32 45, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1801,7 +1863,7 @@ define amdgpu_kernel void @test_print_string_ptr_null(i32 %n) {
 ; GCN-NEXT:    store i32 46, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1833,7 +1895,7 @@ define amdgpu_kernel void @test_print_string_ptr_undef(i32 %n) {
 ; GCN-NEXT:    store i32 47, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 4144959, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
 ; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
@@ -1854,7 +1916,7 @@ define amdgpu_kernel void @test_print_string_indexed(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_indexed(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 40)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 28)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1865,31 +1927,19 @@ define amdgpu_kernel void @test_print_string_indexed(i32 %n) {
 ; GCN-NEXT:    store i32 48, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 1936875892, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
+; GCN-NEXT:    store i32 1936875892, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
+; GCN-NEXT:    store i32 1936875892, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
+; GCN-NEXT:    store i32 1936875892, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR8:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR6]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST9:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR8]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST9]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR10:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR8]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST11:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR10]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST11]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR12:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR10]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST13:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR12]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 7565921, ptr addrspace(1) [[PRINTBUFFPTRCAST13]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR14:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR12]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST15:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR14]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST15]], align 4
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
@@ -1907,7 +1957,7 @@ define amdgpu_kernel void @test_print_string_indexed_oob(i32 %n) {
 ;
 ; GCN-LABEL: @test_print_string_indexed_oob(
 ; GCN-NEXT:  entry:
-; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 40)
+; GCN-NEXT:    [[PRINTF_ALLOC_FN:%.*]] = call ptr addrspace(1) @__printf_alloc(i32 12)
 ; GCN-NEXT:    br label [[ENTRY_SPLIT:%.*]]
 ; GCN:       entry.split:
 ; GCN-NEXT:    [[TMP0:%.*]] = icmp ne ptr addrspace(1) [[PRINTF_ALLOC_FN]], null
@@ -1918,31 +1968,10 @@ define amdgpu_kernel void @test_print_string_indexed_oob(i32 %n) {
 ; GCN-NEXT:    store i32 49, ptr addrspace(1) [[PRINTBUFFIDCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFGEP:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTF_ALLOC_FN]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFGEP]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
+; GCN-NEXT:    store i32 -256, ptr addrspace(1) [[PRINTBUFFPTRCAST]], align 4
 ; GCN-NEXT:    [[PRINTBUFFNEXTPTR:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFGEP]], i32 4
 ; GCN-NEXT:    [[PRINTBUFFPTRCAST1:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR2:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST3:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR2]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST3]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR4:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR2]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST5:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR4]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST5]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR6:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR4]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST7:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR6]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST7]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR8:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR6]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST9:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR8]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST9]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR10:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR8]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST11:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR10]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 1953722977, ptr addrspace(1) [[PRINTBUFFPTRCAST11]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR12:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR10]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST13:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR12]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 7565921, ptr addrspace(1) [[PRINTBUFFPTRCAST13]], align 4
-; GCN-NEXT:    [[PRINTBUFFNEXTPTR14:%.*]] = getelementptr i8, ptr addrspace(1) [[PRINTBUFFNEXTPTR12]], i32 4
-; GCN-NEXT:    [[PRINTBUFFPTRCAST15:%.*]] = bitcast ptr addrspace(1) [[PRINTBUFFNEXTPTR14]] to ptr addrspace(1)
-; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST15]], align 4
+; GCN-NEXT:    store i32 [[N:%.*]], ptr addrspace(1) [[PRINTBUFFPTRCAST1]], align 4
 ; GCN-NEXT:    br label [[TMP2]]
 ; GCN:       2:
 ; GCN-NEXT:    ret void
