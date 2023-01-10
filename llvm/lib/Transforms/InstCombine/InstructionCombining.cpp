@@ -204,7 +204,7 @@ std::optional<Value *> InstCombiner::targetSimplifyDemandedVectorEltsIntrinsic(
 }
 
 Value *InstCombinerImpl::EmitGEPOffset(User *GEP) {
-  return llvm::EmitGEPOffset(&Builder, DL, GEP);
+  return llvm::emitGEPOffset(&Builder, DL, GEP);
 }
 
 /// Legal integers and common types are considered desirable. This is used to
@@ -3320,6 +3320,12 @@ InstCombinerImpl::foldExtractOfOverflowIntrinsic(ExtractValueInst &EV) {
   if (OvID == Intrinsic::usub_with_overflow)
     return new ICmpInst(ICmpInst::ICMP_ULT, WO->getLHS(), WO->getRHS());
 
+  // smul with i1 types overflows when both sides are set: -1 * -1 == +1, but
+  // +1 is not possible because we assume signed values.
+  if (OvID == Intrinsic::smul_with_overflow &&
+      WO->getLHS()->getType()->isIntOrIntVectorTy(1))
+    return BinaryOperator::CreateAnd(WO->getLHS(), WO->getRHS());
+
   // If only the overflow result is used, and the right hand side is a
   // constant (or constant splat), we can remove the intrinsic by directly
   // checking for overflow.
@@ -3390,7 +3396,7 @@ Instruction *InstCombinerImpl::visitExtractValueInst(ExtractValueInst &EV) {
       Value *NewEV = Builder.CreateExtractValue(IV->getAggregateOperand(),
                                                 EV.getIndices());
       return InsertValueInst::Create(NewEV, IV->getInsertedValueOperand(),
-                                     makeArrayRef(insi, inse));
+                                     ArrayRef(insi, inse));
     }
     if (insi == inse)
       // The insert list is a prefix of the extract list
@@ -3402,7 +3408,7 @@ Instruction *InstCombinerImpl::visitExtractValueInst(ExtractValueInst &EV) {
       // with
       // %E extractvalue { i32 } { i32 42 }, 0
       return ExtractValueInst::Create(IV->getInsertedValueOperand(),
-                                      makeArrayRef(exti, exte));
+                                      ArrayRef(exti, exte));
   }
 
   if (Instruction *R = foldExtractOfOverflowIntrinsic(EV))

@@ -241,9 +241,9 @@ define i64 @test_vsetvl_interleave_avl(i64 %avl, i64 %avl2, i64 %avl3, i64 %avl4
 ; CHECK-O2-NEXT:    vsetvli a1, a1, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a2, a2, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    vsetvli a3, a3, e64, m1, ta, mu
-; CHECK-O2-NEXT:    add a0, a1, a0
 ; CHECK-O2-NEXT:    add a0, a0, a2
 ; CHECK-O2-NEXT:    add a0, a0, a3
+; CHECK-O2-NEXT:    add a0, a1, a0
 ; CHECK-O2-NEXT:    ret
 {
   %1 = tail call i64 @llvm.epi.vsetvl(i64 %avl, i64 3, i64 0)

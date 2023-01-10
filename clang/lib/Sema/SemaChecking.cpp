@@ -3705,6 +3705,23 @@ bool Sema::CheckLoongArchBuiltinFunctionCall(const TargetInfo &TI,
   switch (BuiltinID) {
   default:
     break;
+  case LoongArch::BI__builtin_loongarch_cacop_d:
+    if (!TI.hasFeature("64bit"))
+      return Diag(TheCall->getBeginLoc(),
+                  diag::err_loongarch_builtin_requires_la64)
+             << TheCall->getSourceRange();
+    LLVM_FALLTHROUGH;
+  case LoongArch::BI__builtin_loongarch_cacop_w: {
+    if (BuiltinID == LoongArch::BI__builtin_loongarch_cacop_w &&
+        !TI.hasFeature("32bit"))
+      return Diag(TheCall->getBeginLoc(),
+                  diag::err_loongarch_builtin_requires_la32)
+             << TheCall->getSourceRange();
+    SemaBuiltinConstantArgRange(TheCall, 0, 0, llvm::maxUIntN(5));
+    SemaBuiltinConstantArgRange(TheCall, 2, llvm::minIntN(12),
+                                llvm::maxIntN(12));
+    break;
+  }
   case LoongArch::BI__builtin_loongarch_crc_w_b_w:
   case LoongArch::BI__builtin_loongarch_crc_w_h_w:
   case LoongArch::BI__builtin_loongarch_crc_w_w_w:
@@ -3759,6 +3776,9 @@ bool Sema::CheckLoongArchBuiltinFunctionCall(const TargetInfo &TI,
                   diag::err_loongarch_builtin_requires_la64)
              << TheCall->getSourceRange();
     return SemaBuiltinConstantArgRange(TheCall, 1, 0, 31);
+  case LoongArch::BI__builtin_loongarch_movfcsr2gr:
+  case LoongArch::BI__builtin_loongarch_movgr2fcsr:
+    return SemaBuiltinConstantArgRange(TheCall, 0, 0, llvm::maxUIntN(2));
   }
 
   return false;
@@ -5995,7 +6015,7 @@ bool Sema::CheckFunctionCall(FunctionDecl *FDecl, CallExpr *TheCall,
                       ThisTypeFromDecl);
   }
 
-  checkCall(FDecl, Proto, ImplicitThis, llvm::makeArrayRef(Args, NumArgs),
+  checkCall(FDecl, Proto, ImplicitThis, llvm::ArrayRef(Args, NumArgs),
             IsMemberFunction, TheCall->getRParenLoc(),
             TheCall->getCallee()->getSourceRange(), CallType);
 
@@ -6076,7 +6096,7 @@ bool Sema::CheckPointerCall(NamedDecl *NDecl, CallExpr *TheCall,
   }
 
   checkCall(NDecl, Proto, /*ThisArg=*/nullptr,
-            llvm::makeArrayRef(TheCall->getArgs(), TheCall->getNumArgs()),
+            llvm::ArrayRef(TheCall->getArgs(), TheCall->getNumArgs()),
             /*IsMemberFunction=*/false, TheCall->getRParenLoc(),
             TheCall->getCallee()->getSourceRange(), CallType);
 
@@ -6089,7 +6109,7 @@ bool Sema::CheckOtherCall(CallExpr *TheCall, const FunctionProtoType *Proto) {
   VariadicCallType CallType = getVariadicCallType(/*FDecl=*/nullptr, Proto,
                                                   TheCall->getCallee());
   checkCall(/*FDecl=*/nullptr, Proto, /*ThisArg=*/nullptr,
-            llvm::makeArrayRef(TheCall->getArgs(), TheCall->getNumArgs()),
+            llvm::ArrayRef(TheCall->getArgs(), TheCall->getNumArgs()),
             /*IsMemberFunction=*/false, TheCall->getRParenLoc(),
             TheCall->getCallee()->getSourceRange(), CallType);
 

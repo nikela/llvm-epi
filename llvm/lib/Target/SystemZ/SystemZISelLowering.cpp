@@ -1628,8 +1628,8 @@ SDValue SystemZTargetLowering::LowerFormalArguments(
       }
       // Join the stores, which are independent of one another.
       Chain = DAG.getNode(ISD::TokenFactor, DL, MVT::Other,
-                          makeArrayRef(&MemOps[NumFixedFPRs],
-                                       SystemZ::ELFNumArgFPRs-NumFixedFPRs));
+                          ArrayRef(&MemOps[NumFixedFPRs],
+                                   SystemZ::ELFNumArgFPRs - NumFixedFPRs));
     }
   }
 
@@ -3672,7 +3672,7 @@ SystemZTargetLowering::lowerDYNAMIC_STACKALLOC_XPLINK(SDValue Op,
   bool IsReturnValueUsed = false;
   EVT VT = Op.getValueType();
   SDValue AllocaCall =
-      makeExternalCall(Chain, DAG, "@@ALCAXP", VT, makeArrayRef(NeededSpace),
+      makeExternalCall(Chain, DAG, "@@ALCAXP", VT, ArrayRef(NeededSpace),
                        CallingConv::C, IsSigned, DL, DoesNotReturn,
                        IsReturnValueUsed)
           .first;
@@ -4146,7 +4146,7 @@ SDValue SystemZTargetLowering::lowerATOMIC_FENCE(SDValue Op,
   }
 
   // MEMBARRIER is a compiler barrier; it codegens to a no-op.
-  return DAG.getNode(SystemZISD::MEMBARRIER, DL, MVT::Other, Op.getOperand(0));
+  return DAG.getNode(ISD::MEMBARRIER, DL, MVT::Other, Op.getOperand(0));
 }
 
 // Op is an atomic load.  Lower it into a normal volatile load.
@@ -5944,7 +5944,6 @@ const char *SystemZTargetLowering::getTargetNodeName(unsigned Opcode) const {
     OPCODE(STRCMP);
     OPCODE(SEARCH_STRING);
     OPCODE(IPM);
-    OPCODE(MEMBARRIER);
     OPCODE(TBEGIN);
     OPCODE(TBEGIN_NOFLOAT);
     OPCODE(TEND);

@@ -50,10 +50,12 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // FIXME: For scalable vectors for now we compute the MinCost based on Min
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
-    MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, 0);
+    MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, 0, nullptr,
+                                  nullptr);
 
     for (int i = 0, e = VTy->getElementCount().getKnownMinValue(); i < e; ++i) {
-      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i, nullptr,
+                                    nullptr);
     }
     return MinCost;
   }
@@ -73,8 +75,10 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
     for (int i = 0, e = VTy->getElementCount().getKnownMinValue(); i < e; ++i) {
-      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i);
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i, nullptr,
+                                    nullptr);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i,
+                                    nullptr, nullptr);
     }
     return MinCost;
   }
@@ -95,9 +99,10 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
     for (unsigned i = 0; i != NumSubElts; ++i) {
-      MinCost +=
-          getVectorInstrCost(Instruction::ExtractElement, VTy, i + Index);
-      MinCost += getVectorInstrCost(Instruction::InsertElement, SubVTy, i);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i + Index,
+                                    nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, SubVTy, i,
+                                    nullptr, nullptr);
     }
     return MinCost;
   }
@@ -118,8 +123,10 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
     for (unsigned i = 0; i != NumSubElts; ++i) {
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, SubVTy, i);
-      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i + Index);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, SubVTy, i,
+                                    nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i + Index,
+                                    nullptr, nullptr);
     }
     return MinCost;
   }
@@ -164,10 +171,6 @@ public:
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
-  // InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
-  //                                    unsigned Index);
-  InstructionCost getVectorInstrCost(const Instruction &I, Type *Val,
-                                     unsigned Index);
   InstructionCost getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
                                                    ArrayRef<Type *> Tys);
   InstructionCost getScalarizationOverhead(VectorType *InTy,
@@ -276,8 +279,8 @@ public:
                                      const Instruction *I = nullptr);
 
   using BaseT::getVectorInstrCost;
-  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
-                                     unsigned Index);
+  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index,
+                                     Value *Op0, Value *Op1);
 
   InstructionCost getArithmeticInstrCost(
       unsigned Opcode, Type *Ty, TTI::TargetCostKind CostKind,

@@ -23,10 +23,10 @@ define i32 @callee(i32 %a, i64 %b, i32 %c, i32 %d, double %e) {
 ; CHECK-NEXT:    mv a0, a5
 ; CHECK-NEXT:    mv a1, a6
 ; CHECK-NEXT:    call __fixdfsi@plt
-; CHECK-NEXT:    add s2, s3, s2
 ; CHECK-NEXT:    add s1, s2, s1
 ; CHECK-NEXT:    add s0, s1, s0
 ; CHECK-NEXT:    add a0, s0, a0
+; CHECK-NEXT:    add a0, s3, a0
 ; CHECK-NEXT:    lw ra, 28(sp) # 4-byte Folded Reload
 ; CHECK-NEXT:    lw s0, 24(sp) # 4-byte Folded Reload
 ; CHECK-NEXT:    lw s1, 20(sp) # 4-byte Folded Reload

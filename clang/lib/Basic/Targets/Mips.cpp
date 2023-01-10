@@ -20,7 +20,7 @@
 using namespace clang;
 using namespace clang::targets;
 
-const Builtin::Info MipsTargetInfo::BuiltinInfo[] = {
+static constexpr Builtin::Info BuiltinInfo[] = {
 #define BUILTIN(ID, TYPE, ATTRS)                                               \
   {#ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
 #define LIBBUILTIN(ID, TYPE, ATTRS, HEADER)                                    \
@@ -220,8 +220,8 @@ bool MipsTargetInfo::hasFeature(StringRef Feature) const {
 }
 
 ArrayRef<Builtin::Info> MipsTargetInfo::getTargetBuiltins() const {
-  return llvm::makeArrayRef(BuiltinInfo, clang::Mips::LastTSBuiltin -
-                                             Builtin::FirstTSBuiltin);
+  return llvm::ArrayRef(BuiltinInfo,
+                        clang::Mips::LastTSBuiltin - Builtin::FirstTSBuiltin);
 }
 
 unsigned MipsTargetInfo::getUnwindWordWidth() const {
