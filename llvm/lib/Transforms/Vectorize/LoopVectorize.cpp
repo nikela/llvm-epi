@@ -564,7 +564,7 @@ public:
   /// Generate call to setvl intrinsic with requested vector lenght and optional
   /// SEW and LMUL.
   // FIXME: Move this to VPlan
-  Value *getSetVL(Value *RVL, unsigned SEW = 0, unsigned LMUL = 0);
+  Value *getSetVL(Value *RVL);
 
   /// Returns true if vectorization prefers using predicated vector intrinsics.
   bool preferPredicatedVectorOps() const;
@@ -1042,6 +1042,38 @@ static Value *getRuntimeVFAsFloat(IRBuilderBase &B, Type *FTy,
   Type *IntTy = IntegerType::get(FTy->getContext(), FTy->getScalarSizeInBits());
   Value *RuntimeVF = getRuntimeVF(B, IntTy, VF);
   return B.CreateUIToFP(RuntimeVF, FTy);
+}
+
+static Value *createVSETVL(IRBuilderBase &Builder, Value *RVL, unsigned int SEW,
+                           int LMUL) {
+  const std::map<unsigned, unsigned> SEWArgMap = {
+      {8, 0}, {16, 1}, {32, 2}, {64, 3}};
+  const std::map<int, unsigned> LMULArgMap = {
+      {1, 0},
+      {2, 1},
+      {4, 2},
+      {8, 3},
+      // Fractional LMUL (-x means LMUL=1/x)
+      {-8, 5},
+      {-4, 6},
+      {-2, 7}};
+
+  assert(RVL->getType()->isIntegerTy() &&
+         "Requested vector length should be an integer.");
+  assert(SEWArgMap.find(SEW) != SEWArgMap.end() &&
+         "Cannot set vector length: Unsupported type.");
+  assert(LMULArgMap.find(LMUL) != LMULArgMap.end() &&
+         "Cannot set vector length: Unsupported LMUL.");
+
+  Value *RVLArg =
+      Builder.CreateZExtOrTrunc(RVL, Type::getInt64Ty(Builder.getContext()));
+  Constant *SEWArg = ConstantInt::get(Type::getInt64Ty(Builder.getContext()),
+                                      SEWArgMap.at(SEW));
+  Constant *LMULArg = ConstantInt::get(Type::getInt64Ty(Builder.getContext()),
+                                       LMULArgMap.at(LMUL));
+  Value *GVL = Builder.CreateIntrinsic(Intrinsic::EPIIntrinsics::epi_vsetvl, {},
+                                       {RVLArg, SEWArg, LMULArg});
+  return Builder.CreateZExtOrTrunc(GVL, RVL->getType());
 }
 
 void reportVectorizationFailure(const StringRef DebugMsg,
@@ -2005,13 +2037,15 @@ public:
   /// un-linked from the IR and is added back during vector code generation. If
   /// there is no vector code generation, the check blocks are removed
   /// completely.
-  void Create(Loop *L, const LoopAccessInfo &LAI,
-              const SCEVPredicate &UnionPred, ElementCount VF, unsigned IC) {
+  void Create(Loop *L, LoopVectorizationLegality &LVL,
+              PredicatedScalarEvolution &PSE, ElementCount VF, unsigned IC,
+              bool UseVL = false) {
 
     // Hard cutoff to limit compile-time increase in case a very large number of
     // runtime checks needs to be generated.
     // TODO: Skip cutoff if the loop is guaranteed to execute, e.g. due to
     // profile info.
+    const LoopAccessInfo &LAI = *LVL.getLAI();
     CostTooHigh =
         LAI.getNumRuntimePointerChecks() > VectorizeMemoryCheckThreshold;
     if (CostTooHigh)
@@ -2024,6 +2058,7 @@ public:
     // ensure the blocks are properly added to LoopInfo & DominatorTree. Those
     // may be used by SCEVExpander. The blocks will be un-linked from their
     // predecessors and removed from LI & DT at the end of the function.
+    const SCEVPredicate &UnionPred = PSE.getPredicate();
     if (!UnionPred.isAlwaysTrue()) {
       SCEVCheckBlock = SplitBlock(Preheader, Preheader->getTerminator(), DT, LI,
                                   nullptr, "vector.scevcheck");
@@ -2040,15 +2075,38 @@ public:
 
       auto DiffChecks = RtPtrChecking.getDiffChecks();
       if (DiffChecks) {
-        Value *RuntimeVF = nullptr;
-        MemRuntimeCheckCond = addDiffRuntimeChecks(
-            MemCheckBlock->getTerminator(), *DiffChecks, MemCheckExp,
-            [VF, &RuntimeVF](IRBuilderBase &B, unsigned Bits) {
-              if (!RuntimeVF)
-                RuntimeVF = getRuntimeVF(B, B.getIntNTy(Bits), VF);
-              return RuntimeVF;
-            },
-            IC);
+        if (UseVL) {
+          const SCEV *TripCountSCEV =
+              createTripCountSCEV(LVL.getWidestInductionType(), PSE);
+
+          Value *GVL = nullptr;
+          auto GetVL = [this, TripCountSCEV, VF, &GVL](IRBuilderBase &Builder,
+                                                       unsigned Bits) {
+            if (!GVL) {
+              Value *TripCount =
+                  SCEVExp.expandCodeFor(TripCountSCEV, TripCountSCEV->getType(),
+                                        &*Builder.GetInsertPoint());
+              GVL = createVSETVL(Builder, TripCount,
+                                 Builder.getInt64Ty()->getScalarSizeInBits(),
+                                 VF.getKnownMinValue());
+            }
+            return GVL;
+          };
+
+          MemRuntimeCheckCond =
+              addDiffRuntimeChecks(MemCheckBlock->getTerminator(), *DiffChecks,
+                                   MemCheckExp, GetVL, /*IC*/ 1);
+        } else {
+          Value *RuntimeVF = nullptr;
+          auto GetVF = [VF, &RuntimeVF](IRBuilderBase &B, unsigned Bits) {
+            if (!RuntimeVF)
+              RuntimeVF = getRuntimeVF(B, B.getIntNTy(Bits), VF);
+            return RuntimeVF;
+          };
+          MemRuntimeCheckCond =
+              addDiffRuntimeChecks(MemCheckBlock->getTerminator(), *DiffChecks,
+                                   MemCheckExp, GetVF, IC);
+        }
       } else {
         MemRuntimeCheckCond =
             addRuntimeChecks(MemCheckBlock->getTerminator(), L,
@@ -10569,37 +10627,18 @@ void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
   }
 }
 
-Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
-  assert(RVL->getType()->isIntegerTy() &&
-         "Requested vector length should be an integer.");
-  Value *RVLArg =
-      Builder.CreateZExtOrTrunc(RVL, Type::getInt64Ty(Builder.getContext()));
+Value *InnerLoopVectorizer::getSetVL(Value *RVL) {
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = Cost->getSmallestAndWidestTypes();
-  const std::map<unsigned, unsigned> SEWArgMap = {
-      {8, 0}, {16, 1}, {32, 2}, {64, 3}};
-  const std::map<int, unsigned> LMULArgMap = {
-      {1, 0}, {2, 1}, {4, 2}, {8, 3},
-      // Fractional LMUL (-x means LMUL=1/x)
-      {-8, 5}, {-4, 6}, {-2, 7}};
-  assert(SEWArgMap.find(WidestType) != SEWArgMap.end() &&
-         SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
-         "Cannot set vector length: Unsupported type");
-  SEW = SEW ? SEW : SEWArgMap.at(WidestType);
-  int LMULVal =
+
+  int LMUL =
       (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
   // This might be fractional.
-  if (LMULVal == 0 && WidestType > 0 && VF.getKnownMinValue() > 0)
-    LMULVal = -(TTI->getMaxElementWidth() / (WidestType * VF.getKnownMinValue()));
-  LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
-  Constant *SEWArg =
-      ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
-  Constant *LMULArg =
-      ConstantInt::get(IntegerType::get(Builder.getContext(), 64), LMUL);
+  if (LMUL == 0 && WidestType > 0 && VF.getKnownMinValue() > 0)
+    LMUL =
+        -(TTI->getMaxElementWidth() / (WidestType * VF.getKnownMinValue()));
 
-  Value *GVL = Builder.CreateIntrinsic(Intrinsic::EPIIntrinsics::epi_vsetvl, {},
-                                       {RVLArg, SEWArg, LMULArg});
-  return Builder.CreateZExtOrTrunc(GVL, RVL->getType());
+  return createVSETVL(Builder, RVL, WidestType, LMUL);
 }
 
 void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
@@ -11853,7 +11892,9 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     //  Optimistically generate runtime checks if they are needed. Drop them if
     //  they turn out to not be profitable.
     if (VF.Width.isVector() || SelectedIC > 1)
-      Checks.Create(L, *LVL.getLAI(), PSE.getPredicate(), VF.Width, SelectedIC);
+      Checks.Create(L, LVL, PSE, VF.Width, SelectedIC,
+                    /*UseVL*/ CM.foldTailByMasking() &&
+                        LVL.preferPredicatedVectorOps());
 
     // Check if it is profitable to vectorize with runtime checks.
     bool ForceVectorization =

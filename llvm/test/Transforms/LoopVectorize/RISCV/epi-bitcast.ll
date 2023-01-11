@@ -26,7 +26,7 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECK-NEXT:    [[TMP6:%.*]] = icmp ugt i64 [[TMP5]], [[TMP4]]
 ; CHECK-NEXT:    br i1 [[TMP6]], label [[SCALAR_PH:%.*]], label [[VECTOR_MEMCHECK:%.*]]
 ; CHECK:       vector.memcheck:
-; CHECK-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP7:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[N]], i64 3, i64 0)
 ; CHECK-NEXT:    [[TMP8:%.*]] = shl i64 [[TMP7]], 3
 ; CHECK-NEXT:    [[TMP9:%.*]] = sub i64 [[TMP3]], [[TMP2]]
 ; CHECK-NEXT:    [[DIFF_CHECK:%.*]] = icmp ult i64 [[TMP9]], [[TMP8]]
@@ -112,23 +112,23 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECKWF8-NEXT:    [[TMP7:%.*]] = icmp ugt i64 [[TMP6]], [[TMP4]]
 ; CHECKWF8-NEXT:    br i1 [[TMP7]], label [[SCALAR_PH:%.*]], label [[VECTOR_MEMCHECK:%.*]]
 ; CHECKWF8:       vector.memcheck:
-; CHECKWF8-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
-; CHECKWF8-NEXT:    [[TMP9:%.*]] = shl i64 [[TMP8]], 6
+; CHECKWF8-NEXT:    [[TMP8:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[N]], i64 3, i64 3)
+; CHECKWF8-NEXT:    [[TMP9:%.*]] = shl i64 [[TMP8]], 3
 ; CHECKWF8-NEXT:    [[TMP10:%.*]] = sub i64 [[TMP3]], [[TMP2]]
 ; CHECKWF8-NEXT:    [[DIFF_CHECK:%.*]] = icmp ult i64 [[TMP10]], [[TMP9]]
-; CHECKWF8-NEXT:    [[TMP11:%.*]] = shl i64 [[TMP8]], 6
+; CHECKWF8-NEXT:    [[TMP11:%.*]] = shl i64 [[TMP8]], 3
 ; CHECKWF8-NEXT:    [[TMP12:%.*]] = sub i64 [[TMP2]], [[TMP0]]
 ; CHECKWF8-NEXT:    [[DIFF_CHECK1:%.*]] = icmp ult i64 [[TMP12]], [[TMP11]]
 ; CHECKWF8-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK1]]
-; CHECKWF8-NEXT:    [[TMP13:%.*]] = shl i64 [[TMP8]], 6
+; CHECKWF8-NEXT:    [[TMP13:%.*]] = shl i64 [[TMP8]], 3
 ; CHECKWF8-NEXT:    [[TMP14:%.*]] = sub i64 [[TMP2]], [[TMP1]]
 ; CHECKWF8-NEXT:    [[DIFF_CHECK2:%.*]] = icmp ult i64 [[TMP14]], [[TMP13]]
 ; CHECKWF8-NEXT:    [[CONFLICT_RDX3:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK2]]
-; CHECKWF8-NEXT:    [[TMP15:%.*]] = shl i64 [[TMP8]], 6
+; CHECKWF8-NEXT:    [[TMP15:%.*]] = shl i64 [[TMP8]], 3
 ; CHECKWF8-NEXT:    [[TMP16:%.*]] = sub i64 [[TMP3]], [[TMP0]]
 ; CHECKWF8-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP16]], [[TMP15]]
 ; CHECKWF8-NEXT:    [[CONFLICT_RDX5:%.*]] = or i1 [[CONFLICT_RDX3]], [[DIFF_CHECK4]]
-; CHECKWF8-NEXT:    [[TMP17:%.*]] = shl i64 [[TMP8]], 6
+; CHECKWF8-NEXT:    [[TMP17:%.*]] = shl i64 [[TMP8]], 3
 ; CHECKWF8-NEXT:    [[TMP18:%.*]] = sub i64 [[TMP3]], [[TMP1]]
 ; CHECKWF8-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP18]], [[TMP17]]
 ; CHECKWF8-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX5]], [[DIFF_CHECK6]]
@@ -197,23 +197,23 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; INTERLEAVE-NEXT:    [[TMP6:%.*]] = icmp ugt i64 [[TMP5]], [[TMP4]]
 ; INTERLEAVE-NEXT:    br i1 [[TMP6]], label [[SCALAR_PH:%.*]], label [[VECTOR_MEMCHECK:%.*]]
 ; INTERLEAVE:       vector.memcheck:
-; INTERLEAVE-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
-; INTERLEAVE-NEXT:    [[TMP8:%.*]] = shl i64 [[TMP7]], 5
+; INTERLEAVE-NEXT:    [[TMP7:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[N]], i64 3, i64 0)
+; INTERLEAVE-NEXT:    [[TMP8:%.*]] = shl i64 [[TMP7]], 3
 ; INTERLEAVE-NEXT:    [[TMP9:%.*]] = sub i64 [[TMP3]], [[TMP2]]
 ; INTERLEAVE-NEXT:    [[DIFF_CHECK:%.*]] = icmp ult i64 [[TMP9]], [[TMP8]]
-; INTERLEAVE-NEXT:    [[TMP10:%.*]] = shl i64 [[TMP7]], 5
+; INTERLEAVE-NEXT:    [[TMP10:%.*]] = shl i64 [[TMP7]], 3
 ; INTERLEAVE-NEXT:    [[TMP11:%.*]] = sub i64 [[TMP2]], [[TMP0]]
 ; INTERLEAVE-NEXT:    [[DIFF_CHECK1:%.*]] = icmp ult i64 [[TMP11]], [[TMP10]]
 ; INTERLEAVE-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK1]]
-; INTERLEAVE-NEXT:    [[TMP12:%.*]] = shl i64 [[TMP7]], 5
+; INTERLEAVE-NEXT:    [[TMP12:%.*]] = shl i64 [[TMP7]], 3
 ; INTERLEAVE-NEXT:    [[TMP13:%.*]] = sub i64 [[TMP2]], [[TMP1]]
 ; INTERLEAVE-NEXT:    [[DIFF_CHECK2:%.*]] = icmp ult i64 [[TMP13]], [[TMP12]]
 ; INTERLEAVE-NEXT:    [[CONFLICT_RDX3:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK2]]
-; INTERLEAVE-NEXT:    [[TMP14:%.*]] = shl i64 [[TMP7]], 5
+; INTERLEAVE-NEXT:    [[TMP14:%.*]] = shl i64 [[TMP7]], 3
 ; INTERLEAVE-NEXT:    [[TMP15:%.*]] = sub i64 [[TMP3]], [[TMP0]]
 ; INTERLEAVE-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP15]], [[TMP14]]
 ; INTERLEAVE-NEXT:    [[CONFLICT_RDX5:%.*]] = or i1 [[CONFLICT_RDX3]], [[DIFF_CHECK4]]
-; INTERLEAVE-NEXT:    [[TMP16:%.*]] = shl i64 [[TMP7]], 5
+; INTERLEAVE-NEXT:    [[TMP16:%.*]] = shl i64 [[TMP7]], 3
 ; INTERLEAVE-NEXT:    [[TMP17:%.*]] = sub i64 [[TMP3]], [[TMP1]]
 ; INTERLEAVE-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP17]], [[TMP16]]
 ; INTERLEAVE-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX5]], [[DIFF_CHECK6]]
