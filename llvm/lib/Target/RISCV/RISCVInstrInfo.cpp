@@ -1161,8 +1161,7 @@ static MachineInstr *canFoldAsPredicatedOp(Register Reg,
     if (MO.isDef())
       return nullptr;
     // Allow constant physregs.
-    if (Register::isPhysicalRegister(MO.getReg()) &&
-        !MRI.isConstantPhysReg(MO.getReg()))
+    if (MO.getReg().isPhysical() && !MRI.isConstantPhysReg(MO.getReg()))
       return nullptr;
   }
   bool DontMoveAcrossStores = true;
@@ -1506,7 +1505,7 @@ RISCVInstrInfo::getInverseOpcode(unsigned Opcode) const {
 static bool canCombineFPFusedMultiply(const MachineInstr &Root,
                                       const MachineOperand &MO,
                                       bool DoRegPressureReduce) {
-  if (!MO.isReg() || !Register::isVirtualRegister(MO.getReg()))
+  if (!MO.isReg() || !MO.getReg().isVirtual())
     return false;
   const MachineRegisterInfo &MRI = Root.getMF()->getRegInfo();
   MachineInstr *MI = MRI.getVRegDef(MO.getReg());
