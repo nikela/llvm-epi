@@ -212,7 +212,7 @@ static SDNode *SelectSlideLeftFill(SDNode *Node, SelectionDAG *CurDAG,
   SDValue V1 = Node->getOperand(1);
   SDValue V2 = Node->getOperand(2);
 
-  uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+  uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedValue();
 
   ElementCount EC = VT.getVectorElementCount();
   assert(EC.isScalable() && "Unexpected VT");
@@ -307,7 +307,7 @@ static SDNode *SelectInsertVectorElement(SDNode *Node, SelectionDAG *CurDAG) {
   SDValue Value = Node->getOperand(1);
   SDValue Index = Node->getOperand(2);
 
-  uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+  uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedValue();
 
   ElementCount EC = VT.getVectorElementCount();
   assert(EC.isScalable() && "Unexpected VT");
@@ -389,7 +389,7 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
 
   EVT VT = Node->getValueType(0);
   SDLoc DL(Node);
-  uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+  uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedValue();
   bool IsMaskVector = false;
   if (SEW == 1) {
     IsMaskVector = true;
@@ -1503,7 +1503,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       SDValue Offset = Node->getOperand(3);
 
       // FIXME: Make all this easier.
-      uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedSize();
+      uint64_t SEW = VT.getVectorElementType().getSizeInBits().getFixedValue();
       ElementCount EC = VT.getVectorElementCount();
       assert(EC.isScalable() && "Unexpected VT");
       uint64_t LMul =

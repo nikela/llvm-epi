@@ -9047,7 +9047,7 @@ TargetLowering::expandUnalignedLoad(LoadSDNode *LD, SelectionDAG &DAG) const {
 
   if (VT.isFloatingPoint() || VT.isVector()) {
     EVT intVT = EVT::getIntegerVT(*DAG.getContext(),
-                                  LoadedVT.getSizeInBits().getKnownMinSize());
+                                  LoadedVT.getSizeInBits().getKnownMinValue());
     if (isTypeLegal(intVT) && isTypeLegal(LoadedVT)) {
       if (!isOperationLegalOrCustom(ISD::LOAD, intVT) &&
           LoadedVT.isVector()) {
@@ -9070,8 +9070,8 @@ TargetLowering::expandUnalignedLoad(LoadSDNode *LD, SelectionDAG &DAG) const {
     // Copy the value to a (aligned) stack slot using (unaligned) integer
     // loads and stores, then do a (aligned) load from the stack slot.
     MVT RegVT = getRegisterType(*DAG.getContext(), intVT);
-    unsigned LoadedBytes = LoadedVT.getStoreSize().getKnownMinSize();
-    unsigned RegBytes = RegVT.getSizeInBits().getKnownMinSize() / 8;
+    unsigned LoadedBytes = LoadedVT.getStoreSize().getKnownMinValue();
+    unsigned RegBytes = RegVT.getSizeInBits().getKnownMinValue() / 8;
     unsigned NumRegs = (LoadedBytes + RegBytes - 1) / RegBytes;
 
     // Make sure the stack slot is also aligned for the register type.
@@ -9137,7 +9137,7 @@ TargetLowering::expandUnalignedLoad(LoadSDNode *LD, SelectionDAG &DAG) const {
 
   // Compute the new VT that is half the size of the old one.  This is an
   // integer MVT.
-  unsigned NumBits = LoadedVT.getSizeInBits().getKnownMinSize();
+  unsigned NumBits = LoadedVT.getSizeInBits().getKnownMinValue();
   EVT NewLoadedVT;
   NewLoadedVT = EVT::getIntegerVT(*DAG.getContext(), NumBits/2);
   NumBits >>= 1;
@@ -9202,7 +9202,7 @@ SDValue TargetLowering::expandUnalignedStore(StoreSDNode *ST,
   SDLoc dl(ST);
   if (StoreMemVT.isFloatingPoint() || StoreMemVT.isVector()) {
     EVT intVT = EVT::getIntegerVT(*DAG.getContext(),
-                                  VT.getSizeInBits().getKnownMinSize());
+                                  VT.getSizeInBits().getKnownMinValue());
     if (isTypeLegal(intVT)) {
       if (!isOperationLegalOrCustom(ISD::STORE, intVT) &&
           StoreMemVT.isVector()) {
@@ -9223,10 +9223,10 @@ SDValue TargetLowering::expandUnalignedStore(StoreSDNode *ST,
     MVT RegVT = getRegisterType(
         *DAG.getContext(),
         EVT::getIntegerVT(*DAG.getContext(),
-                          StoreMemVT.getSizeInBits().getKnownMinSize()));
+                          StoreMemVT.getSizeInBits().getKnownMinValue()));
     EVT PtrVT = Ptr.getValueType();
-    unsigned StoredBytes = StoreMemVT.getStoreSize().getKnownMinSize();
-    unsigned RegBytes = RegVT.getSizeInBits().getKnownMinSize() / 8;
+    unsigned StoredBytes = StoreMemVT.getStoreSize().getKnownMinValue();
+    unsigned RegBytes = RegVT.getSizeInBits().getKnownMinValue() / 8;
     unsigned NumRegs = (StoredBytes + RegBytes - 1) / RegBytes;
 
     // Make sure the stack slot is also aligned for the register type.
@@ -9346,7 +9346,7 @@ TargetLowering::IncrementMemoryAddress(SDValue Addr, SDValue Mask,
   } else if (DataVT.isScalableVector()) {
     Increment = DAG.getVScale(DL, AddrVT,
                               APInt(AddrVT.getFixedSizeInBits(),
-                                    DataVT.getStoreSize().getKnownMinSize()));
+                                    DataVT.getStoreSize().getKnownMinValue()));
   } else
     Increment = DAG.getConstant(DataVT.getStoreSize(), DL, AddrVT);
 
@@ -10344,7 +10344,7 @@ SDValue TargetLowering::expandVectorSplice(SDNode *Node,
   // Store the hi part of CONCAT_VECTORS(V1, V2)
   SDValue OffsetToV2 = DAG.getVScale(
       DL, PtrVT,
-      APInt(PtrVT.getFixedSizeInBits(), VT.getStoreSize().getKnownMinSize()));
+      APInt(PtrVT.getFixedSizeInBits(), VT.getStoreSize().getKnownMinValue()));
   SDValue StackPtr2 = DAG.getNode(ISD::ADD, DL, PtrVT, StackPtr, OffsetToV2);
   SDValue StoreV2 = DAG.getStore(StoreV1, DL, V2, StackPtr2, PtrInfo);
 
@@ -10365,9 +10365,10 @@ SDValue TargetLowering::expandVectorSplice(SDNode *Node,
       DAG.getConstant(TrailingElts * EltByteSize, DL, PtrVT);
 
   if (TrailingElts > VT.getVectorMinNumElements()) {
-    SDValue VLBytes = DAG.getVScale(
-        DL, PtrVT,
-        APInt(PtrVT.getFixedSizeInBits(), VT.getStoreSize().getKnownMinSize()));
+    SDValue VLBytes =
+        DAG.getVScale(DL, PtrVT,
+                      APInt(PtrVT.getFixedSizeInBits(),
+                            VT.getStoreSize().getKnownMinValue()));
     TrailingBytes = DAG.getNode(ISD::UMIN, DL, PtrVT, TrailingBytes, VLBytes);
   }
 

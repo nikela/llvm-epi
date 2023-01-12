@@ -26,19 +26,19 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; CHECK-NEXT:    [[TMP5:%.*]] = call <vscale x 8 x i64> @llvm.experimental.stepvector.nxv8i64()
 ; CHECK-NEXT:    [[TMP6:%.*]] = add <vscale x 8 x i64> [[TMP5]], zeroinitializer
-; CHECK-NEXT:    [[TMP7:%.*]] = mul <vscale x 8 x i64> [[TMP6]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 1, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
+; CHECK-NEXT:    [[TMP7:%.*]] = mul <vscale x 8 x i64> [[TMP6]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 1, i64 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i64> zeroinitializer, [[TMP7]]
 ; CHECK-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = mul i64 [[TMP8]], 8
 ; CHECK-NEXT:    [[TMP10:%.*]] = mul i64 1, [[TMP9]]
-; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TMP10]], i32 0
+; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TMP10]], i64 0
 ; CHECK-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 8 x i64> [[DOTSPLATINSERT]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[VEC_IND:%.*]] = phi <vscale x 8 x i64> [ [[INDUCTION]], [[VECTOR_PH]] ], [ [[VEC_IND_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[TMP11:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[TMP12:%.*]] = add nuw nsw <vscale x 8 x i64> [[VEC_IND]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 42, i32 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
+; CHECK-NEXT:    [[TMP12:%.*]] = add nuw nsw <vscale x 8 x i64> [[VEC_IND]], shufflevector (<vscale x 8 x i64> insertelement (<vscale x 8 x i64> poison, i64 42, i64 0), <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds [1024 x i64], [1024 x i64]* [[A]], i64 0, i64 [[TMP11]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, i64* [[TMP13]], i32 0
 ; CHECK-NEXT:    [[TMP15:%.*]] = bitcast i64* [[TMP14]] to <vscale x 8 x i64>*
@@ -69,7 +69,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    store i64 [[ADD]], i64* [[ARRAYIDX]], align 8, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[INC]] = add nuw nsw i64 [[I_07]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INC]], 1024
-; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
+; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
 ;
 ; CHECK1-LABEL: @main(
 ; CHECK1-NEXT:  entry:
@@ -85,18 +85,18 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; CHECK1-NEXT:    [[TMP3:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
 ; CHECK1-NEXT:    [[TMP4:%.*]] = add <vscale x 1 x i64> [[TMP3]], zeroinitializer
-; CHECK1-NEXT:    [[TMP5:%.*]] = mul <vscale x 1 x i64> [[TMP4]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 1, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[TMP5:%.*]] = mul <vscale x 1 x i64> [[TMP4]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 1, i64 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[INDUCTION:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP5]]
 ; CHECK1-NEXT:    [[TMP6:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP7:%.*]] = mul i64 1, [[TMP6]]
-; CHECK1-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TMP7]], i32 0
+; CHECK1-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TMP7]], i64 0
 ; CHECK1-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 1 x i64> [[DOTSPLATINSERT]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK1-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK1:       vector.body:
 ; CHECK1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK1-NEXT:    [[VEC_IND:%.*]] = phi <vscale x 1 x i64> [ [[INDUCTION]], [[VECTOR_PH]] ], [ [[VEC_IND_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK1-NEXT:    [[TMP8:%.*]] = add i64 [[INDEX]], 0
-; CHECK1-NEXT:    [[TMP9:%.*]] = add nuw nsw <vscale x 1 x i64> [[VEC_IND]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 42, i32 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[TMP9:%.*]] = add nuw nsw <vscale x 1 x i64> [[VEC_IND]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 42, i64 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[TMP10:%.*]] = getelementptr inbounds [1024 x i64], [1024 x i64]* [[A]], i64 0, i64 [[TMP8]]
 ; CHECK1-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, i64* [[TMP10]], i32 0
 ; CHECK1-NEXT:    [[TMP12:%.*]] = bitcast i64* [[TMP11]] to <vscale x 1 x i64>*
@@ -126,7 +126,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    store i64 [[ADD]], i64* [[ARRAYIDX]], align 8, !tbaa [[TBAA2]]
 ; CHECK1-NEXT:    [[INC]] = add nuw nsw i64 [[I_07]], 1
 ; CHECK1-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INC]], 1024
-; CHECK1-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
+; CHECK1-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
 ;
 entry:
   %a = alloca [1024 x i64], align 8

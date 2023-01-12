@@ -100,7 +100,7 @@ define <vscale x 2 x float> @true_is_allones_float(<vscale x 2 x i1> %cond, <vsc
 
 define <vscale x 2 x i1> @true_is_allones_i1(<vscale x 2 x i1> %cond, <vscale x 2 x i1> %v, i32 %evl) {
 ; CHECK-LABEL: @true_is_allones_i1(
-; CHECK-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i1> @llvm.vp.or.nxv2i1(<vscale x 2 x i1> [[COND:%.*]], <vscale x 2 x i1> [[V:%.*]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CHECK-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i1> @llvm.vp.or.nxv2i1(<vscale x 2 x i1> [[COND:%.*]], <vscale x 2 x i1> [[V:%.*]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CHECK-NEXT:    ret <vscale x 2 x i1> [[TMP1]]
 ;
   %one = insertelement <vscale x 2 x i1> poison, i1 1, i32 0
@@ -133,7 +133,7 @@ define <vscale x 2 x float> @false_is_allzeros_float(<vscale x 2 x i1> %cond, <v
 
 define <vscale x 2 x i1> @false_is_allzeros_i1(<vscale x 2 x i1> %cond, <vscale x 2 x i1> %v, i32 %evl) {
 ; CHECK-LABEL: @false_is_allzeros_i1(
-; CHECK-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i1> @llvm.vp.and.nxv2i1(<vscale x 2 x i1> [[COND:%.*]], <vscale x 2 x i1> [[V:%.*]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[EVL:%.*]])
+; CHECK-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i1> @llvm.vp.and.nxv2i1(<vscale x 2 x i1> [[COND:%.*]], <vscale x 2 x i1> [[V:%.*]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[EVL:%.*]])
 ; CHECK-NEXT:    ret <vscale x 2 x i1> [[TMP1]]
 ;
   %zero = insertelement <vscale x 2 x i1> poison, i1 0, i32 0
