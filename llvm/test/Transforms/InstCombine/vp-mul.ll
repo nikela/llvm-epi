@@ -3,8 +3,8 @@
 
 define <vscale x 2 x i32> @pow2_multiplier_vec(<vscale x 2 x i32> %A, <vscale x 2 x i1> %mask, i32 %evl) {
 ; CHECK-LABEL: @pow2_multiplier_vec(
-; CHECK-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i32> @llvm.vp.shl.nxv2i32(<vscale x 2 x i32> [[A:%.*]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> poison, i32 3, i32 0), <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer), <vscale x 2 x i1> [[MASK:%.*]], i32 [[EVL:%.*]])
-; CHECK-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
+; CHECK-NEXT:    [[B:%.*]] = call <vscale x 2 x i32> @llvm.vp.shl.nxv2i32(<vscale x 2 x i32> [[A:%.*]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> poison, i32 3, i64 0), <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer), <vscale x 2 x i1> [[MASK:%.*]], i32 [[EVL:%.*]])
+; CHECK-NEXT:    ret <vscale x 2 x i32> [[B]]
 ;
   %pow2 = insertelement <vscale x 2 x i32> poison, i32 8, i32 0
   %pow2_splat = shufflevector <vscale x 2 x i32> %pow2, <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer
@@ -14,8 +14,8 @@ define <vscale x 2 x i32> @pow2_multiplier_vec(<vscale x 2 x i32> %A, <vscale x 
 
 define <vscale x 2 x i32> @pow2_multiplier_vec_inverted(<vscale x 2 x i32> %A, <vscale x 2 x i1> %mask, i32 %evl) {
 ; CHECK-LABEL: @pow2_multiplier_vec_inverted(
-; CHECK-NEXT:    [[TMP1:%.*]] = call <vscale x 2 x i32> @llvm.vp.shl.nxv2i32(<vscale x 2 x i32> [[A:%.*]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> poison, i32 3, i32 0), <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer), <vscale x 2 x i1> [[MASK:%.*]], i32 [[EVL:%.*]])
-; CHECK-NEXT:    ret <vscale x 2 x i32> [[TMP1]]
+; CHECK-NEXT:    [[B:%.*]] = call <vscale x 2 x i32> @llvm.vp.shl.nxv2i32(<vscale x 2 x i32> [[A:%.*]], <vscale x 2 x i32> shufflevector (<vscale x 2 x i32> insertelement (<vscale x 2 x i32> poison, i32 3, i64 0), <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer), <vscale x 2 x i1> [[MASK:%.*]], i32 [[EVL:%.*]])
+; CHECK-NEXT:    ret <vscale x 2 x i32> [[B]]
 ;
   %pow2 = insertelement <vscale x 2 x i32> poison, i32 8, i32 0
   %pow2_splat = shufflevector <vscale x 2 x i32> %pow2, <vscale x 2 x i32> poison, <vscale x 2 x i32> zeroinitializer

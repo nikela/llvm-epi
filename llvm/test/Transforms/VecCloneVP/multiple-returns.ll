@@ -37,7 +37,7 @@ attributes #0 = { "_ZGVEMk2vv_foo" "_ZGVENk2vv_foo" }
 ; CHECK-NEXT:    call void @llvm.assume(i1 [[ASSUME_COND]])
 ; CHECK-NEXT:    [[ZEXT_MASK:%.*]] = zext <vscale x 2 x i1> [[MASK:%.*]] to <vscale x 2 x i32>
 ; CHECK-NEXT:    [[VEC_MASK:%.*]] = alloca <vscale x 2 x i32>, align 8
-; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[ZEXT_MASK]], ptr [[VEC_MASK]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
+; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[ZEXT_MASK]], ptr [[VEC_MASK]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
 ; CHECK-NEXT:    [[VEC_X:%.*]] = alloca <vscale x 2 x i32>, align 8
 ; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[X:%.*]], ptr [[VEC_X]], <vscale x 2 x i1> [[MASK]], i32 [[VL]])
 ; CHECK-NEXT:    [[VEC_Y:%.*]] = alloca <vscale x 2 x i32>, align 8
@@ -88,9 +88,9 @@ attributes #0 = { "_ZGVEMk2vv_foo" "_ZGVENk2vv_foo" }
 ; CHECK-NEXT:    [[ASSUME_COND:%.*]] = icmp ule i32 [[VL:%.*]], [[TMP0]]
 ; CHECK-NEXT:    call void @llvm.assume(i1 [[ASSUME_COND]])
 ; CHECK-NEXT:    [[VEC_X:%.*]] = alloca <vscale x 2 x i32>, align 8
-; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[X:%.*]], ptr [[VEC_X]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
+; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[X:%.*]], ptr [[VEC_X]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
 ; CHECK-NEXT:    [[VEC_Y:%.*]] = alloca <vscale x 2 x i32>, align 8
-; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[Y:%.*]], ptr [[VEC_Y]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
+; CHECK-NEXT:    call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[Y:%.*]], ptr [[VEC_Y]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
 ; CHECK-NEXT:    [[VEC_RET:%.*]] = alloca <vscale x 2 x i32>, align 8
 ; CHECK-NEXT:    [[VL_CHECK:%.*]] = icmp uge i32 [[VL]], 0
 ; CHECK-NEXT:    br i1 [[VL_CHECK]], label [[SIMD_LOOP:%.*]], label [[RETURN:%.*]]
@@ -121,6 +121,6 @@ attributes #0 = { "_ZGVEMk2vv_foo" "_ZGVENk2vv_foo" }
 ; CHECK-NEXT:    [[EXIT_COND:%.*]] = icmp eq i32 [[INDVAR]], [[VL]]
 ; CHECK-NEXT:    br i1 [[EXIT_COND]], label [[RETURN]], label [[SIMD_LOOP]], !llvm.loop [[LOOP8:![0-9]+]]
 ; CHECK:       return:
-; CHECK-NEXT:    [[VEC_RET6:%.*]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[VEC_RET]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
+; CHECK-NEXT:    [[VEC_RET6:%.*]] = call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[VEC_RET]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[VL]])
 ; CHECK-NEXT:    ret <vscale x 2 x i32> [[VEC_RET6]]
 ;
