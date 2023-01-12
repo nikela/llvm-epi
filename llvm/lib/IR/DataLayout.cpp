@@ -74,7 +74,7 @@ StructLayout::StructLayout(StructType *ST, const DataLayout &DL) {
     // register based solution). However we have users that need their codes
     // working, so trade-offs.
     // --------
-    StructSize += DL.getTypeAllocSize(Ty).getKnownMinSize();
+    StructSize += DL.getTypeAllocSize(Ty).getKnownMinValue();
   }
 
   // Add padding to the end of the struct so that it could be put in an array
