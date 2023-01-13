@@ -386,7 +386,7 @@ static void buildCopyFromRegs(MachineIRBuilder &B, ArrayRef<Register> OrigRegs,
     assert(OrigRegs.size() == 1);
     LLT OrigTy = MRI.getType(OrigRegs[0]);
 
-    unsigned SrcSize = PartLLT.getSizeInBits().getFixedSize() * Regs.size();
+    unsigned SrcSize = PartLLT.getSizeInBits().getFixedValue() * Regs.size();
     if (SrcSize == OrigTy.getSizeInBits())
       B.buildMerge(OrigRegs[0], Regs);
     else {
@@ -680,7 +680,7 @@ bool CallLowering::handleAssignments(ValueHandler &Handler,
     if (VA.needsCustom()) {
       std::function<void()> Thunk;
       unsigned NumArgRegs = Handler.assignCustomValue(
-          Args[i], makeArrayRef(ArgLocs).slice(j), &Thunk);
+          Args[i], ArrayRef(ArgLocs).slice(j), &Thunk);
       if (Thunk)
         DelayedOutgoingRegAssignments.emplace_back(Thunk);
       if (!NumArgRegs)

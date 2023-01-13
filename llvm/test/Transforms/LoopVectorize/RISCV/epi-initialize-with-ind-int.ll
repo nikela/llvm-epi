@@ -29,21 +29,21 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; CHECK-NEXT:    [[TMP6:%.*]] = call <vscale x 8 x i32> @llvm.experimental.stepvector.nxv8i32()
 ; CHECK-NEXT:    [[TMP7:%.*]] = add <vscale x 8 x i32> [[TMP6]], zeroinitializer
-; CHECK-NEXT:    [[TMP8:%.*]] = mul <vscale x 8 x i32> [[TMP7]], shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> poison, i32 1, i32 0), <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer)
+; CHECK-NEXT:    [[TMP8:%.*]] = mul <vscale x 8 x i32> [[TMP7]], shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> poison, i32 1, i64 0), <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[INDUCTION:%.*]] = add <vscale x 8 x i32> zeroinitializer, [[TMP8]]
 ; CHECK-NEXT:    [[TMP9:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECK-NEXT:    [[TMP10:%.*]] = mul i32 [[TMP9]], 8
 ; CHECK-NEXT:    [[TMP11:%.*]] = mul i32 1, [[TMP10]]
-; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 8 x i32> poison, i32 [[TMP11]], i32 0
+; CHECK-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 8 x i32> poison, i32 [[TMP11]], i64 0
 ; CHECK-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 8 x i32> [[DOTSPLATINSERT]], <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP12:%.*]] = call <vscale x 8 x i32> @llvm.experimental.stepvector.nxv8i32()
 ; CHECK-NEXT:    [[TMP13:%.*]] = add <vscale x 8 x i32> [[TMP12]], zeroinitializer
-; CHECK-NEXT:    [[TMP14:%.*]] = mul <vscale x 8 x i32> [[TMP13]], shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> poison, i32 1, i32 0), <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer)
+; CHECK-NEXT:    [[TMP14:%.*]] = mul <vscale x 8 x i32> [[TMP13]], shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> poison, i32 1, i64 0), <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[INDUCTION1:%.*]] = add <vscale x 8 x i32> zeroinitializer, [[TMP14]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECK-NEXT:    [[TMP16:%.*]] = mul i32 [[TMP15]], 8
 ; CHECK-NEXT:    [[TMP17:%.*]] = mul i32 1, [[TMP16]]
-; CHECK-NEXT:    [[DOTSPLATINSERT2:%.*]] = insertelement <vscale x 8 x i32> poison, i32 [[TMP17]], i32 0
+; CHECK-NEXT:    [[DOTSPLATINSERT2:%.*]] = insertelement <vscale x 8 x i32> poison, i32 [[TMP17]], i64 0
 ; CHECK-NEXT:    [[DOTSPLAT3:%.*]] = shufflevector <vscale x 8 x i32> [[DOTSPLATINSERT2]], <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -56,7 +56,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds double, double* [[TMP20]], i32 0
 ; CHECK-NEXT:    [[TMP22:%.*]] = bitcast double* [[TMP21]] to <vscale x 8 x double>*
 ; CHECK-NEXT:    store <vscale x 8 x double> [[TMP19]], <vscale x 8 x double>* [[TMP22]], align 8, !tbaa [[TBAA2:![0-9]+]]
-; CHECK-NEXT:    [[TMP23:%.*]] = sub <vscale x 8 x i32> shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> poison, i32 1024, i32 0), <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer), [[VEC_IND4]]
+; CHECK-NEXT:    [[TMP23:%.*]] = sub <vscale x 8 x i32> shufflevector (<vscale x 8 x i32> insertelement (<vscale x 8 x i32> poison, i32 1024, i64 0), <vscale x 8 x i32> poison, <vscale x 8 x i32> zeroinitializer), [[VEC_IND4]]
 ; CHECK-NEXT:    [[TMP24:%.*]] = sitofp <vscale x 8 x i32> [[TMP23]] to <vscale x 8 x double>
 ; CHECK-NEXT:    [[TMP25:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[B]], i64 0, i64 [[TMP18]]
 ; CHECK-NEXT:    [[TMP26:%.*]] = getelementptr inbounds double, double* [[TMP25]], i32 0
@@ -99,7 +99,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK-NEXT:    store double [[CONV1]], double* [[ARRAYIDX3]], align 8, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 1024
-; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
+; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
 ;
 ; CHECK1-LABEL: @main(
 ; CHECK1-NEXT:  entry:
@@ -118,19 +118,19 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[N_VEC:%.*]] = sub i64 1024, [[N_MOD_VF]]
 ; CHECK1-NEXT:    [[TMP4:%.*]] = call <vscale x 1 x i32> @llvm.experimental.stepvector.nxv1i32()
 ; CHECK1-NEXT:    [[TMP5:%.*]] = add <vscale x 1 x i32> [[TMP4]], zeroinitializer
-; CHECK1-NEXT:    [[TMP6:%.*]] = mul <vscale x 1 x i32> [[TMP5]], shufflevector (<vscale x 1 x i32> insertelement (<vscale x 1 x i32> poison, i32 1, i32 0), <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[TMP6:%.*]] = mul <vscale x 1 x i32> [[TMP5]], shufflevector (<vscale x 1 x i32> insertelement (<vscale x 1 x i32> poison, i32 1, i64 0), <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[INDUCTION:%.*]] = add <vscale x 1 x i32> zeroinitializer, [[TMP6]]
 ; CHECK1-NEXT:    [[TMP7:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECK1-NEXT:    [[TMP8:%.*]] = mul i32 1, [[TMP7]]
-; CHECK1-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP8]], i32 0
+; CHECK1-NEXT:    [[DOTSPLATINSERT:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP8]], i64 0
 ; CHECK1-NEXT:    [[DOTSPLAT:%.*]] = shufflevector <vscale x 1 x i32> [[DOTSPLATINSERT]], <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK1-NEXT:    [[TMP9:%.*]] = call <vscale x 1 x i32> @llvm.experimental.stepvector.nxv1i32()
 ; CHECK1-NEXT:    [[TMP10:%.*]] = add <vscale x 1 x i32> [[TMP9]], zeroinitializer
-; CHECK1-NEXT:    [[TMP11:%.*]] = mul <vscale x 1 x i32> [[TMP10]], shufflevector (<vscale x 1 x i32> insertelement (<vscale x 1 x i32> poison, i32 1, i32 0), <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer)
+; CHECK1-NEXT:    [[TMP11:%.*]] = mul <vscale x 1 x i32> [[TMP10]], shufflevector (<vscale x 1 x i32> insertelement (<vscale x 1 x i32> poison, i32 1, i64 0), <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK1-NEXT:    [[INDUCTION1:%.*]] = add <vscale x 1 x i32> zeroinitializer, [[TMP11]]
 ; CHECK1-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
 ; CHECK1-NEXT:    [[TMP13:%.*]] = mul i32 1, [[TMP12]]
-; CHECK1-NEXT:    [[DOTSPLATINSERT2:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP13]], i32 0
+; CHECK1-NEXT:    [[DOTSPLATINSERT2:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP13]], i64 0
 ; CHECK1-NEXT:    [[DOTSPLAT3:%.*]] = shufflevector <vscale x 1 x i32> [[DOTSPLATINSERT2]], <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK1-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK1:       vector.body:
@@ -143,7 +143,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    [[TMP17:%.*]] = getelementptr inbounds double, double* [[TMP16]], i32 0
 ; CHECK1-NEXT:    [[TMP18:%.*]] = bitcast double* [[TMP17]] to <vscale x 1 x double>*
 ; CHECK1-NEXT:    store <vscale x 1 x double> [[TMP15]], <vscale x 1 x double>* [[TMP18]], align 8, !tbaa [[TBAA2:![0-9]+]]
-; CHECK1-NEXT:    [[TMP19:%.*]] = sub <vscale x 1 x i32> shufflevector (<vscale x 1 x i32> insertelement (<vscale x 1 x i32> poison, i32 1024, i32 0), <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer), [[VEC_IND4]]
+; CHECK1-NEXT:    [[TMP19:%.*]] = sub <vscale x 1 x i32> shufflevector (<vscale x 1 x i32> insertelement (<vscale x 1 x i32> poison, i32 1024, i64 0), <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer), [[VEC_IND4]]
 ; CHECK1-NEXT:    [[TMP20:%.*]] = sitofp <vscale x 1 x i32> [[TMP19]] to <vscale x 1 x double>
 ; CHECK1-NEXT:    [[TMP21:%.*]] = getelementptr inbounds [1024 x double], [1024 x double]* [[B]], i64 0, i64 [[TMP14]]
 ; CHECK1-NEXT:    [[TMP22:%.*]] = getelementptr inbounds double, double* [[TMP21]], i32 0
@@ -185,7 +185,7 @@ define dso_local signext i32 @main(i32 signext %argc, i8** nocapture readnone %a
 ; CHECK1-NEXT:    store double [[CONV1]], double* [[ARRAYIDX3]], align 8, !tbaa [[TBAA2]]
 ; CHECK1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK1-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 1024
-; CHECK1-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
+; CHECK1-NEXT:    br i1 [[EXITCOND]], label [[FOR_COND_CLEANUP]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
 ;
 entry:
   %a = alloca [1024 x double], align 8

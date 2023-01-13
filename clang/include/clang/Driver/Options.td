@@ -1000,6 +1000,8 @@ def hip_path_EQ : Joined<["--"], "hip-path=">, Group<i_Group>,
   HelpText<"HIP runtime installation path, used for finding HIP version and adding HIP include path.">;
 def amdgpu_arch_tool_EQ : Joined<["--"], "amdgpu-arch-tool=">, Group<i_Group>,
   HelpText<"Tool used for detecting AMD GPU arch in the system.">;
+def nvptx_arch_tool_EQ : Joined<["--"], "nvptx-arch-tool=">, Group<i_Group>,
+  HelpText<"Tool used for detecting NVIDIA GPU arch in the system.">;
 def rocm_device_lib_path_EQ : Joined<["--"], "rocm-device-lib-path=">, Group<Link_Group>,
   HelpText<"ROCm device library path. Alternative to rocm-path.">;
 def : Joined<["--"], "hip-device-lib-path=">, Alias<rocm_device_lib_path_EQ>;
@@ -1576,8 +1578,22 @@ def exception_model_EQ : Joined<["-"], "exception-model=">,
 def fignore_exceptions : Flag<["-"], "fignore-exceptions">, Group<f_Group>, Flags<[CC1Option]>,
   HelpText<"Enable support for ignoring exception handling constructs">,
   MarshallingInfoFlag<LangOpts<"IgnoreExceptions">>;
-def fexcess_precision_EQ : Joined<["-"], "fexcess-precision=">,
-    Group<clang_ignored_gcc_optimization_f_Group>;
+def fexcess_precision_EQ : Joined<["-"], "fexcess-precision=">, Group<f_Group>,
+  HelpText<"Allows control over excess precision on targets where native "
+  "support for the precision types is not available. By default, excess "
+  "precision is used to calculate intermediate results following the "
+  "rules specified in ISO C99.">,
+  Values<"standard,fast,none">, NormalizedValuesScope<"LangOptions">,
+  NormalizedValues<["FPP_Standard", "FPP_Fast", "FPP_None"]>;
+def ffloat16_excess_precision_EQ : Joined<["-"], "ffloat16-excess-precision=">,
+  Group<f_Group>, Flags<[CC1Option, NoDriverOption]>,
+  HelpText<"Allows control over excess precision on targets where native "
+  "support for Float16 precision types is not available. By default, excess "
+  "precision is used to calculate intermediate results following the "
+  "rules specified in ISO C99.">,
+  Values<"standard,fast,none">, NormalizedValuesScope<"LangOptions">,
+  NormalizedValues<["FPP_Standard", "FPP_Fast", "FPP_None"]>,
+  MarshallingInfoEnum<LangOpts<"Float16ExcessPrecision">, "FPP_Standard">;
 def : Flag<["-"], "fexpensive-optimizations">, Group<clang_ignored_gcc_optimization_f_Group>;
 def : Flag<["-"], "fno-expensive-optimizations">, Group<clang_ignored_gcc_optimization_f_Group>;
 def fextdirs_EQ : Joined<["-"], "fextdirs=">, Group<f_Group>;
@@ -1714,6 +1730,7 @@ def fsanitize_memory_track_origins_EQ : Joined<["-"], "fsanitize-memory-track-or
                                         MarshallingInfoInt<CodeGenOpts<"SanitizeMemoryTrackOrigins">>;
 def fsanitize_memory_track_origins : Flag<["-"], "fsanitize-memory-track-origins">,
                                      Group<f_clang_Group>,
+                                     Alias<fsanitize_memory_track_origins_EQ>, AliasArgs<["2"]>,
                                      HelpText<"Enable origins tracking in MemorySanitizer">;
 def fno_sanitize_memory_track_origins : Flag<["-"], "fno-sanitize-memory-track-origins">,
                                         Group<f_clang_Group>,
@@ -2637,6 +2654,11 @@ def fopenmp_offload_mandatory : Flag<["-"], "fopenmp-offload-mandatory">, Group<
   Flags<[CC1Option, NoArgumentUnused]>,
   HelpText<"Do not create a host fallback if offloading to the device fails.">,
   MarshallingInfoFlag<LangOpts<"OpenMPOffloadMandatory">>;
+def fopenmp_target_jit : Flag<["-"], "fopenmp-target-jit">, Group<f_Group>,
+  Flags<[CoreOption, NoArgumentUnused]>,
+  HelpText<"Emit code that can be JIT compiled for OpenMP offloading. Implies -foffload-lto=full">;
+def fno_openmp_target_jit : Flag<["-"], "fno-openmp-target-jit">, Group<f_Group>,
+  Flags<[CoreOption, NoArgumentUnused, HelpHidden]>;
 def fopenmp_target_new_runtime : Flag<["-"], "fopenmp-target-new-runtime">,
   Group<f_Group>, Flags<[CC1Option, HelpHidden]>;
 def fno_openmp_target_new_runtime : Flag<["-"], "fno-openmp-target-new-runtime">,
@@ -3866,6 +3888,8 @@ def msmall_data_threshold_EQ : Joined <["-"], "msmall-data-threshold=">,
 def msoft_float : Flag<["-"], "msoft-float">, Group<m_Group>, Flags<[CC1Option]>,
   HelpText<"Use software floating point">,
   MarshallingInfoFlag<CodeGenOpts<"SoftFloat">>;
+def mno_fmv : Flag<["-"], "mno-fmv">, Group<f_clang_Group>, Flags<[CC1Option]>,
+  HelpText<"Disable function multiversioning">;
 def moutline_atomics : Flag<["-"], "moutline-atomics">, Group<f_clang_Group>, Flags<[CC1Option]>,
   HelpText<"Generate local calls to out-of-line atomic operations">;
 def mno_outline_atomics : Flag<["-"], "mno-outline-atomics">, Group<f_clang_Group>, Flags<[CC1Option]>,
@@ -4235,7 +4259,7 @@ def std_default_EQ : Joined<["-"], "std-default=">;
 def std_EQ : Joined<["-", "--"], "std=">, Flags<[CC1Option,FlangOption,FC1Option]>,
   Group<CompileOnly_Group>, HelpText<"Language standard to compile for">,
   ValuesCode<[{
-    const char *Values =
+    static constexpr const char VALUES_CODE [] =
     #define LANGSTANDARD(id, name, lang, desc, features) name ","
     #define LANGSTANDARD_ALIAS(id, alias) alias ","
     #include "clang/Basic/LangStandards.def"
@@ -5246,7 +5270,7 @@ def analyzer_stats : Flag<["-"], "analyzer-stats">,
 def analyzer_checker : Separate<["-"], "analyzer-checker">,
   HelpText<"Choose analyzer checkers to enable">,
   ValuesCode<[{
-    const char *Values =
+    static constexpr const char VALUES_CODE [] =
     #define GET_CHECKERS
     #define CHECKER(FULLNAME, CLASS, HT, DOC_URI, IS_HIDDEN)  FULLNAME ","
     #include "clang/StaticAnalyzer/Checkers/Checkers.inc"
@@ -5389,9 +5413,9 @@ def massembler_no_warn : Flag<["-"], "massembler-no-warn">,
 def massembler_fatal_warnings : Flag<["-"], "massembler-fatal-warnings">,
   HelpText<"Make assembler warnings fatal">,
   MarshallingInfoFlag<CodeGenOpts<"FatalWarnings">>;
-def mrelax_relocations : Flag<["--"], "mrelax-relocations">,
-    HelpText<"Use relaxable elf relocations">,
-    MarshallingInfoFlag<CodeGenOpts<"RelaxELFRelocations">>;
+def mrelax_relocations_no : Flag<["-"], "mrelax-relocations=no">,
+    HelpText<"Disable x86 relax relocations">,
+    MarshallingInfoNegativeFlag<CodeGenOpts<"RelaxELFRelocations">>;
 def msave_temp_labels : Flag<["-"], "msave-temp-labels">,
   HelpText<"Save temporary labels in the symbol table. "
            "Note this may change .s semantics and shouldn't generally be used "

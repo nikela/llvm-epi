@@ -3210,9 +3210,10 @@ public:
   /// By default, builds a new default-argument expression, which does not
   /// require any semantic analysis. Subclasses may override this routine to
   /// provide different behavior.
-  ExprResult RebuildCXXDefaultArgExpr(SourceLocation Loc, ParmVarDecl *Param) {
+  ExprResult RebuildCXXDefaultArgExpr(SourceLocation Loc, ParmVarDecl *Param,
+                                      Expr *RewrittenExpr) {
     return CXXDefaultArgExpr::Create(getSema().Context, Loc, Param,
-                                     getSema().CurContext);
+                                     RewrittenExpr, getSema().CurContext);
   }
 
   /// Build a new C++11 default-initialization expression.
@@ -3222,8 +3223,7 @@ public:
   /// routine to provide different behavior.
   ExprResult RebuildCXXDefaultInitExpr(SourceLocation Loc,
                                        FieldDecl *Field) {
-    return CXXDefaultInitExpr::Create(getSema().Context, Loc, Field,
-                                      getSema().CurContext);
+    return getSema().BuildCXXDefaultInitExpr(Loc, Field);
   }
 
   /// Build a new C++ zero-initialization expression.
@@ -3857,16 +3857,6 @@ public:
   ExprResult RebuildEmptyCXXFoldExpr(SourceLocation EllipsisLoc,
                                      BinaryOperatorKind Operator) {
     return getSema().BuildEmptyCXXFoldExpr(EllipsisLoc, Operator);
-  }
-
-  ExprResult RebuildCXXParenListInitExpr(ArrayRef<Expr *> Args, QualType T,
-                                         unsigned NumUserSpecifiedExprs,
-                                         SourceLocation InitLoc,
-                                         SourceLocation LParenLoc,
-                                         SourceLocation RParenLoc) {
-    return CXXParenListInitExpr::Create(getSema().Context, Args, T,
-                                        NumUserSpecifiedExprs, InitLoc,
-                                        LParenLoc, RParenLoc);
   }
 
   /// Build a new atomic operation expression.
@@ -6061,8 +6051,8 @@ QualType TreeTransform<Derived>::TransformFunctionProtoType(
   if (auto NewExtParamInfos =
         ExtParamInfos.getPointerOrNull(ParamTypes.size())) {
     if (!EPI.ExtParameterInfos ||
-        llvm::makeArrayRef(EPI.ExtParameterInfos, TL.getNumParams())
-          != llvm::makeArrayRef(NewExtParamInfos, ParamTypes.size())) {
+        llvm::ArrayRef(EPI.ExtParameterInfos, TL.getNumParams()) !=
+            llvm::ArrayRef(NewExtParamInfos, ParamTypes.size())) {
       EPIChanged = true;
     }
     EPI.ExtParameterInfos = NewExtParamInfos;
@@ -6073,7 +6063,7 @@ QualType TreeTransform<Derived>::TransformFunctionProtoType(
 
   QualType Result = TL.getType();
   if (getDerived().AlwaysRebuild() || ResultType != T->getReturnType() ||
-      T->getParamTypes() != llvm::makeArrayRef(ParamTypes) || EPIChanged) {
+      T->getParamTypes() != llvm::ArrayRef(ParamTypes) || EPIChanged) {
     Result = getDerived().RebuildFunctionProtoType(ResultType, ParamTypes, EPI);
     if (Result.isNull())
       return QualType();
@@ -7222,12 +7212,10 @@ TreeTransform<Derived>::TransformObjCTypeParamType(TypeLocBuilder &TLB,
   QualType Result = TL.getType();
   if (getDerived().AlwaysRebuild() ||
       OTP != T->getDecl()) {
-    Result = getDerived().RebuildObjCTypeParamType(OTP,
-                 TL.getProtocolLAngleLoc(),
-                 llvm::makeArrayRef(TL.getTypePtr()->qual_begin(),
-                                    TL.getNumProtocols()),
-                 TL.getProtocolLocs(),
-                 TL.getProtocolRAngleLoc());
+    Result = getDerived().RebuildObjCTypeParamType(
+        OTP, TL.getProtocolLAngleLoc(),
+        llvm::ArrayRef(TL.getTypePtr()->qual_begin(), TL.getNumProtocols()),
+        TL.getProtocolLocs(), TL.getProtocolRAngleLoc());
     if (Result.isNull())
       return QualType();
   }
@@ -7347,7 +7335,7 @@ TreeTransform<Derived>::TransformObjCObjectType(TypeLocBuilder &TLB,
     Result = getDerived().RebuildObjCObjectType(
         BaseType, TL.getBeginLoc(), TL.getTypeArgsLAngleLoc(), NewTypeArgInfos,
         TL.getTypeArgsRAngleLoc(), TL.getProtocolLAngleLoc(),
-        llvm::makeArrayRef(TL.getTypePtr()->qual_begin(), TL.getNumProtocols()),
+        llvm::ArrayRef(TL.getTypePtr()->qual_begin(), TL.getNumProtocols()),
         TL.getProtocolLocs(), TL.getProtocolRAngleLoc());
 
     if (Result.isNull())
@@ -7910,8 +7898,7 @@ TreeTransform<Derived>::TransformGCCAsmStmt(GCCAsmStmt *S) {
 template<typename Derived>
 StmtResult
 TreeTransform<Derived>::TransformMSAsmStmt(MSAsmStmt *S) {
-  ArrayRef<Token> AsmToks =
-    llvm::makeArrayRef(S->getAsmToks(), S->getNumAsmToks());
+  ArrayRef<Token> AsmToks = llvm::ArrayRef(S->getAsmToks(), S->getNumAsmToks());
 
   bool HadError = false, HadChange = false;
 
@@ -12173,11 +12160,20 @@ TreeTransform<Derived>::TransformCXXDefaultArgExpr(CXXDefaultArgExpr *E) {
   if (!Param)
     return ExprError();
 
+  ExprResult InitRes;
+  if (E->hasRewrittenInit()) {
+    InitRes = getDerived().TransformExpr(E->getRewrittenExpr());
+    if (InitRes.isInvalid())
+      return ExprError();
+  }
+
   if (!getDerived().AlwaysRebuild() && Param == E->getParam() &&
-      E->getUsedContext() == SemaRef.CurContext)
+      E->getUsedContext() == SemaRef.CurContext &&
+      InitRes.get() == E->getRewrittenExpr())
     return E;
 
-  return getDerived().RebuildCXXDefaultArgExpr(E->getUsedLocation(), Param);
+  return getDerived().RebuildCXXDefaultArgExpr(E->getUsedLocation(), Param,
+                                               InitRes.get());
 }
 
 template<typename Derived>
@@ -13244,10 +13240,11 @@ TreeTransform<Derived>::TransformLambdaExpr(LambdaExpr *E) {
   // context that isn't a DeclContext (such as a variable template), or when
   // substituting an unevaluated lambda inside of a function's parameter's type
   // - as parameter types are not instantiated from within a function's DC. We
-  // use isUnevaluatedContext() to distinguish the function parameter case.
+  // use evaluation contexts to distinguish the function parameter case.
   CXXRecordDecl::LambdaDependencyKind DependencyKind =
       CXXRecordDecl::LDK_Unknown;
-  if (getSema().isUnevaluatedContext() &&
+  if ((getSema().isUnevaluatedContext() ||
+       getSema().isConstantEvaluatedContext()) &&
       (getSema().CurContext->isFileContext() ||
        !getSema().CurContext->getParent()->isDependentContext()))
     DependencyKind = CXXRecordDecl::LDK_NeverDependent;
@@ -13402,9 +13399,8 @@ TreeTransform<Derived>::TransformLambdaExpr(LambdaExpr *E) {
     }
 
     // Transform the captured variable.
-    VarDecl *CapturedVar
-      = cast_or_null<VarDecl>(getDerived().TransformDecl(C->getLocation(),
-                                                         C->getCapturedVar()));
+    auto *CapturedVar = cast_or_null<ValueDecl>(
+        getDerived().TransformDecl(C->getLocation(), C->getCapturedVar()));
     if (!CapturedVar || CapturedVar->isInvalidDecl()) {
       Invalid = true;
       continue;
@@ -14035,20 +14031,6 @@ TreeTransform<Derived>::TransformCXXFoldExpr(CXXFoldExpr *E) {
                                                 E->getOperator());
 
   return Result;
-}
-
-template <typename Derived>
-ExprResult
-TreeTransform<Derived>::TransformCXXParenListInitExpr(CXXParenListInitExpr *E) {
-  SmallVector<Expr *, 4> TransformedInits;
-  ArrayRef<Expr *> InitExprs = E->getInitExprs();
-  if (TransformExprs(InitExprs.data(), InitExprs.size(), true,
-                     TransformedInits))
-    return ExprError();
-
-  return getDerived().RebuildCXXParenListInitExpr(
-      TransformedInits, E->getType(), E->getUserSpecifiedInitExprs().size(),
-      E->getInitLoc(), E->getBeginLoc(), E->getEndLoc());
 }
 
 template<typename Derived>

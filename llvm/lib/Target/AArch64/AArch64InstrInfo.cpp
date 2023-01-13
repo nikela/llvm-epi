@@ -2647,11 +2647,11 @@ bool AArch64InstrInfo::getMemOperandWithOffsetWidth(
   // set to 1.
   if (LdSt.getNumExplicitOperands() == 3) {
     BaseOp = &LdSt.getOperand(1);
-    Offset = LdSt.getOperand(2).getImm() * Scale.getKnownMinSize();
+    Offset = LdSt.getOperand(2).getImm() * Scale.getKnownMinValue();
   } else {
     assert(LdSt.getNumExplicitOperands() == 4 && "invalid number of operands");
     BaseOp = &LdSt.getOperand(2);
-    Offset = LdSt.getOperand(3).getImm() * Scale.getKnownMinSize();
+    Offset = LdSt.getOperand(3).getImm() * Scale.getKnownMinValue();
   }
   OffsetIsScalable = Scale.isScalable();
 
@@ -4694,7 +4694,7 @@ int llvm::isAArch64FrameOffsetLegal(const MachineInstr &MI,
 
   // Construct the complete offset.
   bool IsMulVL = ScaleValue.isScalable();
-  unsigned Scale = ScaleValue.getKnownMinSize();
+  unsigned Scale = ScaleValue.getKnownMinValue();
   int64_t Offset = IsMulVL ? SOffset.getScalable() : SOffset.getFixed();
 
   const MachineOperand &ImmOpnd =
@@ -4712,7 +4712,7 @@ int llvm::isAArch64FrameOffsetLegal(const MachineInstr &MI,
                                       MaxOff))
     llvm_unreachable("unhandled opcode in isAArch64FrameOffsetLegal");
 
-  Scale = ScaleValue.getKnownMinSize();
+  Scale = ScaleValue.getKnownMinValue();
   assert(IsMulVL == ScaleValue.isScalable() &&
          "Unscaled opcode has different value for scalable");
 
@@ -4976,6 +4976,15 @@ bool AArch64InstrInfo::isAssociativeAndCommutative(const MachineInstr &Inst,
   case AArch64::FMULXv2f32:
   case AArch64::FMULXv4f32:
   case AArch64::FMULXv2f64:
+  // -- SVE instructions --
+  // Opcodes FMULX_ZZZ_? don't exist because there is no unpredicated FMULX
+  // in the SVE instruction set (though there are predicated ones).
+  case AArch64::FADD_ZZZ_H:
+  case AArch64::FADD_ZZZ_S:
+  case AArch64::FADD_ZZZ_D:
+  case AArch64::FMUL_ZZZ_H:
+  case AArch64::FMUL_ZZZ_S:
+  case AArch64::FMUL_ZZZ_D:
     return Inst.getParent()->getParent()->getTarget().Options.UnsafeFPMath ||
            (Inst.getFlag(MachineInstr::MIFlag::FmReassoc) &&
             Inst.getFlag(MachineInstr::MIFlag::FmNsz));
@@ -5020,6 +5029,18 @@ bool AArch64InstrInfo::isAssociativeAndCommutative(const MachineInstr &Inst,
   case AArch64::ORRv16i8:
   case AArch64::EORv8i8:
   case AArch64::EORv16i8:
+  // -- SVE instructions --
+  case AArch64::ADD_ZZZ_B:
+  case AArch64::ADD_ZZZ_H:
+  case AArch64::ADD_ZZZ_S:
+  case AArch64::ADD_ZZZ_D:
+  case AArch64::MUL_ZZZ_B:
+  case AArch64::MUL_ZZZ_H:
+  case AArch64::MUL_ZZZ_S:
+  case AArch64::MUL_ZZZ_D:
+  case AArch64::AND_ZZZ:
+  case AArch64::ORR_ZZZ:
+  case AArch64::EOR_ZZZ:
     return true;
 
   default:
@@ -6960,7 +6981,7 @@ AArch64InstrInfo::getSerializableDirectMachineOperandTargetFlags() const {
       {MO_G3, "aarch64-g3"},     {MO_G2, "aarch64-g2"},
       {MO_G1, "aarch64-g1"},     {MO_G0, "aarch64-g0"},
       {MO_HI12, "aarch64-hi12"}};
-  return makeArrayRef(TargetFlags);
+  return ArrayRef(TargetFlags);
 }
 
 ArrayRef<std::pair<unsigned, const char *>>
@@ -6977,7 +6998,7 @@ AArch64InstrInfo::getSerializableBitmaskMachineOperandTargetFlags() const {
       {MO_DLLIMPORTAUX, "aarch64-dllimportaux"},
       {MO_PREL, "aarch64-prel"},
       {MO_TAGGED, "aarch64-tagged"}};
-  return makeArrayRef(TargetFlags);
+  return ArrayRef(TargetFlags);
 }
 
 ArrayRef<std::pair<MachineMemOperand::Flags, const char *>>
@@ -6985,7 +7006,7 @@ AArch64InstrInfo::getSerializableMachineMemOperandTargetFlags() const {
   static const std::pair<MachineMemOperand::Flags, const char *> TargetFlags[] =
       {{MOSuppressPair, "aarch64-suppress-pair"},
        {MOStridedAccess, "aarch64-strided-access"}};
-  return makeArrayRef(TargetFlags);
+  return ArrayRef(TargetFlags);
 }
 
 /// Constants defining how certain sequences should be outlined.
@@ -7362,8 +7383,8 @@ outliner::OutlinedFunction AArch64InstrInfo::getOutliningCandidateInfo(
       getMemOpInfo(MI.getOpcode(), Scale, DummyWidth, MinOffset, MaxOffset);
 
       Offset += 16; // Update the offset to what it would be if we outlined.
-      if (Offset < MinOffset * (int64_t)Scale.getFixedSize() ||
-          Offset > MaxOffset * (int64_t)Scale.getFixedSize())
+      if (Offset < MinOffset * (int64_t)Scale.getFixedValue() ||
+          Offset > MaxOffset * (int64_t)Scale.getFixedValue())
         return false;
 
       // It's in range, so we can outline it.
@@ -7839,7 +7860,7 @@ void AArch64InstrInfo::fixupPostOutline(MachineBasicBlock &MBB) const {
     // We've pushed the return address to the stack, so add 16 to the offset.
     // This is safe, since we already checked if it would overflow when we
     // checked if this instruction was legal to outline.
-    int64_t NewImm = (Offset + 16) / (int64_t)Scale.getFixedSize();
+    int64_t NewImm = (Offset + 16) / (int64_t)Scale.getFixedValue();
     StackOffsetOperand.setImm(NewImm);
   }
 }

@@ -48,7 +48,7 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i64* [[TMP8]] to <vscale x 1 x i64>*
 ; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, <vscale x 1 x i64>* [[TMP9]], align 8
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds double, double* [[X:%.*]], <vscale x 1 x i64> [[WIDE_LOAD2]]
-; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = tail call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP10]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> poison)
+; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = tail call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP10]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> poison)
 ; CHECK-NEXT:    [[TMP11:%.*]] = fmul fast <vscale x 1 x double> [[WIDE_MASKED_GATHER]], [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[TMP12]] = fadd fast <vscale x 1 x double> [[TMP11]], [[VEC_PHI]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP5]]
@@ -75,7 +75,7 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[ADD13]] = fadd fast double [[MUL]], [[SUM_034]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT1:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[TMP1]]
-; CHECK-NEXT:    br i1 [[EXITCOND_NOT1]], label [[FOR_END]], label [[FOR_BODY7]], !llvm.loop [[LOOP2:![0-9]+]]
+; CHECK-NEXT:    br i1 [[EXITCOND_NOT1]], label [[FOR_END]], label [[FOR_BODY7]], !llvm.loop [[LOOP3:![0-9]+]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    [[SUM_0_LCSSA:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ], [ [[ADD13]], [[FOR_BODY7]] ]
 ; CHECK-NEXT:    [[ARRAYIDX15:%.*]] = getelementptr inbounds double, double* [[Y:%.*]], i64 [[INDVARS_IV39]]

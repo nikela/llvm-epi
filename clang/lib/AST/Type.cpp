@@ -1076,7 +1076,7 @@ public:
 
       if (exceptionChanged) {
         info.ExceptionSpec.Exceptions =
-            llvm::makeArrayRef(exceptionTypes).copy(Ctx);
+            llvm::ArrayRef(exceptionTypes).copy(Ctx);
       }
     }
 
@@ -1218,10 +1218,10 @@ public:
         !typeArgChanged)
       return QualType(T, 0);
 
-    return Ctx.getObjCObjectType(baseType, typeArgs,
-                                 llvm::makeArrayRef(T->qual_begin(),
-                                                    T->getNumProtocols()),
-                                 T->isKindOfTypeAsWritten());
+    return Ctx.getObjCObjectType(
+        baseType, typeArgs,
+        llvm::ArrayRef(T->qual_begin(), T->getNumProtocols()),
+        T->isKindOfTypeAsWritten());
   }
 
   TRIVIAL_TYPE_CLASS(ObjCInterface)
@@ -1373,7 +1373,7 @@ struct SubstObjCTypeArgsVisitor
 
       if (exceptionChanged) {
         info.ExceptionSpec.Exceptions =
-            llvm::makeArrayRef(exceptionTypes).copy(Ctx);
+            llvm::ArrayRef(exceptionTypes).copy(Ctx);
       }
     }
 
@@ -1482,6 +1482,25 @@ struct StripObjCKindOfTypeVisitor
 };
 
 } // namespace
+
+bool QualType::UseExcessPrecision(const ASTContext &Ctx) {
+  const BuiltinType *BT = getTypePtr()->getAs<BuiltinType>();
+  if (BT) {
+    switch (BT->getKind()) {
+    case BuiltinType::Kind::Float16: {
+      const TargetInfo &TI = Ctx.getTargetInfo();
+      if (TI.hasFloat16Type() && !TI.hasLegalHalfType() &&
+          Ctx.getLangOpts().getFloat16ExcessPrecision() !=
+              Ctx.getLangOpts().ExcessPrecisionKind::FPP_None)
+        return true;
+      return false;
+    }
+    default:
+      return false;
+    }
+  }
+  return false;
+}
 
 /// Substitute the given type arguments for Objective-C type
 /// parameters within the given type, recursively.
@@ -3700,7 +3719,7 @@ IdentifierInfo *SubstTemplateTypeParmPackType::getIdentifier() const {
 }
 
 TemplateArgument SubstTemplateTypeParmPackType::getArgumentPack() const {
-  return TemplateArgument(llvm::makeArrayRef(Arguments, getNumArgs()));
+  return TemplateArgument(llvm::ArrayRef(Arguments, getNumArgs()));
 }
 
 void SubstTemplateTypeParmPackType::Profile(llvm::FoldingSetNodeID &ID) {
@@ -3842,7 +3861,7 @@ void ObjCObjectTypeImpl::Profile(llvm::FoldingSetNodeID &ID,
 
 void ObjCObjectTypeImpl::Profile(llvm::FoldingSetNodeID &ID) {
   Profile(ID, getBaseType(), getTypeArgsAsWritten(),
-          llvm::makeArrayRef(qual_begin(), getNumProtocols()),
+          llvm::ArrayRef(qual_begin(), getNumProtocols()),
           isKindOfTypeAsWritten());
 }
 
@@ -3859,7 +3878,7 @@ void ObjCTypeParamType::Profile(llvm::FoldingSetNodeID &ID,
 
 void ObjCTypeParamType::Profile(llvm::FoldingSetNodeID &ID) {
   Profile(ID, getDecl(), getCanonicalTypeInternal(),
-          llvm::makeArrayRef(qual_begin(), getNumProtocols()));
+          llvm::ArrayRef(qual_begin(), getNumProtocols()));
 }
 
 namespace {

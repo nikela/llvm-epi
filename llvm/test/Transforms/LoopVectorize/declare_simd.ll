@@ -20,7 +20,7 @@ define dso_local void @inbranch(i64 noundef %N, ptr nocapture noundef %C, ptr no
 ; CHECK-NEXT:    br i1 [[TMP2]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -29,7 +29,7 @@ define dso_local void @inbranch(i64 noundef %N, ptr nocapture noundef %C, ptr no
 ; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 7)
 ; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[TMP6:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP7:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
 ; CHECK-NEXT:    [[TMP8:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP7]]
@@ -37,10 +37,10 @@ define dso_local void @inbranch(i64 noundef %N, ptr nocapture noundef %C, ptr no
 ; CHECK-NEXT:    [[TMP9:%.*]] = icmp ule <vscale x 1 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[TMP10]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5:![0-9]+]], !llvm.access.group [[ACC_GRP9:![0-9]+]]
-; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f32(<vscale x 1 x float> [[VP_OP_LOAD]], <vscale x 1 x float> shufflevector (<vscale x 1 x float> insertelement (<vscale x 1 x float> poison, float 4.200000e+01, i32 0), <vscale x 1 x float> poison, <vscale x 1 x i32> zeroinitializer), metadata !"ogt", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5:![0-9]+]], !llvm.access.group [[ACC_GRP9:![0-9]+]]
+; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f32(<vscale x 1 x float> [[VP_OP_LOAD]], <vscale x 1 x float> shufflevector (<vscale x 1 x float> insertelement (<vscale x 1 x float> poison, float 4.200000e+01, i64 0), <vscale x 1 x float> poison, <vscale x 1 x i32> zeroinitializer), metadata !"ogt", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP6]]
-; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 1 x i1> @llvm.vp.and.nxv1i1(<vscale x 1 x i1> [[TMP9]], <vscale x 1 x i1> [[VP_OP_FCMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
+; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 1 x i1> @llvm.vp.and.nxv1i1(<vscale x 1 x i1> [[TMP9]], <vscale x 1 x i1> [[VP_OP_FCMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[TMP12]], i32 0
 ; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP13]], <vscale x 1 x i1> [[VP_MASK_SELECT]], i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP6]]
@@ -68,13 +68,13 @@ define dso_local void @inbranch(i64 noundef %N, ptr nocapture noundef %C, ptr no
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_025]]
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX9]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR6:[0-9]+]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR5:[0-9]+]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    br label [[OMP_INNER_FOR_INC]]
 ; CHECK:       omp.inner.for.inc:
 ; CHECK-NEXT:    [[ADD11]] = add nuw nsw i64 [[DOTOMP_IV_025]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[ADD11]], [[N]]
-; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[SIMD_IF_END_LOOPEXIT]], label [[OMP_INNER_FOR_BODY]], !llvm.loop [[LOOP13:![0-9]+]]
+; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[SIMD_IF_END_LOOPEXIT]], label [[OMP_INNER_FOR_BODY]], !llvm.loop [[LOOP14:![0-9]+]]
 ; CHECK:       simd.if.end.loopexit:
 ; CHECK-NEXT:    br label [[SIMD_IF_END]]
 ; CHECK:       simd.if.end:
@@ -128,7 +128,7 @@ define dso_local void @inbranch1(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    br i1 [[TMP2]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -137,7 +137,7 @@ define dso_local void @inbranch1(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 7)
 ; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[TMP6:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP7:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
 ; CHECK-NEXT:    [[TMP8:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP7]]
@@ -145,10 +145,10 @@ define dso_local void @inbranch1(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP9:%.*]] = icmp ule <vscale x 1 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[TMP10]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f32(<vscale x 1 x float> [[VP_OP_LOAD]], <vscale x 1 x float> shufflevector (<vscale x 1 x float> insertelement (<vscale x 1 x float> poison, float 4.200000e+01, i32 0), <vscale x 1 x float> poison, <vscale x 1 x i32> zeroinitializer), metadata !"ogt", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f32(<vscale x 1 x float> [[VP_OP_LOAD]], <vscale x 1 x float> shufflevector (<vscale x 1 x float> insertelement (<vscale x 1 x float> poison, float 4.200000e+01, i64 0), <vscale x 1 x float> poison, <vscale x 1 x i32> zeroinitializer), metadata !"ogt", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP6]]
-; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 1 x i1> @llvm.vp.and.nxv1i1(<vscale x 1 x i1> [[TMP9]], <vscale x 1 x i1> [[VP_OP_FCMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
+; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 1 x i1> @llvm.vp.and.nxv1i1(<vscale x 1 x i1> [[TMP9]], <vscale x 1 x i1> [[VP_OP_FCMP]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]])
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[TMP12]], i32 0
 ; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP13]], <vscale x 1 x i1> [[VP_MASK_SELECT]], i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP6]]
@@ -176,7 +176,7 @@ define dso_local void @inbranch1(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_025]]
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX9]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    br label [[OMP_INNER_FOR_INC]]
 ; CHECK:       omp.inner.for.inc:
@@ -237,7 +237,7 @@ define dso_local void @inbranch2(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -246,7 +246,7 @@ define dso_local void @inbranch2(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 0)
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
 ; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP8:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = add <vscale x 2 x i64> zeroinitializer, [[TMP8]]
@@ -254,10 +254,10 @@ define dso_local void @inbranch2(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp ule <vscale x 2 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[TMP11]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> [[VP_OP_LOAD]], <vscale x 2 x float> shufflevector (<vscale x 2 x float> insertelement (<vscale x 2 x float> poison, float 4.200000e+01, i32 0), <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer), metadata !"ogt", <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 2 x i1> @llvm.vp.fcmp.nxv2f32(<vscale x 2 x float> [[VP_OP_LOAD]], <vscale x 2 x float> shufflevector (<vscale x 2 x float> insertelement (<vscale x 2 x float> poison, float 4.200000e+01, i64 0), <vscale x 2 x float> poison, <vscale x 2 x i32> zeroinitializer), metadata !"ogt", <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP7]]
-; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 2 x i1> @llvm.vp.and.nxv2i1(<vscale x 2 x i1> [[TMP10]], <vscale x 2 x i1> [[VP_OP_FCMP]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 2 x i1> @llvm.vp.and.nxv2i1(<vscale x 2 x i1> [[TMP10]], <vscale x 2 x i1> [[VP_OP_FCMP]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[TMP13]], i32 0
 ; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP14]], <vscale x 2 x i1> [[VP_MASK_SELECT]], i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP7]]
@@ -285,7 +285,7 @@ define dso_local void @inbranch2(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_025]]
 ; CHECK-NEXT:    [[TMP22:%.*]] = load float, ptr [[ARRAYIDX9]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP21]], float noundef [[TMP22]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP21]], float noundef [[TMP22]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    br label [[OMP_INNER_FOR_INC]]
 ; CHECK:       omp.inner.for.inc:
@@ -346,7 +346,7 @@ define dso_local void @inbranch4(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 4 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -355,7 +355,7 @@ define dso_local void @inbranch4(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 1)
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
 ; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 4 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP8:%.*]] = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = add <vscale x 4 x i64> zeroinitializer, [[TMP8]]
@@ -363,10 +363,10 @@ define dso_local void @inbranch4(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp ule <vscale x 4 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[TMP11]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP12]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 4 x i1> @llvm.vp.fcmp.nxv4f32(<vscale x 4 x float> [[VP_OP_LOAD]], <vscale x 4 x float> shufflevector (<vscale x 4 x float> insertelement (<vscale x 4 x float> poison, float 4.200000e+01, i32 0), <vscale x 4 x float> poison, <vscale x 4 x i32> zeroinitializer), metadata !"ogt", <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP12]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i64 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 4 x i1> @llvm.vp.fcmp.nxv4f32(<vscale x 4 x float> [[VP_OP_LOAD]], <vscale x 4 x float> shufflevector (<vscale x 4 x float> insertelement (<vscale x 4 x float> poison, float 4.200000e+01, i64 0), <vscale x 4 x float> poison, <vscale x 4 x i32> zeroinitializer), metadata !"ogt", <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i64 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP7]]
-; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 4 x i1> @llvm.vp.and.nxv4i1(<vscale x 4 x i1> [[TMP10]], <vscale x 4 x i1> [[VP_OP_FCMP]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 4 x i1> @llvm.vp.and.nxv4i1(<vscale x 4 x i1> [[TMP10]], <vscale x 4 x i1> [[VP_OP_FCMP]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i64 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[TMP13]], i32 0
 ; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP14]], <vscale x 4 x i1> [[VP_MASK_SELECT]], i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP7]]
@@ -394,7 +394,7 @@ define dso_local void @inbranch4(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_025]]
 ; CHECK-NEXT:    [[TMP22:%.*]] = load float, ptr [[ARRAYIDX9]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP21]], float noundef [[TMP22]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP21]], float noundef [[TMP22]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    br label [[OMP_INNER_FOR_INC]]
 ; CHECK:       omp.inner.for.inc:
@@ -455,7 +455,7 @@ define dso_local void @inbranch8(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -464,7 +464,7 @@ define dso_local void @inbranch8(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 2)
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
 ; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP8:%.*]] = call <vscale x 8 x i64> @llvm.experimental.stepvector.nxv8i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = add <vscale x 8 x i64> zeroinitializer, [[TMP8]]
@@ -472,10 +472,10 @@ define dso_local void @inbranch8(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp ule <vscale x 8 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[TMP11]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP12]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 8 x i1> @llvm.vp.fcmp.nxv8f32(<vscale x 8 x float> [[VP_OP_LOAD]], <vscale x 8 x float> shufflevector (<vscale x 8 x float> insertelement (<vscale x 8 x float> poison, float 4.200000e+01, i32 0), <vscale x 8 x float> poison, <vscale x 8 x i32> zeroinitializer), metadata !"ogt", <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP12]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_FCMP:%.*]] = call <vscale x 8 x i1> @llvm.vp.fcmp.nxv8f32(<vscale x 8 x float> [[VP_OP_LOAD]], <vscale x 8 x float> shufflevector (<vscale x 8 x float> insertelement (<vscale x 8 x float> poison, float 4.200000e+01, i64 0), <vscale x 8 x float> poison, <vscale x 8 x i32> zeroinitializer), metadata !"ogt", <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP7]]
-; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 8 x i1> @llvm.vp.and.nxv8i1(<vscale x 8 x i1> [[TMP10]], <vscale x 8 x i1> [[VP_OP_FCMP]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]])
+; CHECK-NEXT:    [[VP_MASK_SELECT:%.*]] = call <vscale x 8 x i1> @llvm.vp.and.nxv8i1(<vscale x 8 x i1> [[TMP10]], <vscale x 8 x i1> [[VP_OP_FCMP]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]])
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[TMP13]], i32 0
 ; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP14]], <vscale x 8 x i1> [[VP_MASK_SELECT]], i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP7]]
@@ -503,7 +503,7 @@ define dso_local void @inbranch8(i64 noundef %N, ptr nocapture noundef %C, ptr n
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_025]]
 ; CHECK-NEXT:    [[TMP22:%.*]] = load float, ptr [[ARRAYIDX9]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP21]], float noundef [[TMP22]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP21]], float noundef [[TMP22]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    br label [[OMP_INNER_FOR_INC]]
 ; CHECK:       omp.inner.for.inc:
@@ -563,7 +563,7 @@ define dso_local void @notinbranch(i64 noundef %N, ptr nocapture noundef writeon
 ; CHECK-NEXT:    br i1 [[TMP2]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -572,7 +572,7 @@ define dso_local void @notinbranch(i64 noundef %N, ptr nocapture noundef writeon
 ; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 7)
 ; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[TMP6:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP7:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
 ; CHECK-NEXT:    [[TMP8:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP7]]
@@ -580,14 +580,14 @@ define dso_local void @notinbranch(i64 noundef %N, ptr nocapture noundef writeon
 ; CHECK-NEXT:    [[TMP9:%.*]] = icmp ule <vscale x 1 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[TMP10]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[TMP12]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP13]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP13]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = call <vscale x 1 x float> @_ZGVENk1vv_foo(<vscale x 1 x float> [[VP_OP_LOAD]], <vscale x 1 x float> [[VP_OP_LOAD3]], i32 [[TMP5]]), !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = getelementptr inbounds float, ptr [[TMP15]], i32 0
-; CHECK-NEXT:    call void @llvm.vp.store.nxv1f32.p0(<vscale x 1 x float> [[TMP14]], ptr [[TMP16]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv1f32.p0(<vscale x 1 x float> [[TMP14]], ptr [[TMP16]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP17:%.*]] = zext i32 [[TMP5]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP17]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
@@ -603,7 +603,7 @@ define dso_local void @notinbranch(i64 noundef %N, ptr nocapture noundef writeon
 ; CHECK-NEXT:    [[TMP19:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX7:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX7]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP19]], float noundef [[TMP20]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP19]], float noundef [[TMP20]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX8:%.*]] = getelementptr inbounds float, ptr [[C]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ADD9]] = add nuw nsw i64 [[DOTOMP_IV_021]], 1
@@ -654,7 +654,7 @@ define dso_local void @notinbranch1(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    br i1 [[TMP2]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -663,7 +663,7 @@ define dso_local void @notinbranch1(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP4:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 7)
 ; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
 ; CHECK-NEXT:    [[TMP6:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 1 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 1 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP7:%.*]] = call <vscale x 1 x i64> @llvm.experimental.stepvector.nxv1i64()
 ; CHECK-NEXT:    [[TMP8:%.*]] = add <vscale x 1 x i64> zeroinitializer, [[TMP7]]
@@ -671,14 +671,14 @@ define dso_local void @notinbranch1(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP9:%.*]] = icmp ule <vscale x 1 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[TMP10]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP11]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[TMP12]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP13]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 1 x float> @llvm.vp.load.nxv1f32.p0(ptr [[TMP13]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = call <vscale x 1 x float> @_ZGVENk1vv_foo(<vscale x 1 x float> [[VP_OP_LOAD]], <vscale x 1 x float> [[VP_OP_LOAD3]], i32 [[TMP5]]), !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP6]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = getelementptr inbounds float, ptr [[TMP15]], i32 0
-; CHECK-NEXT:    call void @llvm.vp.store.nxv1f32.p0(<vscale x 1 x float> [[TMP14]], ptr [[TMP16]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i32 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv1f32.p0(<vscale x 1 x float> [[TMP14]], ptr [[TMP16]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP5]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP17:%.*]] = zext i32 [[TMP5]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP17]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
@@ -694,7 +694,7 @@ define dso_local void @notinbranch1(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP19:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX7:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX7]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP19]], float noundef [[TMP20]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP19]], float noundef [[TMP20]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX8:%.*]] = getelementptr inbounds float, ptr [[C]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ADD9]] = add nuw nsw i64 [[DOTOMP_IV_021]], 1
@@ -746,7 +746,7 @@ define dso_local void @notinbranch2(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -755,7 +755,7 @@ define dso_local void @notinbranch2(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 0)
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
 ; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 2 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 2 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 2 x i64> poison, <vscale x 2 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP8:%.*]] = call <vscale x 2 x i64> @llvm.experimental.stepvector.nxv2i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = add <vscale x 2 x i64> zeroinitializer, [[TMP8]]
@@ -763,14 +763,14 @@ define dso_local void @notinbranch2(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp ule <vscale x 2 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[TMP11]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP12]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[TMP13]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP14]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 2 x float> @llvm.vp.load.nxv2f32.p0(ptr [[TMP14]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = call <vscale x 2 x float> @_ZGVENk2vv_foo(<vscale x 2 x float> [[VP_OP_LOAD]], <vscale x 2 x float> [[VP_OP_LOAD3]], i32 [[TMP6]]), !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds float, ptr [[TMP16]], i32 0
-; CHECK-NEXT:    call void @llvm.vp.store.nxv2f32.p0(<vscale x 2 x float> [[TMP15]], ptr [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i32 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv2f32.p0(<vscale x 2 x float> [[TMP15]], ptr [[TMP17]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = zext i32 [[TMP6]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
 ; CHECK-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
@@ -786,7 +786,7 @@ define dso_local void @notinbranch2(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX7:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX7]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX8:%.*]] = getelementptr inbounds float, ptr [[C]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ADD9]] = add nuw nsw i64 [[DOTOMP_IV_021]], 1
@@ -838,7 +838,7 @@ define dso_local void @notinbranch4(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 4 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -847,7 +847,7 @@ define dso_local void @notinbranch4(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 1)
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
 ; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 4 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 4 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 4 x i64> poison, <vscale x 4 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP8:%.*]] = call <vscale x 4 x i64> @llvm.experimental.stepvector.nxv4i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = add <vscale x 4 x i64> zeroinitializer, [[TMP8]]
@@ -855,14 +855,14 @@ define dso_local void @notinbranch4(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp ule <vscale x 4 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[TMP11]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP12]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP12]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i64 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[TMP13]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP14]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 4 x float> @llvm.vp.load.nxv4f32.p0(ptr [[TMP14]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i64 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = call <vscale x 4 x float> @_ZGVENk4vv_foo(<vscale x 4 x float> [[VP_OP_LOAD]], <vscale x 4 x float> [[VP_OP_LOAD3]], i32 [[TMP6]]), !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds float, ptr [[TMP16]], i32 0
-; CHECK-NEXT:    call void @llvm.vp.store.nxv4f32.p0(<vscale x 4 x float> [[TMP15]], ptr [[TMP17]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i32 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv4f32.p0(<vscale x 4 x float> [[TMP15]], ptr [[TMP17]], <vscale x 4 x i1> shufflevector (<vscale x 4 x i1> insertelement (<vscale x 4 x i1> poison, i1 true, i64 0), <vscale x 4 x i1> poison, <vscale x 4 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = zext i32 [[TMP6]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
 ; CHECK-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
@@ -878,7 +878,7 @@ define dso_local void @notinbranch4(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX7:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX7]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX8:%.*]] = getelementptr inbounds float, ptr [[C]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ADD9]] = add nuw nsw i64 [[DOTOMP_IV_021]], 1
@@ -930,7 +930,7 @@ define dso_local void @notinbranch8(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    br i1 [[TMP3]], label [[SCALAR_PH:%.*]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    [[TRIP_COUNT_MINUS_1:%.*]] = sub i64 [[N]], 1
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[TRIP_COUNT_MINUS_1]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -939,7 +939,7 @@ define dso_local void @notinbranch8(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP5:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP4]], i64 2, i64 2)
 ; CHECK-NEXT:    [[TMP6:%.*]] = trunc i64 [[TMP5]] to i32
 ; CHECK-NEXT:    [[TMP7:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[INDEX]], i32 0
+; CHECK-NEXT:    [[BROADCAST_SPLATINSERT1:%.*]] = insertelement <vscale x 8 x i64> poison, i64 [[INDEX]], i64 0
 ; CHECK-NEXT:    [[BROADCAST_SPLAT2:%.*]] = shufflevector <vscale x 8 x i64> [[BROADCAST_SPLATINSERT1]], <vscale x 8 x i64> poison, <vscale x 8 x i32> zeroinitializer
 ; CHECK-NEXT:    [[TMP8:%.*]] = call <vscale x 8 x i64> @llvm.experimental.stepvector.nxv8i64()
 ; CHECK-NEXT:    [[TMP9:%.*]] = add <vscale x 8 x i64> zeroinitializer, [[TMP8]]
@@ -947,14 +947,14 @@ define dso_local void @notinbranch8(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP10:%.*]] = icmp ule <vscale x 8 x i64> [[VEC_IV]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds float, ptr [[TMP11]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP12]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP12]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = getelementptr inbounds float, ptr [[TMP13]], i32 0
-; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP14]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[VP_OP_LOAD3:%.*]] = call <vscale x 8 x float> @llvm.vp.load.nxv8f32.p0(ptr [[TMP14]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = call <vscale x 8 x float> @_ZGVENk8vv_foo(<vscale x 8 x float> [[VP_OP_LOAD]], <vscale x 8 x float> [[VP_OP_LOAD3]], i32 [[TMP6]]), !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = getelementptr inbounds float, ptr [[C:%.*]], i64 [[TMP7]]
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds float, ptr [[TMP16]], i32 0
-; CHECK-NEXT:    call void @llvm.vp.store.nxv8f32.p0(<vscale x 8 x float> [[TMP15]], ptr [[TMP17]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i32 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv8f32.p0(<vscale x 8 x float> [[TMP15]], ptr [[TMP17]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP6]]), !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = zext i32 [[TMP6]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP18]]
 ; CHECK-NEXT:    [[TMP19:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
@@ -970,7 +970,7 @@ define dso_local void @notinbranch8(i64 noundef %N, ptr nocapture noundef writeo
 ; CHECK-NEXT:    [[TMP20:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX7:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    [[TMP21:%.*]] = load float, ptr [[ARRAYIDX7]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
-; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR6]], !llvm.access.group [[ACC_GRP9]]
+; CHECK-NEXT:    [[CALL:%.*]] = tail call float @foo(float noundef [[TMP20]], float noundef [[TMP21]]) #[[ATTR5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ARRAYIDX8:%.*]] = getelementptr inbounds float, ptr [[C]], i64 [[DOTOMP_IV_021]]
 ; CHECK-NEXT:    store float [[CALL]], ptr [[ARRAYIDX8]], align 4, !tbaa [[TBAA5]], !llvm.access.group [[ACC_GRP9]]
 ; CHECK-NEXT:    [[ADD9]] = add nuw nsw i64 [[DOTOMP_IV_021]], 1

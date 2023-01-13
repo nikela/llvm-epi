@@ -344,7 +344,7 @@ AMDGPURegisterBankInfo::getInstrAlternativeMappingsIntrinsic(
     };
 
     const std::array<unsigned, 3> RegSrcOpIdx = { { 0, 2, 3 } };
-    return addMappingFromTable<3>(MI, MRI, RegSrcOpIdx, makeArrayRef(Table));
+    return addMappingFromTable<3>(MI, MRI, RegSrcOpIdx, Table);
   }
   case Intrinsic::amdgcn_writelane: {
     static const OpRegBankEntry<4> Table[4] = {
@@ -363,7 +363,7 @@ AMDGPURegisterBankInfo::getInstrAlternativeMappingsIntrinsic(
 
     // rsrc, voffset, offset
     const std::array<unsigned, 4> RegSrcOpIdx = { { 0, 2, 3, 4 } };
-    return addMappingFromTable<4>(MI, MRI, RegSrcOpIdx, makeArrayRef(Table));
+    return addMappingFromTable<4>(MI, MRI, RegSrcOpIdx, Table);
   }
   default:
     return RegisterBankInfo::getInstrAlternativeMappings(MI);
@@ -392,7 +392,7 @@ AMDGPURegisterBankInfo::getInstrAlternativeMappingsIntrinsicWSideEffects(
 
     // rsrc, offset
     const std::array<unsigned, 2> RegSrcOpIdx = { { 2, 3 } };
-    return addMappingFromTable<2>(MI, MRI, RegSrcOpIdx, makeArrayRef(Table));
+    return addMappingFromTable<2>(MI, MRI, RegSrcOpIdx, Table);
   }
   case Intrinsic::amdgcn_ds_ordered_add:
   case Intrinsic::amdgcn_ds_ordered_swap: {
@@ -406,7 +406,7 @@ AMDGPURegisterBankInfo::getInstrAlternativeMappingsIntrinsicWSideEffects(
     };
 
     const std::array<unsigned, 3> RegSrcOpIdx = { { 0, 2, 3 } };
-    return addMappingFromTable<3>(MI, MRI, RegSrcOpIdx, makeArrayRef(Table));
+    return addMappingFromTable<3>(MI, MRI, RegSrcOpIdx, Table);
   }
   case Intrinsic::amdgcn_s_sendmsg:
   case Intrinsic::amdgcn_s_sendmsghalt: {
@@ -420,7 +420,7 @@ AMDGPURegisterBankInfo::getInstrAlternativeMappingsIntrinsicWSideEffects(
     };
 
     const std::array<unsigned, 1> RegSrcOpIdx = { { 2 } };
-    return addMappingFromTable<1>(MI, MRI, RegSrcOpIdx, makeArrayRef(Table));
+    return addMappingFromTable<1>(MI, MRI, RegSrcOpIdx, Table);
   }
   default:
     return RegisterBankInfo::getInstrAlternativeMappings(MI);
@@ -2117,6 +2117,35 @@ void AMDGPURegisterBankInfo::applyMappingImpl(
   unsigned Opc = MI.getOpcode();
   MachineRegisterInfo &MRI = OpdMapper.getMRI();
   switch (Opc) {
+  case AMDGPU::G_CONSTANT: {
+    Register DstReg = MI.getOperand(0).getReg();
+    LLT DstTy = MRI.getType(DstReg);
+    if (DstTy != LLT::scalar(1))
+      break;
+
+    const RegisterBank *DstBank =
+        OpdMapper.getInstrMapping().getOperandMapping(0).BreakDown[0].RegBank;
+    if (DstBank == &AMDGPU::VCCRegBank)
+      break;
+    SmallVector<Register, 1> DefRegs(OpdMapper.getVRegs(0));
+    if (DefRegs.empty())
+      DefRegs.push_back(DstReg);
+
+    MachineIRBuilder B(MI);
+    B.setInsertPt(*MI.getParent(), ++MI.getIterator());
+
+    Register NewDstReg = MRI.createGenericVirtualRegister(LLT::scalar(32));
+    LLVMContext &Ctx = B.getMF().getFunction().getContext();
+
+    MI.getOperand(0).setReg(NewDstReg);
+    uint64_t ConstVal = MI.getOperand(1).getCImm()->getZExtValue();
+    MI.getOperand(1).setCImm(
+        ConstantInt::get(IntegerType::getInt32Ty(Ctx), ConstVal));
+
+    MRI.setRegBank(NewDstReg, *DstBank);
+    B.buildTrunc(DefRegs[0], NewDstReg);
+    return;
+  }
   case AMDGPU::G_PHI: {
     Register DstReg = MI.getOperand(0).getReg();
     LLT DstTy = MRI.getType(DstReg);

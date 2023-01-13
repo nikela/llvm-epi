@@ -446,7 +446,7 @@ public:
                         unsigned RegWidthFactor = 1,
                         bool IsScalable = false) const {
     unsigned WidestRegister = std::min<unsigned>(
-        getRegisterBitWidth(K).getFixedSize(), MaxSafeRegisterWidth);
+        getRegisterBitWidth(K).getFixedValue(), MaxSafeRegisterWidth);
 
     unsigned LowerBoundVFKnownMin = PowerOf2Floor(WidestRegister / WidestType);
     ElementCount LowerBoundVF =
@@ -582,7 +582,7 @@ public:
       // trunc to a native type is free (assuming the target has compare and
       // shift-right of the same width).
       TypeSize DstSize = DL.getTypeSizeInBits(Dst);
-      if (!DstSize.isScalable() && DL.isLegalInteger(DstSize.getFixedSize()))
+      if (!DstSize.isScalable() && DL.isLegalInteger(DstSize.getFixedValue()))
         return 0;
       break;
     }
@@ -612,8 +612,8 @@ public:
     return 1;
   }
 
-  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
-                                     unsigned Index) const {
+  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index,
+                                     Value *Op0, Value *Op1) const {
     return 1;
   }
 
@@ -903,7 +903,7 @@ protected:
 
       // The max required size is the size of the vector element type
       unsigned MaxRequiredSize =
-          VT->getElementType()->getPrimitiveSizeInBits().getFixedSize();
+          VT->getElementType()->getPrimitiveSizeInBits().getFixedValue();
 
       unsigned MinRequiredSize = 0;
       for (unsigned i = 0, e = VT->getNumElements(); i < e; ++i) {
@@ -1023,7 +1023,7 @@ public:
         if (isa<ScalableVectorType>(TargetType))
           return TTI::TCC_Basic;
         int64_t ElementSize =
-            DL.getTypeAllocSize(GTI.getIndexedType()).getFixedSize();
+            DL.getTypeAllocSize(GTI.getIndexedType()).getFixedValue();
         if (ConstIdx) {
           BaseOffset +=
               ConstIdx->getValue().sextOrTrunc(PtrSizeBits) * ElementSize;
