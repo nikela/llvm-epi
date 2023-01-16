@@ -8704,6 +8704,19 @@ void Sema::CheckVariableDeclarationType(VarDecl *NewVD) {
     NewVD->setInvalidDecl();
     return;
   }
+
+  // Check that SVE types are only used in functions with SVE available.
+  if (T->isSVESizelessBuiltinType() && CurContext->isFunctionOrMethod()) {
+    const FunctionDecl *FD = cast<FunctionDecl>(CurContext);
+    llvm::StringMap<bool> CallerFeatureMap;
+    Context.getFunctionFeatureMap(CallerFeatureMap, FD);
+    if (!Builtin::evaluateRequiredTargetFeatures(
+        "sve", CallerFeatureMap)) {
+      Diag(NewVD->getLocation(), diag::err_sve_vector_in_non_sve_target) << T;
+      NewVD->setInvalidDecl();
+      return;
+    }
+  }
 }
 
 /// Perform semantic checking on a newly-created variable
@@ -13168,6 +13181,7 @@ void Sema::AddInitializerToDecl(Decl *RealDecl, Expr *Init, bool DirectInit) {
 
   // Perform the initialization.
   ParenListExpr *CXXDirectInit = dyn_cast<ParenListExpr>(Init);
+  bool IsParenListInit = false;
   if (!VDecl->isInvalidDecl()) {
     InitializedEntity Entity = InitializedEntity::InitializeVariable(VDecl);
     InitializationKind Kind = InitializationKind::CreateForInit(
@@ -13210,6 +13224,9 @@ void Sema::AddInitializerToDecl(Decl *RealDecl, Expr *Init, bool DirectInit) {
     }
 
     Init = Result.getAs<Expr>();
+    IsParenListInit = !InitSeq.steps().empty() &&
+                      InitSeq.step_begin()->Kind ==
+                          InitializationSequence::SK_ParenthesizedListInit;
   }
 
   // Check for self-references within variable initializers.
@@ -13458,7 +13475,8 @@ void Sema::AddInitializerToDecl(Decl *RealDecl, Expr *Init, bool DirectInit) {
   // class type.
   if (CXXDirectInit) {
     assert(DirectInit && "Call-style initializer must be direct init.");
-    VDecl->setInitStyle(VarDecl::CallInit);
+    VDecl->setInitStyle(IsParenListInit ? VarDecl::ParenListInit
+                                        : VarDecl::CallInit);
   } else if (DirectInit) {
     // This must be list-initialization. No other way is direct-initialization.
     VDecl->setInitStyle(VarDecl::ListInit);
@@ -16587,7 +16605,7 @@ Decl *Sema::ActOnTag(Scope *S, unsigned TagSpec, TagUseKind TUK,
                      SourceLocation ScopedEnumKWLoc,
                      bool ScopedEnumUsesClassTag, TypeResult UnderlyingType,
                      bool IsTypeSpecifier, bool IsTemplateParamOrArg,
-                     SkipBodyInfo *SkipBody) {
+                     OffsetOfKind OOK, SkipBodyInfo *SkipBody) {
   // If this is not a definition, it must have a name.
   IdentifierInfo *OrigName = Name;
   assert((Name != nullptr || TUK == TUK_Definition) &&
@@ -17360,10 +17378,16 @@ CreateNewDecl:
                                cast_or_null<RecordDecl>(PrevDecl));
   }
 
+  if (OOK != OOK_Outside && TUK == TUK_Definition) {
+    Diag(New->getLocation(), diag::err_type_defined_in_offsetof)
+        << Context.getTagDeclType(New) << static_cast<int>(OOK == OOK_Macro);
+    Invalid = true;
+  }
+
   // C++11 [dcl.type]p3:
   //   A type-specifier-seq shall not define a class or enumeration [...].
-  if (getLangOpts().CPlusPlus && (IsTypeSpecifier || IsTemplateParamOrArg) &&
-      TUK == TUK_Definition) {
+  if (!Invalid && getLangOpts().CPlusPlus &&
+      (IsTypeSpecifier || IsTemplateParamOrArg) && TUK == TUK_Definition) {
     Diag(New->getLocation(), diag::err_type_defined_in_type_specifier)
       << Context.getTagDeclType(New);
     Invalid = true;

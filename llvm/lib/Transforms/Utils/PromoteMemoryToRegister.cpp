@@ -432,6 +432,17 @@ static void addAssumeNonNull(AssumptionCache *AC, Instruction *LI) {
   AC->registerAssumption(cast<AssumeInst>(CI));
 }
 
+static void convertMetadataToAssumes(Instruction *LI, Value *Val,
+                                     const DataLayout &DL, AssumptionCache *AC,
+                                     const DominatorTree *DT) {
+  // If the load was marked as nonnull we don't want to lose
+  // that information when we erase this Load. So we preserve
+  // it with an assume.
+  if (AC && LI->getMetadata(LLVMContext::MD_nonnull) &&
+      !isKnownNonZero(Val, DL, 0, AC, LI, DT))
+    addAssumeNonNull(AC, LI);
+}
+
 static void removeIntrinsicUsers(AllocaInst *AI) {
   // Knowing that this alloca is promotable, we know that it's safe to kill all
   // instructions except for load and store.
@@ -491,30 +502,30 @@ static bool rewriteSingleStoreAlloca(AllocaInst *AI, AllocaInfo &Info,
     if (UserInst == OnlyStore)
       continue;
     assert(isa<LoadInst>(UserInst) || UserInst->isVPLoad());
-    Instruction *I = UserInst;
+    Instruction *LI = UserInst;
 
     // Okay, if we have a load from the alloca, we want to replace it with the
     // only value stored to the alloca.  We can do this if the value is
     // dominated by the store.  If not, we use the rest of the mem2reg machinery
     // to insert the phi nodes as needed.
     if (!StoringGlobalVal) { // Non-instructions are always dominated.
-      if (I->getParent() == StoreBB) {
+      if (LI->getParent() == StoreBB) {
         // If we have a use that is in the same block as the store, compare the
         // indices of the two instructions to see which one came first.  If the
         // load came before the store, we can't handle it.
         if (StoreIndex == -1)
           StoreIndex = LBI.getInstructionIndex(OnlyStore);
 
-        if (unsigned(StoreIndex) > LBI.getInstructionIndex(I)) {
+        if (unsigned(StoreIndex) > LBI.getInstructionIndex(LI)) {
           // Can't handle this load, bail out.
           Info.UsingBlocks.push_back(StoreBB);
           continue;
         }
-      } else if (!DT.dominates(StoreBB, I->getParent())) {
+      } else if (!DT.dominates(StoreBB, LI->getParent())) {
         // If the load and store are in different blocks, use BB dominance to
         // check their relationships.  If the store doesn't dom the use, bail
         // out.
-        Info.UsingBlocks.push_back(I->getParent());
+        Info.UsingBlocks.push_back(LI->getParent());
         continue;
       }
     }
@@ -523,19 +534,13 @@ static bool rewriteSingleStoreAlloca(AllocaInst *AI, AllocaInfo &Info,
     Value *ReplVal = OnlyStore->getOperand(0);
     // If the replacement value is the load, this must occur in unreachable
     // code.
-    if (ReplVal == I)
-      ReplVal = PoisonValue::get(I->getType());
+    if (ReplVal == LI)
+      ReplVal = PoisonValue::get(LI->getType());
 
-    // If the load was marked as nonnull we don't want to lose
-    // that information when we erase this Load. So we preserve
-    // it with an assume.
-    if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-        !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT))
-      addAssumeNonNull(AC, I);
-
-    I->replaceAllUsesWith(ReplVal);
-    I->eraseFromParent();
-    LBI.deleteValue(I);
+    convertMetadataToAssumes(LI, ReplVal, DL, AC, &DT);
+    LI->replaceAllUsesWith(ReplVal);
+    LI->eraseFromParent();
+    LBI.deleteValue(LI);
   }
 
   // Finally, after the scan, check to see if the store is all that is left.
@@ -664,11 +669,11 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
   // Walk all of the loads from this alloca, replacing them with the nearest
   // store above them, if any.
   for (User *U : make_early_inc_range(AI->users())) {
-    Instruction *I = dyn_cast<Instruction>(U);
-    if (!I || (!isa<LoadInst>(I) && !I->isVPLoad()))
+    Instruction *LI = dyn_cast<Instruction>(U);
+    if (!LI || (!isa<LoadInst>(LI) && !LI->isVPLoad()))
       continue;
 
-    unsigned LoadIdx = LBI.getInstructionIndex(I);
+    unsigned LoadIdx = LBI.getInstructionIndex(LI);
 
     // Find the nearest store that has a lower index than this load.
     StoresByIndexTy::iterator It = llvm::lower_bound(
@@ -679,7 +684,7 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
     if (It == StoresByIndex.begin()) {
       if (StoresByIndex.empty())
         // If there are no stores, the load takes the undef value.
-        ReplVal = UndefValue::get(I->getType());
+        ReplVal = UndefValue::get(LI->getType());
       else
         // There is no store before this load, bail out (load may be affected
         // by the following stores - see main comment).
@@ -690,20 +695,16 @@ static bool promoteSingleBlockAlloca(AllocaInst *AI, const AllocaInfo &Info,
       ReplVal = std::prev(It)->second->getOperand(0);
     }
 
-    // Note, if the load was marked as nonnull we don't want to lose that
-    // information when we erase it. So we preserve it with an assume.
-    if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-        !isKnownNonZero(ReplVal, DL, 0, AC, I, &DT))
-      addAssumeNonNull(AC, I);
+    convertMetadataToAssumes(LI, ReplVal, DL, AC, &DT);
 
     // If the replacement value is the load, this must occur in unreachable
     // code.
-    if (ReplVal == I)
-      ReplVal = PoisonValue::get(I->getType());
+    if (ReplVal == LI)
+      ReplVal = PoisonValue::get(LI->getType());
 
-    I->replaceAllUsesWith(ReplVal);
-    I->eraseFromParent();
-    LBI.deleteValue(I);
+    LI->replaceAllUsesWith(ReplVal);
+    LI->eraseFromParent();
+    LBI.deleteValue(LI);
   }
 
   // Remove the (now dead) stores and alloca.
@@ -1147,10 +1148,10 @@ NextIteration:
     return;
 
   for (BasicBlock::iterator II = BB->begin(); !II->isTerminator();) {
-    Instruction *I = &*II++; // get the instruction, increment iterator
+    Instruction *LI = &*II++; // get the instruction, increment iterator
 
-    if (isa<LoadInst>(I) || I->isVPLoad()) {
-      AllocaInst *Src = dyn_cast<AllocaInst>(I->getOperand(0));
+    if (isa<LoadInst>(LI) || LI->isVPLoad()) {
+      AllocaInst *Src = dyn_cast<AllocaInst>(LI->getOperand(0));
       if (!Src)
         continue;
 
@@ -1159,21 +1160,15 @@ NextIteration:
         continue;
 
       Value *V = IncomingVals[AI->second];
-
-      // If the load was marked as nonnull we don't want to lose
-      // that information when we erase this Load. So we preserve
-      // it with an assume.
-      if (AC && I->getMetadata(LLVMContext::MD_nonnull) &&
-          !isKnownNonZero(V, SQ.DL, 0, AC, I, &DT))
-        addAssumeNonNull(AC, I);
+      convertMetadataToAssumes(LI, V, SQ.DL, AC, &DT);
 
       // Anything using the load now uses the current value.
-      I->replaceAllUsesWith(V);
-      I->eraseFromParent();
-    } else if (isa<StoreInst>(I) || I->isVPStore()) {
+      LI->replaceAllUsesWith(V);
+      LI->eraseFromParent();
+    } else if (isa<StoreInst>(LI) || LI->isVPStore()) {
       // Delete this instruction and mark the name as the current holder of the
       // value
-      AllocaInst *Dest = dyn_cast<AllocaInst>(I->getOperand(1));
+      AllocaInst *Dest = dyn_cast<AllocaInst>(LI->getOperand(1));
       if (!Dest)
         continue;
 
@@ -1189,8 +1184,8 @@ NextIteration:
       bool AlwaysStoreWithSameMask;
       Value *ReferenceMask;
       std::tie(AlwaysStoreWithSameMask, ReferenceMask) = VPStoreMasks[AllocaNo];
-      if (AlwaysStoreWithSameMask && I->isVPStore()) {
-        auto *VPStore = cast<VPIntrinsic>(I);
+      if (AlwaysStoreWithSameMask && LI->isVPStore()) {
+        auto *VPStore = cast<VPIntrinsic>(LI);
         auto *VPMask = VPStore->getMaskParam();
         if (!ReferenceMask)
           // This is the first vp.store for this alloca
@@ -1202,10 +1197,10 @@ NextIteration:
           VPStoreMasks[AllocaNo] = std::make_pair(false, nullptr);
       }
 
-      if (I->isVPStore() && !AlwaysStoreWithSameMask &&
+      if (LI->isVPStore() && !AlwaysStoreWithSameMask &&
           !isa<UndefValue>(IncomingVals[AllocaNo])) {
-        IRBuilder<> Builder(I);
-        auto *VPStore = cast<VPIntrinsic>(I);
+        IRBuilder<> Builder(LI);
+        auto *VPStore = cast<VPIntrinsic>(LI);
         auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
         VPBuilder.setMask(VPStore->getMaskParam());
         VPBuilder.setEVL(VPStore->getVectorLengthParam());
@@ -1219,15 +1214,15 @@ NextIteration:
 
         IncomingVals[AllocaNo] = VPSelect;
       } else
-        IncomingVals[AllocaNo] = I->getOperand(0);
+        IncomingVals[AllocaNo] = LI->getOperand(0);
 
       // Record debuginfo for the store before removing it.
-      IncomingLocs[AllocaNo] = I->getDebugLoc();
-      AllocaATInfo[AllocaNo].updateForDeletedStore(I, DIB);
+      IncomingLocs[AllocaNo] = LI->getDebugLoc();
+      AllocaATInfo[AllocaNo].updateForDeletedStore(LI, DIB);
       for (DbgVariableIntrinsic *DII : AllocaDbgUsers[ai->second])
         if (DII->isAddressOfVariable())
-          ConvertDebugDeclareToDebugValue(DII, I, DIB);
-      I->eraseFromParent();
+          ConvertDebugDeclareToDebugValue(DII, LI, DIB);
+      LI->eraseFromParent();
     }
   }
 
