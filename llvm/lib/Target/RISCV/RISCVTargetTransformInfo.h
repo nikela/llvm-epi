@@ -369,10 +369,11 @@ public:
               /* Op */ TargetTransformInfo::VPLegalization::Legal};
 
     using VPLegalization = TargetTransformInfo::VPLegalization;
-    if (PI.getIntrinsicID() == Intrinsic::vp_reduce_mul &&
-        cast<VectorType>(PI.getArgOperand(1)->getType())
-                ->getElementType()
-                ->getIntegerBitWidth() != 1)
+    if (!ST->hasVInstructions() ||
+        (PI.getIntrinsicID() == Intrinsic::vp_reduce_mul &&
+         cast<VectorType>(PI.getArgOperand(1)->getType())
+                 ->getElementType()
+                 ->getIntegerBitWidth() != 1))
       return VPLegalization(VPLegalization::Discard, VPLegalization::Convert);
     return VPLegalization(VPLegalization::Legal, VPLegalization::Legal);
   }
