@@ -30,6 +30,7 @@
 #include "clang/Sema/Scope.h"
 #include "clang/Sema/TypoCorrection.h"
 #include "llvm/ADT/SmallVector.h"
+#include <optional>
 using namespace clang;
 
 /// Simple precedence-based parser for binary/ternary operators.
@@ -2591,21 +2592,10 @@ ExprResult Parser::ParseBuiltinPrimaryExpression() {
   }
   case tok::kw___builtin_offsetof: {
     SourceLocation TypeLoc = Tok.getLocation();
-    auto K = Sema::OffsetOfKind::OOK_Builtin;
-    if (Tok.getLocation().isMacroID()) {
-      StringRef MacroName = Lexer::getImmediateMacroNameForDiagnostics(
-          Tok.getLocation(), PP.getSourceManager(), getLangOpts());
-      if (MacroName == "offsetof")
-        K = Sema::OffsetOfKind::OOK_Macro;
-    }
-    TypeResult Ty;
-    {
-      OffsetOfStateRAIIObject InOffsetof(*this, K);
-      Ty = ParseTypeName();
-      if (Ty.isInvalid()) {
-        SkipUntil(tok::r_paren, StopAtSemi);
-        return ExprError();
-      }
+    TypeResult Ty = ParseTypeName();
+    if (Ty.isInvalid()) {
+      SkipUntil(tok::r_paren, StopAtSemi);
+      return ExprError();
     }
 
     if (ExpectAndConsume(tok::comma)) {
@@ -3705,7 +3695,7 @@ static bool CheckAvailabilitySpecList(Parser &P,
 ///  availability-spec:
 ///     '*'
 ///     identifier version-tuple
-Optional<AvailabilitySpec> Parser::ParseAvailabilitySpec() {
+std::optional<AvailabilitySpec> Parser::ParseAvailabilitySpec() {
   if (Tok.is(tok::star)) {
     return AvailabilitySpec(ConsumeToken());
   } else {
@@ -3757,7 +3747,7 @@ ExprResult Parser::ParseAvailabilityCheckExpr(SourceLocation BeginLoc) {
   SmallVector<AvailabilitySpec, 4> AvailSpecs;
   bool HasError = false;
   while (true) {
-    Optional<AvailabilitySpec> Spec = ParseAvailabilitySpec();
+    std::optional<AvailabilitySpec> Spec = ParseAvailabilitySpec();
     if (!Spec)
       HasError = true;
     else
