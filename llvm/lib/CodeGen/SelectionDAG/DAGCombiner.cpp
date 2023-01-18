@@ -3789,6 +3789,24 @@ SDValue DAGCombiner::visitSUB(SDNode *N) {
     }
   }
 
+  // max(a,b) - min(a,b) --> abd(a,b)
+  auto MatchSubMaxMin = [&](unsigned Max, unsigned Min, unsigned Abd) {
+    if (N0.getOpcode() != Max || N1.getOpcode() != Min)
+      return SDValue();
+    if ((N0.getOperand(0) != N1.getOperand(0) ||
+         N0.getOperand(1) != N1.getOperand(1)) &&
+        (N0.getOperand(0) != N1.getOperand(1) ||
+         N0.getOperand(1) != N1.getOperand(0)))
+      return SDValue();
+    if (!TLI.isOperationLegalOrCustom(Abd, VT))
+      return SDValue();
+    return DAG.getNode(Abd, DL, VT, N0.getOperand(0), N0.getOperand(1));
+  };
+  if (SDValue R = MatchSubMaxMin(ISD::SMAX, ISD::SMIN, ISD::ABDS))
+    return R;
+  if (SDValue R = MatchSubMaxMin(ISD::UMAX, ISD::UMIN, ISD::ABDU))
+    return R;
+
   return SDValue();
 }
 
@@ -10100,6 +10118,7 @@ SDValue DAGCombiner::visitSHLSAT(SDNode *N) {
 // Generates UABD/SABD instruction.
 static SDValue combineABSToABD(SDNode *N, SelectionDAG &DAG,
                                const TargetLowering &TLI) {
+  EVT VT = N->getValueType(0);
   SDValue AbsOp1 = N->getOperand(0);
   SDValue Op0, Op1;
 
@@ -10112,10 +10131,14 @@ static SDValue combineABSToABD(SDNode *N, SelectionDAG &DAG,
   unsigned Opc0 = Op0.getOpcode();
   // Check if the operands of the sub are (zero|sign)-extended.
   if (Opc0 != Op1.getOpcode() ||
-      (Opc0 != ISD::ZERO_EXTEND && Opc0 != ISD::SIGN_EXTEND))
+      (Opc0 != ISD::ZERO_EXTEND && Opc0 != ISD::SIGN_EXTEND)) {
+    // fold (abs (sub nsw x, y)) -> abds(x, y)
+    if (AbsOp1->getFlags().hasNoSignedWrap() &&
+        TLI.isOperationLegalOrCustom(ISD::ABDS, VT))
+      return DAG.getNode(ISD::ABDS, SDLoc(N), VT, Op0, Op1);
     return SDValue();
+  }
 
-  EVT VT = N->getValueType(0);
   EVT VT1 = Op0.getOperand(0).getValueType();
   EVT VT2 = Op1.getOperand(0).getValueType();
   unsigned ABDOpcode = (Opc0 == ISD::SIGN_EXTEND) ? ISD::ABDS : ISD::ABDU;
