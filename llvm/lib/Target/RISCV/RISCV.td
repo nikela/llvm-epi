@@ -592,8 +592,8 @@ include "RISCVSchedAvispado.td"
 class RISCVProcessorModel<string n,
                           SchedMachineModel m,
                           list<SubtargetFeature> f,
-                          string default_march = "",
-                          list<SubtargetFeature> tunef = []>
+                          list<SubtargetFeature> tunef = [],
+                          string default_march = "">
       :  ProcessorModel<n, m, f, tunef> {
   string DefaultMarch = default_march;
 }
@@ -631,16 +631,14 @@ def SIFIVE_E20 : RISCVProcessorModel<"sifive-e20",
                                      RocketModel,
                                      [Feature32Bit,
                                       FeatureStdExtM,
-                                      FeatureStdExtC],
-                                     "rv32imc">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_E21 : RISCVProcessorModel<"sifive-e21",
                                      RocketModel,
                                      [Feature32Bit,
                                       FeatureStdExtM,
                                       FeatureStdExtA,
-                                      FeatureStdExtC],
-                                     "rv32imac">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_E24 : RISCVProcessorModel<"sifive-e24",
                                      RocketModel,
@@ -648,16 +646,14 @@ def SIFIVE_E24 : RISCVProcessorModel<"sifive-e24",
                                       FeatureStdExtM,
                                       FeatureStdExtA,
                                       FeatureStdExtF,
-                                      FeatureStdExtC],
-                                     "rv32imafc">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_E31 : RISCVProcessorModel<"sifive-e31",
                                      RocketModel,
                                      [Feature32Bit,
                                       FeatureStdExtM,
                                       FeatureStdExtA,
-                                      FeatureStdExtC],
-                                     "rv32imac">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_E34 : RISCVProcessorModel<"sifive-e34",
                                      RocketModel,
@@ -665,8 +661,7 @@ def SIFIVE_E34 : RISCVProcessorModel<"sifive-e34",
                                       FeatureStdExtM,
                                       FeatureStdExtA,
                                       FeatureStdExtF,
-                                      FeatureStdExtC],
-                                     "rv32imafc">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_E76 : RISCVProcessorModel<"sifive-e76",
                                      SiFive7Model,
@@ -675,7 +670,6 @@ def SIFIVE_E76 : RISCVProcessorModel<"sifive-e76",
                                       FeatureStdExtA,
                                       FeatureStdExtF,
                                       FeatureStdExtC],
-                                     "rv32imafc",
                                      [TuneSiFive7]>;
 
 def SIFIVE_S21 : RISCVProcessorModel<"sifive-s21",
@@ -683,16 +677,14 @@ def SIFIVE_S21 : RISCVProcessorModel<"sifive-s21",
                                      [Feature64Bit,
                                       FeatureStdExtM,
                                       FeatureStdExtA,
-                                      FeatureStdExtC],
-                                     "rv64imac">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_S51 : RISCVProcessorModel<"sifive-s51",
                                      RocketModel,
                                      [Feature64Bit,
                                       FeatureStdExtM,
                                       FeatureStdExtA,
-                                      FeatureStdExtC],
-                                     "rv64imac">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_S54 : RISCVProcessorModel<"sifive-s54",
                                       RocketModel,
@@ -701,8 +693,7 @@ def SIFIVE_S54 : RISCVProcessorModel<"sifive-s54",
                                        FeatureStdExtA,
                                        FeatureStdExtF,
                                        FeatureStdExtD,
-                                       FeatureStdExtC],
-                                      "rv64gc">;
+                                       FeatureStdExtC]>;
 
 def SIFIVE_S76 : RISCVProcessorModel<"sifive-s76",
                                      SiFive7Model,
@@ -712,7 +703,6 @@ def SIFIVE_S76 : RISCVProcessorModel<"sifive-s76",
                                       FeatureStdExtF,
                                       FeatureStdExtD,
                                       FeatureStdExtC],
-                                     "rv64gc",
                                      [TuneSiFive7]>;
 
 def SIFIVE_U54 : RISCVProcessorModel<"sifive-u54",
@@ -722,8 +712,7 @@ def SIFIVE_U54 : RISCVProcessorModel<"sifive-u54",
                                       FeatureStdExtA,
                                       FeatureStdExtF,
                                       FeatureStdExtD,
-                                      FeatureStdExtC],
-                                     "rv64gc">;
+                                      FeatureStdExtC]>;
 
 def SIFIVE_U74 : RISCVProcessorModel<"sifive-u74",
                                      SiFive7Model,
@@ -733,14 +722,12 @@ def SIFIVE_U74 : RISCVProcessorModel<"sifive-u74",
                                       FeatureStdExtF,
                                       FeatureStdExtD,
                                       FeatureStdExtC],
-                                     "rv64gc",
                                      [TuneSiFive7] >;
 
 def SYNTACORE_SCR1_BASE : RISCVProcessorModel<"syntacore-scr1-base",
                                               SyntacoreSCR1Model,
                                               [Feature32Bit,
                                                FeatureStdExtC],
-                                              "rv32ic",
                                               [TuneNoDefaultUnroll]>;
 
 def SYNTACORE_SCR1_MAX : RISCVProcessorModel<"syntacore-scr1-max",
@@ -748,7 +735,6 @@ def SYNTACORE_SCR1_MAX : RISCVProcessorModel<"syntacore-scr1-max",
                                              [Feature32Bit,
                                               FeatureStdExtM,
                                               FeatureStdExtC],
-                                             "rv32imc",
                                              [TuneNoDefaultUnroll]>;
 
 def AVISPADO : RISCVProcessorModel<"avispado",
@@ -758,8 +744,7 @@ def AVISPADO : RISCVProcessorModel<"avispado",
                                     FeatureStdExtA,
                                     FeatureStdExtF,
                                     FeatureStdExtD,
-                                    FeatureStdExtC],
-                                   "rv64gc">;
+                                    FeatureStdExtC]>;
 
 //===----------------------------------------------------------------------===//
 // Define the RISC-V target.
