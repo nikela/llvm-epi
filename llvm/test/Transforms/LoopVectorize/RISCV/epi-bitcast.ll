@@ -14,14 +14,10 @@
 define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECK-LABEL: @test_bitcast_widening(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[B5:%.*]] = ptrtoint i8* [[B:%.*]] to i64
-; CHECK-NEXT:    [[A3:%.*]] = ptrtoint i8* [[A:%.*]] to i64
-; CHECK-NEXT:    [[TMP0:%.*]] = bitcast i8* [[A]] to double*
-; CHECK-NEXT:    [[TMP1:%.*]] = bitcast i8* [[B]] to double*
-; CHECK-NEXT:    [[C2:%.*]] = ptrtoint i8* [[C:%.*]] to i64
-; CHECK-NEXT:    [[TMP2:%.*]] = bitcast i8* [[C]] to double*
-; CHECK-NEXT:    [[M1:%.*]] = ptrtoint i8* [[M:%.*]] to i64
-; CHECK-NEXT:    [[TMP3:%.*]] = bitcast i8* [[M]] to i64*
+; CHECK-NEXT:    [[TMP0:%.*]] = ptrtoint ptr [[A:%.*]] to i64
+; CHECK-NEXT:    [[TMP1:%.*]] = ptrtoint ptr [[B:%.*]] to i64
+; CHECK-NEXT:    [[TMP2:%.*]] = ptrtoint ptr [[C:%.*]] to i64
+; CHECK-NEXT:    [[TMP3:%.*]] = ptrtoint ptr [[M:%.*]] to i64
 ; CHECK-NEXT:    [[CMP17:%.*]] = icmp sgt i64 [[N:%.*]], 0
 ; CHECK-NEXT:    br i1 [[CMP17]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END:%.*]]
 ; CHECK:       for.body.preheader:
@@ -32,25 +28,25 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECK:       vector.memcheck:
 ; CHECK-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP8:%.*]] = shl i64 [[TMP7]], 3
-; CHECK-NEXT:    [[TMP9:%.*]] = sub i64 [[M1]], [[C2]]
+; CHECK-NEXT:    [[TMP9:%.*]] = sub i64 [[TMP3]], [[TMP2]]
 ; CHECK-NEXT:    [[DIFF_CHECK:%.*]] = icmp ult i64 [[TMP9]], [[TMP8]]
 ; CHECK-NEXT:    [[TMP10:%.*]] = shl i64 [[TMP7]], 3
-; CHECK-NEXT:    [[TMP11:%.*]] = sub i64 [[C2]], [[A3]]
-; CHECK-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP11]], [[TMP10]]
-; CHECK-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK4]]
+; CHECK-NEXT:    [[TMP11:%.*]] = sub i64 [[TMP2]], [[TMP0]]
+; CHECK-NEXT:    [[DIFF_CHECK1:%.*]] = icmp ult i64 [[TMP11]], [[TMP10]]
+; CHECK-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK1]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = shl i64 [[TMP7]], 3
-; CHECK-NEXT:    [[TMP13:%.*]] = sub i64 [[C2]], [[B5]]
-; CHECK-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP13]], [[TMP12]]
-; CHECK-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK6]]
+; CHECK-NEXT:    [[TMP13:%.*]] = sub i64 [[TMP2]], [[TMP1]]
+; CHECK-NEXT:    [[DIFF_CHECK2:%.*]] = icmp ult i64 [[TMP13]], [[TMP12]]
+; CHECK-NEXT:    [[CONFLICT_RDX3:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK2]]
 ; CHECK-NEXT:    [[TMP14:%.*]] = shl i64 [[TMP7]], 3
-; CHECK-NEXT:    [[TMP15:%.*]] = sub i64 [[M1]], [[A3]]
-; CHECK-NEXT:    [[DIFF_CHECK8:%.*]] = icmp ult i64 [[TMP15]], [[TMP14]]
-; CHECK-NEXT:    [[CONFLICT_RDX9:%.*]] = or i1 [[CONFLICT_RDX7]], [[DIFF_CHECK8]]
+; CHECK-NEXT:    [[TMP15:%.*]] = sub i64 [[TMP3]], [[TMP0]]
+; CHECK-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP15]], [[TMP14]]
+; CHECK-NEXT:    [[CONFLICT_RDX5:%.*]] = or i1 [[CONFLICT_RDX3]], [[DIFF_CHECK4]]
 ; CHECK-NEXT:    [[TMP16:%.*]] = shl i64 [[TMP7]], 3
-; CHECK-NEXT:    [[TMP17:%.*]] = sub i64 [[M1]], [[B5]]
-; CHECK-NEXT:    [[DIFF_CHECK10:%.*]] = icmp ult i64 [[TMP17]], [[TMP16]]
-; CHECK-NEXT:    [[CONFLICT_RDX11:%.*]] = or i1 [[CONFLICT_RDX9]], [[DIFF_CHECK10]]
-; CHECK-NEXT:    br i1 [[CONFLICT_RDX11]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
+; CHECK-NEXT:    [[TMP17:%.*]] = sub i64 [[TMP3]], [[TMP1]]
+; CHECK-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP17]], [[TMP16]]
+; CHECK-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX5]], [[DIFF_CHECK6]]
+; CHECK-NEXT:    br i1 [[CONFLICT_RDX7]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
 ; CHECK:       vector.ph:
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
@@ -58,26 +54,22 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECK-NEXT:    [[TMP18:%.*]] = sub i64 [[N]], [[INDEX]]
 ; CHECK-NEXT:    [[TMP19:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP18]], i64 3, i64 0)
 ; CHECK-NEXT:    [[TMP20:%.*]] = trunc i64 [[TMP19]] to i32
-; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds double, double* [[TMP0]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP22:%.*]] = bitcast double* [[TMP21]] to <vscale x 1 x double>*
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP22]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[TMP23:%.*]] = getelementptr inbounds double, double* [[TMP1]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP24:%.*]] = bitcast double* [[TMP23]] to <vscale x 1 x double>*
-; CHECK-NEXT:    [[VP_OP_LOAD14:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP24]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[VP_OP_LOAD]], <vscale x 1 x double> [[VP_OP_LOAD14]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[TMP25:%.*]] = getelementptr inbounds double, double* [[TMP2]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP26:%.*]] = bitcast double* [[TMP25]] to <vscale x 1 x double>*
-; CHECK-NEXT:    call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> [[VP_OP]], <vscale x 1 x double>* [[TMP26]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[TMP27:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD]] to <vscale x 1 x i64>
-; CHECK-NEXT:    [[TMP28:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD14]] to <vscale x 1 x i64>
-; CHECK-NEXT:    [[VP_OP15:%.*]] = call <vscale x 1 x i64> @llvm.vp.add.nxv1i64(<vscale x 1 x i64> [[TMP28]], <vscale x 1 x i64> [[TMP27]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[TMP29:%.*]] = getelementptr inbounds i64, i64* [[TMP3]], i64 [[INDEX]]
-; CHECK-NEXT:    [[TMP30:%.*]] = bitcast i64* [[TMP29]] to <vscale x 1 x i64>*
-; CHECK-NEXT:    call void @llvm.vp.store.nxv1i64.p0nxv1i64(<vscale x 1 x i64> [[VP_OP15]], <vscale x 1 x i64>* [[TMP30]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[TMP31:%.*]] = and i64 [[TMP19]], 4294967295
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP31]]
-; CHECK-NEXT:    [[TMP32:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
-; CHECK-NEXT:    br i1 [[TMP32]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[INDEX]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP21]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; CHECK-NEXT:    [[TMP22:%.*]] = getelementptr inbounds double, ptr [[B]], i64 [[INDEX]]
+; CHECK-NEXT:    [[VP_OP_LOAD10:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP22]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; CHECK-NEXT:    [[VP_OP:%.*]] = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[VP_OP_LOAD]], <vscale x 1 x double> [[VP_OP_LOAD10]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; CHECK-NEXT:    [[TMP23:%.*]] = getelementptr inbounds double, ptr [[C]], i64 [[INDEX]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv1f64.p0(<vscale x 1 x double> [[VP_OP]], ptr [[TMP23]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; CHECK-NEXT:    [[TMP24:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD]] to <vscale x 1 x i64>
+; CHECK-NEXT:    [[TMP25:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD10]] to <vscale x 1 x i64>
+; CHECK-NEXT:    [[VP_OP11:%.*]] = call <vscale x 1 x i64> @llvm.vp.add.nxv1i64(<vscale x 1 x i64> [[TMP25]], <vscale x 1 x i64> [[TMP24]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; CHECK-NEXT:    [[TMP26:%.*]] = getelementptr inbounds i64, ptr [[M]], i64 [[INDEX]]
+; CHECK-NEXT:    call void @llvm.vp.store.nxv1i64.p0(<vscale x 1 x i64> [[VP_OP11]], ptr [[TMP26]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; CHECK-NEXT:    [[TMP27:%.*]] = and i64 [[TMP19]], 4294967295
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP27]]
+; CHECK-NEXT:    [[TMP28:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
+; CHECK-NEXT:    br i1 [[TMP28]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    br i1 true, label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
 ; CHECK:       scalar.ph:
@@ -85,18 +77,18 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[I_018:%.*]] = phi i64 [ [[INC:%.*]], [[FOR_BODY]] ], [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ]
-; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[TMP0]], i64 [[I_018]]
-; CHECK-NEXT:    [[TMP33:%.*]] = load double, double* [[ARRAYIDX]], align 8
-; CHECK-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds double, double* [[TMP1]], i64 [[I_018]]
-; CHECK-NEXT:    [[TMP34:%.*]] = load double, double* [[ARRAYIDX1]], align 8
-; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP33]], [[TMP34]]
-; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[TMP2]], i64 [[I_018]]
-; CHECK-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8
-; CHECK-NEXT:    [[TMP35:%.*]] = bitcast double [[TMP33]] to i64
-; CHECK-NEXT:    [[TMP36:%.*]] = bitcast double [[TMP34]] to i64
-; CHECK-NEXT:    [[ADD5:%.*]] = add nsw i64 [[TMP36]], [[TMP35]]
-; CHECK-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i64, i64* [[TMP3]], i64 [[I_018]]
-; CHECK-NEXT:    store i64 [[ADD5]], i64* [[ARRAYIDX6]], align 8
+; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[I_018]]
+; CHECK-NEXT:    [[TMP29:%.*]] = load double, ptr [[ARRAYIDX]], align 8
+; CHECK-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds double, ptr [[B]], i64 [[I_018]]
+; CHECK-NEXT:    [[TMP30:%.*]] = load double, ptr [[ARRAYIDX1]], align 8
+; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP29]], [[TMP30]]
+; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, ptr [[C]], i64 [[I_018]]
+; CHECK-NEXT:    store double [[ADD]], ptr [[ARRAYIDX2]], align 8
+; CHECK-NEXT:    [[TMP31:%.*]] = bitcast double [[TMP29]] to i64
+; CHECK-NEXT:    [[TMP32:%.*]] = bitcast double [[TMP30]] to i64
+; CHECK-NEXT:    [[ADD5:%.*]] = add nsw i64 [[TMP32]], [[TMP31]]
+; CHECK-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i64, ptr [[M]], i64 [[I_018]]
+; CHECK-NEXT:    store i64 [[ADD5]], ptr [[ARRAYIDX6]], align 8
 ; CHECK-NEXT:    [[INC]] = add nuw nsw i64 [[I_018]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INC]], [[N]]
 ; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP3:![0-9]+]]
@@ -107,14 +99,10 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ;
 ; CHECKWF8-LABEL: @test_bitcast_widening(
 ; CHECKWF8-NEXT:  entry:
-; CHECKWF8-NEXT:    [[B5:%.*]] = ptrtoint i8* [[B:%.*]] to i64
-; CHECKWF8-NEXT:    [[A3:%.*]] = ptrtoint i8* [[A:%.*]] to i64
-; CHECKWF8-NEXT:    [[TMP0:%.*]] = bitcast i8* [[A]] to double*
-; CHECKWF8-NEXT:    [[TMP1:%.*]] = bitcast i8* [[B]] to double*
-; CHECKWF8-NEXT:    [[C2:%.*]] = ptrtoint i8* [[C:%.*]] to i64
-; CHECKWF8-NEXT:    [[TMP2:%.*]] = bitcast i8* [[C]] to double*
-; CHECKWF8-NEXT:    [[M1:%.*]] = ptrtoint i8* [[M:%.*]] to i64
-; CHECKWF8-NEXT:    [[TMP3:%.*]] = bitcast i8* [[M]] to i64*
+; CHECKWF8-NEXT:    [[TMP0:%.*]] = ptrtoint ptr [[A:%.*]] to i64
+; CHECKWF8-NEXT:    [[TMP1:%.*]] = ptrtoint ptr [[B:%.*]] to i64
+; CHECKWF8-NEXT:    [[TMP2:%.*]] = ptrtoint ptr [[C:%.*]] to i64
+; CHECKWF8-NEXT:    [[TMP3:%.*]] = ptrtoint ptr [[M:%.*]] to i64
 ; CHECKWF8-NEXT:    [[CMP17:%.*]] = icmp sgt i64 [[N:%.*]], 0
 ; CHECKWF8-NEXT:    br i1 [[CMP17]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END:%.*]]
 ; CHECKWF8:       for.body.preheader:
@@ -126,25 +114,25 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECKWF8:       vector.memcheck:
 ; CHECKWF8-NEXT:    [[TMP8:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECKWF8-NEXT:    [[TMP9:%.*]] = shl i64 [[TMP8]], 6
-; CHECKWF8-NEXT:    [[TMP10:%.*]] = sub i64 [[M1]], [[C2]]
+; CHECKWF8-NEXT:    [[TMP10:%.*]] = sub i64 [[TMP3]], [[TMP2]]
 ; CHECKWF8-NEXT:    [[DIFF_CHECK:%.*]] = icmp ult i64 [[TMP10]], [[TMP9]]
 ; CHECKWF8-NEXT:    [[TMP11:%.*]] = shl i64 [[TMP8]], 6
-; CHECKWF8-NEXT:    [[TMP12:%.*]] = sub i64 [[C2]], [[A3]]
-; CHECKWF8-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP12]], [[TMP11]]
-; CHECKWF8-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK4]]
+; CHECKWF8-NEXT:    [[TMP12:%.*]] = sub i64 [[TMP2]], [[TMP0]]
+; CHECKWF8-NEXT:    [[DIFF_CHECK1:%.*]] = icmp ult i64 [[TMP12]], [[TMP11]]
+; CHECKWF8-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK1]]
 ; CHECKWF8-NEXT:    [[TMP13:%.*]] = shl i64 [[TMP8]], 6
-; CHECKWF8-NEXT:    [[TMP14:%.*]] = sub i64 [[C2]], [[B5]]
-; CHECKWF8-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP14]], [[TMP13]]
-; CHECKWF8-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK6]]
+; CHECKWF8-NEXT:    [[TMP14:%.*]] = sub i64 [[TMP2]], [[TMP1]]
+; CHECKWF8-NEXT:    [[DIFF_CHECK2:%.*]] = icmp ult i64 [[TMP14]], [[TMP13]]
+; CHECKWF8-NEXT:    [[CONFLICT_RDX3:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK2]]
 ; CHECKWF8-NEXT:    [[TMP15:%.*]] = shl i64 [[TMP8]], 6
-; CHECKWF8-NEXT:    [[TMP16:%.*]] = sub i64 [[M1]], [[A3]]
-; CHECKWF8-NEXT:    [[DIFF_CHECK8:%.*]] = icmp ult i64 [[TMP16]], [[TMP15]]
-; CHECKWF8-NEXT:    [[CONFLICT_RDX9:%.*]] = or i1 [[CONFLICT_RDX7]], [[DIFF_CHECK8]]
+; CHECKWF8-NEXT:    [[TMP16:%.*]] = sub i64 [[TMP3]], [[TMP0]]
+; CHECKWF8-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP16]], [[TMP15]]
+; CHECKWF8-NEXT:    [[CONFLICT_RDX5:%.*]] = or i1 [[CONFLICT_RDX3]], [[DIFF_CHECK4]]
 ; CHECKWF8-NEXT:    [[TMP17:%.*]] = shl i64 [[TMP8]], 6
-; CHECKWF8-NEXT:    [[TMP18:%.*]] = sub i64 [[M1]], [[B5]]
-; CHECKWF8-NEXT:    [[DIFF_CHECK10:%.*]] = icmp ult i64 [[TMP18]], [[TMP17]]
-; CHECKWF8-NEXT:    [[CONFLICT_RDX11:%.*]] = or i1 [[CONFLICT_RDX9]], [[DIFF_CHECK10]]
-; CHECKWF8-NEXT:    br i1 [[CONFLICT_RDX11]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
+; CHECKWF8-NEXT:    [[TMP18:%.*]] = sub i64 [[TMP3]], [[TMP1]]
+; CHECKWF8-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP18]], [[TMP17]]
+; CHECKWF8-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX5]], [[DIFF_CHECK6]]
+; CHECKWF8-NEXT:    br i1 [[CONFLICT_RDX7]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
 ; CHECKWF8:       vector.ph:
 ; CHECKWF8-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECKWF8:       vector.body:
@@ -152,26 +140,22 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECKWF8-NEXT:    [[TMP19:%.*]] = sub i64 [[N]], [[INDEX]]
 ; CHECKWF8-NEXT:    [[TMP20:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP19]], i64 3, i64 3)
 ; CHECKWF8-NEXT:    [[TMP21:%.*]] = trunc i64 [[TMP20]] to i32
-; CHECKWF8-NEXT:    [[TMP22:%.*]] = getelementptr inbounds double, double* [[TMP0]], i64 [[INDEX]]
-; CHECKWF8-NEXT:    [[TMP23:%.*]] = bitcast double* [[TMP22]] to <vscale x 8 x double>*
-; CHECKWF8-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x double> @llvm.vp.load.nxv8f64.p0nxv8f64(<vscale x 8 x double>* [[TMP23]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
-; CHECKWF8-NEXT:    [[TMP24:%.*]] = getelementptr inbounds double, double* [[TMP1]], i64 [[INDEX]]
-; CHECKWF8-NEXT:    [[TMP25:%.*]] = bitcast double* [[TMP24]] to <vscale x 8 x double>*
-; CHECKWF8-NEXT:    [[VP_OP_LOAD14:%.*]] = call <vscale x 8 x double> @llvm.vp.load.nxv8f64.p0nxv8f64(<vscale x 8 x double>* [[TMP25]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
-; CHECKWF8-NEXT:    [[VP_OP:%.*]] = call <vscale x 8 x double> @llvm.vp.fadd.nxv8f64(<vscale x 8 x double> [[VP_OP_LOAD]], <vscale x 8 x double> [[VP_OP_LOAD14]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
-; CHECKWF8-NEXT:    [[TMP26:%.*]] = getelementptr inbounds double, double* [[TMP2]], i64 [[INDEX]]
-; CHECKWF8-NEXT:    [[TMP27:%.*]] = bitcast double* [[TMP26]] to <vscale x 8 x double>*
-; CHECKWF8-NEXT:    call void @llvm.vp.store.nxv8f64.p0nxv8f64(<vscale x 8 x double> [[VP_OP]], <vscale x 8 x double>* [[TMP27]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
-; CHECKWF8-NEXT:    [[TMP28:%.*]] = bitcast <vscale x 8 x double> [[VP_OP_LOAD]] to <vscale x 8 x i64>
-; CHECKWF8-NEXT:    [[TMP29:%.*]] = bitcast <vscale x 8 x double> [[VP_OP_LOAD14]] to <vscale x 8 x i64>
-; CHECKWF8-NEXT:    [[VP_OP15:%.*]] = call <vscale x 8 x i64> @llvm.vp.add.nxv8i64(<vscale x 8 x i64> [[TMP29]], <vscale x 8 x i64> [[TMP28]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
-; CHECKWF8-NEXT:    [[TMP30:%.*]] = getelementptr inbounds i64, i64* [[TMP3]], i64 [[INDEX]]
-; CHECKWF8-NEXT:    [[TMP31:%.*]] = bitcast i64* [[TMP30]] to <vscale x 8 x i64>*
-; CHECKWF8-NEXT:    call void @llvm.vp.store.nxv8i64.p0nxv8i64(<vscale x 8 x i64> [[VP_OP15]], <vscale x 8 x i64>* [[TMP31]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
-; CHECKWF8-NEXT:    [[TMP32:%.*]] = and i64 [[TMP20]], 4294967295
-; CHECKWF8-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP32]]
-; CHECKWF8-NEXT:    [[TMP33:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
-; CHECKWF8-NEXT:    br i1 [[TMP33]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECKWF8-NEXT:    [[TMP22:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[INDEX]]
+; CHECKWF8-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 8 x double> @llvm.vp.load.nxv8f64.p0(ptr [[TMP22]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
+; CHECKWF8-NEXT:    [[TMP23:%.*]] = getelementptr inbounds double, ptr [[B]], i64 [[INDEX]]
+; CHECKWF8-NEXT:    [[VP_OP_LOAD10:%.*]] = call <vscale x 8 x double> @llvm.vp.load.nxv8f64.p0(ptr [[TMP23]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
+; CHECKWF8-NEXT:    [[VP_OP:%.*]] = call <vscale x 8 x double> @llvm.vp.fadd.nxv8f64(<vscale x 8 x double> [[VP_OP_LOAD]], <vscale x 8 x double> [[VP_OP_LOAD10]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
+; CHECKWF8-NEXT:    [[TMP24:%.*]] = getelementptr inbounds double, ptr [[C]], i64 [[INDEX]]
+; CHECKWF8-NEXT:    call void @llvm.vp.store.nxv8f64.p0(<vscale x 8 x double> [[VP_OP]], ptr [[TMP24]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
+; CHECKWF8-NEXT:    [[TMP25:%.*]] = bitcast <vscale x 8 x double> [[VP_OP_LOAD]] to <vscale x 8 x i64>
+; CHECKWF8-NEXT:    [[TMP26:%.*]] = bitcast <vscale x 8 x double> [[VP_OP_LOAD10]] to <vscale x 8 x i64>
+; CHECKWF8-NEXT:    [[VP_OP11:%.*]] = call <vscale x 8 x i64> @llvm.vp.add.nxv8i64(<vscale x 8 x i64> [[TMP26]], <vscale x 8 x i64> [[TMP25]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
+; CHECKWF8-NEXT:    [[TMP27:%.*]] = getelementptr inbounds i64, ptr [[M]], i64 [[INDEX]]
+; CHECKWF8-NEXT:    call void @llvm.vp.store.nxv8i64.p0(<vscale x 8 x i64> [[VP_OP11]], ptr [[TMP27]], <vscale x 8 x i1> shufflevector (<vscale x 8 x i1> insertelement (<vscale x 8 x i1> poison, i1 true, i64 0), <vscale x 8 x i1> poison, <vscale x 8 x i32> zeroinitializer), i32 [[TMP21]])
+; CHECKWF8-NEXT:    [[TMP28:%.*]] = and i64 [[TMP20]], 4294967295
+; CHECKWF8-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP28]]
+; CHECKWF8-NEXT:    [[TMP29:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
+; CHECKWF8-NEXT:    br i1 [[TMP29]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECKWF8:       middle.block:
 ; CHECKWF8-NEXT:    br i1 true, label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
 ; CHECKWF8:       scalar.ph:
@@ -179,18 +163,18 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; CHECKWF8-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECKWF8:       for.body:
 ; CHECKWF8-NEXT:    [[I_018:%.*]] = phi i64 [ [[INC:%.*]], [[FOR_BODY]] ], [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ]
-; CHECKWF8-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[TMP0]], i64 [[I_018]]
-; CHECKWF8-NEXT:    [[TMP34:%.*]] = load double, double* [[ARRAYIDX]], align 8
-; CHECKWF8-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds double, double* [[TMP1]], i64 [[I_018]]
-; CHECKWF8-NEXT:    [[TMP35:%.*]] = load double, double* [[ARRAYIDX1]], align 8
-; CHECKWF8-NEXT:    [[ADD:%.*]] = fadd double [[TMP34]], [[TMP35]]
-; CHECKWF8-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[TMP2]], i64 [[I_018]]
-; CHECKWF8-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8
-; CHECKWF8-NEXT:    [[TMP36:%.*]] = bitcast double [[TMP34]] to i64
-; CHECKWF8-NEXT:    [[TMP37:%.*]] = bitcast double [[TMP35]] to i64
-; CHECKWF8-NEXT:    [[ADD5:%.*]] = add nsw i64 [[TMP37]], [[TMP36]]
-; CHECKWF8-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i64, i64* [[TMP3]], i64 [[I_018]]
-; CHECKWF8-NEXT:    store i64 [[ADD5]], i64* [[ARRAYIDX6]], align 8
+; CHECKWF8-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[I_018]]
+; CHECKWF8-NEXT:    [[TMP30:%.*]] = load double, ptr [[ARRAYIDX]], align 8
+; CHECKWF8-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds double, ptr [[B]], i64 [[I_018]]
+; CHECKWF8-NEXT:    [[TMP31:%.*]] = load double, ptr [[ARRAYIDX1]], align 8
+; CHECKWF8-NEXT:    [[ADD:%.*]] = fadd double [[TMP30]], [[TMP31]]
+; CHECKWF8-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, ptr [[C]], i64 [[I_018]]
+; CHECKWF8-NEXT:    store double [[ADD]], ptr [[ARRAYIDX2]], align 8
+; CHECKWF8-NEXT:    [[TMP32:%.*]] = bitcast double [[TMP30]] to i64
+; CHECKWF8-NEXT:    [[TMP33:%.*]] = bitcast double [[TMP31]] to i64
+; CHECKWF8-NEXT:    [[ADD5:%.*]] = add nsw i64 [[TMP33]], [[TMP32]]
+; CHECKWF8-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i64, ptr [[M]], i64 [[I_018]]
+; CHECKWF8-NEXT:    store i64 [[ADD5]], ptr [[ARRAYIDX6]], align 8
 ; CHECKWF8-NEXT:    [[INC]] = add nuw nsw i64 [[I_018]], 1
 ; CHECKWF8-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INC]], [[N]]
 ; CHECKWF8-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP3:![0-9]+]]
@@ -201,14 +185,10 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ;
 ; INTERLEAVE-LABEL: @test_bitcast_widening(
 ; INTERLEAVE-NEXT:  entry:
-; INTERLEAVE-NEXT:    [[B5:%.*]] = ptrtoint i8* [[B:%.*]] to i64
-; INTERLEAVE-NEXT:    [[A3:%.*]] = ptrtoint i8* [[A:%.*]] to i64
-; INTERLEAVE-NEXT:    [[TMP0:%.*]] = bitcast i8* [[A]] to double*
-; INTERLEAVE-NEXT:    [[TMP1:%.*]] = bitcast i8* [[B]] to double*
-; INTERLEAVE-NEXT:    [[C2:%.*]] = ptrtoint i8* [[C:%.*]] to i64
-; INTERLEAVE-NEXT:    [[TMP2:%.*]] = bitcast i8* [[C]] to double*
-; INTERLEAVE-NEXT:    [[M1:%.*]] = ptrtoint i8* [[M:%.*]] to i64
-; INTERLEAVE-NEXT:    [[TMP3:%.*]] = bitcast i8* [[M]] to i64*
+; INTERLEAVE-NEXT:    [[TMP0:%.*]] = ptrtoint ptr [[A:%.*]] to i64
+; INTERLEAVE-NEXT:    [[TMP1:%.*]] = ptrtoint ptr [[B:%.*]] to i64
+; INTERLEAVE-NEXT:    [[TMP2:%.*]] = ptrtoint ptr [[C:%.*]] to i64
+; INTERLEAVE-NEXT:    [[TMP3:%.*]] = ptrtoint ptr [[M:%.*]] to i64
 ; INTERLEAVE-NEXT:    [[CMP17:%.*]] = icmp sgt i64 [[N:%.*]], 0
 ; INTERLEAVE-NEXT:    br i1 [[CMP17]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END:%.*]]
 ; INTERLEAVE:       for.body.preheader:
@@ -219,25 +199,25 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; INTERLEAVE:       vector.memcheck:
 ; INTERLEAVE-NEXT:    [[TMP7:%.*]] = call i64 @llvm.vscale.i64()
 ; INTERLEAVE-NEXT:    [[TMP8:%.*]] = shl i64 [[TMP7]], 5
-; INTERLEAVE-NEXT:    [[TMP9:%.*]] = sub i64 [[M1]], [[C2]]
+; INTERLEAVE-NEXT:    [[TMP9:%.*]] = sub i64 [[TMP3]], [[TMP2]]
 ; INTERLEAVE-NEXT:    [[DIFF_CHECK:%.*]] = icmp ult i64 [[TMP9]], [[TMP8]]
 ; INTERLEAVE-NEXT:    [[TMP10:%.*]] = shl i64 [[TMP7]], 5
-; INTERLEAVE-NEXT:    [[TMP11:%.*]] = sub i64 [[C2]], [[A3]]
-; INTERLEAVE-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP11]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK4]]
+; INTERLEAVE-NEXT:    [[TMP11:%.*]] = sub i64 [[TMP2]], [[TMP0]]
+; INTERLEAVE-NEXT:    [[DIFF_CHECK1:%.*]] = icmp ult i64 [[TMP11]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[CONFLICT_RDX:%.*]] = or i1 [[DIFF_CHECK]], [[DIFF_CHECK1]]
 ; INTERLEAVE-NEXT:    [[TMP12:%.*]] = shl i64 [[TMP7]], 5
-; INTERLEAVE-NEXT:    [[TMP13:%.*]] = sub i64 [[C2]], [[B5]]
-; INTERLEAVE-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP13]], [[TMP12]]
-; INTERLEAVE-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK6]]
+; INTERLEAVE-NEXT:    [[TMP13:%.*]] = sub i64 [[TMP2]], [[TMP1]]
+; INTERLEAVE-NEXT:    [[DIFF_CHECK2:%.*]] = icmp ult i64 [[TMP13]], [[TMP12]]
+; INTERLEAVE-NEXT:    [[CONFLICT_RDX3:%.*]] = or i1 [[CONFLICT_RDX]], [[DIFF_CHECK2]]
 ; INTERLEAVE-NEXT:    [[TMP14:%.*]] = shl i64 [[TMP7]], 5
-; INTERLEAVE-NEXT:    [[TMP15:%.*]] = sub i64 [[M1]], [[A3]]
-; INTERLEAVE-NEXT:    [[DIFF_CHECK8:%.*]] = icmp ult i64 [[TMP15]], [[TMP14]]
-; INTERLEAVE-NEXT:    [[CONFLICT_RDX9:%.*]] = or i1 [[CONFLICT_RDX7]], [[DIFF_CHECK8]]
+; INTERLEAVE-NEXT:    [[TMP15:%.*]] = sub i64 [[TMP3]], [[TMP0]]
+; INTERLEAVE-NEXT:    [[DIFF_CHECK4:%.*]] = icmp ult i64 [[TMP15]], [[TMP14]]
+; INTERLEAVE-NEXT:    [[CONFLICT_RDX5:%.*]] = or i1 [[CONFLICT_RDX3]], [[DIFF_CHECK4]]
 ; INTERLEAVE-NEXT:    [[TMP16:%.*]] = shl i64 [[TMP7]], 5
-; INTERLEAVE-NEXT:    [[TMP17:%.*]] = sub i64 [[M1]], [[B5]]
-; INTERLEAVE-NEXT:    [[DIFF_CHECK10:%.*]] = icmp ult i64 [[TMP17]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[CONFLICT_RDX11:%.*]] = or i1 [[CONFLICT_RDX9]], [[DIFF_CHECK10]]
-; INTERLEAVE-NEXT:    br i1 [[CONFLICT_RDX11]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
+; INTERLEAVE-NEXT:    [[TMP17:%.*]] = sub i64 [[TMP3]], [[TMP1]]
+; INTERLEAVE-NEXT:    [[DIFF_CHECK6:%.*]] = icmp ult i64 [[TMP17]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[CONFLICT_RDX7:%.*]] = or i1 [[CONFLICT_RDX5]], [[DIFF_CHECK6]]
+; INTERLEAVE-NEXT:    br i1 [[CONFLICT_RDX7]], label [[SCALAR_PH]], label [[VECTOR_PH:%.*]]
 ; INTERLEAVE:       vector.ph:
 ; INTERLEAVE-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; INTERLEAVE:       vector.body:
@@ -245,26 +225,22 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; INTERLEAVE-NEXT:    [[TMP18:%.*]] = sub i64 [[N]], [[INDEX]]
 ; INTERLEAVE-NEXT:    [[TMP19:%.*]] = call i64 @llvm.epi.vsetvl(i64 [[TMP18]], i64 3, i64 0)
 ; INTERLEAVE-NEXT:    [[TMP20:%.*]] = trunc i64 [[TMP19]] to i32
-; INTERLEAVE-NEXT:    [[TMP21:%.*]] = getelementptr inbounds double, double* [[TMP0]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    [[TMP22:%.*]] = bitcast double* [[TMP21]] to <vscale x 1 x double>*
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP22]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP23:%.*]] = getelementptr inbounds double, double* [[TMP1]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    [[TMP24:%.*]] = bitcast double* [[TMP23]] to <vscale x 1 x double>*
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD14:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0nxv1f64(<vscale x 1 x double>* [[TMP24]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[VP_OP:%.*]] = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[VP_OP_LOAD]], <vscale x 1 x double> [[VP_OP_LOAD14]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP25:%.*]] = getelementptr inbounds double, double* [[TMP2]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    [[TMP26:%.*]] = bitcast double* [[TMP25]] to <vscale x 1 x double>*
-; INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv1f64.p0nxv1f64(<vscale x 1 x double> [[VP_OP]], <vscale x 1 x double>* [[TMP26]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP27:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD]] to <vscale x 1 x i64>
-; INTERLEAVE-NEXT:    [[TMP28:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD14]] to <vscale x 1 x i64>
-; INTERLEAVE-NEXT:    [[VP_OP15:%.*]] = call <vscale x 1 x i64> @llvm.vp.add.nxv1i64(<vscale x 1 x i64> [[TMP28]], <vscale x 1 x i64> [[TMP27]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP29:%.*]] = getelementptr inbounds i64, i64* [[TMP3]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    [[TMP30:%.*]] = bitcast i64* [[TMP29]] to <vscale x 1 x i64>*
-; INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv1i64.p0nxv1i64(<vscale x 1 x i64> [[VP_OP15]], <vscale x 1 x i64>* [[TMP30]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP31:%.*]] = and i64 [[TMP19]], 4294967295
-; INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP31]]
-; INTERLEAVE-NEXT:    [[TMP32:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
-; INTERLEAVE-NEXT:    br i1 [[TMP32]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; INTERLEAVE-NEXT:    [[TMP21:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP21]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP22:%.*]] = getelementptr inbounds double, ptr [[B]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD10:%.*]] = call <vscale x 1 x double> @llvm.vp.load.nxv1f64.p0(ptr [[TMP22]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[VP_OP:%.*]] = call <vscale x 1 x double> @llvm.vp.fadd.nxv1f64(<vscale x 1 x double> [[VP_OP_LOAD]], <vscale x 1 x double> [[VP_OP_LOAD10]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP23:%.*]] = getelementptr inbounds double, ptr [[C]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv1f64.p0(<vscale x 1 x double> [[VP_OP]], ptr [[TMP23]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP24:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD]] to <vscale x 1 x i64>
+; INTERLEAVE-NEXT:    [[TMP25:%.*]] = bitcast <vscale x 1 x double> [[VP_OP_LOAD10]] to <vscale x 1 x i64>
+; INTERLEAVE-NEXT:    [[VP_OP11:%.*]] = call <vscale x 1 x i64> @llvm.vp.add.nxv1i64(<vscale x 1 x i64> [[TMP25]], <vscale x 1 x i64> [[TMP24]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP26:%.*]] = getelementptr inbounds i64, ptr [[M]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    call void @llvm.vp.store.nxv1i64.p0(<vscale x 1 x i64> [[VP_OP11]], ptr [[TMP26]], <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP27:%.*]] = and i64 [[TMP19]], 4294967295
+; INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP27]]
+; INTERLEAVE-NEXT:    [[TMP28:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N]]
+; INTERLEAVE-NEXT:    br i1 [[TMP28]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; INTERLEAVE:       middle.block:
 ; INTERLEAVE-NEXT:    br i1 true, label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
 ; INTERLEAVE:       scalar.ph:
@@ -272,18 +248,18 @@ define void @test_bitcast_widening(i64 %N, i8* %c, i8* %a, i8* %b, i8* %m) {
 ; INTERLEAVE-NEXT:    br label [[FOR_BODY:%.*]]
 ; INTERLEAVE:       for.body:
 ; INTERLEAVE-NEXT:    [[I_018:%.*]] = phi i64 [ [[INC:%.*]], [[FOR_BODY]] ], [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ]
-; INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[TMP0]], i64 [[I_018]]
-; INTERLEAVE-NEXT:    [[TMP33:%.*]] = load double, double* [[ARRAYIDX]], align 8
-; INTERLEAVE-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds double, double* [[TMP1]], i64 [[I_018]]
-; INTERLEAVE-NEXT:    [[TMP34:%.*]] = load double, double* [[ARRAYIDX1]], align 8
-; INTERLEAVE-NEXT:    [[ADD:%.*]] = fadd double [[TMP33]], [[TMP34]]
-; INTERLEAVE-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[TMP2]], i64 [[I_018]]
-; INTERLEAVE-NEXT:    store double [[ADD]], double* [[ARRAYIDX2]], align 8
-; INTERLEAVE-NEXT:    [[TMP35:%.*]] = bitcast double [[TMP33]] to i64
-; INTERLEAVE-NEXT:    [[TMP36:%.*]] = bitcast double [[TMP34]] to i64
-; INTERLEAVE-NEXT:    [[ADD5:%.*]] = add nsw i64 [[TMP36]], [[TMP35]]
-; INTERLEAVE-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i64, i64* [[TMP3]], i64 [[I_018]]
-; INTERLEAVE-NEXT:    store i64 [[ADD5]], i64* [[ARRAYIDX6]], align 8
+; INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[I_018]]
+; INTERLEAVE-NEXT:    [[TMP29:%.*]] = load double, ptr [[ARRAYIDX]], align 8
+; INTERLEAVE-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds double, ptr [[B]], i64 [[I_018]]
+; INTERLEAVE-NEXT:    [[TMP30:%.*]] = load double, ptr [[ARRAYIDX1]], align 8
+; INTERLEAVE-NEXT:    [[ADD:%.*]] = fadd double [[TMP29]], [[TMP30]]
+; INTERLEAVE-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, ptr [[C]], i64 [[I_018]]
+; INTERLEAVE-NEXT:    store double [[ADD]], ptr [[ARRAYIDX2]], align 8
+; INTERLEAVE-NEXT:    [[TMP31:%.*]] = bitcast double [[TMP29]] to i64
+; INTERLEAVE-NEXT:    [[TMP32:%.*]] = bitcast double [[TMP30]] to i64
+; INTERLEAVE-NEXT:    [[ADD5:%.*]] = add nsw i64 [[TMP32]], [[TMP31]]
+; INTERLEAVE-NEXT:    [[ARRAYIDX6:%.*]] = getelementptr inbounds i64, ptr [[M]], i64 [[I_018]]
+; INTERLEAVE-NEXT:    store i64 [[ADD5]], ptr [[ARRAYIDX6]], align 8
 ; INTERLEAVE-NEXT:    [[INC]] = add nuw nsw i64 [[I_018]], 1
 ; INTERLEAVE-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INC]], [[N]]
 ; INTERLEAVE-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP3:![0-9]+]]

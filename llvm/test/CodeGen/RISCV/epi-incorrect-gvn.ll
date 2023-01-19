@@ -13,24 +13,21 @@ define dso_local void @test_vmfirst() local_unnamed_addr #0 {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i64 [[TMP2]], -1
 ; CHECK-NEXT:    br i1 [[CMP]], label [[IF_END:%.*]], label [[IF_ELSE:%.*]]
 ; CHECK:       if.else:
-; CHECK-NEXT:    tail call void @abort() #5
+; CHECK-NEXT:    tail call void @abort() #[[ATTR5:[0-9]+]]
 ; CHECK-NEXT:    unreachable
 ; CHECK:       if.end:
-; CHECK-NEXT:    [[TMP3:%.*]] = bitcast [128 x i32]* [[A]] to i8*
-; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 512, i8* nonnull [[TMP3]]) #6
-; CHECK-NEXT:    [[ARRAYDECAY:%.*]] = getelementptr inbounds [128 x i32], [128 x i32]* [[A]], i64 0, i64 0
-; CHECK-NEXT:    call void @llvm.memset.p0i8.i64(i8* nonnull align 4 dereferenceable(512) [[TMP3]], i8 0, i64 512, i1 false)
-; CHECK-NEXT:    store i32 2, i32* [[ARRAYDECAY]], align 4, !tbaa !2
-; CHECK-NEXT:    [[TMP4:%.*]] = bitcast [128 x i32]* [[A]] to <vscale x 2 x i1>*
-; CHECK-NEXT:    [[TMP5:%.*]] = load <vscale x 2 x i1>, <vscale x 2 x i1>* [[TMP4]], align 4
-; CHECK-NEXT:    [[TMP6:%.*]] = tail call i64 @llvm.epi.vmfirst.nxv2i1(<vscale x 2 x i1> [[TMP5]], i64 128)
-; CHECK-NEXT:    [[CMP2:%.*]] = icmp eq i64 [[TMP6]], 0
+; CHECK-NEXT:    call void @llvm.lifetime.start.p0(i64 512, ptr nonnull [[A]]) #[[ATTR6:[0-9]+]]
+; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr nonnull align 4 dereferenceable(512) [[A]], i8 0, i64 512, i1 false)
+; CHECK-NEXT:    store i32 2, ptr [[A]], align 4, !tbaa [[TBAA2:![0-9]+]]
+; CHECK-NEXT:    [[TMP3:%.*]] = load <vscale x 2 x i1>, ptr [[A]], align 4
+; CHECK-NEXT:    [[TMP4:%.*]] = tail call i64 @llvm.epi.vmfirst.nxv2i1(<vscale x 2 x i1> [[TMP3]], i64 128)
+; CHECK-NEXT:    [[CMP2:%.*]] = icmp eq i64 [[TMP4]], 0
 ; CHECK-NEXT:    br i1 [[CMP2]], label [[IF_END5:%.*]], label [[IF_ELSE4:%.*]]
 ; CHECK:       if.else4:
-; CHECK-NEXT:    tail call void @abort() #5
+; CHECK-NEXT:    tail call void @abort() #[[ATTR5]]
 ; CHECK-NEXT:    unreachable
 ; CHECK:       if.end5:
-; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 512, i8* nonnull [[TMP3]]) #6
+; CHECK-NEXT:    call void @llvm.lifetime.end.p0(i64 512, ptr nonnull [[A]]) #[[ATTR6]]
 ; CHECK-NEXT:    ret void
 ;
 entry:

@@ -13,7 +13,7 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    br i1 [[CMP37]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END18:%.*]]
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[WIDE_TRIP_COUNT:%.*]] = zext i32 [[NROWS]] to i64
-; CHECK-NEXT:    [[DOTPRE:%.*]] = load i64, i64* [[IA:%.*]], align 8
+; CHECK-NEXT:    [[DOTPRE:%.*]] = load i64, ptr [[IA:%.*]], align 8
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[TMP0:%.*]] = phi i64 [ [[DOTPRE]], [[FOR_BODY_PREHEADER]] ], [ [[TMP1:%.*]], [[FOR_END:%.*]] ]
@@ -21,8 +21,8 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    [[SEXT:%.*]] = shl i64 [[TMP0]], 32
 ; CHECK-NEXT:    [[CONV231:%.*]] = ashr exact i64 [[SEXT]], 32
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT40]] = add nuw nsw i64 [[INDVARS_IV39]], 1
-; CHECK-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds i64, i64* [[IA]], i64 [[INDVARS_IV_NEXT40]]
-; CHECK-NEXT:    [[TMP1]] = load i64, i64* [[ARRAYIDX4]], align 8
+; CHECK-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds i64, ptr [[IA]], i64 [[INDVARS_IV_NEXT40]]
+; CHECK-NEXT:    [[TMP1]] = load i64, ptr [[ARRAYIDX4]], align 8
 ; CHECK-NEXT:    [[CMP532:%.*]] = icmp sgt i64 [[TMP1]], [[CONV231]]
 ; CHECK-NEXT:    br i1 [[CMP532]], label [[FOR_BODY7_PREHEADER:%.*]], label [[FOR_END]]
 ; CHECK:       for.body7.preheader:
@@ -39,47 +39,45 @@ define dso_local void @spmv(double* nocapture readonly %a, i64* nocapture readon
 ; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
-; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 1 x double> [ zeroinitializer, [[VECTOR_PH]] ], [ [[TMP12:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[VEC_PHI:%.*]] = phi <vscale x 1 x double> [ zeroinitializer, [[VECTOR_PH]] ], [ [[TMP10:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[OFFSET_IDX:%.*]] = add i64 [[CONV231]], [[INDEX]]
-; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds double, double* [[A:%.*]], i64 [[OFFSET_IDX]]
-; CHECK-NEXT:    [[TMP7:%.*]] = bitcast double* [[TMP6]] to <vscale x 1 x double>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP7]], align 8
-; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds i64, i64* [[JA:%.*]], i64 [[OFFSET_IDX]]
-; CHECK-NEXT:    [[TMP9:%.*]] = bitcast i64* [[TMP8]] to <vscale x 1 x i64>*
-; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, <vscale x 1 x i64>* [[TMP9]], align 8
-; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds double, double* [[X:%.*]], <vscale x 1 x i64> [[WIDE_LOAD2]]
-; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = tail call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0f64(<vscale x 1 x double*> [[TMP10]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> poison)
-; CHECK-NEXT:    [[TMP11:%.*]] = fmul fast <vscale x 1 x double> [[WIDE_MASKED_GATHER]], [[WIDE_LOAD]]
-; CHECK-NEXT:    [[TMP12]] = fadd fast <vscale x 1 x double> [[TMP11]], [[VEC_PHI]]
+; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds double, ptr [[A:%.*]], i64 [[OFFSET_IDX]]
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, ptr [[TMP6]], align 8
+; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds i64, ptr [[JA:%.*]], i64 [[OFFSET_IDX]]
+; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, ptr [[TMP7]], align 8
+; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, ptr [[X:%.*]], <vscale x 1 x i64> [[WIDE_LOAD2]]
+; CHECK-NEXT:    [[WIDE_MASKED_GATHER:%.*]] = tail call <vscale x 1 x double> @llvm.masked.gather.nxv1f64.nxv1p0(<vscale x 1 x ptr> [[TMP8]], i32 8, <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), <vscale x 1 x double> poison)
+; CHECK-NEXT:    [[TMP9:%.*]] = fmul fast <vscale x 1 x double> [[WIDE_MASKED_GATHER]], [[WIDE_LOAD]]
+; CHECK-NEXT:    [[TMP10]] = fadd fast <vscale x 1 x double> [[TMP9]], [[VEC_PHI]]
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP5]]
-; CHECK-NEXT:    [[TMP13:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP13]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
+; CHECK-NEXT:    [[TMP11:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP11]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       middle.block:
-; CHECK-NEXT:    [[TMP14:%.*]] = tail call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP12]])
+; CHECK-NEXT:    [[TMP12:%.*]] = tail call fast double @llvm.vector.reduce.fadd.nxv1f64(double -0.000000e+00, <vscale x 1 x double> [[TMP10]])
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[N_MOD_VF]], 0
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END]], label [[FOR_BODY7_PREHEADER3]]
 ; CHECK:       for.body7.preheader3:
 ; CHECK-NEXT:    [[INDVARS_IV_PH:%.*]] = phi i64 [ [[CONV231]], [[FOR_BODY7_PREHEADER]] ], [ [[IND_END]], [[MIDDLE_BLOCK]] ]
-; CHECK-NEXT:    [[SUM_034_PH:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY7_PREHEADER]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ]
+; CHECK-NEXT:    [[SUM_034_PH:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY7_PREHEADER]] ], [ [[TMP12]], [[MIDDLE_BLOCK]] ]
 ; CHECK-NEXT:    br label [[FOR_BODY7:%.*]]
 ; CHECK:       for.body7:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY7]] ], [ [[INDVARS_IV_PH]], [[FOR_BODY7_PREHEADER3]] ]
 ; CHECK-NEXT:    [[SUM_034:%.*]] = phi double [ [[ADD13:%.*]], [[FOR_BODY7]] ], [ [[SUM_034_PH]], [[FOR_BODY7_PREHEADER3]] ]
-; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds double, double* [[A]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP15:%.*]] = load double, double* [[ARRAYIDX9]], align 8
-; CHECK-NEXT:    [[ARRAYIDX11:%.*]] = getelementptr inbounds i64, i64* [[JA]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP16:%.*]] = load i64, i64* [[ARRAYIDX11]], align 8
-; CHECK-NEXT:    [[ARRAYIDX12:%.*]] = getelementptr inbounds double, double* [[X]], i64 [[TMP16]]
-; CHECK-NEXT:    [[TMP17:%.*]] = load double, double* [[ARRAYIDX12]], align 8
-; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[TMP17]], [[TMP15]]
+; CHECK-NEXT:    [[ARRAYIDX9:%.*]] = getelementptr inbounds double, ptr [[A]], i64 [[INDVARS_IV]]
+; CHECK-NEXT:    [[TMP13:%.*]] = load double, ptr [[ARRAYIDX9]], align 8
+; CHECK-NEXT:    [[ARRAYIDX11:%.*]] = getelementptr inbounds i64, ptr [[JA]], i64 [[INDVARS_IV]]
+; CHECK-NEXT:    [[TMP14:%.*]] = load i64, ptr [[ARRAYIDX11]], align 8
+; CHECK-NEXT:    [[ARRAYIDX12:%.*]] = getelementptr inbounds double, ptr [[X]], i64 [[TMP14]]
+; CHECK-NEXT:    [[TMP15:%.*]] = load double, ptr [[ARRAYIDX12]], align 8
+; CHECK-NEXT:    [[MUL:%.*]] = fmul fast double [[TMP15]], [[TMP13]]
 ; CHECK-NEXT:    [[ADD13]] = fadd fast double [[MUL]], [[SUM_034]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT1:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[TMP1]]
 ; CHECK-NEXT:    br i1 [[EXITCOND_NOT1]], label [[FOR_END]], label [[FOR_BODY7]], !llvm.loop [[LOOP3:![0-9]+]]
 ; CHECK:       for.end:
-; CHECK-NEXT:    [[SUM_0_LCSSA:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY]] ], [ [[TMP14]], [[MIDDLE_BLOCK]] ], [ [[ADD13]], [[FOR_BODY7]] ]
-; CHECK-NEXT:    [[ARRAYIDX15:%.*]] = getelementptr inbounds double, double* [[Y:%.*]], i64 [[INDVARS_IV39]]
-; CHECK-NEXT:    store double [[SUM_0_LCSSA]], double* [[ARRAYIDX15]], align 8
+; CHECK-NEXT:    [[SUM_0_LCSSA:%.*]] = phi double [ 0.000000e+00, [[FOR_BODY]] ], [ [[TMP12]], [[MIDDLE_BLOCK]] ], [ [[ADD13]], [[FOR_BODY7]] ]
+; CHECK-NEXT:    [[ARRAYIDX15:%.*]] = getelementptr inbounds double, ptr [[Y:%.*]], i64 [[INDVARS_IV39]]
+; CHECK-NEXT:    store double [[SUM_0_LCSSA]], ptr [[ARRAYIDX15]], align 8
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT40]], [[WIDE_TRIP_COUNT]]
 ; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END18]], label [[FOR_BODY]]
 ; CHECK:       for.end18:
