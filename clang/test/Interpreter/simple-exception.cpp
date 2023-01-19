@@ -1,5 +1,7 @@
 // clang-format off
-// UNSUPPORTED: system-aix
+// This does not seem to work with a clang that is cross by default
+// which suggests "target=" is not precise enough here.
+// UNSUPPORTED: true
 // XFAIL for arm, arm64, riscv, or running on Windows.
 // XFAIL: target={{(arm|riscv).*}}, system-windows
 // RUN: cat %s | clang-repl | FileCheck %s
