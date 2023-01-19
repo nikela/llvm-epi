@@ -38,7 +38,7 @@ entry:
   call void @llvm.lifetime.end.p0i8(i64 4, i8* nonnull %1)
   call void @llvm.lifetime.end.p0i8(i64 16, i8* nonnull %0)
 ; CHECK: foo
-; CHECK: ret i32 %3
+; CHECK: ret i32 %0
   ret i32 %3
 }
 
