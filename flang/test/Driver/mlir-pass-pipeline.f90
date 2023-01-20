@@ -62,5 +62,6 @@ end program
 ! ALL-NEXT:   (S) 0 num-dce'd - Number of operations eliminated
 ! ALL-NEXT: TargetRewrite
 ! ALL-NEXT: ExternalNameConversion
+! ALL-NEXT: AddDebugFoundation
 ! ALL-NEXT: FIRToLLVMLowering
 ! ALL-NOT: LLVMIRLoweringPass

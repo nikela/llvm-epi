@@ -209,6 +209,7 @@ inline void createDefaultFIRCodeGenPassPipeline(
   fir::addCodeGenRewritePass(pm);
   fir::addTargetRewritePass(pm);
   fir::addExternalNameConversionPass(pm);
+  fir::addDebugFoundationPass(pm);
   fir::addFIRToLLVMPass(pm, optLevel);
 }
 
