@@ -38,13 +38,13 @@ define dso_local void @not_parallel(i32 signext %N, float* noalias nocapture rea
 ; CHECK-IR:       for.body:
 ; CHECK-IR-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ 4, [[FOR_BODY_PREHEADER]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-IR-NEXT:    [[TMP0:%.*]] = add nsw i64 [[INDVARS_IV]], -4, !dbg [[DBG13:![0-9]+]]
-; CHECK-IR-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, float* [[B:%.*]], i64 [[TMP0]], !dbg [[DBG14:![0-9]+]]
-; CHECK-IR-NEXT:    [[TMP1:%.*]] = load float, float* [[ARRAYIDX]], align 4, !dbg [[DBG14]], !tbaa [[TBAA15:![0-9]+]]
-; CHECK-IR-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, float* [[A:%.*]], i64 [[INDVARS_IV]], !dbg [[DBG19:![0-9]+]]
-; CHECK-IR-NEXT:    [[TMP2:%.*]] = load float, float* [[ARRAYIDX2]], align 4, !dbg [[DBG19]], !tbaa [[TBAA15]]
+; CHECK-IR-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP0]], !dbg [[DBG14:![0-9]+]]
+; CHECK-IR-NEXT:    [[TMP1:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !dbg [[DBG14]], !tbaa [[TBAA15:![0-9]+]]
+; CHECK-IR-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[INDVARS_IV]], !dbg [[DBG19:![0-9]+]]
+; CHECK-IR-NEXT:    [[TMP2:%.*]] = load float, ptr [[ARRAYIDX2]], align 4, !dbg [[DBG19]], !tbaa [[TBAA15]]
 ; CHECK-IR-NEXT:    [[ADD:%.*]] = fadd float [[TMP1]], [[TMP2]], !dbg [[DBG20:![0-9]+]]
-; CHECK-IR-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds float, float* [[B]], i64 [[INDVARS_IV]], !dbg [[DBG21:![0-9]+]]
-; CHECK-IR-NEXT:    store float [[ADD]], float* [[ARRAYIDX4]], align 4, !dbg [[DBG22:![0-9]+]], !tbaa [[TBAA15]]
+; CHECK-IR-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[INDVARS_IV]], !dbg [[DBG21:![0-9]+]]
+; CHECK-IR-NEXT:    store float [[ADD]], ptr [[ARRAYIDX4]], align 4, !dbg [[DBG22:![0-9]+]], !tbaa [[TBAA15]]
 ; CHECK-IR-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1, !dbg [[DBG23:![0-9]+]]
 ; CHECK-IR-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]], !dbg [[DBG10]]
 ; CHECK-IR-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[FOR_BODY]], !dbg [[DBG11]], !llvm.loop [[LOOP24:![0-9]+]]
@@ -63,13 +63,13 @@ define dso_local void @not_parallel(i32 signext %N, float* noalias nocapture rea
 ; CHECK-DBG:       for.body:
 ; CHECK-DBG-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ 4, [[FOR_BODY_PREHEADER]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-DBG-NEXT:    [[TMP0:%.*]] = add nsw i64 [[INDVARS_IV]], -4, !dbg [[DBG13:![0-9]+]]
-; CHECK-DBG-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, float* [[B:%.*]], i64 [[TMP0]], !dbg [[DBG14:![0-9]+]]
-; CHECK-DBG-NEXT:    [[TMP1:%.*]] = load float, float* [[ARRAYIDX]], align 4, !dbg [[DBG14]], !tbaa [[TBAA15:![0-9]+]]
-; CHECK-DBG-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, float* [[A:%.*]], i64 [[INDVARS_IV]], !dbg [[DBG19:![0-9]+]]
-; CHECK-DBG-NEXT:    [[TMP2:%.*]] = load float, float* [[ARRAYIDX2]], align 4, !dbg [[DBG19]], !tbaa [[TBAA15]]
+; CHECK-DBG-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds float, ptr [[B:%.*]], i64 [[TMP0]], !dbg [[DBG14:![0-9]+]]
+; CHECK-DBG-NEXT:    [[TMP1:%.*]] = load float, ptr [[ARRAYIDX]], align 4, !dbg [[DBG14]], !tbaa [[TBAA15:![0-9]+]]
+; CHECK-DBG-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds float, ptr [[A:%.*]], i64 [[INDVARS_IV]], !dbg [[DBG19:![0-9]+]]
+; CHECK-DBG-NEXT:    [[TMP2:%.*]] = load float, ptr [[ARRAYIDX2]], align 4, !dbg [[DBG19]], !tbaa [[TBAA15]]
 ; CHECK-DBG-NEXT:    [[ADD:%.*]] = fadd float [[TMP1]], [[TMP2]], !dbg [[DBG20:![0-9]+]]
-; CHECK-DBG-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds float, float* [[B]], i64 [[INDVARS_IV]], !dbg [[DBG21:![0-9]+]]
-; CHECK-DBG-NEXT:    store float [[ADD]], float* [[ARRAYIDX4]], align 4, !dbg [[DBG22:![0-9]+]], !tbaa [[TBAA15]]
+; CHECK-DBG-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds float, ptr [[B]], i64 [[INDVARS_IV]], !dbg [[DBG21:![0-9]+]]
+; CHECK-DBG-NEXT:    store float [[ADD]], ptr [[ARRAYIDX4]], align 4, !dbg [[DBG22:![0-9]+]], !tbaa [[TBAA15]]
 ; CHECK-DBG-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1, !dbg [[DBG23:![0-9]+]]
 ; CHECK-DBG-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]], !dbg [[DBG10]]
 ; CHECK-DBG-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_COND_CLEANUP_LOOPEXIT:%.*]], label [[FOR_BODY]], !dbg [[DBG11]], !llvm.loop [[LOOP24:![0-9]+]]
@@ -103,7 +103,7 @@ for.body:                                         ; preds = %for.body.preheader,
   br i1 %exitcond.not, label %for.cond.cleanup.loopexit, label %for.body, !dbg !11, !llvm.loop !24
 }
 
-attributes #0 = { nofree norecurse nounwind "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+zepi,+experimental-zvlsseg,+f,+m,-relax,-save-restore" }
+attributes #0 = { nofree norecurse nounwind "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+a,+c,+d,+zepi,+f,+m,-relax,-save-restore" }
 
 !llvm.dbg.cu = !{!0}
 !llvm.module.flags = !{!3, !4, !5, !6}

@@ -29,24 +29,21 @@ define dso_local void @vfadd64(double* noalias nocapture %dz, double* noalias no
 ; CHECK:       vector.body:
 ; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK-NEXT:    [[TMP4:%.*]] = add i64 [[INDEX]], 0
-; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, double* [[DX:%.*]], i64 [[TMP4]]
-; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds double, double* [[TMP5]], i32 0
-; CHECK-NEXT:    [[TMP7:%.*]] = bitcast double* [[TMP6]] to <vscale x 8 x double>*
-; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x double>, <vscale x 8 x double>* [[TMP7]], align 8, !tbaa [[TBAA2:![0-9]+]]
-; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, double* [[DY:%.*]], i64 [[TMP4]]
-; CHECK-NEXT:    [[TMP9:%.*]] = getelementptr inbounds double, double* [[TMP8]], i32 0
-; CHECK-NEXT:    [[TMP10:%.*]] = bitcast double* [[TMP9]] to <vscale x 8 x double>*
-; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 8 x double>, <vscale x 8 x double>* [[TMP10]], align 8, !tbaa [[TBAA2]]
-; CHECK-NEXT:    [[TMP11:%.*]] = fadd <vscale x 8 x double> [[WIDE_LOAD]], [[WIDE_LOAD1]]
-; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds double, double* [[DZ:%.*]], i64 [[TMP4]]
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds double, double* [[TMP12]], i32 0
-; CHECK-NEXT:    [[TMP14:%.*]] = bitcast double* [[TMP13]] to <vscale x 8 x double>*
-; CHECK-NEXT:    store <vscale x 8 x double> [[TMP11]], <vscale x 8 x double>* [[TMP14]], align 8, !tbaa [[TBAA2]]
-; CHECK-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 8
-; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP16]]
-; CHECK-NEXT:    [[TMP17:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK-NEXT:    br i1 [[TMP17]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP6:![0-9]+]]
+; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, ptr [[DX:%.*]], i64 [[TMP4]]
+; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds double, ptr [[TMP5]], i32 0
+; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x double>, ptr [[TMP6]], align 8, !tbaa [[TBAA2:![0-9]+]]
+; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds double, ptr [[DY:%.*]], i64 [[TMP4]]
+; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, ptr [[TMP7]], i32 0
+; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 8 x double>, ptr [[TMP8]], align 8, !tbaa [[TBAA2]]
+; CHECK-NEXT:    [[TMP9:%.*]] = fadd <vscale x 8 x double> [[WIDE_LOAD]], [[WIDE_LOAD1]]
+; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds double, ptr [[DZ:%.*]], i64 [[TMP4]]
+; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds double, ptr [[TMP10]], i32 0
+; CHECK-NEXT:    store <vscale x 8 x double> [[TMP9]], ptr [[TMP11]], align 8, !tbaa [[TBAA2]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = mul i64 [[TMP12]], 8
+; CHECK-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP13]]
+; CHECK-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP6:![0-9]+]]
 ; CHECK:       middle.block:
 ; CHECK-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -55,16 +52,16 @@ define dso_local void @vfadd64(double* noalias nocapture %dz, double* noalias no
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
-; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[DX]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP18:%.*]] = load double, double* [[ARRAYIDX]], align 8, !tbaa [[TBAA2]]
-; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[DY]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP19:%.*]] = load double, double* [[ARRAYIDX2]], align 8, !tbaa [[TBAA2]]
-; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP18]], [[TMP19]]
-; CHECK-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds double, double* [[DZ]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    store double [[ADD]], double* [[ARRAYIDX4]], align 8, !tbaa [[TBAA2]]
+; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, ptr [[DX]], i64 [[INDVARS_IV]]
+; CHECK-NEXT:    [[TMP15:%.*]] = load double, ptr [[ARRAYIDX]], align 8, !tbaa [[TBAA2]]
+; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, ptr [[DY]], i64 [[INDVARS_IV]]
+; CHECK-NEXT:    [[TMP16:%.*]] = load double, ptr [[ARRAYIDX2]], align 8, !tbaa [[TBAA2]]
+; CHECK-NEXT:    [[ADD:%.*]] = fadd double [[TMP15]], [[TMP16]]
+; CHECK-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds double, ptr [[DZ]], i64 [[INDVARS_IV]]
+; CHECK-NEXT:    store double [[ADD]], ptr [[ARRAYIDX4]], align 8, !tbaa [[TBAA2]]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
+; CHECK-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
 ; CHECK:       for.end.loopexit:
 ; CHECK-NEXT:    br label [[FOR_END]]
 ; CHECK:       for.end:
@@ -87,23 +84,20 @@ define dso_local void @vfadd64(double* noalias nocapture %dz, double* noalias no
 ; CHECK1:       vector.body:
 ; CHECK1-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[VECTOR_PH]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
 ; CHECK1-NEXT:    [[TMP2:%.*]] = add i64 [[INDEX]], 0
-; CHECK1-NEXT:    [[TMP3:%.*]] = getelementptr inbounds double, double* [[DX:%.*]], i64 [[TMP2]]
-; CHECK1-NEXT:    [[TMP4:%.*]] = getelementptr inbounds double, double* [[TMP3]], i32 0
-; CHECK1-NEXT:    [[TMP5:%.*]] = bitcast double* [[TMP4]] to <vscale x 1 x double>*
-; CHECK1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP5]], align 8, !tbaa [[TBAA2:![0-9]+]]
-; CHECK1-NEXT:    [[TMP6:%.*]] = getelementptr inbounds double, double* [[DY:%.*]], i64 [[TMP2]]
-; CHECK1-NEXT:    [[TMP7:%.*]] = getelementptr inbounds double, double* [[TMP6]], i32 0
-; CHECK1-NEXT:    [[TMP8:%.*]] = bitcast double* [[TMP7]] to <vscale x 1 x double>*
-; CHECK1-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x double>, <vscale x 1 x double>* [[TMP8]], align 8, !tbaa [[TBAA2]]
-; CHECK1-NEXT:    [[TMP9:%.*]] = fadd <vscale x 1 x double> [[WIDE_LOAD]], [[WIDE_LOAD1]]
-; CHECK1-NEXT:    [[TMP10:%.*]] = getelementptr inbounds double, double* [[DZ:%.*]], i64 [[TMP2]]
-; CHECK1-NEXT:    [[TMP11:%.*]] = getelementptr inbounds double, double* [[TMP10]], i32 0
-; CHECK1-NEXT:    [[TMP12:%.*]] = bitcast double* [[TMP11]] to <vscale x 1 x double>*
-; CHECK1-NEXT:    store <vscale x 1 x double> [[TMP9]], <vscale x 1 x double>* [[TMP12]], align 8, !tbaa [[TBAA2]]
-; CHECK1-NEXT:    [[TMP13:%.*]] = call i64 @llvm.vscale.i64()
-; CHECK1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP13]]
-; CHECK1-NEXT:    [[TMP14:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
-; CHECK1-NEXT:    br i1 [[TMP14]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP6:![0-9]+]]
+; CHECK1-NEXT:    [[TMP3:%.*]] = getelementptr inbounds double, ptr [[DX:%.*]], i64 [[TMP2]]
+; CHECK1-NEXT:    [[TMP4:%.*]] = getelementptr inbounds double, ptr [[TMP3]], i32 0
+; CHECK1-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x double>, ptr [[TMP4]], align 8, !tbaa [[TBAA2:![0-9]+]]
+; CHECK1-NEXT:    [[TMP5:%.*]] = getelementptr inbounds double, ptr [[DY:%.*]], i64 [[TMP2]]
+; CHECK1-NEXT:    [[TMP6:%.*]] = getelementptr inbounds double, ptr [[TMP5]], i32 0
+; CHECK1-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x double>, ptr [[TMP6]], align 8, !tbaa [[TBAA2]]
+; CHECK1-NEXT:    [[TMP7:%.*]] = fadd <vscale x 1 x double> [[WIDE_LOAD]], [[WIDE_LOAD1]]
+; CHECK1-NEXT:    [[TMP8:%.*]] = getelementptr inbounds double, ptr [[DZ:%.*]], i64 [[TMP2]]
+; CHECK1-NEXT:    [[TMP9:%.*]] = getelementptr inbounds double, ptr [[TMP8]], i32 0
+; CHECK1-NEXT:    store <vscale x 1 x double> [[TMP7]], ptr [[TMP9]], align 8, !tbaa [[TBAA2]]
+; CHECK1-NEXT:    [[TMP10:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK1-NEXT:    [[INDEX_NEXT]] = add nuw i64 [[INDEX]], [[TMP10]]
+; CHECK1-NEXT:    [[TMP11:%.*]] = icmp eq i64 [[INDEX_NEXT]], [[N_VEC]]
+; CHECK1-NEXT:    br i1 [[TMP11]], label [[MIDDLE_BLOCK:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP6:![0-9]+]]
 ; CHECK1:       middle.block:
 ; CHECK1-NEXT:    [[CMP_N:%.*]] = icmp eq i64 [[WIDE_TRIP_COUNT]], [[N_VEC]]
 ; CHECK1-NEXT:    br i1 [[CMP_N]], label [[FOR_END_LOOPEXIT:%.*]], label [[SCALAR_PH]]
@@ -112,16 +106,16 @@ define dso_local void @vfadd64(double* noalias nocapture %dz, double* noalias no
 ; CHECK1-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK1:       for.body:
 ; CHECK1-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
-; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, double* [[DX]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP15:%.*]] = load double, double* [[ARRAYIDX]], align 8, !tbaa [[TBAA2]]
-; CHECK1-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, double* [[DY]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    [[TMP16:%.*]] = load double, double* [[ARRAYIDX2]], align 8, !tbaa [[TBAA2]]
-; CHECK1-NEXT:    [[ADD:%.*]] = fadd double [[TMP15]], [[TMP16]]
-; CHECK1-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds double, double* [[DZ]], i64 [[INDVARS_IV]]
-; CHECK1-NEXT:    store double [[ADD]], double* [[ARRAYIDX4]], align 8, !tbaa [[TBAA2]]
+; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds double, ptr [[DX]], i64 [[INDVARS_IV]]
+; CHECK1-NEXT:    [[TMP12:%.*]] = load double, ptr [[ARRAYIDX]], align 8, !tbaa [[TBAA2]]
+; CHECK1-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds double, ptr [[DY]], i64 [[INDVARS_IV]]
+; CHECK1-NEXT:    [[TMP13:%.*]] = load double, ptr [[ARRAYIDX2]], align 8, !tbaa [[TBAA2]]
+; CHECK1-NEXT:    [[ADD:%.*]] = fadd double [[TMP12]], [[TMP13]]
+; CHECK1-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds double, ptr [[DZ]], i64 [[INDVARS_IV]]
+; CHECK1-NEXT:    store double [[ADD]], ptr [[ARRAYIDX4]], align 8, !tbaa [[TBAA2]]
 ; CHECK1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK1-NEXT:    [[EXITCOND:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[WIDE_TRIP_COUNT]]
-; CHECK1-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
+; CHECK1-NEXT:    br i1 [[EXITCOND]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP9:![0-9]+]]
 ; CHECK1:       for.end.loopexit:
 ; CHECK1-NEXT:    br label [[FOR_END]]
 ; CHECK1:       for.end:

@@ -41,6 +41,11 @@ bool OnlyOnce();
 }; // namespace test
 }; // namespace gwp_asan
 
+char *AllocateMemory(gwp_asan::GuardedPoolAllocator &GPA);
+void DeallocateMemory(gwp_asan::GuardedPoolAllocator &GPA, void *Ptr);
+void DeallocateMemory2(gwp_asan::GuardedPoolAllocator &GPA, void *Ptr);
+void TouchMemory(void *Ptr);
+
 class DefaultGuardedPoolAllocator : public Test {
 public:
   void SetUp() override {

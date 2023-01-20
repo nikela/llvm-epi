@@ -1352,7 +1352,7 @@ let HasMergeOperand = 0 in
 
 let HasMask = 0, EPIRVVHeader = 1,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, b, mask, vl) \
-        vmerge_vvm_${Type}${LMul}((mask), (a), (b), (vl))}] in {
+        vmerge_vvm_${Type}${LMul}((a), (b), (mask), (vl))}] in {
 def vmerge : EPIBinMaskInBuiltin<"v", "vvvm", "csil">;
 def vfmerge : EPIBinMaskInBuiltin<"v", "vvvm", "fd">;
 }
@@ -1673,7 +1673,7 @@ def vslide1down : EPIVecScalarBuiltin<"v", "vvu", "csilfd">;
 
 let HasMask = 0, EPIRVVHeader = 1,
     CompatibilityCode = [{#define __builtin_epi_${FullName}(a, mask, vl) \
-        ${Name}_vm_${Type}${LMul}((mask), vundefined_${Type}${LMul}(), (a), (vl))}] in {
+        ${Name}_vm_${Type}${LMul}(vundefined_${Type}${LMul}(), (a), (mask), (vl))}] in {
 def vcompress : EPIBinBuiltin<"v", "vvm", "csilfd">;
 }
 

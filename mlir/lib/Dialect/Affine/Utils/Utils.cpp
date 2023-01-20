@@ -21,10 +21,11 @@
 #include "mlir/Dialect/Func/IR/FuncOps.h"
 #include "mlir/Dialect/MemRef/IR/MemRef.h"
 #include "mlir/IR/AffineExprVisitor.h"
-#include "mlir/IR/BlockAndValueMapping.h"
 #include "mlir/IR/Dominance.h"
+#include "mlir/IR/IRMapping.h"
 #include "mlir/IR/IntegerSet.h"
 #include "mlir/Transforms/GreedyPatternRewriteDriver.h"
+#include <optional>
 
 #define DEBUG_TYPE "affine-utils"
 
@@ -216,10 +217,9 @@ mlir::Value mlir::expandAffineExpr(OpBuilder &builder, Location loc,
 
 /// Create a sequence of operations that implement the `affineMap` applied to
 /// the given `operands` (as it it were an AffineApplyOp).
-Optional<SmallVector<Value, 8>> mlir::expandAffineMap(OpBuilder &builder,
-                                                      Location loc,
-                                                      AffineMap affineMap,
-                                                      ValueRange operands) {
+std::optional<SmallVector<Value, 8>>
+mlir::expandAffineMap(OpBuilder &builder, Location loc, AffineMap affineMap,
+                      ValueRange operands) {
   auto numDims = affineMap.getNumDims();
   auto expanded = llvm::to_vector<8>(
       llvm::map_range(affineMap.getResults(),
@@ -288,7 +288,7 @@ static AffineIfOp hoistAffineIfOp(AffineIfOp ifOp, Operation *hoistOverOp) {
   // branch while promoting its then block, and analogously drop the 'then'
   // block of the original 'if' from the 'else' branch while promoting its else
   // block.
-  BlockAndValueMapping operandMap;
+  IRMapping operandMap;
   OpBuilder b(hoistOverOp);
   auto hoistedIfOp = b.create<AffineIfOp>(ifOp.getLoc(), ifOp.getIntegerSet(),
                                           ifOp.getOperands(),
@@ -1816,7 +1816,7 @@ MemRefType mlir::normalizeMemRefType(MemRefType memrefType,
       newShape[d] = ShapedType::kDynamic;
     } else {
       // The lower bound for the shape is always zero.
-      Optional<int64_t> ubConst =
+      std::optional<int64_t> ubConst =
           fac.getConstantBound64(IntegerPolyhedron::UB, d);
       // For a static memref and an affine map with no symbols, this is
       // always bounded. However, when we have symbols, we may not be able to

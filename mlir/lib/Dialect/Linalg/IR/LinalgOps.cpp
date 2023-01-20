@@ -39,6 +39,7 @@
 #include "llvm/Support/FormatVariadic.h"
 #include "llvm/Support/MathExtras.h"
 #include "llvm/Support/raw_ostream.h"
+#include <optional>
 
 using namespace mlir;
 using namespace mlir::linalg;
@@ -94,7 +95,7 @@ static void fillStructuredOpRegion(OpBuilder &opBuilder, Region &region,
 /// The body of the operation is filled using `regionBuilder`. All ods-gen
 /// created structured operations use the method to implement their builders.
 static void buildStructuredOp(OpBuilder &b, OperationState &state,
-                              llvm::Optional<TypeRange> resultTensorTypes,
+                              std::optional<TypeRange> resultTensorTypes,
                               ValueRange inputs, ValueRange outputs,
                               ArrayRef<NamedAttribute> attributes,
                               RegionBuilderFn regionBuilder) {
@@ -463,36 +464,6 @@ struct FoldFillWithTensorReshape : OpRewritePattern<TensorReshapeOp> {
   }
 };
 
-/// Swap extract_slice(fill) to fill(extract_slice).
-///
-/// Only swap the two ops if the extract_slice is the only user of the fill.
-struct SwapExtractSliceOfFill : OpRewritePattern<tensor::ExtractSliceOp> {
-  using OpRewritePattern<tensor::ExtractSliceOp>::OpRewritePattern;
-  LogicalResult matchAndRewrite(tensor::ExtractSliceOp extractSliceOp,
-                                PatternRewriter &rewriter) const override {
-    auto oldFill = extractSliceOp.getSource().getDefiningOp<FillOp>();
-    if (!oldFill)
-      return failure();
-    // Only swap the ops if there is no other user of the fill.
-    if (!extractSliceOp.getSource().hasOneUse())
-      return failure();
-    // Extract from the old fill's source.
-    rewriter.updateRootInPlace(extractSliceOp, [&]() {
-      extractSliceOp.getSourceMutable().assign(oldFill.output());
-    });
-    // Create a new fill and remove the old one.
-    rewriter.setInsertionPointAfter(extractSliceOp);
-    auto newFill =
-        rewriter.create<FillOp>(oldFill.getLoc(), ValueRange{oldFill.value()},
-                                ValueRange{extractSliceOp.getResult()});
-    rewriter.eraseOp(oldFill);
-    // Use the new fill instead of the extract_slice.
-    rewriter.replaceAllUsesExcept(extractSliceOp.getResult(),
-                                  newFill.getResult(0), newFill);
-    return success();
-  }
-};
-
 /// Fold tensor.pad(linalg.fill) into linalg.fill if the padding value and the
 /// filling value are the same.
 struct FoldFillWithPad final : public OpRewritePattern<tensor::PadOp> {
@@ -637,7 +608,7 @@ void FillOp::getCanonicalizationPatterns(RewritePatternSet &results,
   results
       .add<FoldFillWithPad, FoldFillWithTensorReshape<tensor::CollapseShapeOp>,
            FoldFillWithTensorReshape<tensor::ExpandShapeOp>,
-           FoldInsertPadIntoFill, SwapExtractSliceOfFill>(context);
+           FoldInsertPadIntoFill>(context);
 }
 
 //===----------------------------------------------------------------------===//
@@ -1796,7 +1767,7 @@ LogicalResult IndexOp::verify() {
 #define GET_OP_CLASSES
 #include "mlir/Dialect/Linalg/IR/LinalgStructuredOps.cpp.inc"
 
-AffineMap mlir::linalg::extractOrIdentityMap(Optional<AffineMap> maybeMap,
+AffineMap mlir::linalg::extractOrIdentityMap(std::optional<AffineMap> maybeMap,
                                              unsigned rank,
                                              MLIRContext *context) {
   if (maybeMap)

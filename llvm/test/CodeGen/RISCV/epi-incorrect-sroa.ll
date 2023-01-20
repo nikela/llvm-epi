@@ -13,28 +13,28 @@ define dso_local void @test_vmfirst() #0 {
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp eq i64 [[TMP2]], -1
 ; CHECK-NEXT:    br i1 [[CMP]], label [[IF_END:%.*]], label [[IF_ELSE:%.*]]
 ; CHECK:       if.else:
-; CHECK-NEXT:    call void @abort() #5
+; CHECK-NEXT:    call void @abort() #[[ATTR5:[0-9]+]]
 ; CHECK-NEXT:    unreachable
 ; CHECK:       if.end:
-; CHECK-NEXT:    [[TMP3:%.*]] = bitcast [128 x i32]* [[A]] to i8*
-; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 512, i8* [[TMP3]]) #6
-; CHECK-NEXT:    [[ARRAYDECAY:%.*]] = getelementptr inbounds [128 x i32], [128 x i32]* [[A]], i64 0, i64 0
-; CHECK-NEXT:    [[TMP4:%.*]] = bitcast i32* [[ARRAYDECAY]] to i8*
-; CHECK-NEXT:    call void @llvm.memset.p0i8.i64(i8* align 4 [[TMP4]], i8 0, i64 512, i1 false)
-; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds [128 x i32], [128 x i32]* [[A]], i64 0, i64 0
-; CHECK-NEXT:    store i32 2, i32* [[ARRAYIDX]], align 4, !tbaa !2
-; CHECK-NEXT:    [[ARRAYDECAY1:%.*]] = getelementptr inbounds [128 x i32], [128 x i32]* [[A]], i64 0, i64 0
-; CHECK-NEXT:    [[TMP5:%.*]] = bitcast i32* [[ARRAYDECAY1]] to <vscale x 2 x i1>*
-; CHECK-NEXT:    [[TMP6:%.*]] = load <vscale x 2 x i1>, <vscale x 2 x i1>* [[TMP5]], align 4
+; CHECK-NEXT:    [[TMP3:%.*]] = bitcast ptr [[A]] to ptr
+; CHECK-NEXT:    call void @llvm.lifetime.start.p0(i64 512, ptr [[TMP3]]) #[[ATTR6:[0-9]+]]
+; CHECK-NEXT:    [[ARRAYDECAY:%.*]] = getelementptr inbounds [128 x i32], ptr [[A]], i64 0, i64 0
+; CHECK-NEXT:    [[TMP4:%.*]] = bitcast ptr [[ARRAYDECAY]] to ptr
+; CHECK-NEXT:    call void @llvm.memset.p0.i64(ptr align 4 [[TMP4]], i8 0, i64 512, i1 false)
+; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds [128 x i32], ptr [[A]], i64 0, i64 0
+; CHECK-NEXT:    store i32 2, ptr [[ARRAYIDX]], align 4, !tbaa [[TBAA2:![0-9]+]]
+; CHECK-NEXT:    [[ARRAYDECAY1:%.*]] = getelementptr inbounds [128 x i32], ptr [[A]], i64 0, i64 0
+; CHECK-NEXT:    [[TMP5:%.*]] = bitcast ptr [[ARRAYDECAY1]] to ptr
+; CHECK-NEXT:    [[TMP6:%.*]] = load <vscale x 2 x i1>, ptr [[TMP5]], align 4
 ; CHECK-NEXT:    [[TMP7:%.*]] = call i64 @llvm.epi.vmfirst.nxv2i1(<vscale x 2 x i1> [[TMP6]], i64 128)
 ; CHECK-NEXT:    [[CMP2:%.*]] = icmp eq i64 [[TMP7]], 0
 ; CHECK-NEXT:    br i1 [[CMP2]], label [[IF_END5:%.*]], label [[IF_ELSE4:%.*]]
 ; CHECK:       if.else4:
-; CHECK-NEXT:    call void @abort() #5
+; CHECK-NEXT:    call void @abort() #[[ATTR5]]
 ; CHECK-NEXT:    unreachable
 ; CHECK:       if.end5:
-; CHECK-NEXT:    [[TMP8:%.*]] = bitcast [128 x i32]* [[A]] to i8*
-; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 512, i8* [[TMP8]]) #6
+; CHECK-NEXT:    [[TMP8:%.*]] = bitcast ptr [[A]] to ptr
+; CHECK-NEXT:    call void @llvm.lifetime.end.p0(i64 512, ptr [[TMP8]]) #[[ATTR6]]
 ; CHECK-NEXT:    ret void
 ;
 entry:

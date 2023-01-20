@@ -32,6 +32,7 @@
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/StringSwitch.h"
+#include <optional>
 
 #include <numeric>
 
@@ -194,13 +195,11 @@ struct TestInlinerInterface : public DialectInlinerInterface {
     // Don't allow inlining calls that are marked `noinline`.
     return !call->hasAttr("noinline");
   }
-  bool isLegalToInline(Region *, Region *, bool,
-                       BlockAndValueMapping &) const final {
+  bool isLegalToInline(Region *, Region *, bool, IRMapping &) const final {
     // Inlining into test dialect regions is legal.
     return true;
   }
-  bool isLegalToInline(Operation *, Region *, bool,
-                       BlockAndValueMapping &) const final {
+  bool isLegalToInline(Operation *, Region *, bool, IRMapping &) const final {
     return true;
   }
 
@@ -957,7 +956,7 @@ ParseResult PrettyPrintedRegionOp::parse(OpAsmParser &parser,
   StringAttr innerOpName = parseOpNameInfo->getIdentifier();
 
   FunctionType opFntype;
-  Optional<Location> explicitLoc;
+  std::optional<Location> explicitLoc;
   if (parser.parseKeyword("end") || parser.parseColon() ||
       parser.parseType(opFntype) ||
       parser.parseOptionalLocationSpecifier(explicitLoc))
@@ -1060,7 +1059,7 @@ void PolyForOp::getAsmBlockArgumentNames(Region &region,
 //===----------------------------------------------------------------------===//
 
 static ParseResult parseOptionalLoc(OpAsmParser &p, Attribute &loc) {
-  Optional<Location> result;
+  std::optional<Location> result;
   SMLoc sourceLoc = p.getCurrentLocation();
   if (p.parseOptionalLocationSpecifier(result))
     return failure();

@@ -35,6 +35,7 @@
 #include "llvm/Support/SourceMgr.h"
 
 #include <numeric>
+#include <optional>
 
 using namespace mlir;
 using namespace mlir::LLVM;
@@ -100,16 +101,6 @@ static Type getI1SameShape(Type type) {
 //===----------------------------------------------------------------------===//
 // Printing, parsing and builder for LLVM::CmpOp.
 //===----------------------------------------------------------------------===//
-
-void ICmpOp::build(OpBuilder &builder, OperationState &result,
-                   ICmpPredicate predicate, Value lhs, Value rhs) {
-  build(builder, result, getI1SameShape(lhs.getType()), predicate, lhs, rhs);
-}
-
-void FCmpOp::build(OpBuilder &builder, OperationState &result,
-                   FCmpPredicate predicate, Value lhs, Value rhs) {
-  build(builder, result, getI1SameShape(lhs.getType()), predicate, lhs, rhs);
-}
 
 void ICmpOp::print(OpAsmPrinter &p) {
   p << " \"" << stringifyICmpPredicate(getPredicate()) << "\" " << getOperand(0)
@@ -218,7 +209,7 @@ ParseResult AllocaOp::parse(OpAsmParser &parser, OperationState &result) {
       parser.getCurrentLocation(&trailingTypeLoc) || parser.parseType(type))
     return failure();
 
-  Optional<NamedAttribute> alignmentAttr =
+  std::optional<NamedAttribute> alignmentAttr =
       result.attributes.getNamed("alignment");
   if (alignmentAttr.has_value()) {
     auto alignmentInt = alignmentAttr->getValue().dyn_cast<IntegerAttr>();
@@ -791,8 +782,8 @@ void LoadOp::print(OpAsmPrinter &p) {
 // Extract the pointee type from the LLVM pointer type wrapped in MLIR. Return
 // the resulting type if any, null type if opaque pointers are used, and
 // std::nullopt if the given type is not the pointer type.
-static Optional<Type> getLoadStoreElementType(OpAsmParser &parser, Type type,
-                                              SMLoc trailingTypeLoc) {
+static std::optional<Type>
+getLoadStoreElementType(OpAsmParser &parser, Type type, SMLoc trailingTypeLoc) {
   auto llvmTy = type.dyn_cast<LLVM::LLVMPointerType>();
   if (!llvmTy) {
     parser.emitError(trailingTypeLoc, "expected LLVM pointer type");
@@ -817,7 +808,7 @@ ParseResult LoadOp::parse(OpAsmParser &parser, OperationState &result) {
       parser.resolveOperand(addr, type, result.operands))
     return failure();
 
-  Optional<Type> elemTy =
+  std::optional<Type> elemTy =
       getLoadStoreElementType(parser, type, trailingTypeLoc);
   if (!elemTy)
     return failure();
@@ -886,7 +877,7 @@ ParseResult StoreOp::parse(OpAsmParser &parser, OperationState &result) {
     if (parser.parseType(type))
       return failure();
   } else {
-    Optional<Type> maybeOperandType =
+    std::optional<Type> maybeOperandType =
         getLoadStoreElementType(parser, type, trailingTypeLoc);
     if (!maybeOperandType)
       return failure();
@@ -1208,6 +1199,10 @@ LogicalResult CallOp::verifySymbolUses(SymbolTableCollection &symbolTable) {
     if (!ptrType)
       return emitOpError("indirect call expects a pointer as callee: ")
              << ptrType;
+
+    if (ptrType.isOpaque())
+      return success();
+
     fnType = ptrType.getElementType();
   } else {
     Operation *callee =
@@ -1370,20 +1365,6 @@ ParseResult CallOp::parse(OpAsmParser &parser, OperationState &result) {
   }
 
   return success();
-}
-
-//===----------------------------------------------------------------------===//
-// ExtractElementOp
-//===----------------------------------------------------------------------===//
-
-/// Expects vector to be an LLVM vector type and position to be an integer type.
-void LLVM::ExtractElementOp::build(OpBuilder &b, OperationState &result,
-                                   Value vector, Value position,
-                                   ArrayRef<NamedAttribute> attrs) {
-  auto vectorType = vector.getType();
-  auto llvmType = LLVM::getVectorElementType(vectorType);
-  build(b, result, llvmType, vector, position);
-  result.addAttributes(attrs);
 }
 
 //===----------------------------------------------------------------------===//
@@ -2016,7 +1997,7 @@ void LLVMFuncOp::build(OpBuilder &builder, OperationState &result,
                        bool dsoLocal, CConv cconv,
                        ArrayRef<NamedAttribute> attrs,
                        ArrayRef<DictionaryAttr> argAttrs,
-                       Optional<uint64_t> functionEntryCount) {
+                       std::optional<uint64_t> functionEntryCount) {
   result.addRegion();
   result.addAttribute(SymbolTable::getSymbolAttrName(),
                       builder.getStringAttr(name));
@@ -2367,7 +2348,7 @@ ParseResult AtomicRMWOp::parse(OpAsmParser &parser, OperationState &result) {
 LogicalResult AtomicRMWOp::verify() {
   auto ptrType = getPtr().getType().cast<LLVM::LLVMPointerType>();
   auto valType = getVal().getType();
-  if (valType != ptrType.getElementType())
+  if (!ptrType.isOpaque() && valType != ptrType.getElementType())
     return emitOpError("expected LLVM IR element type for operand #0 to "
                        "match type for operand #1");
   auto resType = getRes().getType();
@@ -2449,7 +2430,9 @@ LogicalResult AtomicCmpXchgOp::verify() {
     return emitOpError("expected LLVM IR pointer type for operand #0");
   auto cmpType = getCmp().getType();
   auto valType = getVal().getType();
-  if (cmpType != ptrType.getElementType() || cmpType != valType)
+  if (cmpType != valType)
+    return emitOpError("expected both value operands to have the same type");
+  if (!ptrType.isOpaque() && cmpType != ptrType.getElementType())
     return emitOpError("expected LLVM IR element type for operand #0 to "
                        "match type for all other operands");
   auto intType = valType.dyn_cast<IntegerType>();
@@ -2592,6 +2575,45 @@ OpFoldResult LLVM::GEPOp::fold(FoldAdaptor adaptor) {
 //===----------------------------------------------------------------------===//
 // Utilities for LLVM::MetadataOp
 //===----------------------------------------------------------------------===//
+
+void MetadataOp::build(OpBuilder &builder, OperationState &result,
+                       StringRef symName, bool createBodyBlock,
+                       ArrayRef<NamedAttribute> attributes) {
+  result.addAttribute(getSymNameAttrName(result.name),
+                      builder.getStringAttr(symName));
+  result.attributes.append(attributes.begin(), attributes.end());
+  Region *body = result.addRegion();
+  if (createBodyBlock)
+    body->emplaceBlock();
+}
+
+ParseResult MetadataOp::parse(OpAsmParser &parser, OperationState &result) {
+  StringAttr symName;
+  if (parser.parseSymbolName(symName, getSymNameAttrName(result.name),
+                             result.attributes) ||
+      parser.parseOptionalAttrDictWithKeyword(result.attributes))
+    return failure();
+
+  Region *bodyRegion = result.addRegion();
+  if (parser.parseRegion(*bodyRegion))
+    return failure();
+
+  // If the region appeared to be empty to parseRegion(),
+  // add the body block explicitly.
+  if (bodyRegion->empty())
+    bodyRegion->emplaceBlock();
+
+  return success();
+}
+
+void MetadataOp::print(OpAsmPrinter &printer) {
+  printer << ' ';
+  printer.printSymbolName(getSymName());
+  printer.printOptionalAttrDictWithKeyword((*this)->getAttrs(),
+                                           {getSymNameAttrName().getValue()});
+  printer << ' ';
+  printer.printRegion(getBody());
+}
 
 namespace {
 // A node of the TBAA graph.
@@ -2810,10 +2832,10 @@ struct LLVMOpAsmDialectInterface : public OpAsmDialectInterface {
 
   AliasResult getAlias(Attribute attr, raw_ostream &os) const override {
     return TypeSwitch<Attribute, AliasResult>(attr)
-        .Case<DIBasicTypeAttr, DICompileUnitAttr, DICompositeTypeAttr,
-              DIDerivedTypeAttr, DIFileAttr, DILexicalBlockAttr,
-              DILexicalBlockFileAttr, DILocalVariableAttr, DISubprogramAttr,
-              DISubroutineTypeAttr>([&](auto attr) {
+        .Case<DIVoidResultTypeAttr, DIBasicTypeAttr, DICompileUnitAttr,
+              DICompositeTypeAttr, DIDerivedTypeAttr, DIFileAttr,
+              DILexicalBlockAttr, DILexicalBlockFileAttr, DILocalVariableAttr,
+              DISubprogramAttr, DISubroutineTypeAttr>([&](auto attr) {
           os << decltype(attr)::getMnemonic();
           return AliasResult::OverridableAlias;
         })
@@ -2831,8 +2853,7 @@ struct LLVMInlinerInterface : public DialectInlinerInterface {
   using DialectInlinerInterface::DialectInlinerInterface;
 
   /// Conservative allowlist-based inlining of operations supported so far.
-  bool isLegalToInline(Operation *op, Region *, bool,
-                       BlockAndValueMapping &) const final {
+  bool isLegalToInline(Operation *op, Region *, bool, IRMapping &) const final {
     if (isPure(op))
       return true;
     return llvm::TypeSwitch<Operation *, bool>(op)
@@ -2849,6 +2870,21 @@ struct LLVMInlinerInterface : public DialectInlinerInterface {
           return true;
         })
         .Default([](auto) { return false; });
+  }
+  /// Handle the given inlined terminator by replacing it with a new operation
+  /// as necessary. Required when the region has only one block.
+  void handleTerminator(Operation *op,
+                        ArrayRef<Value> valuesToRepl) const final {
+
+    // Only handle "llvm.return" here.
+    auto returnOp = dyn_cast<ReturnOp>(op);
+    if (!returnOp)
+      return;
+
+    // Replace the values directly with the return operands.
+    assert(returnOp.getNumOperands() == valuesToRepl.size());
+    for (const auto &it : llvm::enumerate(returnOp.getOperands()))
+      valuesToRepl[it.index()].replaceAllUsesWith(it.value());
   }
 };
 } // end anonymous namespace
@@ -2917,7 +2953,7 @@ LogicalResult LLVMDialect::verifyOperationAttribute(Operation *op,
     if (!loopAttr)
       return op->emitOpError() << "expected '" << LLVMDialect::getLoopAttrName()
                                << "' to be a dictionary attribute";
-    Optional<NamedAttribute> parallelAccessGroup =
+    std::optional<NamedAttribute> parallelAccessGroup =
         loopAttr.getNamed(LLVMDialect::getParallelAccessAttrName());
     if (parallelAccessGroup) {
       auto accessGroups = parallelAccessGroup->getValue().dyn_cast<ArrayAttr>();
@@ -2946,7 +2982,7 @@ LogicalResult LLVMDialect::verifyOperationAttribute(Operation *op,
       }
     }
 
-    Optional<NamedAttribute> loopOptions =
+    std::optional<NamedAttribute> loopOptions =
         loopAttr.getNamed(LLVMDialect::getLoopOptionsAttrName());
     if (loopOptions && !loopOptions->getValue().isa<LoopOptionsAttr>())
       return op->emitOpError()

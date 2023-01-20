@@ -17,24 +17,6 @@
 #include "gwp_asan/crash_handler.h"
 #include "gwp_asan/tests/harness.h"
 
-// Optnone to ensure that the calls to these functions are not optimized away,
-// as we're looking for them in the backtraces.
-__attribute__((optnone)) static char *
-AllocateMemory(gwp_asan::GuardedPoolAllocator &GPA) {
-  return static_cast<char *>(GPA.allocate(1));
-}
-__attribute__((optnone)) static void
-DeallocateMemory(gwp_asan::GuardedPoolAllocator &GPA, void *Ptr) {
-  GPA.deallocate(Ptr);
-}
-__attribute__((optnone)) static void
-DeallocateMemory2(gwp_asan::GuardedPoolAllocator &GPA, void *Ptr) {
-  GPA.deallocate(Ptr);
-}
-__attribute__((optnone)) static void TouchMemory(void *Ptr) {
-  *(reinterpret_cast<volatile char *>(Ptr)) = 7;
-}
-
 void CheckOnlyOneGwpAsanCrash(const std::string &OutputBuffer) {
   const char *kGwpAsanErrorString = "GWP-ASan detected a memory error";
   size_t FirstIndex = OutputBuffer.find(kGwpAsanErrorString);
@@ -139,9 +121,12 @@ TEST_P(BacktraceGuardedPoolAllocator, OneDoubleFreeOneUseAfterFree) {
 // right hand side may not trap.
 TEST_P(BacktraceGuardedPoolAllocator, OneErrorReportPerSlot) {
   SCOPED_TRACE("");
+  std::vector<void *> Ptrs;
   for (size_t i = 0; i < GPA.getAllocatorState()->MaxSimultaneousAllocations;
        ++i) {
     void *Ptr = AllocateMemory(GPA);
+    ASSERT_NE(Ptr, nullptr);
+    Ptrs.push_back(Ptr);
     DeallocateMemory(GPA, Ptr);
     DeallocateMemory(GPA, Ptr);
     CheckOnlyOneGwpAsanCrash(GetOutputBuffer());
@@ -155,9 +140,12 @@ TEST_P(BacktraceGuardedPoolAllocator, OneErrorReportPerSlot) {
   }
 
   // All slots should have been used. No further errors should occur.
-  void *Ptr = AllocateMemory(GPA);
-  DeallocateMemory(GPA, Ptr);
-  DeallocateMemory(GPA, Ptr);
+  for (size_t i = 0; i < 100; ++i)
+    ASSERT_EQ(AllocateMemory(GPA), nullptr);
+  for (void *Ptr : Ptrs) {
+    DeallocateMemory(GPA, Ptr);
+    TouchMemory(Ptr);
+  }
   ASSERT_TRUE(GetOutputBuffer().empty());
 }
 

@@ -18,17 +18,17 @@ define dso_local signext i32 @xerbla_array(i8* nocapture readonly %srname_array,
 ; CHECK-LABEL: @xerbla_array(
 ; CHECK-NEXT:  entry:
 ; CHECK-NEXT:    [[SRNAME:%.*]] = alloca [33 x i8], align 1
-; CHECK-NEXT:    [[TMP0:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 0
-; CHECK-NEXT:    call void @llvm.lifetime.start.p0i8(i64 33, i8* nonnull [[TMP0]]) #[[ATTR6:[0-9]+]]
-; CHECK-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i64(i8* noundef nonnull align 1 dereferenceable(33) [[TMP0]], i8* noundef nonnull align 1 dereferenceable(33) getelementptr inbounds ([33 x i8], [33 x i8]* @__const.xerbla_array.srname, i64 0, i64 0), i64 33, i1 false)
+; CHECK-NEXT:    [[TMP0:%.*]] = getelementptr inbounds [33 x i8], ptr [[SRNAME]], i64 0, i64 0
+; CHECK-NEXT:    call void @llvm.lifetime.start.p0(i64 33, ptr nonnull [[TMP0]]) #[[ATTR5:[0-9]+]]
+; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef nonnull align 1 dereferenceable(33) [[TMP0]], ptr noundef nonnull align 1 dereferenceable(33) @__const.xerbla_array.srname, i64 33, i1 false)
 ; CHECK-NEXT:    [[CMP114:%.*]] = icmp sgt i32 [[SRNAME_LEN:%.*]], 0
 ; CHECK-NEXT:    br i1 [[CMP114]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END:%.*]]
 ; CHECK:       for.body.preheader:
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp slt i32 [[SRNAME_LEN]], 32
 ; CHECK-NEXT:    [[COND:%.*]] = select i1 [[CMP]], i32 [[SRNAME_LEN]], i32 32
-; CHECK-NEXT:    [[SRNAME16:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 0
+; CHECK-NEXT:    [[SRNAME16:%.*]] = getelementptr inbounds [33 x i8], ptr [[SRNAME]], i64 0, i64 0
 ; CHECK-NEXT:    [[TMP1:%.*]] = zext i32 [[COND]] to i64
-; CHECK-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 1 [[SRNAME16]], i8* align 1 [[SRNAME_ARRAY:%.*]], i64 [[TMP1]], i1 false)
+; CHECK-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr nonnull align 1 [[SRNAME16]], ptr align 1 [[SRNAME_ARRAY:%.*]], i64 [[TMP1]], i1 false)
 ; CHECK-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[TMP1]]
 ; CHECK-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP4:%.*]] = mul i64 [[TMP3]], 8
@@ -54,32 +54,32 @@ define dso_local signext i32 @xerbla_array(i8* nocapture readonly %srname_array,
 ; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[TMP1]]
-; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP7:![0-9]+]]
+; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
 ; CHECK:       for.end.loopexit:
 ; CHECK-NEXT:    [[PHI_CAST:%.*]] = zext i32 [[COND]] to i64
 ; CHECK-NEXT:    br label [[FOR_END]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    [[I_0_LCSSA:%.*]] = phi i64 [ [[PHI_CAST]], [[FOR_END_LOOPEXIT]] ], [ 0, [[ENTRY:%.*]] ]
-; CHECK-NEXT:    [[ARRAYIDX5:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 [[I_0_LCSSA]]
-; CHECK-NEXT:    store i8 0, i8* [[ARRAYIDX5]], align 1, !tbaa [[TBAA9:![0-9]+]]
-; CHECK-NEXT:    [[CALL:%.*]] = call signext i32 @xerbla(i8* nonnull [[TMP0]], i32* [[INFO:%.*]], i32 signext [[SRNAME_LEN]]) #[[ATTR6]]
-; CHECK-NEXT:    call void @llvm.lifetime.end.p0i8(i64 33, i8* nonnull [[TMP0]]) #[[ATTR6]]
+; CHECK-NEXT:    [[ARRAYIDX5:%.*]] = getelementptr inbounds [33 x i8], ptr [[SRNAME]], i64 0, i64 [[I_0_LCSSA]]
+; CHECK-NEXT:    store i8 0, ptr [[ARRAYIDX5]], align 1, !tbaa [[TBAA9:![0-9]+]]
+; CHECK-NEXT:    [[CALL:%.*]] = call signext i32 @xerbla(ptr nonnull [[TMP0]], ptr [[INFO:%.*]], i32 signext [[SRNAME_LEN]]) #[[ATTR5]]
+; CHECK-NEXT:    call void @llvm.lifetime.end.p0(i64 33, ptr nonnull [[TMP0]]) #[[ATTR5]]
 ; CHECK-NEXT:    ret i32 0
 ;
 ; CHECK1-LABEL: @xerbla_array(
 ; CHECK1-NEXT:  entry:
 ; CHECK1-NEXT:    [[SRNAME:%.*]] = alloca [33 x i8], align 1
-; CHECK1-NEXT:    [[TMP0:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 0
-; CHECK1-NEXT:    call void @llvm.lifetime.start.p0i8(i64 33, i8* nonnull [[TMP0]]) #[[ATTR6:[0-9]+]]
-; CHECK1-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i64(i8* noundef nonnull align 1 dereferenceable(33) [[TMP0]], i8* noundef nonnull align 1 dereferenceable(33) getelementptr inbounds ([33 x i8], [33 x i8]* @__const.xerbla_array.srname, i64 0, i64 0), i64 33, i1 false)
+; CHECK1-NEXT:    [[TMP0:%.*]] = getelementptr inbounds [33 x i8], ptr [[SRNAME]], i64 0, i64 0
+; CHECK1-NEXT:    call void @llvm.lifetime.start.p0(i64 33, ptr nonnull [[TMP0]]) #[[ATTR5:[0-9]+]]
+; CHECK1-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr noundef nonnull align 1 dereferenceable(33) [[TMP0]], ptr noundef nonnull align 1 dereferenceable(33) @__const.xerbla_array.srname, i64 33, i1 false)
 ; CHECK1-NEXT:    [[CMP114:%.*]] = icmp sgt i32 [[SRNAME_LEN:%.*]], 0
 ; CHECK1-NEXT:    br i1 [[CMP114]], label [[FOR_BODY_PREHEADER:%.*]], label [[FOR_END:%.*]]
 ; CHECK1:       for.body.preheader:
 ; CHECK1-NEXT:    [[CMP:%.*]] = icmp slt i32 [[SRNAME_LEN]], 32
 ; CHECK1-NEXT:    [[COND:%.*]] = select i1 [[CMP]], i32 [[SRNAME_LEN]], i32 32
-; CHECK1-NEXT:    [[SRNAME16:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 0
+; CHECK1-NEXT:    [[SRNAME16:%.*]] = getelementptr inbounds [33 x i8], ptr [[SRNAME]], i64 0, i64 0
 ; CHECK1-NEXT:    [[TMP1:%.*]] = zext i32 [[COND]] to i64
-; CHECK1-NEXT:    call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 1 [[SRNAME16]], i8* align 1 [[SRNAME_ARRAY:%.*]], i64 [[TMP1]], i1 false)
+; CHECK1-NEXT:    call void @llvm.memcpy.p0.p0.i64(ptr nonnull align 1 [[SRNAME16]], ptr align 1 [[SRNAME_ARRAY:%.*]], i64 [[TMP1]], i1 false)
 ; CHECK1-NEXT:    [[TMP2:%.*]] = sub i64 -1, [[TMP1]]
 ; CHECK1-NEXT:    [[TMP3:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP4:%.*]] = mul i64 [[TMP3]], 8
@@ -105,16 +105,16 @@ define dso_local signext i32 @xerbla_array(i8* nocapture readonly %srname_array,
 ; CHECK1-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[BC_RESUME_VAL]], [[SCALAR_PH]] ], [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ]
 ; CHECK1-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
 ; CHECK1-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], [[TMP1]]
-; CHECK1-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP7:![0-9]+]]
+; CHECK1-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT]], label [[FOR_BODY]], !llvm.loop [[LOOP8:![0-9]+]]
 ; CHECK1:       for.end.loopexit:
 ; CHECK1-NEXT:    [[PHI_CAST:%.*]] = zext i32 [[COND]] to i64
 ; CHECK1-NEXT:    br label [[FOR_END]]
 ; CHECK1:       for.end:
 ; CHECK1-NEXT:    [[I_0_LCSSA:%.*]] = phi i64 [ [[PHI_CAST]], [[FOR_END_LOOPEXIT]] ], [ 0, [[ENTRY:%.*]] ]
-; CHECK1-NEXT:    [[ARRAYIDX5:%.*]] = getelementptr inbounds [33 x i8], [33 x i8]* [[SRNAME]], i64 0, i64 [[I_0_LCSSA]]
-; CHECK1-NEXT:    store i8 0, i8* [[ARRAYIDX5]], align 1, !tbaa [[TBAA9:![0-9]+]]
-; CHECK1-NEXT:    [[CALL:%.*]] = call signext i32 @xerbla(i8* nonnull [[TMP0]], i32* [[INFO:%.*]], i32 signext [[SRNAME_LEN]]) #[[ATTR6]]
-; CHECK1-NEXT:    call void @llvm.lifetime.end.p0i8(i64 33, i8* nonnull [[TMP0]]) #[[ATTR6]]
+; CHECK1-NEXT:    [[ARRAYIDX5:%.*]] = getelementptr inbounds [33 x i8], ptr [[SRNAME]], i64 0, i64 [[I_0_LCSSA]]
+; CHECK1-NEXT:    store i8 0, ptr [[ARRAYIDX5]], align 1, !tbaa [[TBAA9:![0-9]+]]
+; CHECK1-NEXT:    [[CALL:%.*]] = call signext i32 @xerbla(ptr nonnull [[TMP0]], ptr [[INFO:%.*]], i32 signext [[SRNAME_LEN]]) #[[ATTR5]]
+; CHECK1-NEXT:    call void @llvm.lifetime.end.p0(i64 33, ptr nonnull [[TMP0]]) #[[ATTR5]]
 ; CHECK1-NEXT:    ret i32 0
 ;
 entry:

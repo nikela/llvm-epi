@@ -13,24 +13,6 @@
 #include "gwp_asan/crash_handler.h"
 #include "gwp_asan/tests/harness.h"
 
-// Optnone to ensure that the calls to these functions are not optimized away,
-// as we're looking for them in the backtraces.
-__attribute__((optnone)) static void *
-AllocateMemory(gwp_asan::GuardedPoolAllocator &GPA) {
-  return GPA.allocate(1);
-}
-__attribute__((optnone)) static void
-DeallocateMemory(gwp_asan::GuardedPoolAllocator &GPA, void *Ptr) {
-  GPA.deallocate(Ptr);
-}
-__attribute__((optnone)) static void
-DeallocateMemory2(gwp_asan::GuardedPoolAllocator &GPA, void *Ptr) {
-  GPA.deallocate(Ptr);
-}
-__attribute__((optnone)) static void TouchMemory(void *Ptr) {
-  *(reinterpret_cast<volatile char *>(Ptr)) = 7;
-}
-
 TEST_P(BacktraceGuardedPoolAllocatorDeathTest, DoubleFree) {
   void *Ptr = AllocateMemory(GPA);
   DeallocateMemory(GPA, Ptr);
