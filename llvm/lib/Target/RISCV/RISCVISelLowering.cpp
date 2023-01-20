@@ -1509,7 +1509,7 @@ bool RISCVTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
     Info.memVT = MVT::getVT(DataTy);
     Info.ptrVal = I.getArgOperand(0);
     Info.offset = 0;
-    Info.align = MaybeAlign(DL.getABITypeAlignment(DataTy));
+    Info.align = MaybeAlign(DL.getABITypeAlign(DataTy));
     Info.flags = MachineMemOperand::MOLoad;
     return true;
   }
@@ -1521,7 +1521,7 @@ bool RISCVTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
     Info.memVT = MVT::getVT(DataTy);
     Info.ptrVal = I.getArgOperand(1);
     Info.offset = 0;
-    Info.align = MaybeAlign(DL.getABITypeAlignment(DataTy));
+    Info.align = MaybeAlign(DL.getABITypeAlign(DataTy));
     Info.flags = MachineMemOperand::MOLoad;
     return true;
   }
@@ -1536,7 +1536,7 @@ bool RISCVTargetLowering::getTgtMemIntrinsic(IntrinsicInfo &Info,
     Info.memVT = MVT::getVT(DataTy);
     Info.ptrVal = I.getArgOperand(1);
     Info.offset = 0;
-    Info.align = MaybeAlign(DL.getABITypeAlignment(DataTy));
+    Info.align = MaybeAlign(DL.getABITypeAlign(DataTy));
     Info.flags = MachineMemOperand::MOStore;
     return true;
   }
@@ -2005,9 +2005,15 @@ static void translateSetCCForBranch(const SDLoc &DL, SDValue &LHS, SDValue &RHS,
       LHS.getOpcode() == ISD::AND && LHS.hasOneUse() &&
       isa<ConstantSDNode>(LHS.getOperand(1))) {
     uint64_t Mask = LHS.getConstantOperandVal(1);
-    if (isPowerOf2_64(Mask) && !isInt<12>(Mask)) {
-      CC = CC == ISD::SETEQ ? ISD::SETGE : ISD::SETLT;
-      unsigned ShAmt = LHS.getValueSizeInBits() - 1 - Log2_64(Mask);
+    if ((isPowerOf2_64(Mask) || isMask_64(Mask)) && !isInt<12>(Mask)) {
+      unsigned ShAmt = 0;
+      if (isPowerOf2_64(Mask)) {
+        CC = CC == ISD::SETEQ ? ISD::SETGE : ISD::SETLT;
+        ShAmt = LHS.getValueSizeInBits() - 1 - Log2_64(Mask);
+      } else {
+        ShAmt = LHS.getValueSizeInBits() - (64 - countLeadingZeros(Mask));
+      }
+
       LHS = LHS.getOperand(0);
       if (ShAmt != 0)
         LHS = DAG.getNode(ISD::SHL, DL, LHS.getValueType(), LHS,
@@ -2533,7 +2539,8 @@ getDefaultVLOps(uint64_t NumElts, MVT ContainerVT, SDLoc DL, SelectionDAG &DAG,
 
 // Gets the two common "VL" operands: an all-ones mask and the vector length.
 // VecVT is a vector type, either fixed-length or scalable, and ContainerVT is
-// the vector type that it is contained in.
+// the vector type that the fixed-length vector is contained in. Otherwise if
+// VecVT is scalable, then ContainerVT should be the same as VecVT.
 static std::pair<SDValue, SDValue>
 getDefaultVLOps(MVT VecVT, MVT ContainerVT, SDLoc DL, SelectionDAG &DAG,
                 const RISCVSubtarget &Subtarget) {
@@ -5688,75 +5695,74 @@ SDValue RISCVTargetLowering::lowerSELECT(SDValue Op, SelectionDAG &DAG) const {
     }
   }
 
+  // If the condition is not an integer SETCC which operates on XLenVT, we need
+  // to emit a RISCVISD::SELECT_CC comparing the condition to zero. i.e.:
+  // (select condv, truev, falsev)
+  // -> (riscvisd::select_cc condv, zero, setne, truev, falsev)
+  if (CondV.getOpcode() != ISD::SETCC ||
+      CondV.getOperand(0).getSimpleValueType() != XLenVT) {
+    SDValue Zero = DAG.getConstant(0, DL, XLenVT);
+    SDValue SetNE = DAG.getCondCode(ISD::SETNE);
+
+    SDValue Ops[] = {CondV, Zero, SetNE, TrueV, FalseV};
+
+    return DAG.getNode(RISCVISD::SELECT_CC, DL, VT, Ops);
+  }
+
   // If the CondV is the output of a SETCC node which operates on XLenVT inputs,
   // then merge the SETCC node into the lowered RISCVISD::SELECT_CC to take
   // advantage of the integer compare+branch instructions. i.e.:
   // (select (setcc lhs, rhs, cc), truev, falsev)
   // -> (riscvisd::select_cc lhs, rhs, cc, truev, falsev)
-  if (CondV.getOpcode() == ISD::SETCC &&
-      CondV.getOperand(0).getSimpleValueType() == XLenVT) {
-    SDValue LHS = CondV.getOperand(0);
-    SDValue RHS = CondV.getOperand(1);
-    ISD::CondCode CCVal = cast<CondCodeSDNode>(CondV.getOperand(2))->get();
+  SDValue LHS = CondV.getOperand(0);
+  SDValue RHS = CondV.getOperand(1);
+  ISD::CondCode CCVal = cast<CondCodeSDNode>(CondV.getOperand(2))->get();
 
-    // Special case for a select of 2 constants that have a diffence of 1.
-    // Normally this is done by DAGCombine, but if the select is introduced by
-    // type legalization or op legalization, we miss it. Restricting to SETLT
-    // case for now because that is what signed saturating add/sub need.
-    // FIXME: We don't need the condition to be SETLT or even a SETCC,
-    // but we would probably want to swap the true/false values if the condition
-    // is SETGE/SETLE to avoid an XORI.
-    if (isa<ConstantSDNode>(TrueV) && isa<ConstantSDNode>(FalseV) &&
-        CCVal == ISD::SETLT) {
-      const APInt &TrueVal = cast<ConstantSDNode>(TrueV)->getAPIntValue();
-      const APInt &FalseVal = cast<ConstantSDNode>(FalseV)->getAPIntValue();
-      if (TrueVal - 1 == FalseVal)
-        return DAG.getNode(ISD::ADD, DL, VT, CondV, FalseV);
-      if (TrueVal + 1 == FalseVal)
-        return DAG.getNode(ISD::SUB, DL, VT, FalseV, CondV);
-    }
-
-    translateSetCCForBranch(DL, LHS, RHS, CCVal, DAG);
-    // 1 < x ? x : 1 -> 0 < x ? x : 1
-    if (isOneConstant(LHS) &&
-        (CCVal == ISD::SETLT || CCVal == ISD::SETULT) && RHS == TrueV &&
-        LHS == FalseV) {
-      LHS = DAG.getConstant(0, DL, VT);
-      // 0 <u x is the same as x != 0.
-      if (CCVal == ISD::SETULT) {
-        std::swap(LHS, RHS);
-        CCVal = ISD::SETNE;
-      }
-    }
-
-    // x <s -1 ? x : -1 -> x <s 0 ? x : -1
-    if (isAllOnesConstant(RHS) && CCVal == ISD::SETLT && LHS == TrueV &&
-        RHS == FalseV) {
-      RHS = DAG.getConstant(0, DL, VT);
-    }
-
-    SDValue TargetCC = DAG.getCondCode(CCVal);
-
-    if (isa<ConstantSDNode>(TrueV) && !isa<ConstantSDNode>(FalseV)) {
-      // (select (setcc lhs, rhs, CC), constant, falsev)
-      // -> (select (setcc lhs, rhs, InverseCC), falsev, constant)
-      std::swap(TrueV, FalseV);
-      TargetCC =
-          DAG.getCondCode(ISD::getSetCCInverse(CCVal, LHS.getValueType()));
-    }
-
-    SDValue Ops[] = {LHS, RHS, TargetCC, TrueV, FalseV};
-    return DAG.getNode(RISCVISD::SELECT_CC, DL, VT, Ops);
+  // Special case for a select of 2 constants that have a diffence of 1.
+  // Normally this is done by DAGCombine, but if the select is introduced by
+  // type legalization or op legalization, we miss it. Restricting to SETLT
+  // case for now because that is what signed saturating add/sub need.
+  // FIXME: We don't need the condition to be SETLT or even a SETCC,
+  // but we would probably want to swap the true/false values if the condition
+  // is SETGE/SETLE to avoid an XORI.
+  if (isa<ConstantSDNode>(TrueV) && isa<ConstantSDNode>(FalseV) &&
+      CCVal == ISD::SETLT) {
+    const APInt &TrueVal = cast<ConstantSDNode>(TrueV)->getAPIntValue();
+    const APInt &FalseVal = cast<ConstantSDNode>(FalseV)->getAPIntValue();
+    if (TrueVal - 1 == FalseVal)
+      return DAG.getNode(ISD::ADD, DL, VT, CondV, FalseV);
+    if (TrueVal + 1 == FalseVal)
+      return DAG.getNode(ISD::SUB, DL, VT, FalseV, CondV);
   }
 
-  // Otherwise:
-  // (select condv, truev, falsev)
-  // -> (riscvisd::select_cc condv, zero, setne, truev, falsev)
-  SDValue Zero = DAG.getConstant(0, DL, XLenVT);
-  SDValue SetNE = DAG.getCondCode(ISD::SETNE);
+  translateSetCCForBranch(DL, LHS, RHS, CCVal, DAG);
+  // 1 < x ? x : 1 -> 0 < x ? x : 1
+  if (isOneConstant(LHS) && (CCVal == ISD::SETLT || CCVal == ISD::SETULT) &&
+      RHS == TrueV && LHS == FalseV) {
+    LHS = DAG.getConstant(0, DL, VT);
+    // 0 <u x is the same as x != 0.
+    if (CCVal == ISD::SETULT) {
+      std::swap(LHS, RHS);
+      CCVal = ISD::SETNE;
+    }
+  }
 
-  SDValue Ops[] = {CondV, Zero, SetNE, TrueV, FalseV};
+  // x <s -1 ? x : -1 -> x <s 0 ? x : -1
+  if (isAllOnesConstant(RHS) && CCVal == ISD::SETLT && LHS == TrueV &&
+      RHS == FalseV) {
+    RHS = DAG.getConstant(0, DL, VT);
+  }
 
+  SDValue TargetCC = DAG.getCondCode(CCVal);
+
+  if (isa<ConstantSDNode>(TrueV) && !isa<ConstantSDNode>(FalseV)) {
+    // (select (setcc lhs, rhs, CC), constant, falsev)
+    // -> (select (setcc lhs, rhs, InverseCC), falsev, constant)
+    std::swap(TrueV, FalseV);
+    TargetCC = DAG.getCondCode(ISD::getSetCCInverse(CCVal, LHS.getValueType()));
+  }
+
+  SDValue Ops[] = {LHS, RHS, TargetCC, TrueV, FalseV};
   return DAG.getNode(RISCVISD::SELECT_CC, DL, VT, Ops);
 }
 
@@ -11509,15 +11515,9 @@ static SDValue performFP_TO_INTCombine(SDNode *N,
   const TargetLowering &TLI = DAG.getTargetLoweringInfo();
   MVT XLenVT = Subtarget.getXLenVT();
 
-  // Only handle XLen or i32 types. Other types narrower than XLen will
-  // eventually be legalized to XLenVT.
-  EVT VT = N->getValueType(0);
-  if (VT != MVT::i32 && VT != XLenVT)
-    return SDValue();
-
   SDValue Src = N->getOperand(0);
 
-  // Ensure the FP type is also legal.
+  // Ensure the FP type is legal.
   if (!TLI.isTypeLegal(Src.getValueType()))
     return SDValue();
 
@@ -11529,7 +11529,57 @@ static SDValue performFP_TO_INTCombine(SDNode *N,
   if (FRM == RISCVFPRndMode::Invalid)
     return SDValue();
 
+  SDLoc DL(N);
   bool IsSigned = N->getOpcode() == ISD::FP_TO_SINT;
+  EVT VT = N->getValueType(0);
+
+  if (VT.isVector() && TLI.isTypeLegal(VT)) {
+    MVT SrcVT = Src.getSimpleValueType();
+    MVT SrcContainerVT = SrcVT;
+    MVT ContainerVT = VT.getSimpleVT();
+    SDValue XVal = Src.getOperand(0);
+
+    // TODO: Support combining with widening and narrowing instructions
+    // For now only support conversions of the same bit size
+    if (VT.getScalarSizeInBits() != SrcVT.getScalarSizeInBits())
+      return SDValue();
+
+    // Make fixed-length vectors scalable first
+    if (SrcVT.isFixedLengthVector()) {
+      SrcContainerVT = getContainerForFixedLengthVector(DAG, SrcVT, Subtarget);
+      XVal = convertToScalableVector(SrcContainerVT, XVal, DAG, Subtarget);
+      ContainerVT =
+          getContainerForFixedLengthVector(DAG, ContainerVT, Subtarget);
+    }
+
+    auto [Mask, VL] =
+        getDefaultVLOps(SrcVT, SrcContainerVT, DL, DAG, Subtarget);
+
+    SDValue FpToInt;
+    if (FRM == RISCVFPRndMode::RTZ) {
+      // Use the dedicated trunc static rounding mode if we're truncating so we
+      // don't need to generate calls to fsrmi/fsrm
+      unsigned Opc =
+          IsSigned ? RISCVISD::VFCVT_RTZ_X_F_VL : RISCVISD::VFCVT_RTZ_XU_F_VL;
+      FpToInt = DAG.getNode(Opc, DL, ContainerVT, XVal, Mask, VL);
+    } else {
+      unsigned Opc =
+          IsSigned ? RISCVISD::VFCVT_RM_X_F_VL : RISCVISD::VFCVT_RM_XU_F_VL;
+      FpToInt = DAG.getNode(Opc, DL, ContainerVT, XVal, Mask,
+                            DAG.getTargetConstant(FRM, DL, XLenVT), VL);
+    }
+
+    // If converted from fixed-length to scalable, convert back
+    if (VT.isFixedLengthVector())
+      FpToInt = convertFromScalableVector(VT, FpToInt, DAG, Subtarget);
+
+    return FpToInt;
+  }
+
+  // Only handle XLen or i32 types. Other types narrower than XLen will
+  // eventually be legalized to XLenVT.
+  if (VT != MVT::i32 && VT != XLenVT)
+    return SDValue();
 
   unsigned Opc;
   if (VT == XLenVT)
@@ -11537,7 +11587,6 @@ static SDValue performFP_TO_INTCombine(SDNode *N,
   else
     Opc = IsSigned ? RISCVISD::FCVT_W_RV64 : RISCVISD::FCVT_WU_RV64;
 
-  SDLoc DL(N);
   SDValue FpToInt = DAG.getNode(Opc, DL, XLenVT, Src.getOperand(0),
                                 DAG.getTargetConstant(FRM, DL, XLenVT));
   return DAG.getNode(ISD::TRUNCATE, DL, VT, FpToInt);
@@ -13362,6 +13411,7 @@ static MachineBasicBlock *emitSelectPseudo(MachineInstr &MI,
   // multiple selects with the exact same condition (same LHS, RHS and CC).
   // The selects may be interleaved with other instructions if the other
   // instructions meet some requirements we deem safe:
+  // - They are not pseudo instructions.
   // - They are debug instructions. Otherwise,
   // - They do not have side-effects, do not access memory and their inputs do
   //   not depend on the results of the select pseudo-instructions.
@@ -13407,7 +13457,8 @@ static MachineBasicBlock *emitSelectPseudo(MachineInstr &MI,
       continue;
     }
     if (SequenceMBBI->hasUnmodeledSideEffects() ||
-        SequenceMBBI->mayLoadOrStore())
+        SequenceMBBI->mayLoadOrStore() ||
+        SequenceMBBI->usesCustomInsertionHook())
       break;
     if (llvm::any_of(SequenceMBBI->operands(), [&](MachineOperand &MO) {
           return MO.isReg() && MO.isUse() && SelectDests.count(MO.getReg());
@@ -13920,6 +13971,18 @@ RISCVTargetLowering::EmitInstrWithCustomInserter(MachineInstr &MI,
     return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_X_F_V_MF2_MASK);
   case RISCV::PseudoVFCVT_RM_X_F_V_MF4_MASK:
     return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_X_F_V_MF4_MASK);
+  case RISCV::PseudoVFCVT_RM_XU_F_V_M1_MASK:
+    return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_XU_F_V_M1_MASK);
+  case RISCV::PseudoVFCVT_RM_XU_F_V_M2_MASK:
+    return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_XU_F_V_M2_MASK);
+  case RISCV::PseudoVFCVT_RM_XU_F_V_M4_MASK:
+    return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_XU_F_V_M4_MASK);
+  case RISCV::PseudoVFCVT_RM_XU_F_V_M8_MASK:
+    return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_XU_F_V_M8_MASK);
+  case RISCV::PseudoVFCVT_RM_XU_F_V_MF2_MASK:
+    return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_XU_F_V_MF2_MASK);
+  case RISCV::PseudoVFCVT_RM_XU_F_V_MF4_MASK:
+    return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_XU_F_V_MF4_MASK);
   case RISCV::PseudoVFCVT_RM_F_XU_V_M1_MASK:
     return emitVFCVT_RM_MASK(MI, BB, RISCV::PseudoVFCVT_F_XU_V_M1_MASK);
   case RISCV::PseudoVFCVT_RM_F_XU_V_M2_MASK:
@@ -15594,7 +15657,9 @@ const char *RISCVTargetLowering::getTargetNodeName(unsigned Opcode) const {
   NODE_NAME_CASE(VFCVT_RTZ_X_F_VL)
   NODE_NAME_CASE(VFCVT_RTZ_XU_F_VL)
   NODE_NAME_CASE(VFCVT_RM_X_F_VL)
+  NODE_NAME_CASE(VFCVT_RM_XU_F_VL)
   NODE_NAME_CASE(VFCVT_X_F_VL)
+  NODE_NAME_CASE(VFCVT_XU_F_VL)
   NODE_NAME_CASE(VFROUND_NOEXCEPT_VL)
   NODE_NAME_CASE(SINT_TO_FP_VL)
   NODE_NAME_CASE(UINT_TO_FP_VL)

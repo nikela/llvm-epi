@@ -14,13 +14,13 @@ define dso_local void @add_ref(i64 %N, i128* noalias nocapture %c, i128* noalias
 ; CHECK-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK:       for.body:
 ; CHECK-NEXT:    [[I_09:%.*]] = phi i64 [ [[INC:%.*]], [[FOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
-; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i128, i128* [[A:%.*]], i64 [[I_09]]
-; CHECK-NEXT:    [[TMP0:%.*]] = load i128, i128* [[ARRAYIDX]], align 16
-; CHECK-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds i128, i128* [[B:%.*]], i64 [[I_09]]
-; CHECK-NEXT:    [[TMP1:%.*]] = load i128, i128* [[ARRAYIDX1]], align 16
+; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i128, ptr [[A:%.*]], i64 [[I_09]]
+; CHECK-NEXT:    [[TMP0:%.*]] = load i128, ptr [[ARRAYIDX]], align 16
+; CHECK-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds i128, ptr [[B:%.*]], i64 [[I_09]]
+; CHECK-NEXT:    [[TMP1:%.*]] = load i128, ptr [[ARRAYIDX1]], align 16
 ; CHECK-NEXT:    [[ADD:%.*]] = add nsw i128 [[TMP1]], [[TMP0]]
-; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i128, i128* [[C:%.*]], i64 [[I_09]]
-; CHECK-NEXT:    store i128 [[ADD]], i128* [[ARRAYIDX2]], align 16
+; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i128, ptr [[C:%.*]], i64 [[I_09]]
+; CHECK-NEXT:    store i128 [[ADD]], ptr [[ARRAYIDX2]], align 16
 ; CHECK-NEXT:    [[INC]] = add nuw nsw i64 [[I_09]], 1
 ; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INC]], [[N]]
 ; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT:%.*]], label [[FOR_BODY]]
@@ -37,13 +37,13 @@ define dso_local void @add_ref(i64 %N, i128* noalias nocapture %c, i128* noalias
 ; CHECK1-NEXT:    br label [[FOR_BODY:%.*]]
 ; CHECK1:       for.body:
 ; CHECK1-NEXT:    [[I_09:%.*]] = phi i64 [ [[INC:%.*]], [[FOR_BODY]] ], [ 0, [[FOR_BODY_PREHEADER]] ]
-; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i128, i128* [[A:%.*]], i64 [[I_09]]
-; CHECK1-NEXT:    [[TMP0:%.*]] = load i128, i128* [[ARRAYIDX]], align 16
-; CHECK1-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds i128, i128* [[B:%.*]], i64 [[I_09]]
-; CHECK1-NEXT:    [[TMP1:%.*]] = load i128, i128* [[ARRAYIDX1]], align 16
+; CHECK1-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i128, ptr [[A:%.*]], i64 [[I_09]]
+; CHECK1-NEXT:    [[TMP0:%.*]] = load i128, ptr [[ARRAYIDX]], align 16
+; CHECK1-NEXT:    [[ARRAYIDX1:%.*]] = getelementptr inbounds i128, ptr [[B:%.*]], i64 [[I_09]]
+; CHECK1-NEXT:    [[TMP1:%.*]] = load i128, ptr [[ARRAYIDX1]], align 16
 ; CHECK1-NEXT:    [[ADD:%.*]] = add nsw i128 [[TMP1]], [[TMP0]]
-; CHECK1-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i128, i128* [[C:%.*]], i64 [[I_09]]
-; CHECK1-NEXT:    store i128 [[ADD]], i128* [[ARRAYIDX2]], align 16
+; CHECK1-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i128, ptr [[C:%.*]], i64 [[I_09]]
+; CHECK1-NEXT:    store i128 [[ADD]], ptr [[ARRAYIDX2]], align 16
 ; CHECK1-NEXT:    [[INC]] = add nuw nsw i64 [[I_09]], 1
 ; CHECK1-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INC]], [[N]]
 ; CHECK1-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END_LOOPEXIT:%.*]], label [[FOR_BODY]]

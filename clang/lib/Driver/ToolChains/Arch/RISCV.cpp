@@ -43,7 +43,8 @@ static bool getArchFeatures(const Driver &D, StringRef Arch,
   }
 
   (*ISAInfo)->toFeatures(
-      Features, [&Args](const Twine &Str) { return Args.MakeArgString(Str); });
+      Features, [&Args](const Twine &Str) { return Args.MakeArgString(Str); },
+      /*AddAllExtensions=*/true);
   return true;
 }
 
@@ -63,6 +64,45 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
 
   if (!getArchFeatures(D, MArch, Features, Args))
     return;
+
+  {
+    // FIXME: It should be possible to do this in a better way.
+    //
+    // We do this here now because I've found myself unable to update the
+    // implications once the ISAInfo has been created, and because we now put
+    // all the negative features, this effectively renders an inconsistent
+    // feature list in which zepi is enabled and the rest of vector related
+    // stuff is disabled.
+    //
+    // I believe a same problem will happen when someone makes
+    // getCPUFeaturesExceptStdExt return features with implications, but we
+    // don't do that yet (perhaps we should never do that).
+    //
+    // EPI requires rv64g.
+    bool HasRV64 = false;
+    bool HasM = false;
+    bool HasA = false;
+    bool HasF = false;
+    bool HasD = false;
+    auto HasFeature = [&Features](StringRef Str) {
+      return std::count(Features.begin(), Features.end(), Str) != 0;
+    };
+    HasRV64 = MArch.startswith("rv64");
+    HasM = HasFeature("+m");
+    HasA = HasFeature("+a");
+    HasF = HasFeature("+f");
+    HasD = HasFeature("+d");
+
+    if (Args.getLastArg(options::OPT_mepi)) {
+      if (!HasRV64 || !HasM || !HasA || !HasF || !HasD)
+        D.Diag(diag::err_drv_invalid_riscv_epi_ext);
+      else {
+        std::string EPIMarch = MArch.str() + "_zepi";
+        if (!getArchFeatures(D, StringRef(EPIMarch), Features, Args))
+          return;
+      }
+    }
+  }
 
   // If users give march and mcpu, get std extension feature from MArch
   // and other features (ex. mirco architecture feature) from mcpu
@@ -159,36 +199,10 @@ void riscv::getRISCVTargetFeatures(const Driver &D, const llvm::Triple &Triple,
   else
     Features.push_back("-save-restore");
 
-  // EPI requires rv64g.
-  // FIXME - We need a parser of the RISCV march.
-  {
-    bool HasRV64 = false;
-    bool HasM = false;
-    bool HasA = false;
-    bool HasF = false;
-    bool HasD = false;
-    auto HasFeature = [&Features](StringRef Str) {
-      return std::count(Features.begin(), Features.end(), Str) != 0;
-    };
-    HasRV64 = MArch.startswith("rv64");
-    HasM = HasFeature("+m");
-    HasA = HasFeature("+a");
-    HasF = HasFeature("+f");
-    HasD = HasFeature("+d");
-
-    if (Args.getLastArg(options::OPT_mepi)) {
-      if (!HasRV64 || !HasM || !HasA || !HasF || !HasD)
-        D.Diag(diag::err_drv_invalid_riscv_epi_ext);
-      else {
-        Features.push_back("+zepi");
-        // ????? What happened here?
-        // Features.push_back("+experimental-zvlsseg");
-      }
-    } else if (Args.getLastArg(options::OPT_mepi_allow_fixed_vectorization)) {
-      D.Diag(diag::err_drv_mepi_fixed_needs_mepi);
-    }
+  if (!Args.getLastArg(options::OPT_mepi) &&
+      Args.getLastArg(options::OPT_mepi_allow_fixed_vectorization)) {
+    D.Diag(diag::err_drv_mepi_fixed_needs_mepi);
   }
-
   // Now add any that the user explicitly requested on the command line,
   // which may override the defaults.
   handleTargetFeaturesGroup(Args, Features, options::OPT_m_riscv_Features_Group);

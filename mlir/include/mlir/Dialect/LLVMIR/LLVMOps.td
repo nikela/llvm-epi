@@ -787,7 +787,7 @@ def LLVM_CondBrOp : LLVM_TerminatorOp<"cond_br",
     OpBuilder<(ins "Value":$condition, "Block *":$trueDest,
       "ValueRange":$trueOperands, "Block *":$falseDest,
       "ValueRange":$falseOperands,
-      CArg<"Optional<std::pair<uint32_t, uint32_t>>", "{}">:$weights),
+      CArg<"std::optional<std::pair<uint32_t, uint32_t>>", "{}">:$weights),
     [{
         ElementsAttr weightsAttr;
         if (weights) {
@@ -1443,7 +1443,7 @@ def LLVM_GlobalDtorsOp : LLVM_Op<"mlir.global_dtors", [
 
 def LLVM_LLVMFuncOp : LLVM_Op<"func", [
     AutomaticAllocationScope, IsolatedFromAbove, FunctionOpInterface,
-    CallableOpInterface, Symbol
+    CallableOpInterface
   ]> {
   let summary = "LLVM dialect function.";
 
@@ -1500,7 +1500,7 @@ def LLVM_LLVMFuncOp : LLVM_Op<"func", [
       CArg<"CConv", "CConv::C">:$cconv,
       CArg<"ArrayRef<NamedAttribute>", "{}">:$attrs,
       CArg<"ArrayRef<DictionaryAttr>", "{}">:$argAttrs,
-      CArg<"Optional<uint64_t>", "{}">:$functionEntryCount)>
+      CArg<"std::optional<uint64_t>", "{}">:$functionEntryCount)>
   ];
 
   let extraClassDeclaration = [{

@@ -1022,10 +1022,12 @@ AliasResult BasicAAResult::aliasGEP(
     // this case if the UnderlyingV1 is the same as V2, the type is a pointer
     // to a struct and the indices are <0, X> where X != 0, then this is
     // NoAlias.
-    auto IsPointerToStruct = [](Type *Ty) {
-      return isa<PointerType>(Ty) && !cast<PointerType>(Ty)->isOpaque() &&
-             isa<StructType>(
-                 cast<PointerType>(Ty)->getNonOpaquePointerElementType());
+    auto IsPointerToStruct = [](const Value *V) {
+      Type* Ty = nullptr;
+      if (auto *AI = dyn_cast<AllocaInst>(V)) {
+        Ty = AI->getAllocatedType();
+      }
+      return isa_and_nonnull<StructType>(Ty);
     };
     auto GEPIndexesScalableVectorField = [](const GEPOperator *GEP) {
       if (!GEP->isInBounds() || GEP->getNumIndices() != 2 ||
@@ -1051,7 +1053,7 @@ AliasResult BasicAAResult::aliasGEP(
       return true;
     };
     // FIXME: This is perhaps too specific.
-    if (UnderlyingV1 == V2 && IsPointerToStruct(UnderlyingV1->getType()) &&
+    if (UnderlyingV1 == V2 && IsPointerToStruct(UnderlyingV1) &&
         GEPIndexesScalableVectorField(GEP1))
       return AliasResult::NoAlias;
 
