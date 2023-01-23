@@ -247,12 +247,14 @@ bool RISCVTTIImpl::isLegalMaskedScatter(Type *DataType,
 /// scalar, in which case the costs are multiplied with VF.
 InstructionCost
 RISCVTTIImpl::getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
-                                               ArrayRef<Type *> Tys) {
-  return BaseT::getOperandsScalarizationOverhead(Args, Tys);
+                                               ArrayRef<Type *> Tys,
+                                               TTI::TargetCostKind CostKind) {
+  return BaseT::getOperandsScalarizationOverhead(Args, Tys, CostKind);
 }
 
 InstructionCost RISCVTTIImpl::getScalarizationOverhead(
-    VectorType *InTy, const APInt &DemandedElts, bool Insert, bool Extract) {
+    VectorType *InTy, const APInt &DemandedElts, bool Insert, bool Extract,
+    TTI::TargetCostKind CostKind) {
   // FIXME: a bitfield is not a reasonable abstraction for talking about
   // which elements are needed from a scalable vector.
   // For scalable vectors DemenadedElts currently represent
@@ -267,11 +269,11 @@ InstructionCost RISCVTTIImpl::getScalarizationOverhead(
     if (!DemandedElts[i])
       continue;
     if (Insert)
-      MinCost += getVectorInstrCost(Instruction::InsertElement, InTy, i,
-                                    nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, InTy, CostKind,
+                                    i, nullptr, nullptr);
     if (Extract)
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, InTy, i,
-                                    nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, InTy, CostKind,
+                                    i, nullptr, nullptr);
   }
 
   return *MinCost.getValue();
@@ -402,13 +404,14 @@ InstructionCost RISCVTTIImpl::getShuffleCost(TTI::ShuffleKind Kind,
     case TTI::SK_PermuteTwoSrc:
       // This may seem strange but the more elements out there the more work is
       // for the VPU.
-      return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp));
+      return getPermuteShuffleOverhead(cast<ScalableVectorType>(Tp), CostKind);
     case TTI::SK_ExtractSubvector:
-      return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
+      return getExtractSubvectorOverhead(cast<ScalableVectorType>(Tp), CostKind,
+                                         Index,
                                          cast<ScalableVectorType>(SubTp));
     case TTI::SK_InsertSubvector:
-      return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), Index,
-                                        cast<ScalableVectorType>(SubTp));
+      return getInsertSubvectorOverhead(cast<ScalableVectorType>(Tp), CostKind,
+                                        Index, cast<ScalableVectorType>(SubTp));
       // Use the default.
     case TTI::SK_Broadcast: {
       return LT.first * 1;
@@ -1511,13 +1514,14 @@ InstructionCost RISCVTTIImpl::getCmpSelInstrCost(unsigned Opcode, Type *ValTy,
 }
 
 InstructionCost RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
+                                                 TTI::TargetCostKind CostKind,
                                                  unsigned Index, Value *Op0,
                                                  Value *Op1) {
   assert(Val->isVectorTy() && "This must be a vector type");
 
   if (Opcode != Instruction::ExtractElement &&
       Opcode != Instruction::InsertElement)
-    return BaseT::getVectorInstrCost(Opcode, Val, Index, Op0, Op1);
+    return BaseT::getVectorInstrCost(Opcode, Val, CostKind, Index, Op0, Op1);
 
   // Legalize the type.
   std::pair<InstructionCost, MVT> LT = getTypeLegalizationCost(Val);
@@ -1531,7 +1535,7 @@ InstructionCost RISCVTTIImpl::getVectorInstrCost(unsigned Opcode, Type *Val,
     return LT.first;
 
   if (!isTypeLegal(Val))
-    return BaseT::getVectorInstrCost(Opcode, Val, Index, Op0, Op1);
+    return BaseT::getVectorInstrCost(Opcode, Val, CostKind, Index, Op0, Op1);
 
   // In RVV, we could use vslidedown + vmv.x.s to extract element from vector
   // and vslideup + vmv.s.x to insert element to vector.

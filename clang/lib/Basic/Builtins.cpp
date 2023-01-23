@@ -18,15 +18,26 @@
 #include "llvm/ADT/StringRef.h"
 using namespace clang;
 
+const char *HeaderDesc::getName() const {
+  switch (ID) {
+#define HEADER(ID, NAME)                                                       \
+  case ID:                                                                     \
+    return NAME;
+#include "clang/Basic/BuiltinHeaders.def"
+#undef HEADER
+  };
+  llvm_unreachable("Unknown HeaderDesc::HeaderID enum");
+}
+
 static constexpr Builtin::Info BuiltinInfo[] = {
-    {"not a builtin function", nullptr, nullptr, nullptr, ALL_LANGUAGES,
-     nullptr},
+    {"not a builtin function", nullptr, nullptr, nullptr, HeaderDesc::NO_HEADER,
+     ALL_LANGUAGES},
 #define BUILTIN(ID, TYPE, ATTRS)                                               \
-  { #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr },
+  {#ID, TYPE, ATTRS, nullptr, HeaderDesc::NO_HEADER, ALL_LANGUAGES},
 #define LANGBUILTIN(ID, TYPE, ATTRS, LANGS)                                    \
-  { #ID, TYPE, ATTRS, nullptr, LANGS, nullptr },
+  {#ID, TYPE, ATTRS, nullptr, HeaderDesc::NO_HEADER, LANGS},
 #define LIBBUILTIN(ID, TYPE, ATTRS, HEADER, LANGS)                             \
-  { #ID, TYPE, ATTRS, HEADER, LANGS, nullptr },
+  {#ID, TYPE, ATTRS, nullptr, HeaderDesc::HEADER, LANGS},
 #include "clang/Basic/Builtins.def"
 };
 
@@ -64,37 +75,48 @@ bool Builtin::Context::isBuiltinFunc(llvm::StringRef FuncName) {
 /// Is this builtin supported according to the given language options?
 static bool builtinIsSupported(const Builtin::Info &BuiltinInfo,
                                const LangOptions &LangOpts) {
-  bool BuiltinsUnsupported =
-      LangOpts.NoBuiltin && strchr(BuiltinInfo.Attributes, 'f') != nullptr;
-  bool CorBuiltinsUnsupported =
-      !LangOpts.Coroutines && (BuiltinInfo.Langs & COR_LANG);
-  bool MathBuiltinsUnsupported =
-    LangOpts.NoMathBuiltin && BuiltinInfo.HeaderName &&
-    llvm::StringRef(BuiltinInfo.HeaderName).equals("math.h");
-  bool GnuModeUnsupported = !LangOpts.GNUMode && (BuiltinInfo.Langs & GNU_LANG);
-  bool MSModeUnsupported =
-      !LangOpts.MicrosoftExt && (BuiltinInfo.Langs & MS_LANG);
-  bool ObjCUnsupported = !LangOpts.ObjC && BuiltinInfo.Langs == OBJC_LANG;
-  bool OclCUnsupported =
-      !LangOpts.OpenCL && (BuiltinInfo.Langs & ALL_OCL_LANGUAGES);
-  bool OclGASUnsupported =
-      !LangOpts.OpenCLGenericAddressSpace && (BuiltinInfo.Langs & OCL_GAS);
-  bool OclPipeUnsupported =
-      !LangOpts.OpenCLPipes && (BuiltinInfo.Langs & OCL_PIPE);
+  if (bool BuiltinsUnsupported =
+          LangOpts.NoBuiltin && strchr(BuiltinInfo.Attributes, 'f') != nullptr)
+    return false;
+  if (bool CorBuiltinsUnsupported =
+          !LangOpts.Coroutines && (BuiltinInfo.Langs & COR_LANG))
+    return false;
+  if (bool MathBuiltinsUnsupported =
+          LangOpts.NoMathBuiltin && BuiltinInfo.Header.ID == HeaderDesc::MATH_H)
+    return false;
+  if (bool GnuModeUnsupported =
+          !LangOpts.GNUMode && (BuiltinInfo.Langs & GNU_LANG))
+    return false;
+  if (bool MSModeUnsupported =
+          !LangOpts.MicrosoftExt && (BuiltinInfo.Langs & MS_LANG))
+    return false;
+  if (bool ObjCUnsupported = !LangOpts.ObjC && BuiltinInfo.Langs == OBJC_LANG)
+    return false;
+  if (bool OclCUnsupported =
+          !LangOpts.OpenCL && (BuiltinInfo.Langs & ALL_OCL_LANGUAGES))
+    return false;
+  if (bool OclGASUnsupported =
+          !LangOpts.OpenCLGenericAddressSpace && (BuiltinInfo.Langs & OCL_GAS))
+    return false;
+  if (bool OclPipeUnsupported =
+          !LangOpts.OpenCLPipes && (BuiltinInfo.Langs & OCL_PIPE))
+    return false;
+
   // Device side enqueue is not supported until OpenCL 2.0. In 2.0 and higher
   // support is indicated with language option for blocks.
-  bool OclDSEUnsupported =
-      (LangOpts.getOpenCLCompatibleVersion() < 200 || !LangOpts.Blocks) &&
-      (BuiltinInfo.Langs & OCL_DSE);
-  bool OpenMPUnsupported = !LangOpts.OpenMP && BuiltinInfo.Langs == OMP_LANG;
-  bool CUDAUnsupported = !LangOpts.CUDA && BuiltinInfo.Langs == CUDA_LANG;
-  bool CPlusPlusUnsupported =
-      !LangOpts.CPlusPlus && BuiltinInfo.Langs == CXX_LANG;
-  return !BuiltinsUnsupported && !CorBuiltinsUnsupported &&
-         !MathBuiltinsUnsupported && !OclCUnsupported && !OclGASUnsupported &&
-         !OclPipeUnsupported && !OclDSEUnsupported && !OpenMPUnsupported &&
-         !GnuModeUnsupported && !MSModeUnsupported && !ObjCUnsupported &&
-         !CPlusPlusUnsupported && !CUDAUnsupported;
+  if (bool OclDSEUnsupported =
+          (LangOpts.getOpenCLCompatibleVersion() < 200 || !LangOpts.Blocks) &&
+          (BuiltinInfo.Langs & OCL_DSE))
+    return false;
+  if (bool OpenMPUnsupported =
+          !LangOpts.OpenMP && BuiltinInfo.Langs == OMP_LANG)
+    return false;
+  if (bool CUDAUnsupported = !LangOpts.CUDA && BuiltinInfo.Langs == CUDA_LANG)
+    return false;
+  if (bool CPlusPlusUnsupported =
+          !LangOpts.CPlusPlus && BuiltinInfo.Langs == CXX_LANG)
+    return false;
+  return true;
 }
 
 /// initializeBuiltins - Mark the identifiers for all the builtins with their

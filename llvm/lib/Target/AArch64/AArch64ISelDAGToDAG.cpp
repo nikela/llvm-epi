@@ -357,6 +357,7 @@ public:
                             unsigned Opc_rr, unsigned Opc_ri,
                             bool IsIntr = false);
   void SelectWhilePair(SDNode *N, unsigned Opc);
+  void SelectCVTIntrinsic(SDNode *N, unsigned NumVecs, unsigned Opcode);
 
   bool SelectAddrModeFrameIndexSVE(SDValue N, SDValue &Base, SDValue &OffImm);
   /// SVE Reg+Imm addressing mode.
@@ -1747,6 +1748,22 @@ void AArch64DAGToDAGISel::SelectWhilePair(SDNode *N, unsigned Opc) {
   CurDAG->RemoveDeadNode(N);
 }
 
+void AArch64DAGToDAGISel::SelectCVTIntrinsic(SDNode *N, unsigned NumVecs,
+                                             unsigned Opcode) {
+  EVT VT = N->getValueType(0);
+  SmallVector<SDValue, 4> Regs(N->op_begin() + 1, N->op_begin() + 1 + NumVecs);
+  SDValue Ops = createZTuple(Regs);
+  SDLoc DL(N);
+  SDNode *Intrinsic = CurDAG->getMachineNode(Opcode, DL, MVT::Untyped, Ops);
+  SDValue SuperReg = SDValue(Intrinsic, 0);
+  for (unsigned i = 0; i < NumVecs; ++i)
+    ReplaceUses(SDValue(N, i), CurDAG->getTargetExtractSubreg(
+                                   AArch64::zsub0 + i, DL, VT, SuperReg));
+
+  CurDAG->RemoveDeadNode(N);
+  return;
+}
+
 void AArch64DAGToDAGISel::SelectPredicatedLoad(SDNode *N, unsigned NumVecs,
                                                unsigned Scale, unsigned Opc_ri,
                                                unsigned Opc_rr, bool IsIntr) {
@@ -2076,7 +2093,7 @@ static bool isBitfieldExtractOpFromAnd(SelectionDAG *CurDAG, SDNode *N,
   // undo that as part of the transform here if we want to catch all
   // the opportunities.
   // Currently the NumberOfIgnoredLowBits argument helps to recover
-  // form these situations when matching bigger pattern (bitfield insert).
+  // from these situations when matching bigger pattern (bitfield insert).
 
   // For unsigned extracts, check for a shift right and mask
   uint64_t AndImm = 0;
@@ -2195,7 +2212,7 @@ static bool isSeveralBitsExtractOpFromShr(SDNode *N, unsigned &Opc,
   //
   // This gets selected into a single UBFM:
   //
-  // UBFM Value, ShiftImm, BitWide + SrlImm -1
+  // UBFM Value, ShiftImm, findLastSet(MaskImm)
   //
 
   if (N->getOpcode() != ISD::SRL)
@@ -2212,19 +2229,13 @@ static bool isSeveralBitsExtractOpFromShr(SDNode *N, unsigned &Opc,
     return false;
 
   // Check whether we really have several bits extract here.
-  unsigned BitWide = 64 - countLeadingOnes(~(AndMask >> SrlImm));
-  if (BitWide && isMask_64(AndMask >> SrlImm)) {
-    if (N->getValueType(0) == MVT::i32)
-      Opc = AArch64::UBFMWri;
-    else
-      Opc = AArch64::UBFMXri;
+  if (!isMask_64(AndMask >> SrlImm))
+    return false;
 
-    LSB = SrlImm;
-    MSB = BitWide + SrlImm - 1;
-    return true;
-  }
-
-  return false;
+  Opc = N->getValueType(0) == MVT::i32 ? AArch64::UBFMWri : AArch64::UBFMXri;
+  LSB = SrlImm;
+  MSB = findLastSet(AndMask, ZB_Undefined);
+  return true;
 }
 
 static bool isBitfieldExtractOpFromShr(SDNode *N, unsigned &Opc, SDValue &Opd0,
@@ -4737,6 +4748,30 @@ void AArch64DAGToDAGISel::Select(SDNode *Node) {
               {AArch64::WHILELT_2PXX_B, AArch64::WHILELT_2PXX_H,
                AArch64::WHILELT_2PXX_S, AArch64::WHILELT_2PXX_D}))
         SelectWhilePair(Node, Op);
+      return;
+    case Intrinsic::aarch64_sve_fcvts_x2:
+      SelectCVTIntrinsic(Node, 2, AArch64::FCVTZS_2Z2Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_scvtf_x2:
+      SelectCVTIntrinsic(Node, 2, AArch64::SCVTF_2Z2Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_fcvtu_x2:
+      SelectCVTIntrinsic(Node, 2, AArch64::FCVTZU_2Z2Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_ucvtf_x2:
+      SelectCVTIntrinsic(Node, 2, AArch64::UCVTF_2Z2Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_fcvts_x4:
+      SelectCVTIntrinsic(Node, 4, AArch64::FCVTZS_4Z4Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_scvtf_x4:
+      SelectCVTIntrinsic(Node, 4, AArch64::SCVTF_4Z4Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_fcvtu_x4:
+      SelectCVTIntrinsic(Node, 4, AArch64::FCVTZU_4Z4Z_StoS);
+      return;
+    case Intrinsic::aarch64_sve_ucvtf_x4:
+      SelectCVTIntrinsic(Node, 4, AArch64::UCVTF_4Z4Z_StoS);
       return;
     }
     break;

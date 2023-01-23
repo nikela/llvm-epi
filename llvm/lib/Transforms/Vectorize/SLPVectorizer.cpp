@@ -6666,7 +6666,8 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
           continue;
         }
       }
-      Cost -= TTI->getVectorInstrCost(*EE, EE->getVectorOperandType(), Idx);
+      Cost -= TTI->getVectorInstrCost(*EE, EE->getVectorOperandType(), CostKind,
+                                      Idx);
     }
     // Add a cost for subvector extracts/inserts if required.
     for (const auto &Data : ExtractVectorsTys) {
@@ -6794,7 +6795,7 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
       bool NeedShuffle =
           VL.front() != *It || !all_of(VL.drop_front(), UndefValue::classof);
       InstructionCost InsertCost =
-          TTI->getVectorInstrCost(Instruction::InsertElement, VecTy,
+          TTI->getVectorInstrCost(Instruction::InsertElement, VecTy, CostKind,
                                   /*Index=*/0, PoisonValue::get(VecTy), *It);
       return InsertCost + (NeedShuffle
                                ? TTI->getShuffleCost(
@@ -7049,7 +7050,7 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
         }
       }
       return TTI->getVectorInstrCost(Instruction::ExtractElement, SrcVecTy,
-                                     *getExtractIndex(I));
+                                     CostKind, *getExtractIndex(I));
     };
     auto GetVectorCost = [](InstructionCost CommonCost) { return CommonCost; };
     return GetCostDiff(GetScalarCost, GetVectorCost);
@@ -7118,7 +7119,8 @@ InstructionCost BoUpSLP::getEntryCost(const TreeEntry *E,
 
     InstructionCost Cost = 0;
     Cost -= TTI->getScalarizationOverhead(SrcVecTy, DemandedElts,
-                                          /*Insert*/ true, /*Extract*/ false);
+                                          /*Insert*/ true, /*Extract*/ false,
+                                          CostKind);
 
     // First cost - resize to actual vector size if not identity shuffle or
     // need to shift the vector.
@@ -7997,6 +7999,7 @@ InstructionCost BoUpSLP::getTreeCost(ArrayRef<Value *> VectorizedVals) {
     // extend the extracted value back to the original type. Here, we account
     // for the extract and the added cost of the sign extend if needed.
     auto *VecTy = FixedVectorType::get(EU.Scalar->getType(), BundleWidth);
+    TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
     auto *ScalarRoot = VectorizableTree[0]->Scalars[0];
     if (MinBWs.count(ScalarRoot)) {
       auto *MinTy = IntegerType::get(F->getContext(), MinBWs[ScalarRoot].first);
@@ -8006,8 +8009,8 @@ InstructionCost BoUpSLP::getTreeCost(ArrayRef<Value *> VectorizedVals) {
       ExtractCost += TTI->getExtractWithExtendCost(Extend, EU.Scalar->getType(),
                                                    VecTy, EU.Lane);
     } else {
-      ExtractCost +=
-          TTI->getVectorInstrCost(Instruction::ExtractElement, VecTy, EU.Lane);
+      ExtractCost += TTI->getVectorInstrCost(Instruction::ExtractElement, VecTy,
+                                             CostKind, EU.Lane);
     }
   }
 
@@ -8081,7 +8084,7 @@ InstructionCost BoUpSLP::getTreeCost(ArrayRef<Value *> VectorizedVals) {
         EstimateShufflesCost);
     InstructionCost InsertCost = TTI->getScalarizationOverhead(
         cast<FixedVectorType>(FirstUsers[I].first->getType()), DemandedElts[I],
-        /*Insert*/ true, /*Extract*/ false);
+        /*Insert*/ true, /*Extract*/ false, TTI::TCK_RecipThroughput);
     Cost -= InsertCost;
   }
 
@@ -8429,9 +8432,10 @@ BoUpSLP::isGatherShuffledEntry(const TreeEntry *TE, ArrayRef<Value *> VL,
 InstructionCost BoUpSLP::getGatherCost(FixedVectorType *Ty,
                                        const APInt &ShuffledIndices,
                                        bool NeedToShuffle) const {
+  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
   InstructionCost Cost =
       TTI->getScalarizationOverhead(Ty, ~ShuffledIndices, /*Insert*/ true,
-                                    /*Extract*/ false);
+                                    /*Extract*/ false, CostKind);
   if (NeedToShuffle)
     Cost += TTI->getShuffleCost(TargetTransformInfo::SK_PermuteSingleSrc, Ty);
   return Cost;
