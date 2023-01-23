@@ -3621,8 +3621,6 @@ class SwitchInstProfUpdateWrapper {
   bool Changed = false;
 
 protected:
-  static MDNode *getProfBranchWeightsMD(const SwitchInst &SI);
-
   MDNode *buildProfBranchWeightsMD();
 
   void init();

@@ -134,8 +134,6 @@
 ! HELP-FC1-NEXT:  -fdefault-integer-8     Set the default integer kind to an 8 byte wide type
 ! HELP-FC1-NEXT:  -fdefault-real-8        Set the default real kind to an 8 byte wide type
 ! HELP-FC1-NEXT:  -fdump-vtable-layouts   Dump the layouts of all vtables that will be emitted in a translation unit
-! HELP-FC1-NEXT:  -fexperimental-assignment-tracking
-! HELP-FC1-NEXT:                          Enable assignment tracking debug info
 ! HELP-FC1-NEXT:  -fexperimental-sanitize-metadata=atomics
 ! HELP-FC1-NEXT:                          Emit PCs for atomic operations used by binary analysis sanitizers
 ! HELP-FC1-NEXT:  -fexperimental-sanitize-metadata=covered

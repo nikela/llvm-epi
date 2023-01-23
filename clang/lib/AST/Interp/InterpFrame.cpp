@@ -40,6 +40,10 @@ InterpFrame::InterpFrame(InterpState &S, const Function *Func,
       ID->Desc = Local.Desc;
       ID->IsActive = true;
       ID->Offset = sizeof(InlineDescriptor);
+      ID->IsBase = false;
+      ID->IsMutable = false;
+      ID->IsConst = false;
+      ID->IsInitialized = false;
     }
   }
 }
@@ -64,8 +68,6 @@ InterpFrame::InterpFrame(InterpState &S, const Function *Func, CodePtr RetPC)
 }
 
 InterpFrame::~InterpFrame() {
-  if (Func && Func->isConstructor() && This.isBaseClass())
-    This.initialize();
   for (auto &Param : Params)
     S.deallocate(reinterpret_cast<Block *>(Param.second.get()));
 }

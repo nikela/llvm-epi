@@ -59,11 +59,10 @@ public:
          const Fortran::lower::LoweringOptions &loweringOptions,
          const std::vector<Fortran::lower::EnvironmentDefault> &envDefaults,
          llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
-             funcAttrs,
-         llvm::StringRef filePath) {
+             funcAttrs) {
     return LoweringBridge(ctx, semanticsContext, defaultKinds, intrinsics,
                           targetCharacteristics, allCooked, triple, kindMap,
-                          loweringOptions, envDefaults, funcAttrs, filePath);
+                          loweringOptions, envDefaults, funcAttrs);
   }
 
   //===--------------------------------------------------------------------===//
@@ -140,8 +139,7 @@ private:
       const Fortran::lower::LoweringOptions &loweringOptions,
       const std::vector<Fortran::lower::EnvironmentDefault> &envDefaults,
       llvm::ArrayRef<std::pair<std::string, llvm::Optional<std::string>>>
-          funcAttrs,
-      llvm::StringRef filePath);
+          funcAttrs);
   LoweringBridge() = delete;
   LoweringBridge(const LoweringBridge &) = delete;
 

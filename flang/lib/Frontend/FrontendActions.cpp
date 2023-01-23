@@ -187,8 +187,7 @@ bool CodeGenAction::beginSourceFileAction() {
       ci.getInvocation().getSemanticsContext().targetCharacteristics(),
       ci.getParsing().allCooked(), ci.getInvocation().getTargetOpts().triple,
       kindMap, ci.getInvocation().getLoweringOpts(),
-      ci.getInvocation().getFrontendOpts().envDefaults, funcAttributes,
-      getCurrentFileOrBufferName());
+      ci.getInvocation().getFrontendOpts().envDefaults, funcAttributes);
 
   // Fetch module from lb, so we can set
   mlirModule = std::make_unique<mlir::ModuleOp>(lb.getModule());
@@ -762,11 +761,11 @@ void CodeGenAction::runOptimizationPipeline(llvm::raw_pwrite_stream &os) {
   llvm::PrintPassOptions printPassOpts;
   printPassOpts.Indent = /*opts.DebugPassStructure*/ false;
   printPassOpts.SkipAnalyses = /*opts.DebugPassStructure*/ false;
-  llvm::StandardInstrumentations si(
-      llvmModule->getContext(), opts.DebugPassManager);
+  std::optional<llvm::PGOOptions> pgoOpt;
+  llvm::StandardInstrumentations si(llvmModule->getContext(),
+                                    opts.DebugPassManager);
   si.registerCallbacks(pic, &fam);
 
-  std::optional<llvm::PGOOptions> pgoOpt;
   llvm::PassBuilder pb(tm.get(), pto, pgoOpt, &pic);
 
   // Register the AA manager first so that our version is the one used.
