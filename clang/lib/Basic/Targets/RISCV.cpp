@@ -223,7 +223,8 @@ static constexpr Builtin::Info BuiltinInfo[] = {
   {#ID, TYPE, ATTRS, FEATURE, HeaderDesc::NO_HEADER, ALL_LANGUAGES},
 #include "clang/Basic/BuiltinsRISCV.def"
 #define BUILTIN(ID, TYPE, ATTRS)                                               \
-  {"__builtin_epi_" #ID, TYPE, ATTRS, nullptr, ALL_LANGUAGES, nullptr},
+  {"__builtin_epi_" #ID,  TYPE, ATTRS, nullptr,                                \
+   HeaderDesc::NO_HEADER, ALL_LANGUAGES},
 #include "clang/Basic/BuiltinsEPI.def"
 };
 
