@@ -23,6 +23,17 @@ Non-comprehensive list of changes in this release
 * OpenMP target offloading will no longer support on 32-bit Linux systems.
   ``libomptarget`` and plugins will not be built on 32-bit systems.
 
+* OpenMP target offloading plugins are re-implemented and named as the NextGen
+  plugins. These have an internal unified interface that implement the common
+  behavior of all the plugins. This way, generic optimizations or features can
+  be implemented once, in the plugin interface, so all the plugins include them
+  with no additional effort. Also, all new plugins now behave more similarly and
+  debugging is simplified. The NextGen module includes the NVIDIA CUDA, the
+  AMDGPU and the GenericELF64bit plugins. These NextGen plugins are enabled by
+  default and replace the original ones. The new plugins can be disabled by
+  setting the environment variable ``LIBOMPTARGET_NEXTGEN_PLUGINS`` to ``false``
+  (default: ``true``).
+
 * Support for building the OpenMP runtime for Windows on AArch64 and ARM
   with MinGW based toolchains.
 
@@ -68,3 +79,22 @@ Non-comprehensive list of changes in this release
   maximum value for the per-thread re-enqueue counter (defaults to 5).
   ``OMPTARGET_QUERY_COUNT_BACKOFF_FACTOR`` defines the decrement factor applied
   to the counter when a target task is completed (defaults to 0.5).
+
+* GPU dynamic shared memory (aka. local data share (lds)) can now be allocated
+  per kernel via the ``ompx_dyn_cgroup_mem(<Bytes>)`` clause. For an example,
+  see https://openmp.llvm.org/design/Runtimes.html#dynamic-shared-memory.
+
+* OpenMP-Opt (run as part of O1/O2/O3) will more effectively lower GPU resource
+  usage and improve performance.
+
+* Support record-and-replay functionality for individual OpenMP offload kernels.
+  Enabling recording in the host OpenMP target runtime library stores per-kernel
+  the device image, device memory state, and kernel launching information. The
+  newly added command-line tool `llvm-omp-kernel-replay` replays kernel execution.
+  Environment variables control recording/replaying:
+   * LIBOMPTARGET_RECORDING=<0|1>, 0: disable recording (default), 1: enable recording
+   * LIBOMPTARGET_RR_DEVMEM_SIZE = <integer in bytes>, default 64GB, amount of device
+     memory to pre-allocate for storing/loading when recording/replaying
+   * LIBOMPTARGET_RR_SAVE_OUTPUT=<0|1>, 0: disable saving device memory post-kernel execution
+     (default), 1: enable saving device memory post-kernel execution (used for verification
+     with `llvm-omp-kernel-replay`)
