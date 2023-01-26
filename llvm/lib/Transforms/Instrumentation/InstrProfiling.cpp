@@ -833,12 +833,19 @@ static inline bool shouldUsePublicSymbol(Function *Fn) {
   if (Fn->hasLocalLinkage())
     return true;
 
+  // PGO + ThinLTO + CFI cause duplicate symbols to be introduced due to some
+  // unfavorable interaction between the new alias and the alias renaming done
+  // in LowerTypeTests under ThinLTO. For comdat functions that would normally
+  // be deduplicated, but the renaming scheme ends up preventing renaming, since
+  // it creates unique names for each alias, resulting in duplicated symbols. In
+  // the future, we should update the CFI related passes to migrate these
+  // aliases to the same module as the jump-table they refer to will be defined.
+  if (Fn->hasMetadata(LLVMContext::MD_type))
+    return true;
+
   // For comdat functions, an alias would need the same linkage as the original
-  // function and hidden visibility, and there is not point in adding an alias
-  // with identical linkage an visibility to avoid introducing relocations.
-  // This caused duplicate symbols to be introduced under the combination of
-  // PGO + ThinLTO + CFI, due to some unfavorable interaction between the new
-  // alias, and alias related transforms in GlobalOpt and LowerTypeTests.
+  // function and hidden visibility. There is no point in adding an alias with
+  // identical linkage an visibility to avoid introducing symbolic relocations.
   if (Fn->hasComdat() &&
       (Fn->getVisibility() == GlobalValue::VisibilityTypes::HiddenVisibility))
     return true;
@@ -876,6 +883,9 @@ static inline Constant *getFuncAddrForProfData(Function *Fn) {
     GA->setLinkage(Fn->getLinkage());
     GA->setVisibility(GlobalValue::VisibilityTypes::HiddenVisibility);
   }
+
+  // appendToCompilerUsed(*Fn->getParent(), {GA});
+
   return ConstantExpr::getBitCast(GA, Int8PtrTy);
 }
 
