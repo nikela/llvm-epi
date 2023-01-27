@@ -564,7 +564,7 @@ public:
   /// Generate call to setvl intrinsic with requested vector lenght and optional
   /// SEW and LMUL.
   // FIXME: Move this to VPlan
-  Value *getSetVL(Value *RVL, unsigned SEW = 0, unsigned LMUL = 0);
+  Value *getSetVL(Value *RVL);
 
   /// Returns true if vectorization prefers using predicated vector intrinsics.
   bool preferPredicatedVectorOps() const;
@@ -1044,6 +1044,38 @@ static Value *getRuntimeVFAsFloat(IRBuilderBase &B, Type *FTy,
   return B.CreateUIToFP(RuntimeVF, FTy);
 }
 
+static Value *createVSETVL(IRBuilderBase &Builder, Value *RVL, unsigned int SEW,
+                           int LMUL) {
+  const std::map<unsigned, unsigned> SEWArgMap = {
+      {8, 0}, {16, 1}, {32, 2}, {64, 3}};
+  const std::map<int, unsigned> LMULArgMap = {
+      {1, 0},
+      {2, 1},
+      {4, 2},
+      {8, 3},
+      // Fractional LMUL (-x means LMUL=1/x)
+      {-8, 5},
+      {-4, 6},
+      {-2, 7}};
+
+  assert(RVL->getType()->isIntegerTy() &&
+         "Requested vector length should be an integer.");
+  assert(SEWArgMap.find(SEW) != SEWArgMap.end() &&
+         "Cannot set vector length: Unsupported type.");
+  assert(LMULArgMap.find(LMUL) != LMULArgMap.end() &&
+         "Cannot set vector length: Unsupported LMUL.");
+
+  Value *RVLArg =
+      Builder.CreateZExtOrTrunc(RVL, Type::getInt64Ty(Builder.getContext()));
+  Constant *SEWArg = ConstantInt::get(Type::getInt64Ty(Builder.getContext()),
+                                      SEWArgMap.at(SEW));
+  Constant *LMULArg = ConstantInt::get(Type::getInt64Ty(Builder.getContext()),
+                                       LMULArgMap.at(LMUL));
+  Value *GVL = Builder.CreateIntrinsic(Intrinsic::EPIIntrinsics::epi_vsetvl, {},
+                                       {RVLArg, SEWArg, LMULArg});
+  return Builder.CreateZExtOrTrunc(GVL, RVL->getType());
+}
+
 void reportVectorizationFailure(const StringRef DebugMsg,
                                 const StringRef OREMsg, const StringRef ORETag,
                                 OptimizationRemarkEmitter *ORE, Loop *TheLoop,
@@ -1130,8 +1162,7 @@ void InnerLoopVectorizer::collectPoisonGeneratingRecipes(
   // Traverse all the recipes in the VPlan and collect the poison-generating
   // recipes in the backward slice starting at the address of a VPWidenRecipe or
   // VPInterleaveRecipe.
-  auto Iter = depth_first(
-      VPBlockRecursiveTraversalWrapper<VPBlockBase *>(State.Plan->getEntry()));
+  auto Iter = vp_depth_first_deep(State.Plan->getEntry());
   for (VPBasicBlock *VPBB : VPBlockUtils::blocksOnly<VPBasicBlock>(Iter)) {
     for (VPRecipeBase &Recipe : *VPBB) {
       if (auto *WidenRec = dyn_cast<VPWidenMemoryInstructionRecipe>(&Recipe)) {
@@ -1768,8 +1799,8 @@ private:
 
   /// Estimate the overhead of scalarizing an instruction. This is a
   /// convenience wrapper for the type-based getScalarizationOverhead API.
-  InstructionCost getScalarizationOverhead(Instruction *I,
-                                           ElementCount VF) const;
+  InstructionCost getScalarizationOverhead(Instruction *I, ElementCount VF,
+                                           TTI::TargetCostKind CostKind) const;
 
   /// Returns true if an artificially high cost for emulated masked memrefs
   /// should be used.
@@ -2006,13 +2037,15 @@ public:
   /// un-linked from the IR and is added back during vector code generation. If
   /// there is no vector code generation, the check blocks are removed
   /// completely.
-  void Create(Loop *L, const LoopAccessInfo &LAI,
-              const SCEVPredicate &UnionPred, ElementCount VF, unsigned IC) {
+  void Create(Loop *L, LoopVectorizationLegality &LVL,
+              PredicatedScalarEvolution &PSE, ElementCount VF, unsigned IC,
+              bool UseVL = false) {
 
     // Hard cutoff to limit compile-time increase in case a very large number of
     // runtime checks needs to be generated.
     // TODO: Skip cutoff if the loop is guaranteed to execute, e.g. due to
     // profile info.
+    const LoopAccessInfo &LAI = *LVL.getLAI();
     CostTooHigh =
         LAI.getNumRuntimePointerChecks() > VectorizeMemoryCheckThreshold;
     if (CostTooHigh)
@@ -2025,6 +2058,7 @@ public:
     // ensure the blocks are properly added to LoopInfo & DominatorTree. Those
     // may be used by SCEVExpander. The blocks will be un-linked from their
     // predecessors and removed from LI & DT at the end of the function.
+    const SCEVPredicate &UnionPred = PSE.getPredicate();
     if (!UnionPred.isAlwaysTrue()) {
       SCEVCheckBlock = SplitBlock(Preheader, Preheader->getTerminator(), DT, LI,
                                   nullptr, "vector.scevcheck");
@@ -2041,15 +2075,38 @@ public:
 
       auto DiffChecks = RtPtrChecking.getDiffChecks();
       if (DiffChecks) {
-        Value *RuntimeVF = nullptr;
-        MemRuntimeCheckCond = addDiffRuntimeChecks(
-            MemCheckBlock->getTerminator(), *DiffChecks, MemCheckExp,
-            [VF, &RuntimeVF](IRBuilderBase &B, unsigned Bits) {
-              if (!RuntimeVF)
-                RuntimeVF = getRuntimeVF(B, B.getIntNTy(Bits), VF);
-              return RuntimeVF;
-            },
-            IC);
+        if (UseVL) {
+          const SCEV *TripCountSCEV =
+              createTripCountSCEV(LVL.getWidestInductionType(), PSE);
+
+          Value *GVL = nullptr;
+          auto GetVL = [this, TripCountSCEV, VF, &GVL](IRBuilderBase &Builder,
+                                                       unsigned Bits) {
+            if (!GVL) {
+              Value *TripCount =
+                  SCEVExp.expandCodeFor(TripCountSCEV, TripCountSCEV->getType(),
+                                        &*Builder.GetInsertPoint());
+              GVL = createVSETVL(Builder, TripCount,
+                                 Builder.getInt64Ty()->getScalarSizeInBits(),
+                                 VF.getKnownMinValue());
+            }
+            return GVL;
+          };
+
+          MemRuntimeCheckCond =
+              addDiffRuntimeChecks(MemCheckBlock->getTerminator(), *DiffChecks,
+                                   MemCheckExp, GetVL, /*IC*/ 1);
+        } else {
+          Value *RuntimeVF = nullptr;
+          auto GetVF = [VF, &RuntimeVF](IRBuilderBase &B, unsigned Bits) {
+            if (!RuntimeVF)
+              RuntimeVF = getRuntimeVF(B, B.getIntNTy(Bits), VF);
+            return RuntimeVF;
+          };
+          MemRuntimeCheckCond =
+              addDiffRuntimeChecks(MemCheckBlock->getTerminator(), *DiffChecks,
+                                   MemCheckExp, GetVF, IC);
+        }
       } else {
         MemRuntimeCheckCond =
             addRuntimeChecks(MemCheckBlock->getTerminator(), L,
@@ -3550,8 +3607,9 @@ LoopVectorizationCostModel::getVectorCallCost(CallInst *CI, ElementCount VF,
   // to be vectors, so we need to extract individual elements from there,
   // execute VF scalar calls, and then gather the result into the vector return
   // value.
+  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
   InstructionCost ScalarCallCost =
-      TTI.getCallInstrCost(F, ScalarRetTy, ScalarTys, TTI::TCK_RecipThroughput);
+      TTI.getCallInstrCost(F, ScalarRetTy, ScalarTys, CostKind);
   if (VF.isScalar())
     return ScalarCallCost;
 
@@ -3562,7 +3620,8 @@ LoopVectorizationCostModel::getVectorCallCost(CallInst *CI, ElementCount VF,
 
   // Compute costs of unpacking argument values for the scalar calls and
   // packing the return values to a vector.
-  InstructionCost ScalarizationCost = getScalarizationOverhead(CI, VF);
+  InstructionCost ScalarizationCost =
+      getScalarizationOverhead(CI, VF, CostKind);
 
   InstructionCost Cost =
       ScalarCallCost * VF.getKnownMinValue() + ScalarizationCost;
@@ -3578,7 +3637,7 @@ LoopVectorizationCostModel::getVectorCallCost(CallInst *CI, ElementCount VF,
 
   // If the corresponding vector cost is cheaper, return its cost.
   InstructionCost VectorCallCost =
-      TTI.getCallInstrCost(nullptr, RetTy, Tys, TTI::TCK_RecipThroughput);
+      TTI.getCallInstrCost(nullptr, RetTy, Tys, CostKind);
   if (VectorCallCost < Cost) {
     NeedToScalarize = false;
     Cost = VectorCallCost;
@@ -4339,8 +4398,7 @@ void InnerLoopVectorizer::sinkScalarOperands(Instruction *PredInst) {
 
 void InnerLoopVectorizer::fixNonInductionPHIs(VPlan &Plan,
                                               VPTransformState &State) {
-  auto Iter = depth_first(
-      VPBlockRecursiveTraversalWrapper<VPBlockBase *>(Plan.getEntry()));
+  auto Iter = vp_depth_first_deep(Plan.getEntry());
   for (VPBasicBlock *VPBB : VPBlockUtils::blocksOnly<VPBasicBlock>(Iter)) {
     for (VPRecipeBase &P : VPBB->phis()) {
       VPWidenPHIRecipe *VPPhi = dyn_cast<VPWidenPHIRecipe>(&P);
@@ -4922,7 +4980,7 @@ LoopVectorizationCostModel::getDivRemSpeculationCost(Instruction *I,
 
     // The cost of insertelement and extractelement instructions needed for
     // scalarization.
-    ScalarizationCost += getScalarizationOverhead(I, VF);
+    ScalarizationCost += getScalarizationOverhead(I, VF, CostKind);
 
     // Scale the cost by the probability of executing the predicated blocks.
     // This assumes the predicated block for each vector lane is equally
@@ -6969,13 +7027,14 @@ InstructionCost LoopVectorizationCostModel::computePredInstDiscount(
 
     // Compute the scalarization overhead of needed insertelement instructions
     // and phi nodes.
+    TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
     if (isScalarWithPredication(I, VF) && !I->getType()->isVoidTy()) {
       ScalarCost += TTI.getScalarizationOverhead(
           cast<VectorType>(ToVectorTy(I->getType(), VF)),
-          APInt::getAllOnes(VF.getFixedValue()), true, false);
+          APInt::getAllOnes(VF.getFixedValue()), /*Insert*/ true,
+          /*Extract*/ false, CostKind);
       ScalarCost +=
-          VF.getFixedValue() *
-          TTI.getCFInstrCost(Instruction::PHI, TTI::TCK_RecipThroughput);
+          VF.getFixedValue() * TTI.getCFInstrCost(Instruction::PHI, CostKind);
     }
 
     // Compute the scalarization overhead of needed extractelement
@@ -6991,7 +7050,8 @@ InstructionCost LoopVectorizationCostModel::computePredInstDiscount(
         else if (needsExtract(J, VF)) {
           ScalarCost += TTI.getScalarizationOverhead(
               cast<VectorType>(ToVectorTy(J->getType(), VF)),
-              APInt::getAllOnes(VF.getFixedValue()), false, true);
+              APInt::getAllOnes(VF.getFixedValue()), /*Insert*/ false,
+              /*Extract*/ true, CostKind);
         }
       }
 
@@ -7163,14 +7223,15 @@ LoopVectorizationCostModel::getMemInstScalarizationCost(Instruction *I,
 
   // Don't pass *I here, since it is scalar but will actually be part of a
   // vectorized loop where the user of it is a vectorized instruction.
+  TTI::TargetCostKind CostKind = TTI::TCK_RecipThroughput;
   const Align Alignment = getLoadStoreAlignment(I);
-  Cost += VF.getKnownMinValue() *
-          TTI.getMemoryOpCost(I->getOpcode(), ValTy->getScalarType(), Alignment,
-                              AS, TTI::TCK_RecipThroughput);
+  Cost += VF.getKnownMinValue() * TTI.getMemoryOpCost(I->getOpcode(),
+                                                      ValTy->getScalarType(),
+                                                      Alignment, AS, CostKind);
 
   // Get the overhead of the extractelement and insertelement instructions
   // we might create due to scalarization.
-  Cost += getScalarizationOverhead(I, VF);
+  Cost += getScalarizationOverhead(I, VF, CostKind);
 
   // If we have a predicated load/store, it will need extra i1 extracts and
   // conditional branches, but may not be executed for each vector lane. Scale
@@ -7183,8 +7244,8 @@ LoopVectorizationCostModel::getMemInstScalarizationCost(Instruction *I,
         VectorType::get(IntegerType::getInt1Ty(ValTy->getContext()), VF);
     Cost += TTI.getScalarizationOverhead(
         Vec_i1Ty, APInt::getAllOnes(VF.getKnownMinValue()),
-        /*Insert=*/false, /*Extract=*/true);
-    Cost += TTI.getCFInstrCost(Instruction::Br, TTI::TCK_RecipThroughput);
+        /*Insert=*/false, /*Extract=*/true, CostKind);
+    Cost += TTI.getCFInstrCost(Instruction::Br, CostKind);
 
     if (useEmulatedMaskMemRefHack(I, VF))
       // Artificially setting to a high enough value to practically disable
@@ -7250,7 +7311,7 @@ LoopVectorizationCostModel::getUniformMemOpCost(Instruction *I,
          (isLoopInvariantStoreValue
               ? 0
               : TTI.getVectorInstrCost(Instruction::ExtractElement, VectorTy,
-                                       VF.getKnownMinValue() - 1));
+                                       CostKind, VF.getKnownMinValue() - 1));
 }
 
 InstructionCost
@@ -7565,9 +7626,8 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I,
   return VectorizationCostTy(C, TypeNotScalarized);
 }
 
-InstructionCost
-LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
-                                                     ElementCount VF) const {
+InstructionCost LoopVectorizationCostModel::getScalarizationOverhead(
+    Instruction *I, ElementCount VF, TTI::TargetCostKind CostKind) const {
 
   // There is no mechanism yet to create a scalable scalarization loop,
   // so this is currently Invalid.
@@ -7595,8 +7655,9 @@ LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
     // overhead currently models ElementCount.Min number of elements. This would
     // be changed in the future.
     Cost += TTI.getScalarizationOverhead(
-        cast<VectorType>(RetTy), APInt::getAllOnes(VF.getKnownMinValue()), true,
-        false);
+        cast<VectorType>(RetTy), APInt::getAllOnes(VF.getKnownMinValue()),
+        /*Insert*/ true,
+        /*Extract*/ false, CostKind);
 
   // Some targets keep addresses scalar.
   if (isa<LoadInst>(I) && !TTI.prefersVectorizedAddressing())
@@ -7617,7 +7678,7 @@ LoopVectorizationCostModel::getScalarizationOverhead(Instruction *I,
   for (auto *V : filterExtractingOperands(Ops, VF))
     Tys.push_back(MaybeVectorizeType(V->getType(), VF));
   return Cost + TTI.getOperandsScalarizationOverhead(
-                    filterExtractingOperands(Ops, VF), Tys);
+                    filterExtractingOperands(Ops, VF), Tys, CostKind);
 }
 
 const SCEV *LoopVectorizationCostModel::canUseStridedAccess(Instruction *I) {
@@ -7920,7 +7981,8 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
           VectorType::get(IntegerType::getInt1Ty(RetTy->getContext()), VF);
       return (
           TTI.getScalarizationOverhead(
-              Vec_i1Ty, APInt::getAllOnes(VF.getFixedValue()), false, true) +
+              Vec_i1Ty, APInt::getAllOnes(VF.getFixedValue()),
+              /*Insert*/ false, /*Extract*/ true, CostKind) +
           (TTI.getCFInstrCost(Instruction::Br, CostKind) * VF.getFixedValue()));
     } else if (I->getParent() == TheLoop->getLoopLatch() || VF.isScalar())
       // The back-edge branch will remain, as will all scalar branches.
@@ -10571,37 +10633,18 @@ void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
   }
 }
 
-Value *InnerLoopVectorizer::getSetVL(Value *RVL, unsigned SEW, unsigned LMUL) {
-  assert(RVL->getType()->isIntegerTy() &&
-         "Requested vector length should be an integer.");
-  Value *RVLArg =
-      Builder.CreateZExtOrTrunc(RVL, Type::getInt64Ty(Builder.getContext()));
+Value *InnerLoopVectorizer::getSetVL(Value *RVL) {
   unsigned SmallestType, WidestType;
   std::tie(SmallestType, WidestType) = Cost->getSmallestAndWidestTypes();
-  const std::map<unsigned, unsigned> SEWArgMap = {
-      {8, 0}, {16, 1}, {32, 2}, {64, 3}};
-  const std::map<int, unsigned> LMULArgMap = {
-      {1, 0}, {2, 1}, {4, 2}, {8, 3},
-      // Fractional LMUL (-x means LMUL=1/x)
-      {-8, 5}, {-4, 6}, {-2, 7}};
-  assert(SEWArgMap.find(WidestType) != SEWArgMap.end() &&
-         SEWArgMap.find(SmallestType) != SEWArgMap.end() &&
-         "Cannot set vector length: Unsupported type");
-  SEW = SEW ? SEW : SEWArgMap.at(WidestType);
-  int LMULVal =
+
+  int LMUL =
       (WidestType * VF.getKnownMinValue()) / TTI->getMaxElementWidth();
   // This might be fractional.
-  if (LMULVal == 0 && WidestType > 0 && VF.getKnownMinValue() > 0)
-    LMULVal = -(TTI->getMaxElementWidth() / (WidestType * VF.getKnownMinValue()));
-  LMUL = LMUL ? LMUL : LMULArgMap.at(LMULVal);
-  Constant *SEWArg =
-      ConstantInt::get(IntegerType::get(Builder.getContext(), 64), SEW);
-  Constant *LMULArg =
-      ConstantInt::get(IntegerType::get(Builder.getContext(), 64), LMUL);
+  if (LMUL == 0 && WidestType > 0 && VF.getKnownMinValue() > 0)
+    LMUL =
+        -(TTI->getMaxElementWidth() / (WidestType * VF.getKnownMinValue()));
 
-  Value *GVL = Builder.CreateIntrinsic(Intrinsic::EPIIntrinsics::epi_vsetvl, {},
-                                       {RVLArg, SEWArg, LMULArg});
-  return Builder.CreateZExtOrTrunc(GVL, RVL->getType());
+  return createVSETVL(Builder, RVL, WidestType, LMUL);
 }
 
 void VPWidenIntOrFpInductionRecipe::execute(VPTransformState &State) {
@@ -11855,7 +11898,9 @@ bool LoopVectorizePass::processLoop(Loop *L) {
     //  Optimistically generate runtime checks if they are needed. Drop them if
     //  they turn out to not be profitable.
     if (VF.Width.isVector() || SelectedIC > 1)
-      Checks.Create(L, *LVL.getLAI(), PSE.getPredicate(), VF.Width, SelectedIC);
+      Checks.Create(L, LVL, PSE, VF.Width, SelectedIC,
+                    /*UseVL*/ CM.foldTailByMasking() &&
+                        LVL.preferPredicatedVectorOps());
 
     // Check if it is profitable to vectorize with runtime checks.
     bool ForceVectorization =

@@ -1581,10 +1581,14 @@ class DeclContext {
 
     /// Indicates whether this struct has had its field layout randomized.
     uint64_t IsRandomized : 1;
+
+    /// True if a valid hash is stored in ODRHash. This should shave off some
+    /// extra storage and prevent CXXRecordDecl to store unused bits.
+    uint64_t ODRHash : 25;
   };
 
   /// Number of non-inherited bits in RecordDeclBitfields.
-  enum { NumRecordDeclBits = 16 };
+  enum { NumRecordDeclBits = 41 };
 
   /// Stores the bits used by OMPDeclareReductionDecl.
   /// If modified NumOMPDeclareReductionDeclBits and the accessor

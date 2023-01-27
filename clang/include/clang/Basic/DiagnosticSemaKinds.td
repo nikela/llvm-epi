@@ -5965,7 +5965,7 @@ def ext_excess_initializers_in_char_array_initializer : ExtWarn<
   "excess elements in char array initializer">,
   InGroup<ExcessInitializers>;
 def err_initializer_string_for_char_array_too_long : Error<
-  "initializer-string for char array is too long">;
+  "initializer-string for char array is too long, array size is %0 but initializer has size %1 (including the null terminating character)">;
 def ext_initializer_string_for_char_array_too_long : ExtWarn<
   "initializer-string for char array is too long">,
   InGroup<ExcessInitializers>;
@@ -10861,6 +10861,8 @@ def err_omp_depend_sink_source_with_modifier : Error<
   "depend modifier cannot be used with 'sink' or 'source' depend type">;
 def err_omp_depend_modifier_not_iterator : Error<
   "expected iterator specification as depend modifier">;
+def err_omp_map_modifier_not_iterator : Error<
+  "expected iterator specification as map modifier">;
 def err_omp_linear_ordered : Error<
   "'linear' clause cannot be specified along with 'ordered' clause with a parameter">;
 def err_omp_unexpected_schedule_modifier : Error<

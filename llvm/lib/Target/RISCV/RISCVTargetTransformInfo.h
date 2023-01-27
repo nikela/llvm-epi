@@ -43,26 +43,28 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
 
   /// Estimate a cost of Broadcast as an extract and sequence of insert
   /// operations.
-  InstructionCost getBroadcastShuffleOverhead(ScalableVectorType *VTy) {
+  InstructionCost getBroadcastShuffleOverhead(ScalableVectorType *VTy,
+                                              TTI::TargetCostKind CostKind) {
     InstructionCost MinCost = 0;
     // Broadcast cost is equal to the cost of extracting the zero'th element
     // plus the cost of inserting it into every element of the result vector.
     // FIXME: For scalable vectors for now we compute the MinCost based on Min
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
-    MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, 0, nullptr,
-                                  nullptr);
+    MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, CostKind, 0,
+                                  nullptr, nullptr);
 
     for (int i = 0, e = VTy->getElementCount().getKnownMinValue(); i < e; ++i) {
-      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i, nullptr,
-                                    nullptr);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, CostKind,
+                                    i, nullptr, nullptr);
     }
     return MinCost;
   }
 
   /// Estimate a cost of shuffle as a sequence of extract and insert
   /// operations.
-  InstructionCost getPermuteShuffleOverhead(ScalableVectorType *VTy) {
+  InstructionCost getPermuteShuffleOverhead(ScalableVectorType *VTy,
+                                            TTI::TargetCostKind CostKind) {
     InstructionCost MinCost = 0;
     // Shuffle cost is equal to the cost of extracting element from its argument
     // plus the cost of inserting them onto the result vector.
@@ -75,18 +77,20 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
     for (int i = 0, e = VTy->getElementCount().getKnownMinValue(); i < e; ++i) {
-      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i, nullptr,
-                                    nullptr);
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i,
-                                    nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, CostKind,
+                                    i, nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, CostKind,
+                                    i, nullptr, nullptr);
     }
     return MinCost;
   }
 
   /// Estimate a cost of subvector extraction as a sequence of extract and
   /// insert operations.
-  InstructionCost getExtractSubvectorOverhead(ScalableVectorType *VTy, int Index,
-                                       ScalableVectorType *SubVTy) {
+  InstructionCost getExtractSubvectorOverhead(ScalableVectorType *VTy,
+                                              TTI::TargetCostKind CostKind,
+                                              int Index,
+                                              ScalableVectorType *SubVTy) {
     assert(VTy && SubVTy && "Can only extract subvectors from vectors");
     // FIXME: We cannot assert index bounds of SubVTy at compile time.
 
@@ -99,17 +103,19 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
     for (unsigned i = 0; i != NumSubElts; ++i) {
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, i + Index,
-                                    nullptr, nullptr);
-      MinCost += getVectorInstrCost(Instruction::InsertElement, SubVTy, i,
-                                    nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, VTy, CostKind,
+                                    i + Index, nullptr, nullptr);
+      MinCost += getVectorInstrCost(Instruction::InsertElement, SubVTy,
+                                    CostKind, i, nullptr, nullptr);
     }
     return MinCost;
   }
 
   /// Estimate a cost of subvector insertion as a sequence of extract and
   /// insert operations.
-  InstructionCost getInsertSubvectorOverhead(ScalableVectorType *VTy, int Index,
+  InstructionCost getInsertSubvectorOverhead(ScalableVectorType *VTy,
+                                             TTI::TargetCostKind CostKind,
+                                             int Index,
                                              ScalableVectorType *SubVTy) {
     assert(VTy && SubVTy && "Can only insert subvectors into vectors");
     // FIXME: We cannot assert index bounds of SubVTy at compile time.
@@ -123,9 +129,9 @@ class RISCVTTIImpl : public BasicTTIImplBase<RISCVTTIImpl> {
     // number of elements but this does not represent the correct cost. This
     // would be fixed once the cost model has support for scalable vectors.
     for (unsigned i = 0; i != NumSubElts; ++i) {
-      MinCost += getVectorInstrCost(Instruction::ExtractElement, SubVTy, i,
+      MinCost += getVectorInstrCost(Instruction::ExtractElement, SubVTy, CostKind, i,
                                     nullptr, nullptr);
-      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, i + Index,
+      MinCost += getVectorInstrCost(Instruction::InsertElement, VTy, CostKind, i + Index,
                                     nullptr, nullptr);
     }
     return MinCost;
@@ -171,11 +177,14 @@ public:
   bool isLegalMaskedStore(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedGather(Type *DataType, MaybeAlign Alignment) const;
   bool isLegalMaskedScatter(Type *DataType, MaybeAlign Alignment) const;
-  InstructionCost getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
-                                                   ArrayRef<Type *> Tys);
+  InstructionCost
+  getOperandsScalarizationOverhead(ArrayRef<const Value *> Args,
+                                   ArrayRef<Type *> Tys,
+                                   TTI::TargetCostKind CostKind);
   InstructionCost getScalarizationOverhead(VectorType *InTy,
                                            const APInt &DemandedElts,
-                                           bool Insert, bool Extract);
+                                           bool Insert, bool Extract,
+                                           TTI::TargetCostKind CostKind);
   bool shouldMaximizeVectorBandwidth(TargetTransformInfo::RegisterKind K) const;
   ElementCount getMinimumVF(unsigned ElemWidth, bool IsScalable) const;
   unsigned getVectorRegisterUsage(TargetTransformInfo::RegisterKind K,
@@ -279,8 +288,9 @@ public:
                                      const Instruction *I = nullptr);
 
   using BaseT::getVectorInstrCost;
-  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val, unsigned Index,
-                                     Value *Op0, Value *Op1);
+  InstructionCost getVectorInstrCost(unsigned Opcode, Type *Val,
+                                     TTI::TargetCostKind CostKind,
+                                     unsigned Index, Value *Op0, Value *Op1);
 
   InstructionCost getArithmeticInstrCost(
       unsigned Opcode, Type *Ty, TTI::TargetCostKind CostKind,
@@ -490,6 +500,9 @@ public:
     }
     llvm_unreachable("unknown register class");
   }
+
+  bool isLSRCostLess(const TargetTransformInfo::LSRCost &C1,
+                     const TargetTransformInfo::LSRCost &C2);
 
   std::optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
                                                     IntrinsicInst &II) const;

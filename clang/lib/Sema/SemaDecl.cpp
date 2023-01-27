@@ -15268,9 +15268,15 @@ Decl *Sema::ActOnStartOfFunctionDef(Scope *FnBodyScope, Decl *D,
   }
 
   // C++ [module.import/6] external definitions are not permitted in header
-  // units.
+  // units.  Deleted and Defaulted functions are implicitly inline (but the
+  // inline state is not set at this point, so check the BodyKind explicitly).
+  // FIXME: Consider an alternate location for the test where the inlined()
+  // state is complete.
   if (getLangOpts().CPlusPlusModules && currentModuleIsHeaderUnit() &&
-      FD->getFormalLinkage() == Linkage::ExternalLinkage && !FD->isInlined()) {
+      FD->getFormalLinkage() == Linkage::ExternalLinkage &&
+      !FD->isInvalidDecl() && BodyKind != FnBodyKind::Delete &&
+      BodyKind != FnBodyKind::Default && !FD->isInlined()) {
+    assert(FD->isThisDeclarationADefinition());
     Diag(FD->getLocation(), diag::err_extern_def_in_header_unit);
     FD->setInvalidDecl();
   }
@@ -16192,6 +16198,24 @@ void Sema::AddKnownFunctionAttributes(FunctionDecl *FD) {
     case Builtin::BImalloc:
       FD->addAttr(AllocSizeAttr::CreateImplicit(Context, ParamIdx(1, FD),
                                                 ParamIdx(), FD->getLocation()));
+      break;
+    default:
+      break;
+    }
+
+    // Add lifetime attribute to std::move, std::fowrard et al.
+    switch (BuiltinID) {
+    case Builtin::BIaddressof:
+    case Builtin::BI__addressof:
+    case Builtin::BI__builtin_addressof:
+    case Builtin::BIas_const:
+    case Builtin::BIforward:
+    case Builtin::BImove:
+    case Builtin::BImove_if_noexcept:
+      if (ParmVarDecl *P = FD->getParamDecl(0u);
+          !P->hasAttr<LifetimeBoundAttr>())
+        P->addAttr(
+            LifetimeBoundAttr::CreateImplicit(Context, FD->getLocation()));
       break;
     default:
       break;

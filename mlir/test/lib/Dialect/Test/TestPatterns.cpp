@@ -244,16 +244,19 @@ public:
   MLIR_DEFINE_EXPLICIT_INTERNAL_INLINE_TYPE_ID(TestStrictPatternDriver)
 
   TestStrictPatternDriver() = default;
-  TestStrictPatternDriver(const TestStrictPatternDriver &other) = default;
+  TestStrictPatternDriver(const TestStrictPatternDriver &other) {
+    strictMode = other.strictMode;
+  }
 
   StringRef getArgument() const final { return "test-strict-pattern-driver"; }
   StringRef getDescription() const final {
-    return "Run strict mode of pattern driver";
+    return "Test strict mode of pattern driver";
   }
 
   void runOnOperation() override {
-    mlir::RewritePatternSet patterns(&getContext());
-    patterns.add<InsertSameOp, ReplaceWithNewOp, EraseOp>(&getContext());
+    MLIRContext *ctx = &getContext();
+    mlir::RewritePatternSet patterns(ctx);
+    patterns.add<InsertSameOp, ReplaceWithNewOp, EraseOp>(ctx);
     SmallVector<Operation *> ops;
     getOperation()->walk([&](Operation *op) {
       StringRef opName = op->getName().getStringRef();
@@ -263,12 +266,34 @@ public:
       }
     });
 
+    GreedyRewriteStrictness mode;
+    if (strictMode == "AnyOp") {
+      mode = GreedyRewriteStrictness::AnyOp;
+    } else if (strictMode == "ExistingAndNewOps") {
+      mode = GreedyRewriteStrictness::ExistingAndNewOps;
+    } else if (strictMode == "ExistingOps") {
+      mode = GreedyRewriteStrictness::ExistingOps;
+    } else {
+      llvm_unreachable("invalid strictness option");
+    }
+
     // Check if these transformations introduce visiting of operations that
     // are not in the `ops` set (The new created ops are valid). An invalid
     // operation will trigger the assertion while processing.
-    (void)applyOpPatternsAndFold(ArrayRef(ops), std::move(patterns),
-                                 /*strict=*/true);
+    bool changed = false;
+    bool allErased = false;
+    (void)applyOpPatternsAndFold(ArrayRef(ops), std::move(patterns), mode,
+                                 &changed, &allErased);
+    Builder b(ctx);
+    getOperation()->setAttr("pattern_driver_changed", b.getBoolAttr(changed));
+    getOperation()->setAttr("pattern_driver_all_erased",
+                            b.getBoolAttr(allErased));
   }
+
+  Option<std::string> strictMode{
+      *this, "strictness",
+      llvm::cl::desc("Can be {AnyOp, ExistingAndNewOps, ExistingOps}"),
+      llvm::cl::init("AnyOp")};
 
 private:
   // New inserted operation is valid for further transformation.
@@ -840,7 +865,7 @@ struct TestLegalizePatternDriver
   TestLegalizePatternDriver(ConversionMode mode) : mode(mode) {}
 
   void getDependentDialects(DialectRegistry &registry) const override {
-    registry.insert<func::FuncDialect>();
+    registry.insert<func::FuncDialect, test::TestDialect>();
   }
 
   void runOnOperation() override {

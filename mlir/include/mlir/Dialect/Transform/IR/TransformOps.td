@@ -24,7 +24,7 @@ def AlternativesOp : TransformDialectOp<"alternatives",
         ["getSuccessorEntryOperands", "getSuccessorRegions",
          "getRegionInvocationBounds"]>,
      DeclareOpInterfaceMethods<TransformOpInterface>,
-     FunctionalStyleTransformOpTrait, MemoryEffectsOpInterface,
+     DeclareOpInterfaceMethods<MemoryEffectsOpInterface>,
      IsolatedFromAbove, PossibleTopLevelTransformOpTrait,
      SingleBlockImplicitTerminator<"::mlir::transform::YieldOp">]> {
   let summary = "Attempts sequences of transforms until one succeeds";
@@ -225,7 +225,7 @@ def GetProducerOfOperand : TransformDialectOp<"get_producer_of_operand",
 
   let arguments = (ins TransformHandleTypeInterface:$target,
                        I64Attr:$operand_number);
-  let results = (outs TransformHandleTypeInterface:$parent);
+  let results = (outs TransformHandleTypeInterface:$producer);
   let assemblyFormat = "$target `[` $operand_number `]` attr-dict `:` "
                        "functional-type(operands, results)";
 }
@@ -371,8 +371,8 @@ def ReplicateOp : TransformDialectOp<"replicate",
   }];
 
   let arguments = (ins TransformHandleTypeInterface:$pattern,
-                       Variadic<TransformHandleTypeInterface>:$handles);
-  let results = (outs Variadic<TransformHandleTypeInterface>:$replicated);
+                       Variadic<Transform_AnyHandleOrParamType>:$handles);
+  let results = (outs Variadic<Transform_AnyHandleOrParamType>:$replicated);
   let assemblyFormat = "`num` `(` $pattern `)` $handles attr-dict `:` "
                        "type($pattern) `,` type($handles)";
 }
