@@ -78,6 +78,7 @@
 #include "llvm/ADT/StringExtras.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/Triple.h"
+#include "llvm/Frontend/OpenMP/OMPIRBuilder.h"
 #include "llvm/Support/Capacity.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/Compiler.h"
@@ -2086,6 +2087,7 @@ TypeInfo ASTContext::getTypeInfoImpl(const Type *T) const {
       Width = VT->isExtVectorBoolType() ? VT->getNumElements()
                                         : EltInfo.Width * VT->getNumElements();
       // Enforce at least byte alignment.
+      Width = std::max<unsigned>(8, Width);
       Align = std::max<unsigned>(8, Width);
     }
 
@@ -2551,7 +2553,8 @@ unsigned ASTContext::getTypeUnadjustedAlign(const Type *T) const {
 }
 
 unsigned ASTContext::getOpenMPDefaultSimdAlign(QualType T) const {
-  unsigned SimdAlign = getTargetInfo().getSimdDefaultAlign();
+  unsigned SimdAlign = llvm::OpenMPIRBuilder::getOpenMPDefaultSimdAlign(
+      getTargetInfo().getTriple(), Target->getTargetOpts().FeatureMap);
   return SimdAlign;
 }
 
@@ -6878,26 +6881,29 @@ ASTContext::getCanonicalTemplateArgument(const TemplateArgument &Arg) const {
 
     case TemplateArgument::Declaration: {
       auto *D = cast<ValueDecl>(Arg.getAsDecl()->getCanonicalDecl());
-      return TemplateArgument(D, getCanonicalType(Arg.getParamTypeForDecl()));
+      return TemplateArgument(D, getCanonicalType(Arg.getParamTypeForDecl()),
+                              Arg.getIsDefaulted());
     }
 
     case TemplateArgument::NullPtr:
       return TemplateArgument(getCanonicalType(Arg.getNullPtrType()),
-                              /*isNullPtr*/true);
+                              /*isNullPtr*/ true, Arg.getIsDefaulted());
 
     case TemplateArgument::Template:
-      return TemplateArgument(getCanonicalTemplateName(Arg.getAsTemplate()));
+      return TemplateArgument(getCanonicalTemplateName(Arg.getAsTemplate()),
+                              Arg.getIsDefaulted());
 
     case TemplateArgument::TemplateExpansion:
-      return TemplateArgument(getCanonicalTemplateName(
-                                         Arg.getAsTemplateOrTemplatePattern()),
-                              Arg.getNumTemplateExpansions());
+      return TemplateArgument(
+          getCanonicalTemplateName(Arg.getAsTemplateOrTemplatePattern()),
+          Arg.getNumTemplateExpansions(), Arg.getIsDefaulted());
 
     case TemplateArgument::Integral:
       return TemplateArgument(Arg, getCanonicalType(Arg.getIntegralType()));
 
     case TemplateArgument::Type:
-      return TemplateArgument(getCanonicalType(Arg.getAsType()));
+      return TemplateArgument(getCanonicalType(Arg.getAsType()),
+                              /*isNullPtr*/ false, Arg.getIsDefaulted());
 
     case TemplateArgument::Pack: {
       bool AnyNonCanonArgs = false;

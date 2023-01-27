@@ -118,6 +118,7 @@ static const RISCVSupportedExtension SupportedExperimentalExtensions[] = {
     {"zihintntl", RISCVExtensionVersion{0, 2}},
 
     {"zca", RISCVExtensionVersion{0, 70}},
+    {"zcb", RISCVExtensionVersion{0, 70}},
     {"zcd", RISCVExtensionVersion{0, 70}},
     {"zcf", RISCVExtensionVersion{0, 70}},
     {"zvfh", RISCVExtensionVersion{0, 1}},
@@ -830,6 +831,7 @@ static const char *ImpliedExtsZkn[] = {"zbkb", "zbkc", "zbkx",
 static const char *ImpliedExtsZks[] = {"zbkb", "zbkc", "zbkx", "zksed", "zksh"};
 static const char *ImpliedExtsZvfh[] = {"zve32f"};
 static const char *ImpliedExtsXTHeadVdot[] = {"v"};
+static const char *ImpliedExtsZcb[] = {"zca"};
 
 struct ImpliedExtsEntry {
   StringLiteral Name;
@@ -846,6 +848,7 @@ struct ImpliedExtsEntry {
 static constexpr ImpliedExtsEntry ImpliedExts[] = {
     {{"v"}, {ImpliedExtsV}},
     {{"xtheadvdot"}, {ImpliedExtsXTHeadVdot}},
+    {{"zcb"}, {ImpliedExtsZcb}},
     {{"zdinx"}, {ImpliedExtsZdinx}},
     {{"zepi"}, {ImpliedExtsZepi}},
     {{"zfh"}, {ImpliedExtsZfh}},
