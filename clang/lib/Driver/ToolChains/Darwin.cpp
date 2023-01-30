@@ -2121,7 +2121,7 @@ void Darwin::AddDeploymentTarget(DerivedArgList &Args) const {
     llvm::FileRemover OutputRemover(OutputFile.c_str());
     std::optional<llvm::StringRef> Redirects[] = {{""}, OutputFile.str(), {""}};
 
-    Optional<StringRef> SDKName = std::nullopt;
+    std::optional<StringRef> SDKName = std::nullopt;
     switch (getTriple().getOS()) {
     case llvm::Triple::OSType::WatchOS:
       if (getTriple().isSimulatorEnvironment())
