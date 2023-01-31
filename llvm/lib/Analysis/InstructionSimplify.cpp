@@ -4598,6 +4598,9 @@ static Value *simplifySelectInst(Value *Cond, Value *TrueVal, Value *FalseVal,
       // !(X || Y) && X --> false (commuted 2 ways)
       if (match(Cond, m_Not(m_c_LogicalOr(m_Specific(TrueVal), m_Value()))))
         return ConstantInt::getFalse(Cond->getType());
+      // X && !(X || Y) --> false (commuted 2 ways)
+      if (match(TrueVal, m_Not(m_c_LogicalOr(m_Specific(Cond), m_Value()))))
+        return ConstantInt::getFalse(Cond->getType());
 
       // (X || Y) && Y --> Y (commuted 2 ways)
       if (match(Cond, m_c_LogicalOr(m_Specific(TrueVal), m_Value())))
@@ -4618,6 +4621,13 @@ static Value *simplifySelectInst(Value *Cond, Value *TrueVal, Value *FalseVal,
 
     // Match patterns that end in logical-or.
     if (match(TrueVal, m_One())) {
+      // !(X && Y) || X --> true (commuted 2 ways)
+      if (match(Cond, m_Not(m_c_LogicalAnd(m_Specific(FalseVal), m_Value()))))
+        return ConstantInt::getTrue(Cond->getType());
+      // X || !(X && Y) --> true (commuted 2 ways)
+      if (match(FalseVal, m_Not(m_c_LogicalAnd(m_Specific(Cond), m_Value()))))
+        return ConstantInt::getTrue(Cond->getType());
+
       // (X && Y) || Y --> Y (commuted 2 ways)
       if (match(Cond, m_c_LogicalAnd(m_Specific(FalseVal), m_Value())))
         return FalseVal;

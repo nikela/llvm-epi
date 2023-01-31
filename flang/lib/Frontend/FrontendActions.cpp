@@ -860,7 +860,8 @@ void CodeGenAction::executeAction() {
   llvmModule->setTargetTriple(theTriple);
   llvmModule->setDataLayout(tm->createDataLayout());
 
-  runOptimizationPipeline(*os);
+  // Run LLVM's middle-end (i.e. the optimizer).
+  runOptimizationPipeline(ci.isOutputStreamNull() ? *os : ci.getOutputStream());
 
   if (action == BackendActionTy::Backend_EmitLL) {
     llvmModule->print(ci.isOutputStreamNull() ? *os : ci.getOutputStream(),
