@@ -241,20 +241,6 @@ void VPInstruction::generateInstruction(VPTransformState &State,
     State.set(this, V, Part);
     break;
   }
-  case VPInstruction::VPICmpULE: {
-    Value *IV = State.get(getOperand(0), Part);
-    Value *TC = State.get(getOperand(1), Part);
-    Value *EVL = State.get(getOperand(2), Part);
-    Value *AllOnes = Builder.getTrueVector(
-        cast<VectorType>(IV->getType())->getElementCount());
-    LLVMContext &Ctx = Builder.getContext();
-    Value *PredArg = MetadataAsValue::get(Ctx, MDString::get(Ctx, "ule"));
-    Value *V = Builder.CreateIntrinsic(Intrinsic::vp_icmp, {IV->getType()},
-                                       {IV, TC, PredArg, AllOnes, EVL}, nullptr,
-                                       "vp.icmp.ule");
-    State.set(this, V, Part);
-    break;
-  }
   case Instruction::Select: {
     Value *Cond = State.get(getOperand(0), Part);
     Value *Op1 = State.get(getOperand(1), Part);
@@ -487,9 +473,6 @@ void VPInstruction::print(raw_ostream &O, const Twine &Indent,
   case VPInstruction::ICmpULE:
     O << "icmp ule";
     break;
-  case VPInstruction::VPICmpULE:
-    O << "vp icmp ule";
-    break;
   case VPInstruction::SLPLoad:
     O << "combined load";
     break;
@@ -698,7 +681,7 @@ void VPPredicatedWidenCallRecipe::execute(VPTransformState &State) {
       unsigned MaskIdx = Args.size() - 2;
       VPValue *VPMask = getOperand(MaskIdx);
       if (isa<VPInstruction>(VPMask) &&
-          cast<VPInstruction>(VPMask)->getOpcode() == VPInstruction::VPICmpULE)
+          cast<VPInstruction>(VPMask)->getOpcode() == VPInstruction::ICmpULE)
         Args[MaskIdx] = State.Builder.getTrueVector(State.VF);
     }
 

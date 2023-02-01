@@ -819,7 +819,6 @@ public:
     PredicatedFirstOrderRecurrenceSplice, // Same as above but predicated
     Not,
     ICmpULE,
-    VPICmpULE,
     SLPLoad,
     SLPStore,
     ActiveLaneMask,
