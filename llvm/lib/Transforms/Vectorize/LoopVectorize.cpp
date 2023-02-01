@@ -4498,7 +4498,8 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
     // The outermost mask can be lowered as an all ones mask when using EVL.
     if (isa<VPInstruction>(BlockInMask) &&
-        cast<VPInstruction>(BlockInMask)->getOpcode() == VPInstruction::ICmpULE)
+        cast<VPInstruction>(BlockInMask)->getOpcode() ==
+            VPInstruction::VPICmpULE)
       return Builder.getTrueVector(EC);
     else
       return State.get(BlockInMask, Part);
@@ -9087,7 +9088,12 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
                                        nullptr, "active.lane.mask");
     } else {
       VPValue *BTC = Plan->getOrCreateBackedgeTakenCount();
-      BlockMask = Builder.createNaryOp(VPInstruction::ICmpULE, {IV, BTC});
+      if (preferPredicatedWiden()) {
+        BlockMask = Builder.createNaryOp(VPInstruction::VPICmpULE,
+                                         {IV, BTC, getOrCreateEVL(Plan)});
+      } else {
+        BlockMask = Builder.createNaryOp(VPInstruction::ICmpULE, {IV, BTC});
+      }
     }
     return BlockMaskCache[BB] = BlockMask;
   }
@@ -11169,7 +11175,7 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     // The outermost mask can be lowered as an all ones mask when using
     // EVL.
     if (isa<VPInstruction>(getMask()) &&
-        cast<VPInstruction>(getMask())->getOpcode() == VPInstruction::ICmpULE)
+        cast<VPInstruction>(getMask())->getOpcode() == VPInstruction::VPICmpULE)
       return Builder.getTrueVector(EC);
 
     return BlockInMaskParts[Part];
