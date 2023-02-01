@@ -72,8 +72,8 @@ define dso_local signext i32 @exactMatch(ptr nocapture noundef readonly %A, ptr 
 ; CHECK-NEXT:    [[EVL_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP15]], i64 0
 ; CHECK-NEXT:    [[EVL_SPLAT:%.*]] = shufflevector <vscale x 1 x i32> [[EVL_SPLATINSERT]], <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[STEP_VEC:%.*]] = call <vscale x 1 x i32> @llvm.experimental.stepvector.nxv1i32()
-; CHECK-NEXT:    [[VP_EVL_MASK:%.*]] = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i32(<vscale x 1 x i32> [[STEP_VEC]], <vscale x 1 x i32> [[EVL_SPLAT]], metadata !"ule", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP15]])
-; CHECK-NEXT:    [[TMP26]] = select <vscale x 1 x i1> [[VP_EVL_MASK]], <vscale x 1 x i32> [[VP_OP13]], <vscale x 1 x i32> [[VEC_PHI]]
+; CHECK-NEXT:    [[EVL_MASK:%.*]] = icmp ult <vscale x 1 x i32> [[STEP_VEC]], [[EVL_SPLAT]]
+; CHECK-NEXT:    [[TMP26]] = select <vscale x 1 x i1> [[EVL_MASK]], <vscale x 1 x i32> [[VP_OP13]], <vscale x 1 x i32> [[VEC_PHI]]
 ; CHECK-NEXT:    [[TMP27:%.*]] = zext i32 [[TMP15]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP27]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 1 x i64> [[VEC_IND]], [[DOTSPLAT2]]
@@ -222,8 +222,8 @@ define dso_local signext i32 @multipleMatches(ptr nocapture noundef readonly %A,
 ; CHECK-NEXT:    [[EVL_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP20]], i64 0
 ; CHECK-NEXT:    [[EVL_SPLAT:%.*]] = shufflevector <vscale x 1 x i32> [[EVL_SPLATINSERT]], <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[STEP_VEC:%.*]] = call <vscale x 1 x i32> @llvm.experimental.stepvector.nxv1i32()
-; CHECK-NEXT:    [[VP_EVL_MASK:%.*]] = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i32(<vscale x 1 x i32> [[STEP_VEC]], <vscale x 1 x i32> [[EVL_SPLAT]], metadata !"ule", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP20]])
-; CHECK-NEXT:    [[TMP30]] = select <vscale x 1 x i1> [[VP_EVL_MASK]], <vscale x 1 x i32> [[VP_OP23]], <vscale x 1 x i32> [[VEC_PHI]]
+; CHECK-NEXT:    [[EVL_MASK:%.*]] = icmp ult <vscale x 1 x i32> [[STEP_VEC]], [[EVL_SPLAT]]
+; CHECK-NEXT:    [[TMP30]] = select <vscale x 1 x i1> [[EVL_MASK]], <vscale x 1 x i32> [[VP_OP23]], <vscale x 1 x i32> [[VEC_PHI]]
 ; CHECK-NEXT:    [[TMP31:%.*]] = zext i32 [[TMP20]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP31]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 1 x i64> [[VEC_IND]], [[DOTSPLAT3]]
@@ -356,8 +356,8 @@ define dso_local signext i32 @mostGenericMatch(ptr nocapture noundef readonly %A
 ; CHECK-NEXT:    [[EVL_SPLATINSERT:%.*]] = insertelement <vscale x 1 x i32> poison, i32 [[TMP15]], i64 0
 ; CHECK-NEXT:    [[EVL_SPLAT:%.*]] = shufflevector <vscale x 1 x i32> [[EVL_SPLATINSERT]], <vscale x 1 x i32> poison, <vscale x 1 x i32> zeroinitializer
 ; CHECK-NEXT:    [[STEP_VEC:%.*]] = call <vscale x 1 x i32> @llvm.experimental.stepvector.nxv1i32()
-; CHECK-NEXT:    [[VP_EVL_MASK:%.*]] = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i32(<vscale x 1 x i32> [[STEP_VEC]], <vscale x 1 x i32> [[EVL_SPLAT]], metadata !"ule", <vscale x 1 x i1> shufflevector (<vscale x 1 x i1> insertelement (<vscale x 1 x i1> poison, i1 true, i64 0), <vscale x 1 x i1> poison, <vscale x 1 x i32> zeroinitializer), i32 [[TMP15]])
-; CHECK-NEXT:    [[TMP25]] = select <vscale x 1 x i1> [[VP_EVL_MASK]], <vscale x 1 x i32> [[VP_OP14]], <vscale x 1 x i32> [[VEC_PHI]]
+; CHECK-NEXT:    [[EVL_MASK:%.*]] = icmp ult <vscale x 1 x i32> [[STEP_VEC]], [[EVL_SPLAT]]
+; CHECK-NEXT:    [[TMP25]] = select <vscale x 1 x i1> [[EVL_MASK]], <vscale x 1 x i32> [[VP_OP14]], <vscale x 1 x i32> [[VEC_PHI]]
 ; CHECK-NEXT:    [[TMP26:%.*]] = zext i32 [[TMP15]] to i64
 ; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP26]]
 ; CHECK-NEXT:    [[VEC_IND_NEXT]] = add <vscale x 1 x i64> [[VEC_IND]], [[DOTSPLAT2]]

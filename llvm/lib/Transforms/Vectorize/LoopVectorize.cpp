@@ -10634,16 +10634,8 @@ void VPWidenEVLMaskRecipe::execute(VPTransformState &State) {
     Value *StepVec = State.Builder.CreateIntrinsic(
         Intrinsic::experimental_stepvector, EVLSplat->getType(), {}, nullptr,
         "step.vec");
-
-    LLVMContext &Ctx = State.Builder.getContext();
-    Value *PredArg = MetadataAsValue::get(Ctx, MDString::get(Ctx, "ule"));
-    Value *AllOnes = State.Builder.getTrueVector(
-        cast<VectorType>(StepVec->getType())->getElementCount());
-    Value *V = State.Builder.CreateIntrinsic(
-        Intrinsic::vp_icmp, {EVLSplat->getType()},
-        {StepVec, EVLSplat, PredArg, AllOnes, EVL}, nullptr, "vp.evl.mask");
-
-    State.set(this, V, Part);
+    Value *EVLMask = State.Builder.CreateICmpULT(StepVec, EVLSplat, "evl.mask");
+    State.set(getEVLMask(), EVLMask, Part);
   }
 }
 
