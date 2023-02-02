@@ -60,6 +60,10 @@ Bug Fixes
 - Fix crash when diagnosing incorrect usage of ``_Nullable`` involving alias
   templates. This fixes
   `Issue 60344 <https://github.com/llvm/llvm-project/issues/60344>`_.
+- Fix confusing warning message when ``/clang:-x`` is passed in ``clang-cl``
+  driver mode and emit an error which suggests using ``/TC`` or ``/TP``
+  ``clang-cl`` options instead. This fixes
+  `Issue 59307 <https://github.com/llvm/llvm-project/issues/59307>`_.
 
 Improvements to Clang's diagnostics
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -72,8 +76,6 @@ Non-comprehensive list of changes in this release
 - Clang now saves the address of ABI-indirect function parameters on the stack,
   improving the debug information available in programs compiled without
   optimizations.
-- Clang now supports ``__builtin_nondeterministic_value`` that returns a
-  nondeterministic value of the same type as the provided argument.
 
 New Compiler Flags
 ------------------
