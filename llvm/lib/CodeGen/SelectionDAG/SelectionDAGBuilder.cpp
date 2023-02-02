@@ -7931,6 +7931,17 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
     setValue(&VPIntrin, Result);
     break;
   }
+  case ISD::EXPERIMENTAL_VP_STEPVECTOR: {
+    assert(OpValues.size() == 2 && "Unexpected number of operands");
+    EVT RetVT = ValueVTs[0];
+    APInt One(RetVT.getScalarSizeInBits(), 1);
+    SDValue Step =
+        DAG.getTargetConstant(One, DL, RetVT.getVectorElementType());
+    SDValue Result =
+        DAG.getNode(Opcode, DL, VTs, Step, OpValues[0], OpValues[1]);
+    setValue(&VPIntrin, Result);
+    break;
+  }
   }
 }
 
