@@ -765,27 +765,6 @@ public:
   }
 };
 
-// inline bool VPUser::classof(const VPDef *Def) {
-//   return Def->getVPDefID() == VPRecipeBase::VPInstructionSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenCallSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenCallSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenSelectSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenSelectSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenGEPSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPBlendSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedBlendSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPInterleaveSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPReplicateSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPReductionSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPBranchOnMaskSC ||
-//          Def->getVPDefID() ==
-//              VPRecipeBase::VPPredicatedWidenMemoryInstructionSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPEVLPHISC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenMemoryInstructionSC;
-// }
-
 // Helper macro to define common classof implementations for recipes.
 #define VP_CLASSOF_IMPL(VPDefID)                                               \
   static inline bool classof(const VPDef *D) {                                 \
