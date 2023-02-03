@@ -98,6 +98,8 @@ Instruction *InstCombinerImpl::visitVPInst(VPIntrinsic *VPI) {
   switch (VPI->getIntrinsicID()) {
   default:
     break;
+  case Intrinsic::vp_icmp:
+    return visitVPICmp(VPI);
   case Intrinsic::vp_mul:
     return visitVPMul(VPI);
   case Intrinsic::vp_select:
@@ -171,6 +173,28 @@ InstCombinerImpl::visitVPGatherScatterOnlyGEP(GetElementPtrInst &GEP) {
       VB.createVectorInstruction(Instruction::IntToPtr, GEPType, {Add});
 
   return replaceInstUsesWith(GEP, IntToPtr);
+}
+
+Instruction *InstCombinerImpl::visitVPICmp(VPIntrinsic *VPICmp) {
+  auto *VPCmp = cast<VPCmpIntrinsic>(VPICmp);
+  if (VPCmp->getPredicate() == ICmpInst::ICMP_NE) {
+    if (match(VPCmp->getOperand(1), m_Zero())) {
+      // If first operand is just a zext of a mask, this then ICmp is just a
+      // truncation which results in that same mask.
+      // In order to be conservative, we require that both mask and vl are the
+      // same for this icmp and the zext.
+      auto *Op0 = dyn_cast<VPIntrinsic>(VPCmp->getOperand(0));
+      if (Op0 && Op0->getIntrinsicID() == Intrinsic::vp_zext &&
+          Op0->getOperand(0)->getType()->getScalarSizeInBits() == 1) {
+        // Here we have a expand/truncate sequence over a mask vector.
+        if (Op0->getMaskParam() == VPCmp->getMaskParam() &&
+            Op0->getVectorLengthParam() == VPCmp->getVectorLengthParam())
+          return replaceInstUsesWith(*VPICmp, Op0->getOperand(0));
+      }
+    }
+  }
+
+  return nullptr;
 }
 
 Instruction *InstCombinerImpl::visitVPMul(VPIntrinsic *VPMul) {
