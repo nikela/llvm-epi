@@ -172,8 +172,8 @@ public:
     return false;
   }
 
-  PredicationStyle emitGetActiveLaneMask() const {
-    return PredicationStyle::None;
+  TailFoldingStyle getPreferredTailFoldingStyle() const {
+    return TailFoldingStyle::DataWithoutLaneMask;
   }
 
   std::optional<Instruction *> instCombineIntrinsic(InstCombiner &IC,
