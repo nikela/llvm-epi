@@ -4498,7 +4498,8 @@ void InnerLoopVectorizer::widenPredicatedInstruction(Instruction &I,
   auto MaskValue = [&](unsigned Part, ElementCount EC) -> Value * {
     // The outermost mask can be lowered as an all ones mask when using EVL.
     if (isa<VPInstruction>(BlockInMask) &&
-        cast<VPInstruction>(BlockInMask)->getOpcode() == VPInstruction::ICmpULE)
+        cast<VPInstruction>(BlockInMask)->getOpcode() ==
+            VPInstruction::VPICmpULE)
       return Builder.getTrueVector(EC);
     else
       return State.get(BlockInMask, Part);
@@ -5667,7 +5668,7 @@ FixedScalableVFPair LoopVectorizationCostModel::computeFeasibleMaxVF(
   // the memory accesses that is most restrictive (involved in the smallest
   // dependence distance).
   unsigned MaxSafeElements =
-      PowerOf2Floor(Legal->getMaxSafeVectorWidthInBits() / WidestType);
+      llvm::bit_floor(Legal->getMaxSafeVectorWidthInBits() / WidestType);
 
   auto MaxSafeFixedVF = ElementCount::getFixed(MaxSafeElements);
   auto MaxSafeScalableVF = getMaxLegalScalableVF(MaxSafeElements);
@@ -5931,7 +5932,7 @@ ElementCount LoopVectorizationCostModel::getMaximizedVFForTarget(
   // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
   // Note that both WidestRegister and WidestType may not be a powers of 2.
   auto MaxVectorElementCount = ElementCount::get(
-      PowerOf2Floor(WidestRegister.getKnownMinValue() / WidestType),
+      llvm::bit_floor(WidestRegister.getKnownMinValue() / WidestType),
       ComputeScalableMaxVF);
   MaxVectorElementCount = MinVF(MaxVectorElementCount, MaxSafeVF);
   LLVM_DEBUG(dbgs() << "LV: The Widest register safe to use is: "
@@ -5958,7 +5959,7 @@ ElementCount LoopVectorizationCostModel::getMaximizedVFForTarget(
     // power of two which doesn't exceed TC.
     // If MaxVectorElementCount is scalable, we only fall back on a fixed VF
     // when the TC is less than or equal to the known number of lanes.
-    auto ClampedConstTripCount = PowerOf2Floor(ConstTripCount);
+    auto ClampedConstTripCount = llvm::bit_floor(ConstTripCount);
     LLVM_DEBUG(dbgs() << "LV: Clamping the MaxVF to maximum power of two not "
                          "exceeding the constant trip count: "
                       << ClampedConstTripCount << "\n");
@@ -5972,7 +5973,7 @@ ElementCount LoopVectorizationCostModel::getMaximizedVFForTarget(
   if (MaximizeBandwidth || (MaximizeBandwidth.getNumOccurrences() == 0 &&
                             TTI.shouldMaximizeVectorBandwidth(RegKind))) {
     auto MaxVectorElementCountMaxBW = ElementCount::get(
-        PowerOf2Floor(WidestRegister.getKnownMinValue() / SmallestType),
+        llvm::bit_floor(WidestRegister.getKnownMinValue() / SmallestType),
         ComputeScalableMaxVF);
     MaxVectorElementCountMaxBW = MinVF(MaxVectorElementCountMaxBW, MaxSafeVF);
 
@@ -6522,12 +6523,12 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
     if (R.LoopInvariantRegs.find(pair.first) != R.LoopInvariantRegs.end())
       LoopInvariantRegs = R.LoopInvariantRegs[pair.first];
 
-    unsigned TmpIC = PowerOf2Floor((TargetNumRegisters - LoopInvariantRegs) / MaxLocalUsers);
+    unsigned TmpIC = llvm::bit_floor((TargetNumRegisters - LoopInvariantRegs) /
+                                     MaxLocalUsers);
     // Don't count the induction variable as interleaved.
     if (EnableIndVarRegisterHeur) {
-      TmpIC =
-          PowerOf2Floor((TargetNumRegisters - LoopInvariantRegs - 1) /
-                        std::max(1U, (MaxLocalUsers - 1)));
+      TmpIC = llvm::bit_floor((TargetNumRegisters - LoopInvariantRegs - 1) /
+                              std::max(1U, (MaxLocalUsers - 1)));
     }
 
     IC = std::min(IC, TmpIC);
@@ -6605,8 +6606,8 @@ LoopVectorizationCostModel::selectInterleaveCount(ElementCount VF,
     // We assume that the cost overhead is 1 and we use the cost model
     // to estimate the cost of the loop and interleave until the cost of the
     // loop overhead is about 5% of the cost of the loop.
-    unsigned SmallIC = std::min(
-        IC, (unsigned)PowerOf2Floor(SmallLoopCost / *LoopCost.getValue()));
+    unsigned SmallIC = std::min(IC, (unsigned)llvm::bit_floor<uint64_t>(
+                                        SmallLoopCost / *LoopCost.getValue()));
 
     // Interleave until store/load ports (estimated by max interleave count) are
     // saturated.
@@ -9087,7 +9088,12 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
                                        nullptr, "active.lane.mask");
     } else {
       VPValue *BTC = Plan->getOrCreateBackedgeTakenCount();
-      BlockMask = Builder.createNaryOp(VPInstruction::ICmpULE, {IV, BTC});
+      if (preferPredicatedWiden()) {
+        BlockMask = Builder.createNaryOp(VPInstruction::VPICmpULE,
+                                         {IV, BTC, getOrCreateEVL(Plan)});
+      } else {
+        BlockMask = Builder.createNaryOp(VPInstruction::ICmpULE, {IV, BTC});
+      }
     }
     return BlockMaskCache[BB] = BlockMask;
   }
@@ -11169,7 +11175,7 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     // The outermost mask can be lowered as an all ones mask when using
     // EVL.
     if (isa<VPInstruction>(getMask()) &&
-        cast<VPInstruction>(getMask())->getOpcode() == VPInstruction::ICmpULE)
+        cast<VPInstruction>(getMask())->getOpcode() == VPInstruction::VPICmpULE)
       return Builder.getTrueVector(EC);
 
     return BlockInMaskParts[Part];

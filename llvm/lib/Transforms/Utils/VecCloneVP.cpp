@@ -784,20 +784,26 @@ bool VecCloneVPPass::runImpl(
       break;
     }
     Builder.SetInsertPoint(EntryBlock.getFirstNonPHI());
-    auto *ZExt = Builder.CreateZExt(Mask, DestType, "zext." + Mask->getName());
-    MaskAlloca = Builder.CreateAlloca(DestType, DL.getAllocaAddrSpace(),
-                                      nullptr, "vec." + Mask->getName());
     if (VL) {
       auto VPBuilder = VectorBuilder(cast<IRBuilderBase>(Builder));
       auto *AllOnes = ConstantInt::getAllOnesValue(
           VectorType::get(Builder.getInt1Ty(), DestType));
       VPBuilder.setMask(AllOnes);
       VPBuilder.setEVL(VL);
+      Value *ZExt = VPBuilder.createVectorInstruction(
+          Instruction::ZExt, DestType, {Mask}, "vp.zext." + Mask->getName());
+      MaskAlloca = Builder.CreateAlloca(DestType, DL.getAllocaAddrSpace(),
+                                        nullptr, "vec." + Mask->getName());
       VPBuilder.createVectorInstruction(Instruction::Store, nullptr,
                                         {ZExt, MaskAlloca});
-    } else
-      Builder.CreateAlignedStore(ZExt, MaskAlloca, DL.getPrefTypeAlign(DestType),
-                                 false);
+    } else {
+      Value *ZExt =
+          Builder.CreateZExt(Mask, DestType, "zext." + Mask->getName());
+      MaskAlloca = Builder.CreateAlloca(DestType, DL.getAllocaAddrSpace(),
+                                        nullptr, "vec." + Mask->getName());
+      Builder.CreateAlignedStore(ZExt, MaskAlloca,
+                                 DL.getPrefTypeAlign(DestType), false);
+    }
   }
 
   // On the split, the alloca instructions are moved into LoopBlock. Move
