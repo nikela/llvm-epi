@@ -174,12 +174,12 @@ void RISCVDAGToDAGISel::PostprocessISelDAG() {
     CurDAG->RemoveDeadNodes();
 }
 
-static SDNode *selectImmSeq(SelectionDAG *CurDAG, const SDLoc &DL, const MVT VT,
+static SDValue selectImmSeq(SelectionDAG *CurDAG, const SDLoc &DL, const MVT VT,
                             RISCVMatInt::InstSeq &Seq) {
-  SDNode *Result = nullptr;
   SDValue SrcReg = CurDAG->getRegister(RISCV::X0, VT);
   for (RISCVMatInt::Inst &Inst : Seq) {
     SDValue SDImm = CurDAG->getTargetConstant(Inst.getImm(), DL, VT);
+    SDNode *Result = nullptr;
     switch (Inst.getOpndKind()) {
     case RISCVMatInt::Imm:
       Result = CurDAG->getMachineNode(Inst.getOpcode(), DL, VT, SDImm);
@@ -200,7 +200,7 @@ static SDNode *selectImmSeq(SelectionDAG *CurDAG, const SDLoc &DL, const MVT VT,
     SrcReg = SDValue(Result, 0);
   }
 
-  return Result;
+  return SrcReg;
 }
 
 static SDNode *SelectSlideLeftFill(SDNode *Node, SelectionDAG *CurDAG,
@@ -517,7 +517,7 @@ static SDNode *SelectVectorReverse(SDNode *Node, SelectionDAG *CurDAG) {
   return VRGATHER;
 }
 
-static SDNode *selectImm(SelectionDAG *CurDAG, const SDLoc &DL, const MVT VT,
+static SDValue selectImm(SelectionDAG *CurDAG, const SDLoc &DL, const MVT VT,
                          int64_t Imm, const RISCVSubtarget &Subtarget) {
   RISCVMatInt::InstSeq Seq =
       RISCVMatInt::generateInstSeq(Imm, Subtarget.getFeatureBits());
@@ -1080,7 +1080,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
     if (!isInt<32>(Imm) && isUInt<32>(Imm) && hasAllWUsers(Node))
       Imm = SignExtend64<32>(Imm);
 
-    ReplaceNode(Node, selectImm(CurDAG, DL, VT, Imm, *Subtarget));
+    ReplaceNode(Node, selectImm(CurDAG, DL, VT, Imm, *Subtarget).getNode());
     return;
   }
   case ISD::ConstantFP: {
@@ -1093,10 +1093,8 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       break;
     assert(VT.bitsLE(Subtarget->getXLenVT()) &&
            "Cannot create a 64 bit floating-point immediate value for rv32");
-    SDValue Imm =
-        SDValue(selectImm(CurDAG, DL, XLenVT,
-                          APF.bitcastToAPInt().getSExtValue(), *Subtarget),
-                0);
+    SDValue Imm = selectImm(CurDAG, DL, XLenVT,
+                            APF.bitcastToAPInt().getSExtValue(), *Subtarget);
     unsigned Opc;
     switch (VT.SimpleTy) {
     default:
@@ -1507,7 +1505,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
       ShiftedC1 = SignExtend64<32>(ShiftedC1);
 
     // Create (mulhu (slli X, lzcnt(C2)), C1 << (XLen - lzcnt(C2))).
-    SDNode *Imm = selectImm(CurDAG, DL, VT, ShiftedC1, *Subtarget);
+    SDNode *Imm = selectImm(CurDAG, DL, VT, ShiftedC1, *Subtarget).getNode();
     SDNode *SLLI =
         CurDAG->getMachineNode(RISCV::SLLI, DL, VT, N0.getOperand(0),
                                CurDAG->getTargetConstant(LeadingZeros, DL, VT));
@@ -2414,7 +2412,7 @@ static bool selectConstantAddr(SelectionDAG *CurDAG, const SDLoc &DL,
   Seq.pop_back();
   assert(!Seq.empty() && "Expected more instructions in sequence");
 
-  Base = SDValue(selectImmSeq(CurDAG, DL, VT, Seq), 0);
+  Base = selectImmSeq(CurDAG, DL, VT, Seq);
   Offset = CurDAG->getTargetConstant(Lo12, DL, VT);
   return true;
 }
@@ -3044,9 +3042,8 @@ bool RISCVDAGToDAGISel::selectFPImm(SDValue N, SDValue &Imm) {
     return false;
   SDLoc DL(N);
   MVT XLenVT = Subtarget->getXLenVT();
-  Imm = SDValue(selectImm(CurDAG, DL, XLenVT,
-                          APF.bitcastToAPInt().getSExtValue(), *Subtarget),
-                0);
+  Imm = selectImm(CurDAG, DL, XLenVT, APF.bitcastToAPInt().getSExtValue(),
+                  *Subtarget);
   return true;
 }
 
