@@ -765,27 +765,6 @@ public:
   }
 };
 
-// inline bool VPUser::classof(const VPDef *Def) {
-//   return Def->getVPDefID() == VPRecipeBase::VPInstructionSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenCallSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenCallSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenSelectSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedWidenSelectSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenGEPSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPBlendSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPPredicatedBlendSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPInterleaveSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPReplicateSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPReductionSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPBranchOnMaskSC ||
-//          Def->getVPDefID() ==
-//              VPRecipeBase::VPPredicatedWidenMemoryInstructionSC ||
-//          Def->getVPDefID() == VPRecipeBase::VPEVLPHISC ||
-//          Def->getVPDefID() == VPRecipeBase::VPWidenMemoryInstructionSC;
-// }
-
 // Helper macro to define common classof implementations for recipes.
 #define VP_CLASSOF_IMPL(VPDefID)                                               \
   static inline bool classof(const VPDef *D) {                                 \
@@ -2193,35 +2172,6 @@ public:
 #endif
 };
 
-/// A Recipe for widening the canonical induction variable of the vector loop.
-class VPWidenCanonicalIVRecipe : public VPRecipeBase, public VPValue {
-public:
-  VPWidenCanonicalIVRecipe(VPCanonicalIVPHIRecipe *CanonicalIV)
-      : VPRecipeBase(VPDef::VPWidenCanonicalIVSC, {CanonicalIV}),
-        VPValue(this) {}
-
-  ~VPWidenCanonicalIVRecipe() override = default;
-
-  VP_CLASSOF_IMPL(VPDef::VPWidenCanonicalIVSC)
-
-  /// Generate a canonical vector induction variable of the vector loop, with
-  /// start = {<Part*VF, Part*VF+1, ..., Part*VF+VF-1> for 0 <= Part < UF}, and
-  /// step = <VF*UF, VF*UF, ..., VF*UF>.
-  void execute(VPTransformState &State) override;
-
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  /// Print the recipe.
-  void print(raw_ostream &O, const Twine &Indent,
-             VPSlotTracker &SlotTracker) const override;
-#endif
-
-  /// Returns the scalar type of the induction.
-  const Type *getScalarType() const {
-    return cast<VPCanonicalIVPHIRecipe>(getOperand(0)->getDefiningRecipe())
-        ->getScalarType();
-  }
-};
-
 /// A recipe to generate Explicit Vector Length (EVL) value to be used with
 /// VPred intrinsics.
 class VPWidenEVLRecipe : public VPRecipeBase, public VPValue {
@@ -2283,6 +2233,39 @@ public:
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
 #endif
+};
+
+/// A Recipe for widening the canonical induction variable of the vector loop.
+class VPWidenCanonicalIVRecipe : public VPRecipeBase, public VPValue {
+public:
+  VPWidenCanonicalIVRecipe(VPCanonicalIVPHIRecipe *CanonicalIV,
+                           VPWidenEVLRecipe *EVLRecipe = nullptr)
+      : VPRecipeBase(VPDef::VPWidenCanonicalIVSC, {CanonicalIV}),
+        VPValue(this) {
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
+
+  ~VPWidenCanonicalIVRecipe() override = default;
+
+  VP_CLASSOF_IMPL(VPDef::VPWidenCanonicalIVSC)
+
+  /// Generate a canonical vector induction variable of the vector loop, with
+  /// start = {<Part*VF, Part*VF+1, ..., Part*VF+VF-1> for 0 <= Part < UF}, and
+  /// step = <VF*UF, VF*UF, ..., VF*UF>.
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+
+  /// Returns the scalar type of the induction.
+  const Type *getScalarType() const {
+    return cast<VPCanonicalIVPHIRecipe>(getOperand(0)->getDefiningRecipe())
+        ->getScalarType();
+  }
 };
 
 /// A recipe for converting the canonical IV value to the corresponding value of

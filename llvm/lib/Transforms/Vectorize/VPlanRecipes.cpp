@@ -20,6 +20,7 @@
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/IR/Intrinsics.h"
 #include "llvm/IR/Type.h"
 #include "llvm/IR/Value.h"
 #include "llvm/Support/Casting.h"
@@ -1437,6 +1438,9 @@ void VPExpandSCEVRecipe::print(raw_ostream &O, const Twine &Indent,
 
 void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
   Value *CanonicalIV = State.get(getOperand(0), 0);
+  VPValue *EVLRecipe = nullptr;
+  if (getNumOperands() == 2)
+    EVLRecipe = getOperand(1);
   Type *STy = CanonicalIV->getType();
   IRBuilder<> Builder(State.CFG.PrevBB->getTerminator());
   ElementCount VF = State.VF;
@@ -1447,10 +1451,61 @@ void VPWidenCanonicalIVRecipe::execute(VPTransformState &State) {
     Value *VStep = createStepForVF(Builder, STy, VF, Part);
     if (VF.isVector()) {
       VStep = Builder.CreateVectorSplat(VF, VStep);
-      VStep =
-          Builder.CreateAdd(VStep, Builder.CreateStepVector(VStep->getType()));
+      if (EVLRecipe) {
+        Value *VL = State.get(EVLRecipe, Part);
+        auto *AllOnes = ConstantInt::getAllOnesValue(
+            VectorType::get(Builder.getInt1Ty(), VF));
+        Value *StepVector = Builder.CreateIntrinsic(
+            VStep->getType(), Intrinsic::experimental_vp_stepvector,
+            {AllOnes, VL}, nullptr, "vp.stepvector");
+        // TODO: this branching is due to not having InstSimplify optimizations
+        // working for VP intrinsics.
+        if (Part) {
+          VStep = Builder.CreateIntrinsic(VStep->getType(), Intrinsic::vp_add,
+                                          {VStep, StepVector, AllOnes, VL});
+        } else {
+          // Part == 0 => VStep == 0.
+          VStep = StepVector;
+        }
+      } else {
+        VStep = Builder.CreateAdd(VStep,
+                                  Builder.CreateStepVector(VStep->getType()));
+      }
     }
-    Value *CanonicalVectorIV = Builder.CreateAdd(VStart, VStep, "vec.iv");
+
+    // TODO: this should not be here.
+    auto IsZeroConstant = [&](Value *V) -> bool {
+      if (isa<Constant>(V) && cast<Constant>(V)->isZeroValue())
+        return true;
+
+      if (auto *PHIValue = dyn_cast<PHINode>(V);
+          PHIValue && PHIValue->getNumIncomingValues() == 1) {
+        Value *Incoming = PHIValue->getIncomingValue(0);
+        if (isa<Constant>(Incoming) && cast<Constant>(Incoming)->isZeroValue())
+          return true;
+      }
+
+      return false;
+    };
+
+    Value *CanonicalVectorIV = nullptr;
+    if (EVLRecipe) {
+      // TODO: same as before, missing InstSimplify for VP.
+      Value *SplatValue = getSplatValue(VStart);
+      assert(SplatValue);
+      if (IsZeroConstant(SplatValue)) {
+        CanonicalVectorIV = VStep;
+      } else {
+        Value *VL = State.get(EVLRecipe, Part);
+        auto *AllOnes = ConstantInt::getAllOnesValue(
+            VectorType::get(Builder.getInt1Ty(), VF));
+        CanonicalVectorIV = Builder.CreateIntrinsic(
+            VStart->getType(), Intrinsic::vp_add, {VStart, VStep, AllOnes, VL},
+            nullptr, "vec.iv");
+      }
+    } else {
+      CanonicalVectorIV = Builder.CreateAdd(VStart, VStep, "vec.iv");
+    }
     State.set(this, CanonicalVectorIV, Part);
   }
 }

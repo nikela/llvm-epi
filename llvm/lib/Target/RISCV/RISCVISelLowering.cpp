@@ -515,6 +515,7 @@ RISCVTargetLowering::RISCVTargetLowering(const TargetMachine &TM,
         ISD::VP_ABS,
         // EPI
         ISD::EXPERIMENTAL_VP_REVERSE,
+        ISD::EXPERIMENTAL_VP_STEPVECTOR,
         ISD::VP_REDUCE_MUL};
 
     static const unsigned FloatingPointVPOps[] = {
@@ -5440,6 +5441,9 @@ SDValue RISCVTargetLowering::LowerOperation(SDValue Op,
     return lowerVECLIBCALL(Op, DAG, VTToLC, Op.getValueType(),
                            /*NeedsMask*/ true);
   }
+  case ISD::EXPERIMENTAL_VP_STEPVECTOR: {
+    return lowerVPStepVectorExperimental(Op, DAG);
+  }
   }
 }
 
@@ -9148,6 +9152,43 @@ RISCVTargetLowering::lowerVPReverseExperimental(SDValue Op,
   if (!VT.isFixedLengthVector())
     return Result;
   return convertFromScalableVector(VT, Result, DAG, Subtarget);
+}
+
+SDValue
+RISCVTargetLowering::lowerVPStepVectorExperimental(SDValue Op,
+                                                   SelectionDAG &DAG) const {
+  SDLoc DL(Op);
+  MVT VT = Op.getSimpleValueType();
+  assert(VT.isScalableVector() && "Expected scalable vector");
+  MVT XLenVT = Subtarget.getXLenVT();
+
+  // Ops indexes: 0->Step, 1->Mask, 2->EVL
+  SmallVector<SDValue, 3> Ops;
+  for (const auto &OpIdx : enumerate(Op->ops())) {
+    SDValue V = OpIdx.value();
+    assert(!isa<VTSDNode>(V) && "Unexpected VTSDNode node!");
+    assert(!V.getValueType().isFixedLengthVector() &&
+           "Fixed-length vectors not supported");
+    // Pass through operands which aren't fixed-length vectors.
+    Ops.push_back(V);
+  }
+  SDValue StepVec = DAG.getNode(RISCVISD::VID_VL, DL, VT, Ops[1], Ops[2]);
+
+  uint64_t StepValImm = Op.getConstantOperandVal(0);
+  if (StepValImm != 1) {
+    if (isPowerOf2_64(StepValImm)) {
+      SDValue StepVal =
+          DAG.getNode(RISCVISD::VMV_V_X_VL, DL, VT, DAG.getUNDEF(VT),
+                      DAG.getConstant(Log2_64(StepValImm), DL, XLenVT), Ops[2]);
+      StepVec = DAG.getNode(ISD::SHL, DL, VT, StepVec, StepVal);
+    } else {
+      SDValue StepVal = lowerScalarSplat(
+          SDValue(), DAG.getConstant(StepValImm, DL, VT.getVectorElementType()),
+          Ops[2], VT, DL, DAG, Subtarget);
+      StepVec = DAG.getNode(ISD::MUL, DL, VT, StepVec, StepVal);
+    }
+  }
+  return StepVec;
 }
 
 SDValue RISCVTargetLowering::lowerVPLoadMasks(SDValue Op, SelectionDAG &DAG) const {

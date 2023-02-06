@@ -784,6 +784,7 @@ private:
   SDValue lowerVPTruncOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPTruncToMaskOp(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPReverseExperimental(SDValue Op, SelectionDAG &DAG) const;
+  SDValue lowerVPStepVectorExperimental(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPLoadMasks(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerVPStoreMasks(SDValue Op, SelectionDAG &DAG) const;
   SDValue lowerFixedLengthVectorExtendToRVV(SDValue Op, SelectionDAG &DAG,

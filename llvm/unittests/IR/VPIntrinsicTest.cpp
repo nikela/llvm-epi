@@ -167,6 +167,7 @@ protected:
 
     // EPI only
     Str << " declare <8 x i32> @llvm.experimental.vp.reverse.v8i32(<8 x i32>, <8 x i1>, i32) ";
+    Str << " declare <8 x i32> @llvm.experimental.vp.stepvector.v8i32(<8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.cos.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.sin.v8f32(<8 x float>, <8 x i1>, i32) ";
     Str << " declare <8 x float> @llvm.vp.exp.v8f32(<8 x float>, <8 x i1>, i32) ";

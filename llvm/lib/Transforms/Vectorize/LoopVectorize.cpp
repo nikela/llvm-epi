@@ -9037,7 +9037,10 @@ VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
   if (IVEntryIt != IVCache.end())
     return IVEntryIt->second;
 
-  auto *IV = new VPWidenCanonicalIVRecipe(Plan->getCanonicalIV());
+  VPWidenEVLRecipe *EVLRecipe = nullptr;
+  if (preferPredicatedWiden())
+    EVLRecipe = getOrCreateEVL(Plan);
+  auto *IV = new VPWidenCanonicalIVRecipe(Plan->getCanonicalIV(), EVLRecipe);
 
   VPBasicBlock *HeaderVPBB =
     Plan->getVectorLoopRegion()->getEntryBasicBlock();

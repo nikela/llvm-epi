@@ -619,6 +619,14 @@ END_REGISTER_VP(experimental_vp_splice, EXPERIMENTAL_VP_SPLICE)
 BEGIN_REGISTER_VP(experimental_vp_reverse, 1, 2,
                   EXPERIMENTAL_VP_REVERSE, -1)
 END_REGISTER_VP(experimental_vp_reverse, EXPERIMENTAL_VP_REVERSE)
+
+// llvm.experimental.vp.stepvector(mask,vlen)
+BEGIN_REGISTER_VP_INTRINSIC(experimental_vp_stepvector, 0, 1)
+// x = EXPERIMENTAL_VP_STEPVECTOR(step, mask, vlen)
+BEGIN_REGISTER_VP_SDNODE(EXPERIMENTAL_VP_STEPVECTOR, -1,
+                         experimental_vp_stepvector, 1, 2)
+HELPER_MAP_VPID_TO_VPSD(experimental_vp_stepvector, EXPERIMENTAL_VP_STEPVECTOR)
+END_REGISTER_VP(experimental_vp_stepvector, EXPERIMENTAL_VP_STEPVECTOR)
 ///// } Shuffles
 
 ///// libm functions {

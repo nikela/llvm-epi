@@ -392,6 +392,7 @@ private:
   /// Vector Predication related visitors and functions.
   Instruction *visitVPInst(VPIntrinsic *VPI);
   Instruction *visitVPGatherScatterOnlyGEP(GetElementPtrInst &GEP);
+  Instruction *visitVPICmp(VPIntrinsic *VPICmp);
   Instruction *visitVPMul(VPIntrinsic *VPMul);
   Instruction *visitVPSelect(VPIntrinsic *VPSelect);
 
