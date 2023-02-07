@@ -408,10 +408,8 @@ def SplatPat_simm5_plus1_nonzero
 def SelectFPImm : ComplexPattern<fAny, 1, "selectFPImm", [], [], 1>;
 
 // Ignore the vl operand.
-def SplatFPOp : PatFrags<(ops node:$op),
-                        [(riscv_vfmv_v_f_vl undef, node:$op, srcvalue),
-                         // FIXME: Sometimes the preprocessing of the DAG does not kick in?
-                         (splat_vector node:$op)]>;
+def SplatFPOp : PatFrag<(ops node:$op),
+                        (riscv_vfmv_v_f_vl undef, node:$op, srcvalue)>;
 
 def sew8simm5  : ComplexPattern<XLenVT, 1, "selectRVVSimm5<8>",  []>;
 def sew16simm5 : ComplexPattern<XLenVT, 1, "selectRVVSimm5<16>", []>;
