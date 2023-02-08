@@ -4,6 +4,8 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+v -verify-machineinstrs -O2 \
 ; RUN:    < %s -epi-pipeline | FileCheck --check-prefix=CHECK-O2 %s
 
+; NOTE: using volatile in order to avoid instruction selection optimizations.
+
 @scratch = global i8 0, align 16
 
 define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
@@ -89,19 +91,19 @@ define void @test_vp_fold_unsigned_greater(<vscale x 1 x i64> %a, i64 %b, <vscal
 
   ; x > splat(y) → vmsgtu.vx x, y
   %ugt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ugt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ugt.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ugt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmsltu.vx x, y
   %ugt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ugt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ugt.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ugt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → cannot be folded (vmsleu.vv)
   %uge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"uge", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %uge.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %uge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmsleu.vx x, y
   %uge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"uge", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %uge.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %uge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -188,19 +190,19 @@ define void @test_vp_fold_unsigned_lower(<vscale x 1 x i64> %a, i64 %b, <vscale 
 
   ; x < splat(y) → vmsltu.vx x, y
   %ult.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ult", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ult.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ult.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) < x → x > splat(y) → vmsgtu.vx x, y
   %ult.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ult", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ult.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ult.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmsleu.vx x, y
   %ule.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"ule", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ule.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ule.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= y → y >= splat(y) → cannot be folded (vmsleu.vv)
   %ule.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"ule", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ule.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ule.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -288,19 +290,19 @@ define void @test_vp_fold_signed_greater(<vscale x 1 x i64> %a, i64 %b, <vscale 
 
   ; x > splat(y) → vmsgt.vx x, y
   %sgt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sgt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %sgt.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sgt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmslt.vx x, y
   %sgt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sgt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %sgt.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sgt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → cannot be folded (vmsle.vv)
   %sge.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sge", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %sge.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmsle.vx x, y
   %sge.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sge", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %sge.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -387,19 +389,19 @@ define void @test_vp_fold_signed_lower(<vscale x 1 x i64> %a, i64 %b, <vscale x 
 
   ; y < splat(x) → vmslt.vx x, y
   %slt.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"slt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %slt.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %slt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(x) < y → y > splat(x) → cannot be folded (vmslt.vv)
   %slt.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"slt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %slt.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %slt.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmsle.vx x, y
   %sle.0 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %splat, metadata !"sle", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %sle.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sle.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= x → x >= splat(y) → cannot be folded (vmsle.vv)
   %sle.1 = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %splat, <vscale x 1 x i64> %a, metadata !"sle", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %sle.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sle.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }

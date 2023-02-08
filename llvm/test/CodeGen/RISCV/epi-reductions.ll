@@ -180,26 +180,23 @@ define i64 @red_nxv2i64(<vscale x 2 x i64> %a) nounwind {
 define float @red_nxv2f32(<vscale x 2 x float> %a) nounwind {
 ; CHECK-LABEL: red_nxv2f32:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    lui a0, %hi(.LCPI3_0)
-; CHECK-NEXT:    flw ft0, %lo(.LCPI3_0)(a0)
-; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
-; CHECK-NEXT:    vfmv.s.f v9, ft0
+; CHECK-NEXT:    lui a0, 264192
+; CHECK-NEXT:    vsetvli a1, zero, e32, m1, ta, ma
+; CHECK-NEXT:    vmv.s.x v9, a0
 ; CHECK-NEXT:    vfredosum.vs v10, v8, v9
 ; CHECK-NEXT:    vfmv.f.s ft0, v10
 ; CHECK-NEXT:    vfredusum.vs v9, v8, v9
-; CHECK-NEXT:    lui a0, %hi(.LCPI3_1)
-; CHECK-NEXT:    flw ft1, %lo(.LCPI3_1)(a0)
-; CHECK-NEXT:    vfmv.f.s ft2, v9
-; CHECK-NEXT:    lui a0, %hi(.LCPI3_2)
-; CHECK-NEXT:    flw ft3, %lo(.LCPI3_2)(a0)
-; CHECK-NEXT:    vfmv.s.f v9, ft1
-; CHECK-NEXT:    vfredmax.vs v9, v8, v9
 ; CHECK-NEXT:    vfmv.f.s ft1, v9
-; CHECK-NEXT:    vfmv.s.f v9, ft3
+; CHECK-NEXT:    lui a0, 1047552
+; CHECK-NEXT:    vmv.s.x v9, a0
+; CHECK-NEXT:    vfredmax.vs v9, v8, v9
+; CHECK-NEXT:    vfmv.f.s ft2, v9
+; CHECK-NEXT:    lui a0, 523264
+; CHECK-NEXT:    vmv.s.x v9, a0
 ; CHECK-NEXT:    vfredmin.vs v8, v8, v9
 ; CHECK-NEXT:    vfmv.f.s ft3, v8
-; CHECK-NEXT:    fadd.s ft0, ft0, ft2
 ; CHECK-NEXT:    fadd.s ft0, ft0, ft1
+; CHECK-NEXT:    fadd.s ft0, ft0, ft2
 ; CHECK-NEXT:    fadd.s fa0, ft0, ft3
 ; CHECK-NEXT:    ret
   %fadd = call float @llvm.vector.reduce.fadd.f32.nxv2f32(float 4.0, <vscale x 2 x float> %a)

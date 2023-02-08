@@ -141,8 +141,8 @@ define <vscale x 2 x float> @binary_nxv1f32(<vscale x 2 x float> %a, float %b) n
 define <vscale x 2 x float> @binary_nxv1f32_imm(<vscale x 2 x float> %a) nounwind {
 ; CHECK-LABEL: binary_nxv1f32_imm:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    lui a0, %hi(.LCPI11_0)
-; CHECK-NEXT:    flw ft0, %lo(.LCPI11_0)(a0)
+; CHECK-NEXT:    lui a0, 263168
+; CHECK-NEXT:    fmv.w.x ft0, a0
 ; CHECK-NEXT:    vsetvli a0, zero, e32, m1, ta, ma
 ; CHECK-NEXT:    vfadd.vf v8, v8, ft0
 ; CHECK-NEXT:    ret

@@ -36,8 +36,8 @@ define void @uniform_load(ptr noalias nocapture %a, ptr noalias nocapture %b, i6
 ; SCALABLE-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; SCALABLE-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP12]], align 8
-; SCALABLE-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP13]]
+; SCALABLE-NEXT:    [[TMP13:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i64 [[TMP13]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP14]], align 8
 ; SCALABLE-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 2
@@ -219,8 +219,8 @@ define i64 @uniform_load_outside_use(ptr noalias nocapture %a, ptr noalias nocap
 ; SCALABLE-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; SCALABLE-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP12]], align 8
-; SCALABLE-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP13]]
+; SCALABLE-NEXT:    [[TMP13:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i64 [[TMP13]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP14]], align 8
 ; SCALABLE-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 2
@@ -397,8 +397,8 @@ define void @conditional_uniform_load(ptr noalias nocapture %a, ptr noalias noca
 ; SCALABLE-NEXT:    [[TMP19:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP13]]
 ; SCALABLE-NEXT:    [[TMP20:%.*]] = getelementptr inbounds i64, ptr [[TMP18]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[PREDPHI]], ptr [[TMP20]], align 8
-; SCALABLE-NEXT:    [[TMP21:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP22:%.*]] = getelementptr inbounds i64, ptr [[TMP18]], i32 [[TMP21]]
+; SCALABLE-NEXT:    [[TMP21:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP22:%.*]] = getelementptr inbounds i64, ptr [[TMP18]], i64 [[TMP21]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[PREDPHI5]], ptr [[TMP22]], align 8
 ; SCALABLE-NEXT:    [[TMP23:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP24:%.*]] = mul i64 [[TMP23]], 2
@@ -645,8 +645,8 @@ define void @uniform_load_unaligned(ptr noalias nocapture %a, ptr noalias nocapt
 ; SCALABLE-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; SCALABLE-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP12]], align 8
-; SCALABLE-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i32 [[TMP13]]
+; SCALABLE-NEXT:    [[TMP13:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP14:%.*]] = getelementptr inbounds i64, ptr [[TMP10]], i64 [[TMP13]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP14]], align 8
 ; SCALABLE-NEXT:    [[TMP15:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP16:%.*]] = mul i64 [[TMP15]], 2
@@ -830,8 +830,8 @@ define void @uniform_store(ptr noalias nocapture %a, ptr noalias nocapture %b, i
 ; SCALABLE-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; SCALABLE-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT]], ptr [[TMP11]], align 8
-; SCALABLE-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; SCALABLE-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP13]], align 8
 ; SCALABLE-NEXT:    [[TMP14:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP15:%.*]] = mul i64 [[TMP14]], 2
@@ -1032,8 +1032,8 @@ define void @uniform_store_of_loop_varying(ptr noalias nocapture %a, ptr noalias
 ; SCALABLE-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP13]]
 ; SCALABLE-NEXT:    [[TMP16:%.*]] = getelementptr inbounds i64, ptr [[TMP14]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT5]], ptr [[TMP16]], align 8
-; SCALABLE-NEXT:    [[TMP17:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i64, ptr [[TMP14]], i32 [[TMP17]]
+; SCALABLE-NEXT:    [[TMP17:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i64, ptr [[TMP14]], i64 [[TMP17]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT7]], ptr [[TMP18]], align 8
 ; SCALABLE-NEXT:    [[TMP19:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP20:%.*]] = mul i64 [[TMP19]], 2
@@ -1261,8 +1261,8 @@ define void @conditional_uniform_store(ptr noalias nocapture %a, ptr noalias noc
 ; SCALABLE-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP13]]
 ; SCALABLE-NEXT:    [[TMP18:%.*]] = getelementptr inbounds i64, ptr [[TMP16]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT]], ptr [[TMP18]], align 8
-; SCALABLE-NEXT:    [[TMP19:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP20:%.*]] = getelementptr inbounds i64, ptr [[TMP16]], i32 [[TMP19]]
+; SCALABLE-NEXT:    [[TMP19:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP20:%.*]] = getelementptr inbounds i64, ptr [[TMP16]], i64 [[TMP19]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT5]], ptr [[TMP20]], align 8
 ; SCALABLE-NEXT:    [[TMP21:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP22:%.*]] = mul i64 [[TMP21]], 2
@@ -1507,8 +1507,8 @@ define void @uniform_store_unaligned(ptr noalias nocapture %a, ptr noalias nocap
 ; SCALABLE-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; SCALABLE-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT]], ptr [[TMP11]], align 8
-; SCALABLE-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; SCALABLE-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; SCALABLE-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; SCALABLE-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; SCALABLE-NEXT:    store <vscale x 1 x i64> [[BROADCAST_SPLAT2]], ptr [[TMP13]], align 8
 ; SCALABLE-NEXT:    [[TMP14:%.*]] = call i64 @llvm.vscale.i64()
 ; SCALABLE-NEXT:    [[TMP15:%.*]] = mul i64 [[TMP14]], 2

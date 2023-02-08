@@ -328,8 +328,6 @@ void RISCVMCCodeEmitter::encodeInstruction(const MCInst &MI, raw_ostream &OS,
     }
 
     expandEPIReadCSR(MI, OS, Fixups, STI, CSRNum);
-    MCNumEmitted += 1;
-    return;
   }
 
   switch (Size) {

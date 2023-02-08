@@ -38,14 +38,14 @@ define void @vector_add(ptr noalias nocapture %a, i64 %v) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = add <vscale x 1 x i64> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = add <vscale x 1 x i64> [[WIDE_LOAD1]], [[BROADCAST_SPLAT3]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP14]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP16]]
+; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP16]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP15]], ptr [[TMP17]], align 8
 ; CHECK-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 2
@@ -113,8 +113,8 @@ define i64 @vector_add_reduce(ptr noalias nocapture %a) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD2:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14]] = add <vscale x 1 x i64> [[VEC_PHI]], [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[TMP15]] = add <vscale x 1 x i64> [[VEC_PHI1]], [[WIDE_LOAD2]]

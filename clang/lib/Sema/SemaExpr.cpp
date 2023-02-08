@@ -19,6 +19,7 @@
 #include "clang/AST/CXXInheritance.h"
 #include "clang/AST/DeclObjC.h"
 #include "clang/AST/DeclTemplate.h"
+#include "clang/AST/Designator.h"
 #include "clang/AST/EvaluatedExprVisitor.h"
 #include "clang/AST/Expr.h"
 #include "clang/AST/ExprCXX.h"
@@ -40,7 +41,6 @@
 #include "clang/Sema/AnalysisBasedWarnings.h"
 #include "clang/Sema/DeclSpec.h"
 #include "clang/Sema/DelayedDiagnostic.h"
-#include "clang/Sema/Designator.h"
 #include "clang/Sema/Initialization.h"
 #include "clang/Sema/Lookup.h"
 #include "clang/Sema/Overload.h"
@@ -6688,10 +6688,10 @@ static FunctionDecl *rewriteBuiltinFunctionDecl(Sema *Sema, ASTContext &Context,
       return nullptr;
     Expr *Arg = ArgRes.get();
     QualType ArgType = Arg->getType();
-    if (!ParamType->isPointerType() ||
-        ParamType.hasAddressSpace() ||
+    if (!ParamType->isPointerType() || ParamType.hasAddressSpace() ||
         !ArgType->isPointerType() ||
-        !ArgType->getPointeeType().hasAddressSpace()) {
+        !ArgType->getPointeeType().hasAddressSpace() ||
+        isPtrSizeAddressSpace(ArgType->getPointeeType().getAddressSpace())) {
       OverloadParams.push_back(ParamType);
       continue;
     }

@@ -184,6 +184,8 @@ Arm and AArch64 Support in Clang
 Floating Point Support in Clang
 -------------------------------
 - Add ``__builtin_elementwise_log`` builtin for floating point types only.
+- Add ``__builtin_elementwise_log10`` builtin for floating point types only.
+- Add ``__builtin_elementwise_log2`` builtin for floating point types only.
 
 Internal API Changes
 --------------------
@@ -196,6 +198,11 @@ AST Matchers
 
 clang-format
 ------------
+
+- Add ``NextLineOnly`` style to option ``PackConstructorInitializers``.
+  Compared to ``NextLine`` style, ``NextLineOnly`` style will not try to
+  put the initializers on the current line first, instead, it will try to
+  put the initializers on the next line only.
 
 clang-extdef-mapping
 --------------------

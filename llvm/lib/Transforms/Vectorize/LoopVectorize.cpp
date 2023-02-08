@@ -11112,6 +11112,13 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
     // Calculate the pointer for the specific unroll-part.
     GetElementPtrInst *PartPtr = nullptr;
 
+    // Use i32 for the gep index type when the value is constant,
+    // or query DataLayout for a more suitable index type otherwise.
+    const DataLayout &DL =
+        Builder.GetInsertBlock()->getModule()->getDataLayout();
+    Type *IndexTy = State.VF.isScalable() && (Reverse || Part > 0)
+                        ? DL.getIndexType(ScalarDataTy->getPointerTo())
+                        : Builder.getInt32Ty();
     bool InBounds = false;
     if (auto *gep = dyn_cast<GetElementPtrInst>(Ptr->stripPointerCasts()))
       InBounds = gep->isInBounds();
@@ -11124,20 +11131,20 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
         // If EVL is not nullptr, then EVL must be a valid value set during plan
         // creation and must be used to correctly reverse the address.
         // Number of elements already processed.
+        // NOTE: hardcoding i32 since this is the EVL type.
         NumElt = Builder.getInt32(0);
         for (unsigned P = 0; P < Part; P++) {
           NumElt = Builder.CreateAdd(NumElt, State.get(getEVL(), P));
         }
         NumElt = Builder.CreateSub(Builder.getInt32(0), NumElt);
-        LastLane = Builder.CreateSub(Builder.getInt32(1),
-                                     State.get(getEVL(), Part));
+        LastLane =
+            Builder.CreateSub(Builder.getInt32(1), State.get(getEVL(), Part));
       } else {
         // RunTimeVF =  VScale * VF.getKnownMinValue()
         // For fixed-width VScale is 1, then RunTimeVF = VF.getKnownMinValue()
-        Value *RunTimeVF = getRuntimeVF(Builder, Builder.getInt32Ty(),
-                                        State.VF);
-        NumElt = Builder.CreateMul(Builder.getInt32(-Part), RunTimeVF);
-        LastLane = Builder.CreateSub(Builder.getInt32(1), RunTimeVF);
+        Value *RunTimeVF = getRuntimeVF(Builder, IndexTy, State.VF);
+        NumElt = Builder.CreateMul(ConstantInt::get(IndexTy, -Part), RunTimeVF);
+        LastLane = Builder.CreateSub(ConstantInt::get(IndexTy, 1), RunTimeVF);
       }
       PartPtr =
           cast<GetElementPtrInst>(Builder.CreateGEP(ScalarDataTy, Ptr, NumElt));
@@ -11170,8 +11177,7 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
         for (unsigned int P = 0; P < Part; P++)
           Increment = Builder.CreateAdd(Increment, State.get(getEVL(), P));
       } else {
-        Increment =
-            createStepForVF(Builder, Builder.getInt32Ty(), State.VF, Part);
+        Increment = createStepForVF(Builder, IndexTy, State.VF, Part);
       }
       PartPtr = cast<GetElementPtrInst>(
           Builder.CreateGEP(ScalarDataTy, Ptr, Increment));

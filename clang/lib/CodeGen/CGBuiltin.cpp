@@ -55,8 +55,8 @@
 #include "llvm/IR/MatrixBuilder.h"
 #include "llvm/Support/ConvertUTF.h"
 #include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/X86TargetParser.h"
 #include "llvm/TargetParser/AArch64TargetParser.h"
+#include "llvm/TargetParser/X86TargetParser.h"
 #include <optional>
 #include <sstream>
 #include <numeric>
@@ -3093,6 +3093,12 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
   case Builtin::BI__builtin_elementwise_log:
     return RValue::get(
         emitUnaryBuiltin(*this, E, llvm::Intrinsic::log, "elt.log"));
+  case Builtin::BI__builtin_elementwise_log2:
+    return RValue::get(
+        emitUnaryBuiltin(*this, E, llvm::Intrinsic::log2, "elt.log2"));
+  case Builtin::BI__builtin_elementwise_log10:
+    return RValue::get(
+        emitUnaryBuiltin(*this, E, llvm::Intrinsic::log10, "elt.log10"));
   case Builtin::BI__builtin_elementwise_cos:
     return RValue::get(
         emitUnaryBuiltin(*this, E, llvm::Intrinsic::cos, "elt.cos"));
