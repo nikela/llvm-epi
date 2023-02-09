@@ -103,7 +103,6 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/SetOperations.h"
 #include "llvm/ADT/SetVector.h"
-#include "llvm/ADT/Triple.h"
 #include "llvm/ADT/iterator.h"
 #include "llvm/Analysis/AssumeBundleQueries.h"
 #include "llvm/Analysis/CFG.h"
@@ -127,6 +126,7 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/DOTGraphTraits.h"
 #include "llvm/Support/TimeProfiler.h"
+#include "llvm/TargetParser/Triple.h"
 #include "llvm/Transforms/Utils/CallGraphUpdater.h"
 
 #include <limits>
@@ -5483,6 +5483,7 @@ struct AAPointerInfo : public AbstractAttribute {
   /// read the intial value of the underlying memory.
   virtual bool forallInterferingAccesses(
       Attributor &A, const AbstractAttribute &QueryingAA, Instruction &I,
+      bool FindInterferingWrites, bool FindInterferingReads,
       function_ref<bool(const Access &, bool)> CB, bool &HasBeenWrittenTo,
       AA::RangeTy &Range) const = 0;
 

@@ -1146,7 +1146,7 @@ private:
           name, symbol, "'%s' is already declared as a procedure"_err_en_US);
     } else if (std::is_same_v<ProcEntityDetails, T> &&
         symbol.has<ObjectEntityDetails>()) {
-      if (InCommonBlock(symbol)) {
+      if (FindCommonBlockContaining(symbol)) {
         SayWithDecl(name, symbol,
             "'%s' may not be a procedure as it is in a COMMON block"_err_en_US);
       } else {
@@ -2541,7 +2541,7 @@ bool ScopeHandler::ConvertToProcEntity(Symbol &symbol) {
     if (IsFunctionResult(symbol) &&
         !(IsPointer(symbol) && symbol.attrs().test(Attr::EXTERNAL))) {
       // Don't turn function result into a procedure pointer unless both
-      // POUNTER and EXTERNAL
+      // POINTER and EXTERNAL
       return false;
     }
     funcResultStack_.CompleteTypeIfFunctionResult(symbol);
@@ -3242,6 +3242,8 @@ void InterfaceVisitor::ResolveSpecificsInGeneric(Symbol &generic) {
       case ProcedureDefinitionClass::Intrinsic:
       case ProcedureDefinitionClass::External:
       case ProcedureDefinitionClass::Internal:
+      case ProcedureDefinitionClass::Dummy:
+      case ProcedureDefinitionClass::Pointer:
         break;
       case ProcedureDefinitionClass::None:
         Say(*name, "'%s' is not a procedure"_err_en_US);
@@ -3909,11 +3911,19 @@ bool SubprogramVisitor::HandlePreviousCalls(
     // ENTRY's name.  We have to replace that symbol in situ to avoid the
     // obligation to rewrite symbol pointers in the parse tree.
     if (!symbol.test(subpFlag)) {
-      Say2(name,
-          subpFlag == Symbol::Flag::Function
-              ? "'%s' was previously called as a subroutine"_err_en_US
-              : "'%s' was previously called as a function"_err_en_US,
-          symbol, "Previous call of '%s'"_en_US);
+      // External statements issue an explicit EXTERNAL attribute.
+      if (symbol.attrs().test(Attr::EXTERNAL) &&
+          !symbol.implicitAttrs().test(Attr::EXTERNAL)) {
+        // Warn if external statement previously declared.
+        Say(name,
+            "EXTERNAL attribute was already specified on '%s'"_warn_en_US);
+      } else {
+        Say2(name,
+            subpFlag == Symbol::Flag::Function
+                ? "'%s' was previously called as a subroutine"_err_en_US
+                : "'%s' was previously called as a function"_err_en_US,
+            symbol, "Previous call of '%s'"_en_US);
+      }
     }
     EntityDetails entity;
     if (proc->type()) {
@@ -4331,8 +4341,17 @@ bool DeclarationVisitor::Pre(const parser::ExternalStmt &x) {
   for (const auto &name : x.v) {
     auto *symbol{FindSymbol(name)};
     if (!ConvertToProcEntity(DEREF(symbol))) {
-      SayWithDecl(
-          name, *symbol, "EXTERNAL attribute not allowed on '%s'"_err_en_US);
+      // Check if previous symbol is an interface.
+      if (auto *details{symbol->detailsIf<SubprogramDetails>()}) {
+        if (details->isInterface()) {
+          // Warn if interface previously declared.
+          Say(name,
+              "EXTERNAL attribute was already specified on '%s'"_warn_en_US);
+        }
+      } else {
+        SayWithDecl(
+            name, *symbol, "EXTERNAL attribute not allowed on '%s'"_err_en_US);
+      }
     } else if (symbol->attrs().test(Attr::INTRINSIC)) { // C840
       Say(symbol->name(),
           "Symbol '%s' cannot have both INTRINSIC and EXTERNAL attributes"_err_en_US,
@@ -7508,7 +7527,8 @@ void ResolveNamesVisitor::FinishSpecificationPart(
 // expressions, so it's safe to defer processing their definitions.)
 void ResolveNamesVisitor::AnalyzeStmtFunctionStmt(
     const parser::StmtFunctionStmt &stmtFunc) {
-  Symbol *symbol{std::get<parser::Name>(stmtFunc.t).symbol};
+  const auto &name{std::get<parser::Name>(stmtFunc.t)};
+  Symbol *symbol{name.symbol};
   auto *details{symbol ? symbol->detailsIf<SubprogramDetails>() : nullptr};
   if (!details || !symbol->scope()) {
     return;
@@ -7520,8 +7540,12 @@ void ResolveNamesVisitor::AnalyzeStmtFunctionStmt(
   PopScope();
   if (auto expr{AnalyzeExpr(context(), stmtFunc)}) {
     if (auto type{evaluate::DynamicType::From(*symbol)}) {
-      if (auto converted{ConvertToType(*type, std::move(*expr))}) {
+      if (auto converted{evaluate::ConvertToType(*type, std::move(*expr))}) {
         details->set_stmtFunction(std::move(*converted));
+      } else {
+        Say(name.source,
+            "Defining expression of statement function '%s' cannot be converted to its result type %s"_err_en_US,
+            name.source, type->AsFortran());
       }
     } else {
       details->set_stmtFunction(std::move(*expr));

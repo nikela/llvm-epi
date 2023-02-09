@@ -4,6 +4,8 @@
 ; RUN: llc -mtriple=riscv64 -target-abi lp64d -mattr=+m,+f,+d,+v \
 ; RUN:     -O2 < %s -verify-machineinstrs -epi-pipeline | FileCheck --check-prefix=CHECK-O2 %s
 
+; NOTE: using volatile in order to avoid instruction selection optimizations.
+
 @scratch = global i8 0, align 16
 
 define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <vscale x 1 x i1> %m, i32 %n) nounwind {
@@ -84,19 +86,19 @@ define void @test_vp_fold_greater_splats(<vscale x 1 x double> %a, double %b, <v
 
   ; ; x > splat(y) → vmfgt.vf x, y
   %ogt.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"ogt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ogt.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ogt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) > x → x < splat(y) → vmflt.vf x, y
   %ogt.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"ogt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ogt.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ogt.1, <vscale x 1 x i1>* %store_addr
 
   ; x >= splat(y) → vmfge.vf x, y
   %oge.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"oge", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %oge.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %oge.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) >= x → x <= splat(y) → vmfle.vf x, y
   %oge.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"oge", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %oge.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %oge.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -183,19 +185,19 @@ define void @test_vp_fold_lower_splats(<vscale x 1 x double> %a, <vscale x 1 x d
 
   ; x < splat(y) → vmflt.vf x, y
   %olt.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"olt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %olt.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %olt.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) < x → x > splat(y) → vmfgt.vf x, y
   %olt.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"olt", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %olt.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %olt.1, <vscale x 1 x i1>* %store_addr
 
   ; x <= splat(y) → vmfle.vf x, y
   %ole.0 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %a, <vscale x 1 x double> %splat, metadata !"ole", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ole.0, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ole.0, <vscale x 1 x i1>* %store_addr
 
   ; splat(y) <= x → x >= splat(y) → vmfge.vf x, y
   %ole.1 = call <vscale x 1 x i1> @llvm.vp.fcmp.nxv1f64(<vscale x 1 x double> %splat, <vscale x 1 x double> %a, metadata !"ole", <vscale x 1 x i1> %m, i32 %n)
-  store <vscale x 1 x i1> %ole.1, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ole.1, <vscale x 1 x i1>* %store_addr
 
   ret void
 }

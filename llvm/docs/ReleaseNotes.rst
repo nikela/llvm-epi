@@ -71,6 +71,10 @@ Changes to the AMDGPU Backend
 Changes to the ARM Backend
 --------------------------
 
+- The hard-float ABI is now available in Armv8.1-M configurations that
+  have integer MVE instructions (and therefore have FP registers) but
+  no scalar or vector floating point computation.
+
 Changes to the AVR Backend
 --------------------------
 
@@ -82,7 +86,7 @@ Changes to the DirectX Backend
 Changes to the Hexagon Backend
 ------------------------------
 
-* ...
+* The Hexagon backend now support V71 and V73 ISA.
 
 Changes to the LoongArch Backend
 --------------------------------
@@ -102,6 +106,9 @@ Changes to the RISC-V Backend
 
 * Assembler support for version 1.0.1 of the Zcb extension was added.
 * Zca, Zcf, and Zcd extensions were upgraded to version 1.0.1.
+* vsetvli intrinsics no longer have side effects. They may now be combined,
+  moved, deleted, etc. by optimizations.
+* Adds support for the vendor-defined XTHeadBa (address-generation) extension.
 
 Changes to the WebAssembly Backend
 ----------------------------------

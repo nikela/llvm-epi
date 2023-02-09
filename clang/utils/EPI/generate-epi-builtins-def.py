@@ -863,7 +863,7 @@ def emit_compatibility_header(out_file, j):
             code = string.Template(code)
             subs = {}
             subs["FullName"] = ib.full_name
-            subs["Name"] = ib.builtin["Name"]
+            subs["Name"] = "__riscv_" + ib.builtin["Name"]
             # At the moment vlseg and vsseg builtins are not implemented upstream
             # Once they are, uncommenitng this 'if' statement should be enough to make them work
             #if subs["Name"].startswith("vlseg") or subs["Name"].startswith("vsseg"):
@@ -882,8 +882,8 @@ def emit_compatibility_header(out_file, j):
                 if ib.lmul == 1:
                     subs["LMulExt"] = subs["LMulTrunc"] = subs["End"] = ""
                 else:
-                    subs["LMulExt"] = "vlmul_ext_v_" + subs["Type"] + "m1_" + subs["Type"] + subs["LMul"] + "("
-                    subs["LMulTrunc"] = "vlmul_trunc_v_" + subs["Type"] + subs["LMul"] + "_" + subs["Type"] + "m1" + "("
+                    subs["LMulExt"] = "__riscv_vlmul_ext_v_" + subs["Type"] + "m1_" + subs["Type"] + subs["LMul"] + "("
+                    subs["LMulTrunc"] = "__riscv_vlmul_trunc_v_" + subs["Type"] + subs["LMul"] + "_" + subs["Type"] + "m1" + "("
                     subs["End"] = ")"
             if "slide" in ib.full_name:
                 subs["ifFloat"] = "f" if subs["Type"][0] == "f" else ""

@@ -29,9 +29,9 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Program.h"
 #include "llvm/Support/ScopedPrinter.h"
-#include "llvm/Support/TargetParser.h"
 #include "llvm/Support/Threading.h"
 #include "llvm/Support/VirtualFileSystem.h"
+#include "llvm/TargetParser/TargetParser.h"
 #include <cstdlib> // ::getenv
 #include <memory>  // std::unique_ptr
 
@@ -1438,27 +1438,29 @@ void DarwinClang::AddLinkRuntimeLibArgs(const ArgList &Args,
     return;
   }
 
-  if (Sanitize.needsAsanRt())
-    AddLinkSanitizerLibArgs(Args, CmdArgs, "asan");
-  if (Sanitize.needsLsanRt())
-    AddLinkSanitizerLibArgs(Args, CmdArgs, "lsan");
-  if (Sanitize.needsUbsanRt()) {
-    assert(Sanitize.needsSharedRt() && "Static sanitizer runtimes not supported");
-    AddLinkSanitizerLibArgs(Args, CmdArgs,
-                            Sanitize.requiresMinimalRuntime() ? "ubsan_minimal"
-                                                              : "ubsan");
-  }
-  if (Sanitize.needsTsanRt())
-    AddLinkSanitizerLibArgs(Args, CmdArgs, "tsan");
-  if (Sanitize.needsFuzzer() && !Args.hasArg(options::OPT_dynamiclib)) {
-    AddLinkSanitizerLibArgs(Args, CmdArgs, "fuzzer", /*shared=*/false);
+  if (Sanitize.linkRuntimes()) {
+    if (Sanitize.needsAsanRt())
+      AddLinkSanitizerLibArgs(Args, CmdArgs, "asan");
+    if (Sanitize.needsLsanRt())
+      AddLinkSanitizerLibArgs(Args, CmdArgs, "lsan");
+    if (Sanitize.needsUbsanRt()) {
+      assert(Sanitize.needsSharedRt() && "Static sanitizer runtimes not supported");
+      AddLinkSanitizerLibArgs(Args, CmdArgs,
+                              Sanitize.requiresMinimalRuntime() ? "ubsan_minimal"
+                                                                : "ubsan");
+    }
+    if (Sanitize.needsTsanRt())
+      AddLinkSanitizerLibArgs(Args, CmdArgs, "tsan");
+    if (Sanitize.needsFuzzer() && !Args.hasArg(options::OPT_dynamiclib)) {
+      AddLinkSanitizerLibArgs(Args, CmdArgs, "fuzzer", /*shared=*/false);
 
-    // Libfuzzer is written in C++ and requires libcxx.
-    AddCXXStdlibLibArgs(Args, CmdArgs);
-  }
-  if (Sanitize.needsStatsRt()) {
-    AddLinkRuntimeLib(Args, CmdArgs, "stats_client", RLO_AlwaysLink);
-    AddLinkSanitizerLibArgs(Args, CmdArgs, "stats");
+        // Libfuzzer is written in C++ and requires libcxx.
+        AddCXXStdlibLibArgs(Args, CmdArgs);
+    }
+    if (Sanitize.needsStatsRt()) {
+      AddLinkRuntimeLib(Args, CmdArgs, "stats_client", RLO_AlwaysLink);
+      AddLinkSanitizerLibArgs(Args, CmdArgs, "stats");
+    }
   }
 
   const XRayArgs &XRay = getXRayArgs();
@@ -1779,7 +1781,7 @@ getDeploymentTargetFromOSVersionArg(DerivedArgList &Args,
                  ->getAsString(Args);
     }
     return DarwinPlatform::createOSVersionArg(Darwin::MacOS, macOSVersion,
-                                              /*IsImulator=*/false);
+                                              /*IsSimulator=*/false);
   } else if (iOSVersion) {
     if (TvOSVersion || WatchOSVersion) {
       TheDriver.Diag(diag::err_drv_argument_not_allowed_with)

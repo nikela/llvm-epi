@@ -37,7 +37,7 @@
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/MachineValueType.h"
 #include "llvm/Support/MathExtras.h"
-#include "llvm/Support/TargetParser.h"
+#include "llvm/TargetParser/TargetParser.h"
 #include <optional>
 
 using namespace llvm;
@@ -5309,7 +5309,7 @@ bool AMDGPUAsmParser::ParseDirectiveAMDHSAKernel() {
 
   getTargetStreamer().EmitAmdhsaKernelDescriptor(
       getSTI(), KernelName, KD, NextFreeVGPR, NextFreeSGPR, ReserveVCC,
-      ReserveFlatScr);
+      ReserveFlatScr, AMDGPU::getAmdhsaCodeObjectVersion());
   return false;
 }
 
@@ -5609,7 +5609,7 @@ bool AMDGPUAsmParser::ParseDirectiveAMDGPULDS() {
     return TokError("expected identifier in directive");
 
   MCSymbol *Symbol = getContext().getOrCreateSymbol(Name);
-  if (parseToken(AsmToken::Comma, "expected ','"))
+  if (getParser().parseComma())
     return true;
 
   unsigned LocalMemorySize = AMDGPU::IsaInfo::getLocalMemorySize(&getSTI());

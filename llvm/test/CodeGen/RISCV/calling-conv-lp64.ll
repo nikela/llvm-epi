@@ -130,8 +130,8 @@ define i64 @caller_float_in_regs() nounwind {
 ; RV64F-FPELIM:       # %bb.0:
 ; RV64F-FPELIM-NEXT:    addi sp, sp, -16
 ; RV64F-FPELIM-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; RV64F-FPELIM-NEXT:    lui a0, %hi(.LCPI1_0)
-; RV64F-FPELIM-NEXT:    flw fa0, %lo(.LCPI1_0)(a0)
+; RV64F-FPELIM-NEXT:    lui a0, 262144
+; RV64F-FPELIM-NEXT:    fmv.w.x fa0, a0
 ; RV64F-FPELIM-NEXT:    li a0, 1
 ; RV64F-FPELIM-NEXT:    call callee_float_in_regs@plt
 ; RV64F-FPELIM-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
@@ -144,8 +144,8 @@ define i64 @caller_float_in_regs() nounwind {
 ; RV64F-WITHFP-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; RV64F-WITHFP-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
 ; RV64F-WITHFP-NEXT:    addi s0, sp, 16
-; RV64F-WITHFP-NEXT:    lui a0, %hi(.LCPI1_0)
-; RV64F-WITHFP-NEXT:    flw fa0, %lo(.LCPI1_0)(a0)
+; RV64F-WITHFP-NEXT:    lui a0, 262144
+; RV64F-WITHFP-NEXT:    fmv.w.x fa0, a0
 ; RV64F-WITHFP-NEXT:    li a0, 1
 ; RV64F-WITHFP-NEXT:    call callee_float_in_regs@plt
 ; RV64F-WITHFP-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
@@ -157,8 +157,8 @@ define i64 @caller_float_in_regs() nounwind {
 ; RV64D-FPELIM:       # %bb.0:
 ; RV64D-FPELIM-NEXT:    addi sp, sp, -16
 ; RV64D-FPELIM-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; RV64D-FPELIM-NEXT:    lui a0, %hi(.LCPI1_0)
-; RV64D-FPELIM-NEXT:    flw fa0, %lo(.LCPI1_0)(a0)
+; RV64D-FPELIM-NEXT:    lui a0, 262144
+; RV64D-FPELIM-NEXT:    fmv.w.x fa0, a0
 ; RV64D-FPELIM-NEXT:    li a0, 1
 ; RV64D-FPELIM-NEXT:    call callee_float_in_regs@plt
 ; RV64D-FPELIM-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
@@ -171,8 +171,8 @@ define i64 @caller_float_in_regs() nounwind {
 ; RV64D-WITHFP-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; RV64D-WITHFP-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
 ; RV64D-WITHFP-NEXT:    addi s0, sp, 16
-; RV64D-WITHFP-NEXT:    lui a0, %hi(.LCPI1_0)
-; RV64D-WITHFP-NEXT:    flw fa0, %lo(.LCPI1_0)(a0)
+; RV64D-WITHFP-NEXT:    lui a0, 262144
+; RV64D-WITHFP-NEXT:    fmv.w.x fa0, a0
 ; RV64D-WITHFP-NEXT:    li a0, 1
 ; RV64D-WITHFP-NEXT:    call callee_float_in_regs@plt
 ; RV64D-WITHFP-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
@@ -287,8 +287,8 @@ define i64 @caller_float_on_stack() nounwind {
 ; RV64F-FPELIM:       # %bb.0:
 ; RV64F-FPELIM-NEXT:    addi sp, sp, -16
 ; RV64F-FPELIM-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; RV64F-FPELIM-NEXT:    lui a0, %hi(.LCPI3_0)
-; RV64F-FPELIM-NEXT:    flw fa0, %lo(.LCPI3_0)(a0)
+; RV64F-FPELIM-NEXT:    lui a0, 264704
+; RV64F-FPELIM-NEXT:    fmv.w.x fa0, a0
 ; RV64F-FPELIM-NEXT:    li a0, 1
 ; RV64F-FPELIM-NEXT:    li a2, 2
 ; RV64F-FPELIM-NEXT:    li a4, 3
@@ -308,8 +308,8 @@ define i64 @caller_float_on_stack() nounwind {
 ; RV64F-WITHFP-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; RV64F-WITHFP-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
 ; RV64F-WITHFP-NEXT:    addi s0, sp, 16
-; RV64F-WITHFP-NEXT:    lui a0, %hi(.LCPI3_0)
-; RV64F-WITHFP-NEXT:    flw fa0, %lo(.LCPI3_0)(a0)
+; RV64F-WITHFP-NEXT:    lui a0, 264704
+; RV64F-WITHFP-NEXT:    fmv.w.x fa0, a0
 ; RV64F-WITHFP-NEXT:    li a0, 1
 ; RV64F-WITHFP-NEXT:    li a2, 2
 ; RV64F-WITHFP-NEXT:    li a4, 3
@@ -328,8 +328,8 @@ define i64 @caller_float_on_stack() nounwind {
 ; RV64D-FPELIM:       # %bb.0:
 ; RV64D-FPELIM-NEXT:    addi sp, sp, -16
 ; RV64D-FPELIM-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
-; RV64D-FPELIM-NEXT:    lui a0, %hi(.LCPI3_0)
-; RV64D-FPELIM-NEXT:    flw fa0, %lo(.LCPI3_0)(a0)
+; RV64D-FPELIM-NEXT:    lui a0, 264704
+; RV64D-FPELIM-NEXT:    fmv.w.x fa0, a0
 ; RV64D-FPELIM-NEXT:    li a0, 1
 ; RV64D-FPELIM-NEXT:    li a2, 2
 ; RV64D-FPELIM-NEXT:    li a4, 3
@@ -349,8 +349,8 @@ define i64 @caller_float_on_stack() nounwind {
 ; RV64D-WITHFP-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; RV64D-WITHFP-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
 ; RV64D-WITHFP-NEXT:    addi s0, sp, 16
-; RV64D-WITHFP-NEXT:    lui a0, %hi(.LCPI3_0)
-; RV64D-WITHFP-NEXT:    flw fa0, %lo(.LCPI3_0)(a0)
+; RV64D-WITHFP-NEXT:    lui a0, 264704
+; RV64D-WITHFP-NEXT:    fmv.w.x fa0, a0
 ; RV64D-WITHFP-NEXT:    li a0, 1
 ; RV64D-WITHFP-NEXT:    li a2, 2
 ; RV64D-WITHFP-NEXT:    li a4, 3
@@ -388,8 +388,8 @@ define float @callee_tiny_scalar_ret() nounwind {
 ;
 ; RV64F-FPELIM-LABEL: callee_tiny_scalar_ret:
 ; RV64F-FPELIM:       # %bb.0:
-; RV64F-FPELIM-NEXT:    lui a0, %hi(.LCPI4_0)
-; RV64F-FPELIM-NEXT:    flw fa0, %lo(.LCPI4_0)(a0)
+; RV64F-FPELIM-NEXT:    lui a0, 260096
+; RV64F-FPELIM-NEXT:    fmv.w.x fa0, a0
 ; RV64F-FPELIM-NEXT:    ret
 ;
 ; RV64F-WITHFP-LABEL: callee_tiny_scalar_ret:
@@ -398,8 +398,8 @@ define float @callee_tiny_scalar_ret() nounwind {
 ; RV64F-WITHFP-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; RV64F-WITHFP-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
 ; RV64F-WITHFP-NEXT:    addi s0, sp, 16
-; RV64F-WITHFP-NEXT:    lui a0, %hi(.LCPI4_0)
-; RV64F-WITHFP-NEXT:    flw fa0, %lo(.LCPI4_0)(a0)
+; RV64F-WITHFP-NEXT:    lui a0, 260096
+; RV64F-WITHFP-NEXT:    fmv.w.x fa0, a0
 ; RV64F-WITHFP-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; RV64F-WITHFP-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; RV64F-WITHFP-NEXT:    addi sp, sp, 16
@@ -407,8 +407,8 @@ define float @callee_tiny_scalar_ret() nounwind {
 ;
 ; RV64D-FPELIM-LABEL: callee_tiny_scalar_ret:
 ; RV64D-FPELIM:       # %bb.0:
-; RV64D-FPELIM-NEXT:    lui a0, %hi(.LCPI4_0)
-; RV64D-FPELIM-NEXT:    flw fa0, %lo(.LCPI4_0)(a0)
+; RV64D-FPELIM-NEXT:    lui a0, 260096
+; RV64D-FPELIM-NEXT:    fmv.w.x fa0, a0
 ; RV64D-FPELIM-NEXT:    ret
 ;
 ; RV64D-WITHFP-LABEL: callee_tiny_scalar_ret:
@@ -417,8 +417,8 @@ define float @callee_tiny_scalar_ret() nounwind {
 ; RV64D-WITHFP-NEXT:    sd ra, 8(sp) # 8-byte Folded Spill
 ; RV64D-WITHFP-NEXT:    sd s0, 0(sp) # 8-byte Folded Spill
 ; RV64D-WITHFP-NEXT:    addi s0, sp, 16
-; RV64D-WITHFP-NEXT:    lui a0, %hi(.LCPI4_0)
-; RV64D-WITHFP-NEXT:    flw fa0, %lo(.LCPI4_0)(a0)
+; RV64D-WITHFP-NEXT:    lui a0, 260096
+; RV64D-WITHFP-NEXT:    fmv.w.x fa0, a0
 ; RV64D-WITHFP-NEXT:    ld ra, 8(sp) # 8-byte Folded Reload
 ; RV64D-WITHFP-NEXT:    ld s0, 0(sp) # 8-byte Folded Reload
 ; RV64D-WITHFP-NEXT:    addi sp, sp, 16

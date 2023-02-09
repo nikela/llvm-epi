@@ -26,7 +26,6 @@
 #include "clang/Driver/OptionUtils.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSwitch.h"
-#include "llvm/ADT/Triple.h"
 #include "llvm/Option/Arg.h"
 #include "llvm/Option/ArgList.h"
 #include "llvm/Option/OptTable.h"
@@ -36,6 +35,7 @@
 #include "llvm/Support/Path.h"
 #include "llvm/Support/Process.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/Triple.h"
 #include <memory>
 #include <optional>
 
@@ -155,8 +155,18 @@ static bool parseCodeGenArgs(CompilerInvocation &invoc,
                                   clang::driver::options::OPT_fno_unroll_loops,
                                   (opts.OptimizationLevel > 1));
 
+  if (args.hasFlag(clang::driver::options::OPT_fstack_arrays,
+                   clang::driver::options::OPT_fno_stack_arrays, false)) {
+    opts.StackArrays = 1;
+  }
+
   for (auto *a : args.filtered(clang::driver::options::OPT_fpass_plugin_EQ))
     opts.LLVMPassPlugins.push_back(a->getValue());
+
+  // -fembed-offload-object option
+  for (auto *a :
+       args.filtered(clang::driver::options::OPT_fembed_offload_object_EQ))
+    opts.OffloadObjects.push_back(a->getValue());
 
   // -mrelocation-model option.
   if (const llvm::opt::Arg *A =

@@ -145,6 +145,9 @@ struct TypeBuilderImpl {
     Fortran::common::TypeCategory category = dynamicType->category();
 
     mlir::Type baseType;
+    bool isPolymorphic = (dynamicType->IsPolymorphic() ||
+                          dynamicType->IsUnlimitedPolymorphic()) &&
+                         !dynamicType->IsAssumedType();
     if (dynamicType->IsUnlimitedPolymorphic()) {
       baseType = mlir::NoneType::get(context);
     } else if (category == Fortran::common::TypeCategory::Derived) {
@@ -169,8 +172,14 @@ struct TypeBuilderImpl {
       for (int dim = 0; dim < rank; ++dim)
         shape.emplace_back(fir::SequenceType::getUnknownExtent());
     }
-    if (!shape.empty())
+
+    if (!shape.empty()) {
+      if (isPolymorphic)
+        return fir::ClassType::get(fir::SequenceType::get(shape, baseType));
       return fir::SequenceType::get(shape, baseType);
+    }
+    if (isPolymorphic)
+      return fir::ClassType::get(baseType);
     return baseType;
   }
 
@@ -258,6 +267,9 @@ struct TypeBuilderImpl {
     } else {
       fir::emitFatalError(loc, "symbol must have a type");
     }
+    bool isPolymorphic = (Fortran::semantics::IsPolymorphic(symbol) ||
+                          Fortran::semantics::IsUnlimitedPolymorphic(symbol)) &&
+                         !Fortran::semantics::IsAssumedType(symbol);
     if (ultimate.IsObjectArray()) {
       auto shapeExpr = Fortran::evaluate::GetShapeHelper{
           converter.getFoldingContext()}(ultimate);
@@ -268,11 +280,10 @@ struct TypeBuilderImpl {
       ty = fir::SequenceType::get(shape, ty);
     }
     if (Fortran::semantics::IsPointer(symbol))
-      return fir::wrapInClassOrBoxType(
-          fir::PointerType::get(ty), Fortran::semantics::IsPolymorphic(symbol));
+      return fir::wrapInClassOrBoxType(fir::PointerType::get(ty),
+                                       isPolymorphic);
     if (Fortran::semantics::IsAllocatable(symbol))
-      return fir::wrapInClassOrBoxType(
-          fir::HeapType::get(ty), Fortran::semantics::IsPolymorphic(symbol));
+      return fir::wrapInClassOrBoxType(fir::HeapType::get(ty), isPolymorphic);
     // isPtr and isAlloc are variable that were promoted to be on the
     // heap or to be pointers, but they do not have Fortran allocatable
     // or pointer semantics, so do not use box for them.
@@ -280,6 +291,8 @@ struct TypeBuilderImpl {
       return fir::PointerType::get(ty);
     if (isAlloc)
       return fir::HeapType::get(ty);
+    if (isPolymorphic)
+      return fir::ClassType::get(ty);
     return ty;
   }
 
@@ -289,9 +302,6 @@ struct TypeBuilderImpl {
     const Fortran::semantics::Symbol &typeSymbol = tySpec.typeSymbol();
     if (mlir::Type ty = getTypeIfDerivedAlreadyInConstruction(typeSymbol))
       return ty;
-
-    if (Fortran::semantics::IsFinalizable(tySpec))
-      TODO(converter.genLocation(tySpec.name()), "derived type finalization");
 
     auto rec = fir::RecordType::get(context,
                                     Fortran::lower::mangle::mangleName(tySpec));

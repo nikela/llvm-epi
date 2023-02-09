@@ -84,6 +84,7 @@ bool VPRecipeBase::mayReadFromMemory() const {
         ->mayReadFromMemory();
   case VPBranchOnMaskSC:
   case VPScalarIVStepsSC:
+  case VPPredInstPHISC:
     return false;
   case VPWidenIntOrFpInductionSC:
   case VPWidenCanonicalIVSC:
@@ -127,6 +128,13 @@ bool VPRecipeBase::mayHaveSideEffects() const {
            "underlying instruction has side-effects");
     return false;
   }
+  case VPWidenMemoryInstructionSC:
+    assert(cast<VPWidenMemoryInstructionRecipe>(this)
+                   ->getIngredient()
+                   .mayHaveSideEffects() == mayWriteToMemory() &&
+           "mayHaveSideffects result for ingredient differs from this "
+           "implementation");
+    return mayWriteToMemory();
   case VPReplicateSC: {
     auto *R = cast<VPReplicateRecipe>(this);
     return R->getUnderlyingInstr()->mayHaveSideEffects();

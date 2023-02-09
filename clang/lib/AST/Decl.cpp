@@ -58,10 +58,10 @@
 #include "llvm/ADT/SmallVector.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/ADT/StringSwitch.h"
-#include "llvm/ADT/Triple.h"
 #include "llvm/Support/Casting.h"
 #include "llvm/Support/ErrorHandling.h"
 #include "llvm/Support/raw_ostream.h"
+#include "llvm/TargetParser/Triple.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
@@ -4771,7 +4771,10 @@ bool RecordDecl::isOrContainsUnion() const {
 RecordDecl::field_iterator RecordDecl::field_begin() const {
   if (hasExternalLexicalStorage() && !hasLoadedFieldsFromExternalStorage())
     LoadFieldsFromExternalStorage();
-
+  // This is necessary for correctness for C++ with modules.
+  // FIXME: Come up with a test case that breaks without definition.
+  if (RecordDecl *D = getDefinition(); D && D != this)
+    return D->field_begin();
   return field_iterator(decl_iterator(FirstDecl));
 }
 

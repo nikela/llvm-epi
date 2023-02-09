@@ -154,7 +154,7 @@ class UImmAsmOperand<int width, string suffix = "">
 def FenceArg : AsmOperandClass {
   let Name = "FenceArg";
   let RenderMethod = "addFenceArgOperands";
-  let DiagnosticType = "InvalidFenceArg";
+  let ParserMethod = "parseFenceArg";
 }
 
 def fencearg : Operand<XLenVT> {
@@ -1469,6 +1469,26 @@ let Predicates = [HasStdExtC, OptForMinSize] in {
   def : BrccCompessOpt<SETEQ, BEQ>;
   def : BrccCompessOpt<SETNE, BNE>;
 }
+
+class LongBccPseudo : Pseudo<(outs),
+                             (ins GPR:$rs1, GPR:$rs2, simm21_lsb0_jal:$imm20),
+                             []> {
+  let Size = 8;
+  let isBarrier = 1;
+  let isBranch = 1;
+  let hasSideEffects = 0;
+  let mayStore = 0;
+  let mayLoad = 0;
+  let isAsmParserOnly = 1;
+  let hasNoSchedulingInfo = 1;
+}
+
+def PseudoLongBEQ : LongBccPseudo;
+def PseudoLongBNE : LongBccPseudo;
+def PseudoLongBLT : LongBccPseudo;
+def PseudoLongBGE : LongBccPseudo;
+def PseudoLongBLTU : LongBccPseudo;
+def PseudoLongBGEU : LongBccPseudo;
 
 let isBarrier = 1, isBranch = 1, isTerminator = 1 in
 def PseudoBR : Pseudo<(outs), (ins simm21_lsb0_jal:$imm20), [(br bb:$imm20)]>,
