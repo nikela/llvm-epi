@@ -29,9 +29,18 @@ class AssociateOp;
 class ElementalOp;
 class YieldElementOp;
 
+/// Is this an SSA value type for the value of a Fortran procedure
+/// designator ?
+inline bool isFortranProcedureValue(mlir::Type type) {
+  return type.isa<fir::BoxProcType>() ||
+         (type.isa<mlir::TupleType>() &&
+          fir::isCharacterProcedureTuple(type, /*acceptRawFunc=*/false));
+}
+
 /// Is this an SSA value type for the value of a Fortran expression?
 inline bool isFortranValueType(mlir::Type type) {
-  return type.isa<hlfir::ExprType>() || fir::isa_trivial(type);
+  return type.isa<hlfir::ExprType>() || fir::isa_trivial(type) ||
+         isFortranProcedureValue(type);
 }
 
 /// Is this the value of a Fortran expression in an SSA value form?
@@ -77,6 +86,10 @@ public:
   bool isBoxAddressOrValue() const {
     return hlfir::isBoxAddressOrValueType(getType());
   }
+
+  /// Is this entity a procedure designator?
+  bool isProcedure() const { return isFortranProcedureValue(getType()); }
+
   /// Is this an array or an assumed ranked entity?
   bool isArray() const { return getRank() != 0; }
 
@@ -349,6 +362,17 @@ hlfir::YieldElementOp inlineElementalOp(mlir::Location loc,
                                         hlfir::ElementalOp elemental,
                                         mlir::ValueRange oneBasedIndices);
 
+std::pair<fir::ExtendedValue, std::optional<hlfir::CleanupFunction>>
+convertToValue(mlir::Location loc, fir::FirOpBuilder &builder,
+               const hlfir::Entity &entity);
+
+std::pair<fir::ExtendedValue, std::optional<hlfir::CleanupFunction>>
+convertToAddress(mlir::Location loc, fir::FirOpBuilder &builder,
+                 const hlfir::Entity &entity, mlir::Type targetType);
+
+std::pair<fir::ExtendedValue, std::optional<hlfir::CleanupFunction>>
+convertToBox(mlir::Location loc, fir::FirOpBuilder &builder,
+             const hlfir::Entity &entity, mlir::Type targetType);
 } // namespace hlfir
 
 #endif // FORTRAN_OPTIMIZER_BUILDER_HLFIRTOOLS_H

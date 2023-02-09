@@ -81,7 +81,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD8]])
 ; CHECK-NEXT:    [[TMP34:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP35:%.*]] = shl i64 [[TMP34]], 6
-; CHECK-NEXT:    [[TMP36:%.*]] = mul i64 [[TMP34]], 274877906880
+; CHECK-NEXT:    [[TMP36:%.*]] = sub i64 0, [[TMP35]]
 ; CHECK-NEXT:    [[TMP37:%.*]] = sub i64 1, [[TMP35]]
 ; CHECK-NEXT:    [[TMP38:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP36]]
 ; CHECK-NEXT:    [[TMP39:%.*]] = getelementptr inbounds i8, ptr [[TMP38]], i64 [[TMP37]]
@@ -89,7 +89,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE10:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD9]])
 ; CHECK-NEXT:    [[TMP40:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP41:%.*]] = shl i64 [[TMP40]], 6
-; CHECK-NEXT:    [[TMP42:%.*]] = mul i64 [[TMP40]], 274877906816
+; CHECK-NEXT:    [[TMP42:%.*]] = mul i64 [[TMP40]], -128
 ; CHECK-NEXT:    [[TMP43:%.*]] = sub i64 1, [[TMP41]]
 ; CHECK-NEXT:    [[TMP44:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP42]]
 ; CHECK-NEXT:    [[TMP45:%.*]] = getelementptr inbounds i8, ptr [[TMP44]], i64 [[TMP43]]
@@ -97,7 +97,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE12:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD11]])
 ; CHECK-NEXT:    [[TMP46:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP47:%.*]] = shl i64 [[TMP46]], 6
-; CHECK-NEXT:    [[TMP48:%.*]] = mul i64 [[TMP46]], 274877906752
+; CHECK-NEXT:    [[TMP48:%.*]] = mul i64 [[TMP46]], -192
 ; CHECK-NEXT:    [[TMP49:%.*]] = sub i64 1, [[TMP47]]
 ; CHECK-NEXT:    [[TMP50:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP48]]
 ; CHECK-NEXT:    [[TMP51:%.*]] = getelementptr inbounds i8, ptr [[TMP50]], i64 [[TMP49]]
@@ -105,7 +105,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE14:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD13]])
 ; CHECK-NEXT:    [[TMP52:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP53:%.*]] = shl i64 [[TMP52]], 6
-; CHECK-NEXT:    [[TMP54:%.*]] = mul i64 [[TMP52]], 274877906688
+; CHECK-NEXT:    [[TMP54:%.*]] = mul i64 [[TMP52]], -256
 ; CHECK-NEXT:    [[TMP55:%.*]] = sub i64 1, [[TMP53]]
 ; CHECK-NEXT:    [[TMP56:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP54]]
 ; CHECK-NEXT:    [[TMP57:%.*]] = getelementptr inbounds i8, ptr [[TMP56]], i64 [[TMP55]]
@@ -113,7 +113,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE16:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD15]])
 ; CHECK-NEXT:    [[TMP58:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP59:%.*]] = shl i64 [[TMP58]], 6
-; CHECK-NEXT:    [[TMP60:%.*]] = mul i64 [[TMP58]], 274877906624
+; CHECK-NEXT:    [[TMP60:%.*]] = mul i64 [[TMP58]], -320
 ; CHECK-NEXT:    [[TMP61:%.*]] = sub i64 1, [[TMP59]]
 ; CHECK-NEXT:    [[TMP62:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP60]]
 ; CHECK-NEXT:    [[TMP63:%.*]] = getelementptr inbounds i8, ptr [[TMP62]], i64 [[TMP61]]
@@ -121,7 +121,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE18:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD17]])
 ; CHECK-NEXT:    [[TMP64:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP65:%.*]] = shl i64 [[TMP64]], 6
-; CHECK-NEXT:    [[TMP66:%.*]] = mul i64 [[TMP64]], 274877906560
+; CHECK-NEXT:    [[TMP66:%.*]] = mul i64 [[TMP64]], -384
 ; CHECK-NEXT:    [[TMP67:%.*]] = sub i64 1, [[TMP65]]
 ; CHECK-NEXT:    [[TMP68:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP66]]
 ; CHECK-NEXT:    [[TMP69:%.*]] = getelementptr inbounds i8, ptr [[TMP68]], i64 [[TMP67]]
@@ -129,7 +129,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK-NEXT:    [[REVERSE20:%.*]] = call <vscale x 64 x i8> @llvm.experimental.vector.reverse.nxv64i8(<vscale x 64 x i8> [[WIDE_LOAD19]])
 ; CHECK-NEXT:    [[TMP70:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP71:%.*]] = shl i64 [[TMP70]], 6
-; CHECK-NEXT:    [[TMP72:%.*]] = mul i64 [[TMP70]], 274877906496
+; CHECK-NEXT:    [[TMP72:%.*]] = mul i64 [[TMP70]], -448
 ; CHECK-NEXT:    [[TMP73:%.*]] = sub i64 1, [[TMP71]]
 ; CHECK-NEXT:    [[TMP74:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP72]]
 ; CHECK-NEXT:    [[TMP75:%.*]] = getelementptr inbounds i8, ptr [[TMP74]], i64 [[TMP73]]
@@ -264,7 +264,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD8]])
 ; CHECK1-NEXT:    [[TMP34:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP35:%.*]] = shl i64 [[TMP34]], 3
-; CHECK1-NEXT:    [[TMP36:%.*]] = mul i64 [[TMP34]], 34359738360
+; CHECK1-NEXT:    [[TMP36:%.*]] = sub i64 0, [[TMP35]]
 ; CHECK1-NEXT:    [[TMP37:%.*]] = sub i64 1, [[TMP35]]
 ; CHECK1-NEXT:    [[TMP38:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP36]]
 ; CHECK1-NEXT:    [[TMP39:%.*]] = getelementptr inbounds i8, ptr [[TMP38]], i64 [[TMP37]]
@@ -272,7 +272,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE10:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD9]])
 ; CHECK1-NEXT:    [[TMP40:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP41:%.*]] = shl i64 [[TMP40]], 3
-; CHECK1-NEXT:    [[TMP42:%.*]] = mul i64 [[TMP40]], 34359738352
+; CHECK1-NEXT:    [[TMP42:%.*]] = mul i64 [[TMP40]], -16
 ; CHECK1-NEXT:    [[TMP43:%.*]] = sub i64 1, [[TMP41]]
 ; CHECK1-NEXT:    [[TMP44:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP42]]
 ; CHECK1-NEXT:    [[TMP45:%.*]] = getelementptr inbounds i8, ptr [[TMP44]], i64 [[TMP43]]
@@ -280,7 +280,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE12:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD11]])
 ; CHECK1-NEXT:    [[TMP46:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP47:%.*]] = shl i64 [[TMP46]], 3
-; CHECK1-NEXT:    [[TMP48:%.*]] = mul i64 [[TMP46]], 34359738344
+; CHECK1-NEXT:    [[TMP48:%.*]] = mul i64 [[TMP46]], -24
 ; CHECK1-NEXT:    [[TMP49:%.*]] = sub i64 1, [[TMP47]]
 ; CHECK1-NEXT:    [[TMP50:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP48]]
 ; CHECK1-NEXT:    [[TMP51:%.*]] = getelementptr inbounds i8, ptr [[TMP50]], i64 [[TMP49]]
@@ -288,7 +288,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE14:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD13]])
 ; CHECK1-NEXT:    [[TMP52:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP53:%.*]] = shl i64 [[TMP52]], 3
-; CHECK1-NEXT:    [[TMP54:%.*]] = mul i64 [[TMP52]], 34359738336
+; CHECK1-NEXT:    [[TMP54:%.*]] = mul i64 [[TMP52]], -32
 ; CHECK1-NEXT:    [[TMP55:%.*]] = sub i64 1, [[TMP53]]
 ; CHECK1-NEXT:    [[TMP56:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP54]]
 ; CHECK1-NEXT:    [[TMP57:%.*]] = getelementptr inbounds i8, ptr [[TMP56]], i64 [[TMP55]]
@@ -296,7 +296,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE16:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD15]])
 ; CHECK1-NEXT:    [[TMP58:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP59:%.*]] = shl i64 [[TMP58]], 3
-; CHECK1-NEXT:    [[TMP60:%.*]] = mul i64 [[TMP58]], 34359738328
+; CHECK1-NEXT:    [[TMP60:%.*]] = mul i64 [[TMP58]], -40
 ; CHECK1-NEXT:    [[TMP61:%.*]] = sub i64 1, [[TMP59]]
 ; CHECK1-NEXT:    [[TMP62:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP60]]
 ; CHECK1-NEXT:    [[TMP63:%.*]] = getelementptr inbounds i8, ptr [[TMP62]], i64 [[TMP61]]
@@ -304,7 +304,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE18:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD17]])
 ; CHECK1-NEXT:    [[TMP64:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP65:%.*]] = shl i64 [[TMP64]], 3
-; CHECK1-NEXT:    [[TMP66:%.*]] = mul i64 [[TMP64]], 34359738320
+; CHECK1-NEXT:    [[TMP66:%.*]] = mul i64 [[TMP64]], -48
 ; CHECK1-NEXT:    [[TMP67:%.*]] = sub i64 1, [[TMP65]]
 ; CHECK1-NEXT:    [[TMP68:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP66]]
 ; CHECK1-NEXT:    [[TMP69:%.*]] = getelementptr inbounds i8, ptr [[TMP68]], i64 [[TMP67]]
@@ -312,7 +312,7 @@ define dso_local void @add_ref(i32 signext %N, i8* noalias nocapture readonly %a
 ; CHECK1-NEXT:    [[REVERSE20:%.*]] = call <vscale x 8 x i8> @llvm.experimental.vector.reverse.nxv8i8(<vscale x 8 x i8> [[WIDE_LOAD19]])
 ; CHECK1-NEXT:    [[TMP70:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK1-NEXT:    [[TMP71:%.*]] = shl i64 [[TMP70]], 3
-; CHECK1-NEXT:    [[TMP72:%.*]] = mul i64 [[TMP70]], 34359738312
+; CHECK1-NEXT:    [[TMP72:%.*]] = mul i64 [[TMP70]], -56
 ; CHECK1-NEXT:    [[TMP73:%.*]] = sub i64 1, [[TMP71]]
 ; CHECK1-NEXT:    [[TMP74:%.*]] = getelementptr inbounds i8, ptr [[TMP29]], i64 [[TMP72]]
 ; CHECK1-NEXT:    [[TMP75:%.*]] = getelementptr inbounds i8, ptr [[TMP74]], i64 [[TMP73]]
