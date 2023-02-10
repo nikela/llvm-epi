@@ -582,8 +582,9 @@ static bool dominates(const VPRecipeBase *A, const VPRecipeBase *B,
 
 // Sink users of \p FOR after the recipe defining the previous value \p Previous
 // of the recurrence.
+template <typename VPGenericFirstOrderRecurrencePHIRecipe>
 static void
-sinkRecurrenceUsersAfterPrevious(VPFirstOrderRecurrencePHIRecipe *FOR,
+sinkRecurrenceUsersAfterPrevious(VPGenericFirstOrderRecurrencePHIRecipe *FOR,
                                  VPRecipeBase *Previous,
                                  VPDominatorTree &VPDT) {
   // Collect recipes that need sinking.
@@ -686,27 +687,36 @@ void VPlanTransforms::adjustFixedOrderRecurrences(VPlan &Plan,
        Plan.getVectorLoopRegion()->getEntry()->getEntryBasicBlock()->phis()) {
     if (auto *PredFOR =
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
-      VPRecipeBase *PrevRecipe = &PredFOR->getBackedgeRecipe();
+
+      SmallPtrSet<VPPredicatedFirstOrderRecurrencePHIRecipe *, 4> SeenPhis;
+      VPRecipeBase *Previous = &PredFOR->getBackedgeRecipe();
       // Fixed-order recurrences do not contain cycles, so this loop is
       // guaranteed to terminate.
       while (
           auto *PrevPhi =
-              dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(PrevRecipe)) {
-        PrevRecipe = &PrevPhi->getBackedgeRecipe();
+              dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(Previous)) {
+        assert(PrevPhi->getParent() == PredFOR->getParent());
+        assert(SeenPhis.insert(PrevPhi).second);
+        Previous = PrevPhi->getBackedgeValue()->getDefiningRecipe();
       }
-      VPBasicBlock *InsertBlock = PrevRecipe->getParent();
-      auto *Region = GetReplicateRegion(PrevRecipe);
+
+      sinkRecurrenceUsersAfterPrevious(PredFOR, Previous, VPDT);
+
+      // Introduce a recipe to combine the incoming and previous values of a
+      // fixed-order recurrence.
+      VPBasicBlock *InsertBlock = Previous->getParent();
+      auto *Region = GetReplicateRegion(Previous);
       if (Region)
         InsertBlock = dyn_cast<VPBasicBlock>(Region->getSingleSuccessor());
       if (!InsertBlock) {
         InsertBlock = new VPBasicBlock(Region->getName() + ".succ");
         VPBlockUtils::insertBlockAfter(InsertBlock, Region);
       }
-      if (Region || PrevRecipe->isPhi())
+      if (Region || Previous->isPhi())
         Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
       else
         Builder.setInsertPoint(InsertBlock,
-                               std::next(PrevRecipe->getIterator()));
+                               std::next(Previous->getIterator()));
       auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
           VPInstruction::PredicatedFirstOrderRecurrenceSplice,
           {PredFOR, PredFOR->getBackedgeValue(), EVLRecipe}));
