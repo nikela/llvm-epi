@@ -634,6 +634,7 @@ public:
   Instruction *foldICmpEqIntrinsicWithConstant(ICmpInst &ICI, IntrinsicInst *II,
                                                const APInt &C);
   Instruction *foldICmpBitCast(ICmpInst &Cmp);
+  Instruction *foldICmpWithTrunc(ICmpInst &Cmp);
 
   // Helpers of visitSelectInst().
   Instruction *foldSelectOfBools(SelectInst &SI);
