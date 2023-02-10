@@ -379,6 +379,7 @@ private:
   Instruction *foldLShrOverflowBit(BinaryOperator &I);
   Instruction *foldExtractOfOverflowIntrinsic(ExtractValueInst &EV);
   Instruction *foldIntrinsicWithOverflowCommon(IntrinsicInst *II);
+  Instruction *foldIntrinsicIsFPClass(IntrinsicInst &II);
   Instruction *foldFPSignBitOps(BinaryOperator &I);
   Instruction *foldFDivConstantDivisor(BinaryOperator &I);
 
@@ -392,6 +393,7 @@ private:
   /// Vector Predication related visitors and functions.
   Instruction *visitVPInst(VPIntrinsic *VPI);
   Instruction *visitVPGatherScatterOnlyGEP(GetElementPtrInst &GEP);
+  Instruction *visitVPICmp(VPIntrinsic *VPICmp);
   Instruction *visitVPMul(VPIntrinsic *VPMul);
   Instruction *visitVPSelect(VPIntrinsic *VPSelect);
 
@@ -632,6 +634,7 @@ public:
   Instruction *foldICmpEqIntrinsicWithConstant(ICmpInst &ICI, IntrinsicInst *II,
                                                const APInt &C);
   Instruction *foldICmpBitCast(ICmpInst &Cmp);
+  Instruction *foldICmpWithTrunc(ICmpInst &Cmp);
 
   // Helpers of visitSelectInst().
   Instruction *foldSelectOfBools(SelectInst &SI);

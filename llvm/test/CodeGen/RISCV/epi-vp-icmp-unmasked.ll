@@ -4,6 +4,8 @@
 ; RUN: llc -mtriple=riscv64 -mattr=+m,+v -verify-machineinstrs -O2 \
 ; RUN:    < %s -epi-pipeline | FileCheck --check-prefix=CHECK-O2 %s
 
+; NOTE: using volatile in order to avoid instruction selection optimizations.
+
 @scratch = global i8 0, align 16
 
 define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 %n) nounwind {
@@ -110,34 +112,34 @@ define void @test_vp_icmp(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, i32 %n) 
   %allones = shufflevector <vscale x 1 x i1> %head, <vscale x 1 x i1> undef, <vscale x 1 x i32> zeroinitializer
 
   %eq = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"eq", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %eq, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %eq, <vscale x 1 x i1>* %store_addr
 
   %ne = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"ne", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %ne, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ne, <vscale x 1 x i1>* %store_addr
 
   %ugt = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"ugt", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %ugt, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ugt, <vscale x 1 x i1>* %store_addr
 
   %uge = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"uge", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %uge, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %uge, <vscale x 1 x i1>* %store_addr
 
   %ult = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"ult", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %ult, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ult, <vscale x 1 x i1>* %store_addr
 
   %ule = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"ule", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %ule, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %ule, <vscale x 1 x i1>* %store_addr
 
   %sgt = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"sgt", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %sgt, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sgt, <vscale x 1 x i1>* %store_addr
 
   %sge = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"sge", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %sge, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sge, <vscale x 1 x i1>* %store_addr
 
   %slt = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"slt", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %slt, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %slt, <vscale x 1 x i1>* %store_addr
 
   %sle = call <vscale x 1 x i1> @llvm.vp.icmp.nxv1i64(<vscale x 1 x i64> %a, <vscale x 1 x i64> %b, metadata !"sle", <vscale x 1 x i1> %allones, i32 %n)
-  store <vscale x 1 x i1> %sle, <vscale x 1 x i1>* %store_addr
+  store volatile <vscale x 1 x i1> %sle, <vscale x 1 x i1>* %store_addr
 
   ret void
 }
@@ -246,34 +248,34 @@ define void @test_vp_icmp_2(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, i32 %n
   %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %eq = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"eq", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %eq, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %eq, <vscale x 2 x i1>* %store_addr
 
   %ne = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"ne", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ne, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ne, <vscale x 2 x i1>* %store_addr
 
   %ugt = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"ugt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
 
   %uge = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"uge", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
 
   %ult = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"ult", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
 
   %ule = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"ule", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
 
   %sgt = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"sgt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %sgt, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %sgt, <vscale x 2 x i1>* %store_addr
 
   %sge = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"sge", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %sge, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %sge, <vscale x 2 x i1>* %store_addr
 
   %slt = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"slt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %slt, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %slt, <vscale x 2 x i1>* %store_addr
 
   %sle = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i32(<vscale x 2 x i32> %a, <vscale x 2 x i32> %b, metadata !"sle", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %sle, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %sle, <vscale x 2 x i1>* %store_addr
 
   ret void
 }
@@ -384,34 +386,34 @@ define void @test_vp_icmp_3(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, i32 %n
   %allones = shufflevector <vscale x 2 x i1> %head, <vscale x 2 x i1> undef, <vscale x 2 x i32> zeroinitializer
 
   %eq = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"eq", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %eq, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %eq, <vscale x 2 x i1>* %store_addr
 
   %ne = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"ne", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ne, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ne, <vscale x 2 x i1>* %store_addr
 
   %ugt = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"ugt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ugt, <vscale x 2 x i1>* %store_addr
 
   %uge = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"uge", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %uge, <vscale x 2 x i1>* %store_addr
 
   %ult = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"ult", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ult, <vscale x 2 x i1>* %store_addr
 
   %ule = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"ule", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %ule, <vscale x 2 x i1>* %store_addr
 
   %sgt = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"sgt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %sgt, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %sgt, <vscale x 2 x i1>* %store_addr
 
   %sge = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"sge", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %sge, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %sge, <vscale x 2 x i1>* %store_addr
 
   %slt = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"slt", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %slt, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %slt, <vscale x 2 x i1>* %store_addr
 
   %sle = call <vscale x 2 x i1> @llvm.vp.icmp.nxv2i64(<vscale x 2 x i64> %a, <vscale x 2 x i64> %b, metadata !"sle", <vscale x 2 x i1> %allones, i32 %n)
-  store <vscale x 2 x i1> %sle, <vscale x 2 x i1>* %store_addr
+  store volatile <vscale x 2 x i1> %sle, <vscale x 2 x i1>* %store_addr
 
   ret void
 }

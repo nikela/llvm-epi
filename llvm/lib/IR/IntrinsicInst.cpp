@@ -637,6 +637,9 @@ Function *VPIntrinsic::getDeclarationForParams(Module *M, Intrinsic::ID VPID,
     VPFunc = Intrinsic::getDeclaration(
         M, VPID, {Params[0]->getType(), Params[1]->getType()});
     break;
+  case Intrinsic::experimental_vp_stepvector:
+    VPFunc = Intrinsic::getDeclaration(M, VPID, {ReturnType});
+    break;
   }
   assert(VPFunc && "Could not declare VP intrinsic");
   return VPFunc;

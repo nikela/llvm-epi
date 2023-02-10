@@ -39,24 +39,27 @@ static std::string getMangledName(mlir::Location loc,
   return bindName ? *bindName : Fortran::lower::mangle::mangleName(symbol);
 }
 
+mlir::Type Fortran::lower::getUntypedBoxProcType(mlir::MLIRContext *context) {
+  llvm::SmallVector<mlir::Type> resultTys;
+  llvm::SmallVector<mlir::Type> inputTys;
+  auto untypedFunc = mlir::FunctionType::get(context, inputTys, resultTys);
+  return fir::BoxProcType::get(context, untypedFunc);
+}
+
 /// Return the type of a dummy procedure given its characteristic (if it has
 /// one).
-mlir::Type getProcedureDesignatorType(
+static mlir::Type getProcedureDesignatorType(
     const Fortran::evaluate::characteristics::Procedure *,
     Fortran::lower::AbstractConverter &converter) {
   // TODO: Get actual function type of the dummy procedure, at least when an
   // interface is given. The result type should be available even if the arity
   // and type of the arguments is not.
-  llvm::SmallVector<mlir::Type> resultTys;
-  llvm::SmallVector<mlir::Type> inputTys;
   // In general, that is a nice to have but we cannot guarantee to find the
   // function type that will match the one of the calls, we may not even know
   // how many arguments the dummy procedure accepts (e.g. if a procedure
   // pointer is only transiting through the current procedure without being
   // called), so a function type cast must always be inserted.
-  auto *context = &converter.getMLIRContext();
-  auto untypedFunc = mlir::FunctionType::get(context, inputTys, resultTys);
-  return fir::BoxProcType::get(context, untypedFunc);
+  return Fortran::lower::getUntypedBoxProcType(&converter.getMLIRContext());
 }
 
 //===----------------------------------------------------------------------===//
@@ -1121,12 +1124,7 @@ bool Fortran::lower::CallInterface<T>::PassedEntity::mayBeModifiedByCall()
     return true;
   if (characteristics->GetIntent() == Fortran::common::Intent::In)
     return false;
-  const auto *dummy =
-      std::get_if<Fortran::evaluate::characteristics::DummyDataObject>(
-          &characteristics->u);
-  return !dummy ||
-         !dummy->attrs.test(
-             Fortran::evaluate::characteristics::DummyDataObject::Attr::Value);
+  return !hasValueAttribute();
 }
 template <typename T>
 bool Fortran::lower::CallInterface<T>::PassedEntity::mayBeReadByCall() const {
@@ -1160,6 +1158,18 @@ bool Fortran::lower::CallInterface<T>::PassedEntity::mustBeMadeContiguous()
     return false;
   // Explicit shape arrays are contiguous.
   return dummy->type.Rank() > 0;
+}
+
+template <typename T>
+bool Fortran::lower::CallInterface<T>::PassedEntity::hasValueAttribute() const {
+  if (!characteristics)
+    return false;
+  const auto *dummy =
+      std::get_if<Fortran::evaluate::characteristics::DummyDataObject>(
+          &characteristics->u);
+  return dummy &&
+         dummy->attrs.test(
+             Fortran::evaluate::characteristics::DummyDataObject::Attr::Value);
 }
 
 template <typename T>

@@ -31,8 +31,8 @@ define void @test(ptr %p) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr i64, ptr [[P]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 32
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 32
 ; CHECK-NEXT:    [[TMP14:%.*]] = add i64 [[TMP4]], 200
 ; CHECK-NEXT:    [[TMP15:%.*]] = add i64 [[TMP8]], 200
@@ -40,8 +40,8 @@ define void @test(ptr %p) {
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr i64, ptr [[P]], i64 [[TMP15]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = getelementptr i64, ptr [[TMP16]], i32 0
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[WIDE_LOAD]], ptr [[TMP18]], align 32
-; CHECK-NEXT:    [[TMP19:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP20:%.*]] = getelementptr i64, ptr [[TMP16]], i32 [[TMP19]]
+; CHECK-NEXT:    [[TMP19:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP20:%.*]] = getelementptr i64, ptr [[TMP16]], i64 [[TMP19]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[WIDE_LOAD1]], ptr [[TMP20]], align 32
 ; CHECK-NEXT:    [[TMP21:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP22:%.*]] = mul i64 [[TMP21]], 2
@@ -63,7 +63,7 @@ define void @test(ptr %p) {
 ; CHECK-NEXT:    store i64 [[V]], ptr [[A2]], align 32
 ; CHECK-NEXT:    [[IV_NEXT]] = add i64 [[IV]], 1
 ; CHECK-NEXT:    [[CMP:%.*]] = icmp ne i64 [[IV]], 199
-; CHECK-NEXT:    br i1 [[CMP]], label [[LOOP]], label [[EXIT]], !llvm.loop [[LOOP2:![0-9]+]]
+; CHECK-NEXT:    br i1 [[CMP]], label [[LOOP]], label [[EXIT]], !llvm.loop [[LOOP3:![0-9]+]]
 ; CHECK:       exit:
 ; CHECK-NEXT:    ret void
 ;
@@ -168,8 +168,8 @@ define void @trivial_due_max_vscale(ptr %p) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr i64, ptr [[P]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 32
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 32
 ; CHECK-NEXT:    [[TMP14:%.*]] = add i64 [[TMP4]], 8192
 ; CHECK-NEXT:    [[TMP15:%.*]] = add i64 [[TMP8]], 8192
@@ -177,8 +177,8 @@ define void @trivial_due_max_vscale(ptr %p) {
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr i64, ptr [[P]], i64 [[TMP15]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = getelementptr i64, ptr [[TMP16]], i32 0
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[WIDE_LOAD]], ptr [[TMP18]], align 32
-; CHECK-NEXT:    [[TMP19:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP20:%.*]] = getelementptr i64, ptr [[TMP16]], i32 [[TMP19]]
+; CHECK-NEXT:    [[TMP19:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP20:%.*]] = getelementptr i64, ptr [[TMP16]], i64 [[TMP19]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[WIDE_LOAD1]], ptr [[TMP20]], align 32
 ; CHECK-NEXT:    [[TMP21:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP22:%.*]] = mul i64 [[TMP21]], 2
@@ -247,8 +247,8 @@ define void @no_high_lmul_or_interleave(ptr %p) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr i64, ptr [[P]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 32
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 32
 ; CHECK-NEXT:    [[TMP14:%.*]] = add i64 [[TMP4]], 1024
 ; CHECK-NEXT:    [[TMP15:%.*]] = add i64 [[TMP8]], 1024
@@ -256,8 +256,8 @@ define void @no_high_lmul_or_interleave(ptr %p) {
 ; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr i64, ptr [[P]], i64 [[TMP15]]
 ; CHECK-NEXT:    [[TMP18:%.*]] = getelementptr i64, ptr [[TMP16]], i32 0
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[WIDE_LOAD]], ptr [[TMP18]], align 32
-; CHECK-NEXT:    [[TMP19:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP20:%.*]] = getelementptr i64, ptr [[TMP16]], i32 [[TMP19]]
+; CHECK-NEXT:    [[TMP19:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP20:%.*]] = getelementptr i64, ptr [[TMP16]], i64 [[TMP19]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[WIDE_LOAD1]], ptr [[TMP20]], align 32
 ; CHECK-NEXT:    [[TMP21:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP22:%.*]] = mul i64 [[TMP21]], 2

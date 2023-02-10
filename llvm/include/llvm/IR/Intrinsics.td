@@ -1854,6 +1854,12 @@ def int_experimental_vp_reverse:
                          llvm_i32_ty],
                         [IntrNoMem]>;
 
+def int_experimental_vp_stepvector:
+  DefaultAttrsIntrinsic<[llvm_anyvector_ty],
+                        [LLVMScalarOrSameVectorWidth<0, llvm_i1_ty>,
+                         llvm_i32_ty],
+                        [IntrNoMem]>;
+
 // libm function -- EPI only, probably
 def int_vp_cos : DefaultAttrsIntrinsic<[llvm_anyfloat_ty],
                                        [LLVMMatchType<0>,

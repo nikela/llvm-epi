@@ -405,11 +405,11 @@ def SplatPat_simm5_plus1
 def SplatPat_simm5_plus1_nonzero
     : ComplexPattern<vAny, 1, "selectVSplatSimm5Plus1NonZero", [], [], 2>;
 
+def SelectFPImm : ComplexPattern<fAny, 1, "selectFPImm", [], [], 1>;
+
 // Ignore the vl operand.
-def SplatFPOp : PatFrags<(ops node:$op),
-                        [(riscv_vfmv_v_f_vl undef, node:$op, srcvalue),
-                         // FIXME: Sometimes the preprocessing of the DAG does not kick in?
-                         (splat_vector node:$op)]>;
+def SplatFPOp : PatFrag<(ops node:$op),
+                        (riscv_vfmv_v_f_vl undef, node:$op, srcvalue)>;
 
 def sew8simm5  : ComplexPattern<XLenVT, 1, "selectRVVSimm5<8>",  []>;
 def sew16simm5 : ComplexPattern<XLenVT, 1, "selectRVVSimm5<16>", []>;
@@ -1739,6 +1739,15 @@ foreach fvti = AllFloatVectors in {
                  (fvti.Mask V0), GPR:$vl, fvti.Log2SEW)>;
 
   def : Pat<(fvti.Vector (riscv_vselect_vl (fvti.Mask V0),
+                                           (SplatFPOp (SelectFPImm (XLenVT GPR:$imm))),
+                                           fvti.RegClass:$rs2,
+                                           VLOpFrag)),
+            (!cast<Instruction>("PseudoVMERGE_VXM_"#fvti.LMul.MX)
+                 fvti.RegClass:$rs2,
+                 GPR:$imm,
+                 (fvti.Mask V0), GPR:$vl, fvti.Log2SEW)>;
+
+  def : Pat<(fvti.Vector (riscv_vselect_vl (fvti.Mask V0),
                                            (SplatFPOp (fvti.Scalar fpimm0)),
                                            fvti.RegClass:$rs2,
                                            VLOpFrag)),
@@ -1780,6 +1789,14 @@ foreach fvti = AllFloatVectors in {
                          fvti.Vector:$passthru, (fvti.Scalar (fpimm0)), VLOpFrag)),
             (!cast<Instruction>("PseudoVMV_V_I_"#fvti.LMul.MX#"_TU")
              $passthru, 0, GPR:$vl, fvti.Log2SEW)>;
+  def : Pat<(fvti.Vector (riscv_vfmv_v_f_vl
+                         (fvti.Vector undef), (fvti.Scalar (SelectFPImm (XLenVT GPR:$imm))), VLOpFrag)),
+            (!cast<Instruction>("PseudoVMV_V_X_"#fvti.LMul.MX)
+             GPR:$imm, GPR:$vl, fvti.Log2SEW)>;
+  def : Pat<(fvti.Vector (riscv_vfmv_v_f_vl
+                         fvti.Vector:$passthru, (fvti.Scalar (SelectFPImm (XLenVT GPR:$imm))), VLOpFrag)),
+            (!cast<Instruction>("PseudoVMV_V_X_"#fvti.LMul.MX#"_TU")
+             $passthru, GPR:$imm, GPR:$vl, fvti.Log2SEW)>;
 
   def : Pat<(fvti.Vector (riscv_vfmv_v_f_vl
                          (fvti.Vector undef), (fvti.Scalar fvti.ScalarRegClass:$rs2), VLOpFrag)),
@@ -2057,6 +2074,11 @@ foreach vti = AllFloatVectors in {
                                            VLOpFrag)),
             (!cast<Instruction>("PseudoVMV_S_X_"#vti.LMul.MX)
                 vti.RegClass:$merge, X0, GPR:$vl, vti.Log2SEW)>;
+  def : Pat<(vti.Vector (riscv_vfmv_s_f_vl (vti.Vector vti.RegClass:$merge),
+                                           (vti.Scalar (SelectFPImm (XLenVT GPR:$imm))),
+                                           VLOpFrag)),
+            (!cast<Instruction>("PseudoVMV_S_X_"#vti.LMul.MX)
+                vti.RegClass:$merge, GPR:$imm, GPR:$vl, vti.Log2SEW)>;
   def : Pat<(vti.Vector (riscv_vfmv_s_f_vl (vti.Vector vti.RegClass:$merge),
                                            vti.ScalarRegClass:$rs1,
                                            VLOpFrag)),

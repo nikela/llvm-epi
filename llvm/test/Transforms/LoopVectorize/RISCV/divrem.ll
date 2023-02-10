@@ -35,14 +35,14 @@ define void @vector_udiv(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = udiv <vscale x 1 x i64> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = udiv <vscale x 1 x i64> [[WIDE_LOAD1]], [[BROADCAST_SPLAT3]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP14]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP16]]
+; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP16]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP15]], ptr [[TMP17]], align 8
 ; CHECK-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 2
@@ -156,14 +156,14 @@ define void @vector_sdiv(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = sdiv <vscale x 1 x i64> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = sdiv <vscale x 1 x i64> [[WIDE_LOAD1]], [[BROADCAST_SPLAT3]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP14]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP16]]
+; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP16]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP15]], ptr [[TMP17]], align 8
 ; CHECK-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 2
@@ -277,14 +277,14 @@ define void @vector_urem(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = urem <vscale x 1 x i64> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = urem <vscale x 1 x i64> [[WIDE_LOAD1]], [[BROADCAST_SPLAT3]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP14]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP16]]
+; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP16]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP15]], ptr [[TMP17]], align 8
 ; CHECK-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 2
@@ -398,14 +398,14 @@ define void @vector_srem(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = srem <vscale x 1 x i64> [[WIDE_LOAD]], [[BROADCAST_SPLAT]]
 ; CHECK-NEXT:    [[TMP15:%.*]] = srem <vscale x 1 x i64> [[WIDE_LOAD1]], [[BROADCAST_SPLAT3]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP14]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP16:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP16]]
+; CHECK-NEXT:    [[TMP16:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP17:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP16]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[TMP15]], ptr [[TMP17]], align 8
 ; CHECK-NEXT:    [[TMP18:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP19:%.*]] = mul i64 [[TMP18]], 2
@@ -519,8 +519,8 @@ define void @predicated_udiv(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = icmp ne <vscale x 1 x i64> [[BROADCAST_SPLAT]], zeroinitializer
 ; CHECK-NEXT:    [[TMP15:%.*]] = icmp ne <vscale x 1 x i64> [[BROADCAST_SPLAT3]], zeroinitializer
@@ -533,8 +533,8 @@ define void @predicated_udiv(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[PREDPHI:%.*]] = select <vscale x 1 x i1> [[TMP14]], <vscale x 1 x i64> [[TMP18]], <vscale x 1 x i64> [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[PREDPHI4:%.*]] = select <vscale x 1 x i1> [[TMP15]], <vscale x 1 x i64> [[TMP19]], <vscale x 1 x i64> [[WIDE_LOAD1]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP22:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP22]]
+; CHECK-NEXT:    [[TMP22:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP22]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI4]], ptr [[TMP23]], align 8
 ; CHECK-NEXT:    [[TMP24:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP25:%.*]] = mul i64 [[TMP24]], 2
@@ -674,8 +674,8 @@ define void @predicated_sdiv(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = icmp ne <vscale x 1 x i64> [[BROADCAST_SPLAT]], zeroinitializer
 ; CHECK-NEXT:    [[TMP15:%.*]] = icmp ne <vscale x 1 x i64> [[BROADCAST_SPLAT3]], zeroinitializer
@@ -688,8 +688,8 @@ define void @predicated_sdiv(ptr noalias nocapture %a, i64 %v, i64 %n) {
 ; CHECK-NEXT:    [[PREDPHI:%.*]] = select <vscale x 1 x i1> [[TMP14]], <vscale x 1 x i64> [[TMP18]], <vscale x 1 x i64> [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[PREDPHI4:%.*]] = select <vscale x 1 x i1> [[TMP15]], <vscale x 1 x i64> [[TMP19]], <vscale x 1 x i64> [[WIDE_LOAD1]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP22:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP22]]
+; CHECK-NEXT:    [[TMP22:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP23:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP22]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI4]], ptr [[TMP23]], align 8
 ; CHECK-NEXT:    [[TMP24:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP25:%.*]] = mul i64 [[TMP24]], 2
@@ -825,8 +825,8 @@ define void @predicated_udiv_by_constant(ptr noalias nocapture %a, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = icmp ne <vscale x 1 x i64> [[WIDE_LOAD]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 42, i64 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP15:%.*]] = icmp ne <vscale x 1 x i64> [[WIDE_LOAD1]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 42, i64 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
@@ -837,8 +837,8 @@ define void @predicated_udiv_by_constant(ptr noalias nocapture %a, i64 %n) {
 ; CHECK-NEXT:    [[PREDPHI:%.*]] = select <vscale x 1 x i1> [[TMP14]], <vscale x 1 x i64> [[TMP16]], <vscale x 1 x i64> [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[PREDPHI2:%.*]] = select <vscale x 1 x i1> [[TMP15]], <vscale x 1 x i64> [[TMP17]], <vscale x 1 x i64> [[WIDE_LOAD1]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP20:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP20]]
+; CHECK-NEXT:    [[TMP20:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP20]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI2]], ptr [[TMP21]], align 8
 ; CHECK-NEXT:    [[TMP22:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP23:%.*]] = mul i64 [[TMP22]], 2
@@ -968,8 +968,8 @@ define void @predicated_sdiv_by_constant(ptr noalias nocapture %a, i64 %n) {
 ; CHECK-NEXT:    [[TMP10:%.*]] = getelementptr inbounds i64, ptr [[A]], i64 [[TMP8]]
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 1 x i64>, ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP12:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP12]]
+; CHECK-NEXT:    [[TMP12:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP13:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP12]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 1 x i64>, ptr [[TMP13]], align 8
 ; CHECK-NEXT:    [[TMP14:%.*]] = icmp ne <vscale x 1 x i64> [[WIDE_LOAD]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 42, i64 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP15:%.*]] = icmp ne <vscale x 1 x i64> [[WIDE_LOAD1]], shufflevector (<vscale x 1 x i64> insertelement (<vscale x 1 x i64> poison, i64 42, i64 0), <vscale x 1 x i64> poison, <vscale x 1 x i32> zeroinitializer)
@@ -980,8 +980,8 @@ define void @predicated_sdiv_by_constant(ptr noalias nocapture %a, i64 %n) {
 ; CHECK-NEXT:    [[PREDPHI:%.*]] = select <vscale x 1 x i1> [[TMP14]], <vscale x 1 x i64> [[TMP16]], <vscale x 1 x i64> [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[PREDPHI2:%.*]] = select <vscale x 1 x i1> [[TMP15]], <vscale x 1 x i64> [[TMP17]], <vscale x 1 x i64> [[WIDE_LOAD1]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI]], ptr [[TMP11]], align 8
-; CHECK-NEXT:    [[TMP20:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i32 [[TMP20]]
+; CHECK-NEXT:    [[TMP20:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP21:%.*]] = getelementptr inbounds i64, ptr [[TMP9]], i64 [[TMP20]]
 ; CHECK-NEXT:    store <vscale x 1 x i64> [[PREDPHI2]], ptr [[TMP21]], align 8
 ; CHECK-NEXT:    [[TMP22:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP23:%.*]] = mul i64 [[TMP22]], 2
@@ -1112,9 +1112,9 @@ define void @predicated_sdiv_by_minus_one(ptr noalias nocapture %a, i64 %n) {
 ; CHECK-NEXT:    [[TMP11:%.*]] = getelementptr inbounds i8, ptr [[A]], i64 [[TMP9]]
 ; CHECK-NEXT:    [[TMP12:%.*]] = getelementptr inbounds i8, ptr [[TMP10]], i32 0
 ; CHECK-NEXT:    [[WIDE_LOAD:%.*]] = load <vscale x 8 x i8>, ptr [[TMP12]], align 1
-; CHECK-NEXT:    [[TMP13:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP14:%.*]] = mul i32 [[TMP13]], 8
-; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i8, ptr [[TMP10]], i32 [[TMP14]]
+; CHECK-NEXT:    [[TMP13:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP14:%.*]] = mul i64 [[TMP13]], 8
+; CHECK-NEXT:    [[TMP15:%.*]] = getelementptr inbounds i8, ptr [[TMP10]], i64 [[TMP14]]
 ; CHECK-NEXT:    [[WIDE_LOAD1:%.*]] = load <vscale x 8 x i8>, ptr [[TMP15]], align 1
 ; CHECK-NEXT:    [[TMP16:%.*]] = icmp ne <vscale x 8 x i8> [[WIDE_LOAD]], shufflevector (<vscale x 8 x i8> insertelement (<vscale x 8 x i8> poison, i8 -128, i64 0), <vscale x 8 x i8> poison, <vscale x 8 x i32> zeroinitializer)
 ; CHECK-NEXT:    [[TMP17:%.*]] = icmp ne <vscale x 8 x i8> [[WIDE_LOAD1]], shufflevector (<vscale x 8 x i8> insertelement (<vscale x 8 x i8> poison, i8 -128, i64 0), <vscale x 8 x i8> poison, <vscale x 8 x i32> zeroinitializer)
@@ -1127,9 +1127,9 @@ define void @predicated_sdiv_by_minus_one(ptr noalias nocapture %a, i64 %n) {
 ; CHECK-NEXT:    [[PREDPHI:%.*]] = select <vscale x 8 x i1> [[TMP16]], <vscale x 8 x i8> [[TMP20]], <vscale x 8 x i8> [[WIDE_LOAD]]
 ; CHECK-NEXT:    [[PREDPHI2:%.*]] = select <vscale x 8 x i1> [[TMP17]], <vscale x 8 x i8> [[TMP21]], <vscale x 8 x i8> [[WIDE_LOAD1]]
 ; CHECK-NEXT:    store <vscale x 8 x i8> [[PREDPHI]], ptr [[TMP12]], align 1
-; CHECK-NEXT:    [[TMP24:%.*]] = call i32 @llvm.vscale.i32()
-; CHECK-NEXT:    [[TMP25:%.*]] = mul i32 [[TMP24]], 8
-; CHECK-NEXT:    [[TMP26:%.*]] = getelementptr inbounds i8, ptr [[TMP10]], i32 [[TMP25]]
+; CHECK-NEXT:    [[TMP24:%.*]] = call i64 @llvm.vscale.i64()
+; CHECK-NEXT:    [[TMP25:%.*]] = mul i64 [[TMP24]], 8
+; CHECK-NEXT:    [[TMP26:%.*]] = getelementptr inbounds i8, ptr [[TMP10]], i64 [[TMP25]]
 ; CHECK-NEXT:    store <vscale x 8 x i8> [[PREDPHI2]], ptr [[TMP26]], align 1
 ; CHECK-NEXT:    [[TMP27:%.*]] = call i64 @llvm.vscale.i64()
 ; CHECK-NEXT:    [[TMP28:%.*]] = mul i64 [[TMP27]], 16

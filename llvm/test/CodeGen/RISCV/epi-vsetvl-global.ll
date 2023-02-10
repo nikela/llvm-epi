@@ -139,13 +139,13 @@ define <vscale x 1 x double> @test4(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    vse64.v v10, (a1)
 ; CHECK-NEXT:    j .LBB3_3
 ; CHECK-NEXT:  .LBB3_2: # %if.else
-; CHECK-NEXT:    lui a1, %hi(.LCPI3_2)
-; CHECK-NEXT:    flw ft0, %lo(.LCPI3_2)(a1)
-; CHECK-NEXT:    lui a1, %hi(.LCPI3_3)
-; CHECK-NEXT:    flw ft1, %lo(.LCPI3_3)(a1)
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    lui a1, 260096
+; CHECK-NEXT:    fmv.w.x ft0, a1
 ; CHECK-NEXT:    vfmv.v.f v10, ft0
-; CHECK-NEXT:    vfadd.vf v10, v10, ft1
+; CHECK-NEXT:    lui a1, 262144
+; CHECK-NEXT:    fmv.w.x ft0, a1
+; CHECK-NEXT:    vfadd.vf v10, v10, ft0
 ; CHECK-NEXT:    lui a1, %hi(scratch)
 ; CHECK-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-NEXT:    vse32.v v10, (a1)
@@ -262,13 +262,13 @@ define <vscale x 1 x double> @test6(i64 %avl, i8 zeroext %cond, <vscale x 1 x do
 ; CHECK-NEXT:    andi a1, a1, 2
 ; CHECK-NEXT:    bnez a1, .LBB5_2
 ; CHECK-NEXT:  .LBB5_4: # %if.else5
-; CHECK-NEXT:    lui a1, %hi(.LCPI5_2)
-; CHECK-NEXT:    flw ft0, %lo(.LCPI5_2)(a1)
-; CHECK-NEXT:    lui a1, %hi(.LCPI5_3)
-; CHECK-NEXT:    flw ft1, %lo(.LCPI5_3)(a1)
 ; CHECK-NEXT:    vsetvli zero, a0, e32, m1, ta, mu
+; CHECK-NEXT:    lui a1, 260096
+; CHECK-NEXT:    fmv.w.x ft0, a1
 ; CHECK-NEXT:    vfmv.v.f v9, ft0
-; CHECK-NEXT:    vfadd.vf v9, v9, ft1
+; CHECK-NEXT:    lui a1, 262144
+; CHECK-NEXT:    fmv.w.x ft0, a1
+; CHECK-NEXT:    vfadd.vf v9, v9, ft0
 ; CHECK-NEXT:    lui a1, %hi(scratch)
 ; CHECK-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-NEXT:    vse32.v v9, (a1)
@@ -382,8 +382,8 @@ define <vscale x 1 x double> @test8(i64 %avl, float %cond, <vscale x 1 x double>
 ; CHECK-NEXT:    # kill: def $f10_f killed $f10_f def $f10_d
 ; CHECK-NEXT:    vsetvli zero, a0, e64, m1, ta, mu
 ; CHECK-NEXT:    vfadd.vv v8, v8, v9
-; CHECK-NEXT:    lui a1, %hi(.LCPI7_0)
-; CHECK-NEXT:    flw ft0, %lo(.LCPI7_0)(a1)
+; CHECK-NEXT:    lui a1, 260096
+; CHECK-NEXT:    fmv.w.x ft0, a1
 ; CHECK-NEXT:    lui a1, %hi(scratch)
 ; CHECK-NEXT:    addi a1, a1, %lo(scratch)
 ; CHECK-NEXT:    fmv.w.x ft1, zero
