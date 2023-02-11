@@ -6,12 +6,13 @@
 //
 //===----------------------------------------------------------------------===//
 
-// UNSUPPORTED: c++03, c++11, c++14, c++17
-// UNSUPPORTED: !c++experimental
+// UNSUPPORTED: c++03, c++11
 
-#include <ranges>
-#include <vector>
+#include <memory>
+#include <utility>
 
-using JoinView = decltype(std::views::join(std::declval<std::vector<std::vector<int>>&>()));
-using JoinIter = std::ranges::iterator_t<JoinView>;
-static_assert(std::__is_segmented_iterator<JoinIter>::value);
+void f() {
+  typedef std::unique_ptr<int> Ptr;
+  std::pair<Ptr, int> t(Ptr(new int(4)), 23);
+  Ptr p = std::get<Ptr>(t); // expected-error {{call to implicitly-deleted copy constructor of 'Ptr'}}
+}
