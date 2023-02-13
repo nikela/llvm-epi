@@ -683,58 +683,59 @@ void VPlanTransforms::adjustFixedOrderRecurrences(VPlan &Plan,
   VPDominatorTree VPDT;
   VPDT.recalculate(Plan);
 
+  SmallVector<VPFirstOrderRecurrencePHIRecipe *> RecurrencePhis;
+  SmallVector<VPPredicatedFirstOrderRecurrencePHIRecipe *> PredicatedRecurrencePhis;
   for (VPRecipeBase &R :
        Plan.getVectorLoopRegion()->getEntry()->getEntryBasicBlock()->phis()) {
-    if (auto *PredFOR =
-            dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
+    if (auto *FOR = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R))
+      RecurrencePhis.push_back(FOR);
+    if (auto *PredFOR = dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R))
+      PredicatedRecurrencePhis.push_back(PredFOR);
+  }
 
-      SmallPtrSet<VPPredicatedFirstOrderRecurrencePHIRecipe *, 4> SeenPhis;
-      VPRecipeBase *Previous = &PredFOR->getBackedgeRecipe();
-      // Fixed-order recurrences do not contain cycles, so this loop is
-      // guaranteed to terminate.
-      while (
-          auto *PrevPhi =
-              dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(Previous)) {
-        assert(PrevPhi->getParent() == PredFOR->getParent());
-        assert(SeenPhis.insert(PrevPhi).second);
-        Previous = PrevPhi->getBackedgeValue()->getDefiningRecipe();
-      }
-
-      sinkRecurrenceUsersAfterPrevious(PredFOR, Previous, VPDT);
-
-      // Introduce a recipe to combine the incoming and previous values of a
-      // fixed-order recurrence.
-      VPBasicBlock *InsertBlock = Previous->getParent();
-      auto *Region = GetReplicateRegion(Previous);
-      if (Region)
-        InsertBlock = dyn_cast<VPBasicBlock>(Region->getSingleSuccessor());
-      if (!InsertBlock) {
-        InsertBlock = new VPBasicBlock(Region->getName() + ".succ");
-        VPBlockUtils::insertBlockAfter(InsertBlock, Region);
-      }
-      if (Region || Previous->isPhi())
-        Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
-      else
-        Builder.setInsertPoint(InsertBlock,
-                               std::next(Previous->getIterator()));
-      auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
-          VPInstruction::PredicatedFirstOrderRecurrenceSplice,
-          {PredFOR, PredFOR->getBackedgeValue(), EVLRecipe}));
-
-      PredFOR->replaceAllUsesWith(RecurSplice);
-      // Set the first operand of RecurSplice to PredFOR again, after replacing
-      // all users.
-      RecurSplice->setOperand(0, PredFOR);
-      // Also add the EVL phi that we will need when emitting the predicated
-      // splice.
-      RecurSplice->addOperand(PredFOR->getEVLPhi());
-      continue;
+  for (VPPredicatedFirstOrderRecurrencePHIRecipe *PredFOR :
+       PredicatedRecurrencePhis) {
+    SmallPtrSet<VPPredicatedFirstOrderRecurrencePHIRecipe *, 4> SeenPhis;
+    VPRecipeBase *Previous = &PredFOR->getBackedgeRecipe();
+    // Fixed-order recurrences do not contain cycles, so this loop is
+    // guaranteed to terminate.
+    while (auto *PrevPhi =
+               dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(Previous)) {
+      assert(PrevPhi->getParent() == PredFOR->getParent());
+      assert(SeenPhis.insert(PrevPhi).second);
+      Previous = PrevPhi->getBackedgeValue()->getDefiningRecipe();
     }
 
-    auto *FOR = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R);
-    if (!FOR)
-      continue;
+    sinkRecurrenceUsersAfterPrevious(PredFOR, Previous, VPDT);
 
+    // Introduce a recipe to combine the incoming and previous values of a
+    // fixed-order recurrence.
+    VPBasicBlock *InsertBlock = Previous->getParent();
+    auto *Region = GetReplicateRegion(Previous);
+    if (Region)
+      InsertBlock = dyn_cast<VPBasicBlock>(Region->getSingleSuccessor());
+    if (!InsertBlock) {
+      InsertBlock = new VPBasicBlock(Region->getName() + ".succ");
+      VPBlockUtils::insertBlockAfter(InsertBlock, Region);
+    }
+    if (Region || Previous->isPhi())
+      Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
+    else
+      Builder.setInsertPoint(InsertBlock, std::next(Previous->getIterator()));
+    auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
+        VPInstruction::PredicatedFirstOrderRecurrenceSplice,
+        {PredFOR, PredFOR->getBackedgeValue(), EVLRecipe}));
+
+    PredFOR->replaceAllUsesWith(RecurSplice);
+    // Set the first operand of RecurSplice to PredFOR again, after replacing
+    // all users.
+    RecurSplice->setOperand(0, PredFOR);
+    // Also add the EVL phi that we will need when emitting the predicated
+    // splice.
+    RecurSplice->addOperand(PredFOR->getEVLPhi());
+  }
+
+  for (VPFirstOrderRecurrencePHIRecipe *FOR : RecurrencePhis) {
     SmallPtrSet<VPFirstOrderRecurrencePHIRecipe *, 4> SeenPhis;
     VPRecipeBase *Previous = FOR->getBackedgeValue()->getDefiningRecipe();
     // Fixed-order recurrences do not contain cycles, so this loop is guaranteed
