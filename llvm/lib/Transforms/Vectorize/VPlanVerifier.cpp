@@ -215,18 +215,16 @@ static bool verifyVPBasicBlock(const VPBasicBlock *VPBB,
         // block.
         if (UI->getParent() == VPBB) {
           if (RecipeNumbering[UI] < RecipeNumbering[&R]) {
-            // LLVM_DEBUG(
-                errs() << "Def: "; R.dump(); errs() << "\n";
-                       errs() << "Use: "; UI->dump(); errs() << "\n";
-                       // );
-            errs() << "(1) Use before def!\n";
+            LLVM_DEBUG(errs() << "Def: "; R.dump(); errs() << "\n";
+                       errs() << "Use: "; UI->dump(); errs() << "\n";);
+            errs() << "Use before def!\n";
             return false;
           }
           continue;
         }
 
         if (!VPDT.dominates(VPBB, UI->getParent())) {
-          errs() << "(2) Use before def!\n";
+          errs() << "Use before def!\n";
           return false;
         }
       }
