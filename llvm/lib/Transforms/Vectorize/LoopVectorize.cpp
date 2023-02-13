@@ -8986,7 +8986,7 @@ void LoopVectorizationPlanner::buildVPlans(ElementCount MinVF,
 }
 
 VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
-                                         VPlanPtr &Plan) {
+                                         VPlan &Plan) {
   assert(is_contained(predecessors(Dst), Src) && "Invalid edge");
 
   // Look for cached value.
@@ -9010,7 +9010,7 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
   if (OrigLoop->isLoopExiting(Src))
     return EdgeMaskCache[Edge] = SrcMask;
 
-  VPValue *EdgeMask = Plan->getOrAddVPValue(BI->getCondition());
+  VPValue *EdgeMask = Plan.getOrAddVPValue(BI->getCondition());
   assert(EdgeMask && "No Edge Mask found for condition");
 
   if (BI->getSuccessor(0) != Dst) {
@@ -9027,7 +9027,7 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
     // 'select i1 SrcMask, i1 EdgeMask, i1 false'.
     // The select version does not introduce new UB if SrcMask is false and
     // EdgeMask is poison. Using 'and' here introduces undefined behavior.
-    VPValue *False = Plan->getOrAddVPValue(
+    VPValue *False = Plan.getOrAddVPValue(
         ConstantInt::getFalse(BI->getCondition()->getType()));
     if (preferPredicatedWiden()) {
       EdgeMask = Builder.createVPSelect(
@@ -9041,7 +9041,7 @@ VPValue *VPRecipeBuilder::createEdgeMask(BasicBlock *Src, BasicBlock *Dst,
   return EdgeMaskCache[Edge] = EdgeMask;
 }
 
-VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
+VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlan &Plan) {
   IVCacheTy::iterator IVEntryIt = IVCache.find(VPBB);
   if (IVEntryIt != IVCache.end())
     return IVEntryIt->second;
@@ -9049,16 +9049,16 @@ VPValue *VPRecipeBuilder::getOrCreateIV(VPBasicBlock *VPBB, VPlanPtr &Plan) {
   VPWidenEVLRecipe *EVLRecipe = nullptr;
   if (preferPredicatedWiden())
     EVLRecipe = getOrCreateEVL(Plan);
-  auto *IV = new VPWidenCanonicalIVRecipe(Plan->getCanonicalIV(), EVLRecipe);
+  auto *IV = new VPWidenCanonicalIVRecipe(Plan.getCanonicalIV(), EVLRecipe);
 
   VPBasicBlock *HeaderVPBB =
-    Plan->getVectorLoopRegion()->getEntryBasicBlock();
+    Plan.getVectorLoopRegion()->getEntryBasicBlock();
   HeaderVPBB->insert(IV, HeaderVPBB->getFirstNonPhi());
 
   return IVCache[VPBB] = IV;
 }
 
-VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
+VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlan &Plan) {
   assert(OrigLoop->contains(BB) && "Block is not a part of a loop");
 
   // Look for cached value.
@@ -9080,15 +9080,14 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     // mask from the active lane mask PHI that is cached in the VPlan.
     TailFoldingStyle Style = CM.getTailFoldingStyle();
     if (Style == TailFoldingStyle::DataAndControlFlow)
-      return BlockMaskCache[BB] = Plan->getActiveLaneMaskPhi();
+      return BlockMaskCache[BB] = Plan.getActiveLaneMaskPhi();
 
     // Introduce the early-exit compare IV <= BTC to form header block mask.
     // This is used instead of IV < TC because TC may wrap, unlike BTC. Start by
     // constructing the desired canonical IV in the header block as its first
     // non-phi instructions.
 
-    VPBasicBlock *HeaderVPBB =
-        Plan->getVectorLoopRegion()->getEntryBasicBlock();
+    VPBasicBlock *HeaderVPBB = Plan.getVectorLoopRegion()->getEntryBasicBlock();
     auto NewInsertionPoint = HeaderVPBB->getFirstNonPhi();
     VPValue *IV = getOrCreateIV(Builder.getInsertBlock(), Plan);
 
@@ -9096,11 +9095,11 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
     Builder.setInsertPoint(HeaderVPBB, NewInsertionPoint);
     if (Style != TailFoldingStyle::None &&
         Style != TailFoldingStyle::DataWithoutLaneMask) {
-      VPValue *TC = Plan->getOrCreateTripCount();
+      VPValue *TC = Plan.getOrCreateTripCount();
       BlockMask = Builder.createNaryOp(VPInstruction::ActiveLaneMask, {IV, TC},
                                        nullptr, "active.lane.mask");
     } else {
-      VPValue *BTC = Plan->getOrCreateBackedgeTakenCount();
+      VPValue *BTC = Plan.getOrCreateBackedgeTakenCount();
       if (preferPredicatedWiden()) {
         BlockMask = Builder.createNaryOp(VPInstruction::VPICmpULE,
                                          {IV, BTC, getOrCreateEVL(Plan)});
@@ -9133,17 +9132,17 @@ VPValue *VPRecipeBuilder::createBlockInMask(BasicBlock *BB, VPlanPtr &Plan) {
   return BlockMaskCache[BB] = BlockMask;
 }
 
-VPWidenEVLRecipe *VPRecipeBuilder::getOrCreateEVL(VPlanPtr &Plan) {
+VPWidenEVLRecipe *VPRecipeBuilder::getOrCreateEVL(VPlan &Plan) {
   if (EVLRecipe)
     return EVLRecipe;
 
-  VPValue *TC = Plan->getOrCreateTripCount();
+  VPValue *TC = Plan.getOrCreateTripCount();
   EVLRecipe = new VPWidenEVLRecipe(TC);
   return EVLRecipe;
 }
 
 VPValue *VPRecipeBuilder::getOrCreateEVLMask(VPBasicBlock *VPBB,
-                                             VPlanPtr &Plan) {
+                                             VPlan &Plan) {
   if (!EVLMask) {
     assert(EVLRecipe && "Cannot create EVL Mask with null EVL value");
     auto *EVLMaskRecipe = new VPWidenEVLMaskRecipe(EVLRecipe);
@@ -9183,7 +9182,7 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenMemory(Instruction *I,
 
   VPValue *Mask = nullptr;
   if (Legal->isMaskRequired(I))
-    Mask = createBlockInMask(I->getParent(), Plan);
+    Mask = createBlockInMask(I->getParent(), *Plan);
 
   // Determine if the pointer operand of the access is either consecutive or
   // reverse consecutive.
@@ -9236,8 +9235,8 @@ VPRecipeBuilder::tryToPredicatedWidenMemory(Instruction *I,
         std::make_optional(std::make_pair(VPBaseAddress, VPStride));
   }
 
-  VPValue *Mask = createBlockInMask(I->getParent(), Plan);
-  VPValue *EVL = getOrCreateEVL(Plan);
+  VPValue *Mask = createBlockInMask(I->getParent(), *Plan);
+  VPValue *EVL = getOrCreateEVL(*Plan);
   if (LoadInst *Load = dyn_cast<LoadInst>(I))
     return new VPPredicatedWidenMemoryInstructionRecipe(
         *Load, Operands[0], Mask, Consecutive, Reverse, VPStridedValues, EVL);
@@ -9293,7 +9292,7 @@ VPRecipeBuilder::tryToOptimizeInductionPHI(PHINode *Phi,
   // produces its scalar and vector values.
   if (auto *II = Legal->getIntOrFpInductionDescriptor(Phi)) {
     VPValue *EVLRecipe =
-        preferPredicatedWiden() ? getOrCreateEVL(Plan) : nullptr;
+        preferPredicatedWiden() ? getOrCreateEVL(*Plan) : nullptr;
     return createWidenInductionRecipes(Phi, Phi, Operands[0], *II, CM, *Plan,
                                        *PSE.getSE(), *OrigLoop, Range,
                                        EVLRecipe);
@@ -9339,7 +9338,7 @@ VPWidenIntOrFpInductionRecipe *VPRecipeBuilder::tryToOptimizeInductionTruncate(
     const InductionDescriptor &II = *Legal->getIntOrFpInductionDescriptor(Phi);
     VPValue *Start = Plan->getOrAddVPValue(II.getStartValue());
     VPValue *EVLRecipe =
-        preferPredicatedWiden() ? getOrCreateEVL(Plan) : nullptr;
+        preferPredicatedWiden() ? getOrCreateEVL(*Plan) : nullptr;
     return createWidenInductionRecipes(Phi, I, Start, II, CM, *Plan,
                                        *PSE.getSE(), *OrigLoop, Range,
                                        EVLRecipe);
@@ -9382,7 +9381,7 @@ VPRecipeOrVPValueTy VPRecipeBuilder::tryToBlend(PHINode *Phi,
 
   for (unsigned In = 0; In < NumIncoming; In++) {
     VPValue *EdgeMask =
-      createEdgeMask(Phi->getIncomingBlock(In), Phi->getParent(), Plan);
+        createEdgeMask(Phi->getIncomingBlock(In), Phi->getParent(), *Plan);
     assert((EdgeMask || NumIncoming == 1) &&
            "Multiple predecessors with one having a full mask");
     OperandsWithMask.push_back(Operands[In]);
@@ -9391,7 +9390,7 @@ VPRecipeOrVPValueTy VPRecipeBuilder::tryToBlend(PHINode *Phi,
   }
   if (preferPredicatedWiden()) {
     return toVPRecipeResult(new VPPredicatedBlendRecipe(Phi, OperandsWithMask,
-                                                        getOrCreateEVL(Plan)));
+                                                        getOrCreateEVL(*Plan)));
   } else {
     return toVPRecipeResult(new VPBlendRecipe(Phi, OperandsWithMask));
   }
@@ -9420,7 +9419,7 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
         VFABI::isDeclareSimdFn(CI->getCalledFunction()))
       return new VPPredicatedWidenCallRecipe(
           *CI, make_range(Ops.begin(), Ops.end()), VPID,
-          createBlockInMask(CI->getParent(), Plan), getOrCreateEVL(Plan));
+          createBlockInMask(CI->getParent(), *Plan), getOrCreateEVL(*Plan));
   }
 
   Intrinsic::ID ID = getVectorIntrinsicIDForCall(CI, TLI);
@@ -9558,7 +9557,7 @@ VPRecipeBase *VPRecipeBuilder::tryToWiden(Instruction *I,
     // div/rem operation itself.  Otherwise fall through to general handling below.
     if (CM.isPredicatedInst(I)) {
       SmallVector<VPValue *> Ops(Operands.begin(), Operands.end());
-      VPValue *Mask = createBlockInMask(I->getParent(), Plan);
+      VPValue *Mask = createBlockInMask(I->getParent(), *Plan);
       VPValue *One =
         Plan->getOrAddExternalDef(ConstantInt::get(I->getType(), 1u, false));
       auto *SafeRHS =
@@ -9619,7 +9618,7 @@ void VPRecipeBuilder::fixHeaderPhis(VPlanPtr &Plan) {
             dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(R)) {
       if (!EVLPhiRecipe) {
         EVLPhiRecipe = new VPEVLPHIRecipe();
-        EVLPhiRecipe->addOperand(getOrCreateEVL(Plan));
+        EVLPhiRecipe->addOperand(getOrCreateEVL(*Plan));
         R->getParent()->insert(EVLPhiRecipe, PredPhi->getIterator());
       }
       // This will be used later when adding the recipe
@@ -9635,15 +9634,15 @@ VPPredicatedWidenRecipe *VPRecipeBuilder::tryToPredicatedWiden(
   if (!validateWiden(I))
     return nullptr;
 
-  VPValue *Mask = createBlockInMask(I->getParent(), Plan);
-  VPValue *EVL = getOrCreateEVL(Plan);
+  VPValue *Mask = createBlockInMask(I->getParent(), *Plan);
+  VPValue *EVL = getOrCreateEVL(*Plan);
   return new VPPredicatedWidenRecipe(
       *I, make_range(Operands.begin(), Operands.end()), Mask, EVL);
 }
 
-VPBasicBlock *VPRecipeBuilder::handleReplication(
-    Instruction *I, VFRange &Range, VPBasicBlock *VPBB,
-    VPlanPtr &Plan) {
+VPBasicBlock *VPRecipeBuilder::handleReplication(Instruction *I, VFRange &Range,
+                                                 VPBasicBlock *VPBB,
+                                                 VPlan &Plan) {
   bool IsUniform = LoopVectorizationPlanner::getDecisionAndClampRange(
       [&](ElementCount VF) { return CM.isUniformAfterVectorization(I, VF); },
       Range);
@@ -9681,7 +9680,7 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
     }
   }
 
-  auto *Recipe = new VPReplicateRecipe(I, Plan->mapToVPValues(I->operands()),
+  auto *Recipe = new VPReplicateRecipe(I, Plan.mapToVPValues(I->operands()),
                                        IsUniform, IsPredicated);
 
   // Find if I uses a predicated instruction. If so, it will use its scalar
@@ -9703,7 +9702,7 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
   if (!IsPredicated) {
     LLVM_DEBUG(dbgs() << "LV: Scalarizing:" << *I << "\n");
     setRecipe(I, Recipe);
-    Plan->addVPValue(I, Recipe);
+    Plan.addVPValue(I, Recipe);
     VPBB->appendRecipe(Recipe);
     return VPBB;
   }
@@ -9724,7 +9723,7 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(
 
 VPRegionBlock *
 VPRecipeBuilder::createReplicateRegion(VPReplicateRecipe *PredRecipe,
-                                       VPlanPtr &Plan) {
+                                       VPlan &Plan) {
   Instruction *Instr = PredRecipe->getUnderlyingInstr();
   // Instructions marked for predication are replicated and placed under an
   // if-then construct to prevent side-effects.
@@ -9741,10 +9740,10 @@ VPRecipeBuilder::createReplicateRegion(VPReplicateRecipe *PredRecipe,
                         : new VPPredInstPHIRecipe(PredRecipe);
   if (PHIRecipe) {
     setRecipe(Instr, PHIRecipe);
-    Plan->addVPValue(Instr, PHIRecipe);
+    Plan.addVPValue(Instr, PHIRecipe);
   } else {
     setRecipe(Instr, PredRecipe);
-    Plan->addVPValue(Instr, PredRecipe);
+    Plan.addVPValue(Instr, PredRecipe);
   }
 
   auto *Exiting = new VPBasicBlock(Twine(RegionName) + ".continue", PHIRecipe);
@@ -9852,7 +9851,7 @@ VPRecipeBuilder::tryToCreateWidenRecipe(Instruction *Instr,
     if (preferPredicatedWiden()) {
       return toVPRecipeResult(new VPPredicatedWidenSelectRecipe(
           *SI, make_range(Operands.begin(), Operands.end()),
-          getOrCreateEVL(Plan), InvariantCond));
+          getOrCreateEVL(*Plan), InvariantCond));
     } else {
       return toVPRecipeResult(new VPWidenSelectRecipe(
           *SI, make_range(Operands.begin(), Operands.end()), InvariantCond));
@@ -10062,7 +10061,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       getDebugLocFromInstOrOperands(Legal->getPrimaryInduction());
   VPWidenEVLRecipe *EVLRecipe = nullptr;
   if (CM.foldTailByMasking() && Legal->preferPredicatedVectorOps())
-    EVLRecipe = RecipeBuilder.getOrCreateEVL(Plan);
+    EVLRecipe = RecipeBuilder.getOrCreateEVL(*Plan);
   addCanonicalIVRecipes(*Plan, Legal->getWidestInductionType(),
                         DLInst ? DLInst->getDebugLoc() : DebugLoc(),
                         CM.getTailFoldingStyle(), EVLRecipe);
@@ -10142,7 +10141,7 @@ VPlanPtr LoopVectorizationPlanner::buildVPlanWithVPRecipes(
       // Otherwise, if all widening options failed, Instruction is to be
       // replicated. This may create a successor for VPBB.
       VPBasicBlock *NextVPBB =
-          RecipeBuilder.handleReplication(Instr, Range, VPBB, Plan);
+          RecipeBuilder.handleReplication(Instr, Range, VPBB, *Plan);
       if (NextVPBB != VPBB) {
         VPBB = NextVPBB;
         VPBB->setName(BB->hasName() ? BB->getName() + "." + Twine(VPBBsForBB++)
@@ -10351,7 +10350,7 @@ void LoopVectorizationPlanner::adjustRecipesForReductions(
         VPBuilder::InsertPointGuard Guard(Builder);
         Builder.setInsertPoint(WidenRecipe->getParent(),
                                WidenRecipe->getIterator());
-        CondOp = RecipeBuilder.createBlockInMask(R->getParent(), Plan);
+        CondOp = RecipeBuilder.createBlockInMask(R->getParent(), *Plan);
       }
 
       if (IsFMulAdd) {
@@ -10401,8 +10400,8 @@ void LoopVectorizationPlanner::adjustRecipesForReductions(
         continue;
       VPValue *Cond =
           Legal->preferPredicatedVectorOps()
-              ? RecipeBuilder.getOrCreateEVLMask(LatchVPBB, Plan)
-              : RecipeBuilder.createBlockInMask(OrigLoop->getHeader(), Plan);
+              ? RecipeBuilder.getOrCreateEVLMask(LatchVPBB, *Plan)
+              : RecipeBuilder.createBlockInMask(OrigLoop->getHeader(), *Plan);
       VPValue *Red = PhiR->getBackedgeValue();
       assert(Red->getDefiningRecipe()->getParent() != LatchVPBB &&
              "reduction recipe must be defined before latch");
