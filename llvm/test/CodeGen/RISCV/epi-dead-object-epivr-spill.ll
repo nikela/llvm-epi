@@ -221,19 +221,19 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    vfadd.vv v16, v16, v17
 ; CHECK-NEXT:    vfadd.vv v17, v28, v25
 ; CHECK-NEXT:    vfadd.vv v16, v16, v17
-; CHECK-NEXT:    vrgather.vv v17, v8, v1
+; CHECK-NEXT:    vrgather.vv v23, v17, v1
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v8
 ; CHECK-NEXT:    vfadd.vv v16, v16, v8
-; CHECK-NEXT:    vrgather.vv v23, v16, v1
-; CHECK-NEXT:    vsuxei64.v v23, (a0), v8
+; CHECK-NEXT:    vrgather.vv v17, v16, v1
 ; CHECK-NEXT:    vsuxei64.v v17, (a0), v8
+; CHECK-NEXT:    vsuxei64.v v23, (a0), v8
 ; CHECK-NEXT:    vsuxei64.v v8, (a0), v8
 ; CHECK-NEXT:    li a1, 208
 ; CHECK-NEXT:    mul a1, s0, a1
 ; CHECK-NEXT:    lui a2, %hi(.LCPI0_1)
 ; CHECK-NEXT:    fld ft0, %lo(.LCPI0_1)(a2)
 ; CHECK-NEXT:    add a1, s1, a1
-; CHECK-NEXT:    vsuxei64.v v17, (a1), v8
+; CHECK-NEXT:    vsuxei64.v v23, (a1), v8
 ; CHECK-NEXT:    vfadd.vv v16, v21, v18
 ; CHECK-NEXT:    vfmsac.vf v16, ft0, v16
 ; CHECK-NEXT:    vfneg.v v16, v16
@@ -243,8 +243,8 @@ define void @n1fv_32(double* %ri, double* %ii, double* %ro, double* %io, i64 %is
 ; CHECK-NEXT:    li a1, 112
 ; CHECK-NEXT:    mul a1, s0, a1
 ; CHECK-NEXT:    add a1, s1, a1
-; CHECK-NEXT:    vrgather.vv v15, v8, v9
-; CHECK-NEXT:    vfsub.vv v15, v16, v15
+; CHECK-NEXT:    vrgather.vv v17, v15, v9
+; CHECK-NEXT:    vfsub.vv v15, v16, v17
 ; CHECK-NEXT:    vrgather.vv v16, v15, v1
 ; CHECK-NEXT:    vsuxei64.v v16, (a1), v8
 ; CHECK-NEXT:    vfneg.v v13, v13, v0.t

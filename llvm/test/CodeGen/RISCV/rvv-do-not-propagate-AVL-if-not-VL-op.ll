@@ -5,7 +5,7 @@
 define <vscale x 1 x i1> @test_do_not_propagate_when_not_VL_op(<vscale x 1 x i64> %vec, i64 %evl) {
 ; CHECK-LABEL: test_do_not_propagate_when_not_VL_op:
 ; CHECK:       # %bb.0:
-; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-NEXT:    vsetvli a0, a0, e64, m1, ta, ma
 ; CHECK-NEXT:    vmsgt.vx v0, v8, a0
 ; CHECK-NEXT:    ret
   %sum = call i64 @llvm.riscv.vsetvli.i64(i64 %evl, i64 3, i64 0)

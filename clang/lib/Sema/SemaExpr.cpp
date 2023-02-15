@@ -14797,13 +14797,6 @@ QualType Sema::CheckAddressOfOperand(ExprResult &OrigOp, SourceLocation OpLoc) {
   if (op->getType()->isObjCObjectType())
     return Context.getObjCObjectPointerType(op->getType());
 
-  if (Context.getTargetInfo().getTriple().isWasm() &&
-      op->getType()->isWebAssemblyReferenceType()) {
-    Diag(OpLoc, diag::err_wasm_ca_reference)
-        << 1 << OrigOp.get()->getSourceRange();
-    return QualType();
-  }
-
   CheckAddressOfPackedMember(op);
 
   return Context.getPointerType(op->getType());
@@ -18912,12 +18905,6 @@ static bool captureInLambda(LambdaScopeInfo *LSI, ValueDecl *Var,
       S.Diag(Loc, diag::err_capture_binding_openmp) << Var;
       S.Diag(Var->getLocation(), diag::note_entity_declared_at) << Var;
     }
-    Invalid = true;
-  }
-
-  if (BuildAndDiagnose && S.Context.getTargetInfo().getTriple().isWasm() &&
-      CaptureType.getNonReferenceType()->isWebAssemblyReferenceType()) {
-    S.Diag(Loc, diag::err_wasm_ca_reference) << 0;
     Invalid = true;
   }
 

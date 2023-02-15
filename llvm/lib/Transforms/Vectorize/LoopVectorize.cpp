@@ -356,10 +356,12 @@ static cl::opt<bool> PreferPredicatedReductionSelect(
     cl::desc(
         "Prefer predicating a reduction operation over an after loop select."));
 
+namespace llvm {
 cl::opt<bool> EnableVPlanNativePath(
-    "enable-vplan-native-path", cl::init(false), cl::Hidden,
+    "enable-vplan-native-path", cl::Hidden,
     cl::desc("Enable VPlan-native vectorization path with "
              "support for outer loop vectorization."));
+}
 
 // This flag enables the stress testing of the VPlan H-CFG construction in the
 // VPlan-native vectorization path. It must be used in conjuction with
@@ -1701,7 +1703,8 @@ public:
   /// scalarized -
   /// i.e. either vector version isn't available, or is too expensive.
   InstructionCost getVectorCallCost(CallInst *CI, ElementCount VF,
-                                    bool &NeedToScalarize) const;
+                                    Function **Variant,
+                                    bool *NeedsMask = nullptr) const;
 
   InstructionCost getDeclareSimdFnCallCost(CallInst *CI, ElementCount VF,
                                            bool &NeedToScalarize);
@@ -3603,9 +3606,8 @@ static void cse(BasicBlock *BB) {
   }
 }
 
-InstructionCost
-LoopVectorizationCostModel::getVectorCallCost(CallInst *CI, ElementCount VF,
-                                              bool &NeedToScalarize) const {
+InstructionCost LoopVectorizationCostModel::getVectorCallCost(
+    CallInst *CI, ElementCount VF, Function **Variant, bool *NeedsMask) const {
   Function *F = CI->getCalledFunction();
   Type *ScalarRetTy = CI->getType();
   SmallVector<Type *, 4> Tys, ScalarTys;
@@ -3637,18 +3639,35 @@ LoopVectorizationCostModel::getVectorCallCost(CallInst *CI, ElementCount VF,
 
   // If we can't emit a vector call for this function, then the currently found
   // cost is the cost we need to return.
-  NeedToScalarize = true;
+  InstructionCost MaskCost = 0;
   VFShape Shape = VFShape::get(*CI, VF, false /*HasGlobalPred*/);
   Function *VecFunc = VFDatabase(*CI).getVectorizedFunction(Shape);
+  // If we want an unmasked vector function but can't find one matching the VF,
+  // maybe we can find vector function that does use a mask and synthesize
+  // an all-true mask.
+  if (!VecFunc) {
+    Shape = VFShape::get(*CI, VF, /*HasGlobalPred=*/true);
+    VecFunc = VFDatabase(*CI).getVectorizedFunction(Shape);
+    // If we found one, add in the cost of creating a mask
+    if (VecFunc) {
+      if (NeedsMask)
+        *NeedsMask = true;
+      MaskCost = TTI.getShuffleCost(
+          TargetTransformInfo::SK_Broadcast,
+          VectorType::get(
+              IntegerType::getInt1Ty(VecFunc->getFunctionType()->getContext()),
+              VF));
+    }
+  }
 
   if (!TLI || CI->isNoBuiltin() || !VecFunc)
     return Cost;
 
   // If the corresponding vector cost is cheaper, return its cost.
   InstructionCost VectorCallCost =
-      TTI.getCallInstrCost(nullptr, RetTy, Tys, CostKind);
+      TTI.getCallInstrCost(nullptr, RetTy, Tys, CostKind) + MaskCost;
   if (VectorCallCost < Cost) {
-    NeedToScalarize = false;
+    *Variant = VecFunc;
     Cost = VectorCallCost;
   }
   return Cost;
@@ -5524,7 +5543,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
   // value. Otherwise, return as is.
   if (UserVF.isNonZero() && !IgnoreScalableUserVF) {
     unsigned MaxSafeElements =
-        PowerOf2Floor(MaxSafeVectorWidthInBits / WidestType);
+        llvm::bit_floor(MaxSafeVectorWidthInBits / WidestType);
     ElementCount MaxSafeVF = ElementCount::getFixed(MaxSafeElements);
 
     if (UserVF.isScalable()) {
@@ -5582,7 +5601,7 @@ LoopVectorizationCostModel::computeFeasibleMaxVFScalableOnly(
   // Ensure MaxVF is a power of 2; the dependence distance bound may not be.
   // Note that both WidestRegister and WidestType may not be a powers of 2.
   auto MaxVectorSize =
-      ElementCount::getFixed(PowerOf2Floor(WidestRegister / WidestType));
+      ElementCount::getFixed(llvm::bit_floor(WidestRegister / WidestType));
 
   LLVM_DEBUG(dbgs() << "LV: The Smallest and Widest types: " << SmallestType
                     << " / " << WidestType << " bits.\n");
@@ -8239,8 +8258,7 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
     if (RecurrenceDescriptor::isFMulAddIntrinsic(I))
       if (auto RedCost = getReductionPatternCost(I, VF, VectorTy, CostKind))
         return *RedCost;
-
-    bool NeedToScalarize;
+    Function *Variant;
     CallInst *CI = cast<CallInst>(I);
     InstructionCost CallCost;
     // Check if we prefer predicated widening.
@@ -8250,11 +8268,12 @@ LoopVectorizationCostModel::getInstructionCost(Instruction *I, ElementCount VF,
         if (getVPVectorIntrinsicIDForCall(CI, TLI) != Intrinsic::not_intrinsic)
           return getVectorIntrinsicCost(CI, VF, /*IsVP*/ true);
 
+        bool NeedToScalarize;
         CallCost = getDeclareSimdFnCallCost(CI, VF, NeedToScalarize);
         if (CallCost.isValid())
           return CallCost;
     }
-    CallCost = getVectorCallCost(CI, VF, NeedToScalarize);
+    CallCost = getVectorCallCost(CI, VF, &Variant);
     if (getVectorIntrinsicIDForCall(CI, TLI)) {
       InstructionCost IntrinsicCost = getVectorIntrinsicCost(CI, VF);
       return std::min(CallCost, IntrinsicCost);
@@ -9411,7 +9430,7 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
   if (IsPredicated)
     return nullptr;
 
-  ArrayRef<VPValue *> Ops = Operands.take_front(CI->arg_size());
+  SmallVector<VPValue *, 4> Ops(Operands.take_front(CI->arg_size()));
   if (VPPredicated) {
     // NOTE: maybe we should prioritize the declare simd version.
     Intrinsic::ID VPID = getVPVectorIntrinsicIDForCall(CI, TLI);
@@ -9433,11 +9452,11 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
   bool ShouldUseVectorIntrinsic =
       ID && LoopVectorizationPlanner::getDecisionAndClampRange(
                 [&](ElementCount VF) -> bool {
-                  bool NeedToScalarize = false;
+                  Function *Variant;
                   // Is it beneficial to perform intrinsic call compared to lib
                   // call?
                   InstructionCost CallCost =
-                      CM.getVectorCallCost(CI, VF, NeedToScalarize);
+                      CM.getVectorCallCost(CI, VF, &Variant);
                   InstructionCost IntrinsicCost =
                       CM.getVectorIntrinsicCost(CI, VF);
                   return IntrinsicCost <= CallCost;
@@ -9446,6 +9465,9 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
   if (ShouldUseVectorIntrinsic)
     return new VPWidenCallRecipe(*CI, make_range(Ops.begin(), Ops.end()), ID);
 
+  Function *Variant = nullptr;
+  ElementCount VariantVF;
+  bool NeedsMask = false;
   // Is better to call a vectorized version of the function than to to scalarize
   // the call?
   auto ShouldUseVectorCall = LoopVectorizationPlanner::getDecisionAndClampRange(
@@ -9453,14 +9475,48 @@ VPRecipeBase *VPRecipeBuilder::tryToWidenCallCommon(
         // The following case may be scalarized depending on the VF.
         // The flag shows whether we can use a usual Call for vectorized
         // version of the instruction.
-        bool NeedToScalarize = false;
-        CM.getVectorCallCost(CI, VF, NeedToScalarize);
-        return !NeedToScalarize;
+
+        // If we've found a variant at a previous VF, then stop looking. A
+        // vectorized variant of a function expects input in a certain shape
+        // -- basically the number of input registers, the number of lanes
+        // per register, and whether there's a mask required.
+        // We store a pointer to the variant in the VPWidenCallRecipe, so
+        // once we have an appropriate variant it's only valid for that VF.
+        // This will force a different vplan to be generated for each VF that
+        // finds a valid variant.
+        if (Variant)
+          return false;
+        CM.getVectorCallCost(CI, VF, &Variant, &NeedsMask);
+        // If we found a valid vector variant at this VF, then store the VF
+        // in case we need to generate a mask.
+        if (Variant)
+          VariantVF = VF;
+        return Variant != nullptr;
       },
       Range);
-  if (ShouldUseVectorCall)
+  if (ShouldUseVectorCall) {
+    if (NeedsMask) {
+      // If our vector variant requires a mask, then synthesize an all-true
+      // mask and insert it into the operands vector in the right place.
+      VPValue *Mask = Plan->getOrAddVPValue(ConstantInt::getTrue(
+          IntegerType::getInt1Ty(Variant->getFunctionType()->getContext())));
+
+      VFShape Shape = VFShape::get(*CI, VariantVF, /*HasGlobalPred=*/true);
+      unsigned MaskPos = 0;
+
+      for (VFInfo Info : VFDatabase::getMappings(*CI))
+        if (Info.Shape == Shape) {
+          assert(Info.isMasked() && "Vector function info shape mismatch");
+          MaskPos = Info.getParamIndexForOptionalMask().value();
+          break;
+        }
+
+      Ops.insert(Ops.begin() + MaskPos, Mask);
+    }
+
     return new VPWidenCallRecipe(*CI, make_range(Ops.begin(), Ops.end()),
-                                 Intrinsic::not_intrinsic);
+                                 Intrinsic::not_intrinsic, Variant);
+  }
 
   return nullptr;
 }
