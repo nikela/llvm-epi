@@ -11764,6 +11764,9 @@ def err_riscv_builtin_requires_extension : Error<
   "builtin requires%select{| at least one of the following extensions to be enabled}0: %1">;
 def err_riscv_builtin_invalid_lmul : Error<
   "LMUL argument must be in the range [0,3] or [5,7]">;
+def err_riscv_type_requires_extension : Error<
+  "RISC-V type %0 requires the '%1' extension"
+>;
 
 def err_std_source_location_impl_not_found : Error<
   "'std::source_location::__impl' was not found; it must be defined before '__builtin_source_location' is called">;
@@ -11821,9 +11824,7 @@ def note_unsafe_buffer_variable_fixit : Note<
 def err_loongarch_builtin_requires_la32 : Error<
   "this builtin requires target: loongarch32">;
 
-// WebAssembly reference type and table diagnostics.
-def err_wasm_reference_pr : Error<
-  "%select{pointer|reference}0 to WebAssembly reference type is not allowed">;
-def err_wasm_ca_reference : Error<
-  "cannot %select{capture|take address of}0 WebAssembly reference">;
+def err_builtin_pass_in_regs_non_class : Error<
+  "argument %0 is not an unqualified class type">;
+
 } // end of sema component.

@@ -553,8 +553,8 @@ static VPRegionBlock *GetReplicateRegion(VPRecipeBase *R) {
   return nullptr;
 }
 
-static bool dominates(const VPRecipeBase *A, const VPRecipeBase *B,
-                      VPDominatorTree &VPDT) {
+static bool properlyDominates(const VPRecipeBase *A, const VPRecipeBase *B,
+                              VPDominatorTree &VPDT) {
   auto LocalComesBefore = [](const VPRecipeBase *A, const VPRecipeBase *B) {
     for (auto &R : *A->getParent()) {
       if (&R == A)
@@ -577,7 +577,7 @@ static bool dominates(const VPRecipeBase *A, const VPRecipeBase *B,
     ParentA = RegionA->getExiting();
   if (RegionB)
     ParentB = RegionB->getExiting();
-  return VPDT.dominates(ParentA, ParentB);
+  return VPDT.properlyDominates(ParentA, ParentB);
 }
 
 // Sink users of \p FOR after the recipe defining the previous value \p Previous
@@ -597,7 +597,7 @@ sinkRecurrenceUsersAfterPrevious(VPGenericFirstOrderRecurrencePHIRecipe *FOR,
         "The previous value cannot depend on the users of the recurrence phi.");
     if (isa<VPHeaderPHIRecipe>(SinkCandidate) ||
         !Seen.insert(SinkCandidate).second ||
-        dominates(Previous, SinkCandidate, VPDT))
+        properlyDominates(Previous, SinkCandidate, VPDT))
       return;
 
     WorkList.push_back(SinkCandidate);
@@ -618,7 +618,7 @@ sinkRecurrenceUsersAfterPrevious(VPGenericFirstOrderRecurrencePHIRecipe *FOR,
   // Keep recipes to sink ordered by dominance so earlier instructions are
   // processed first.
   sort(WorkList, [&VPDT](const VPRecipeBase *A, const VPRecipeBase *B) {
-    return dominates(A, B, VPDT);
+    return properlyDominates(A, B, VPDT);
   });
 
   for (VPRecipeBase *SinkCandidate : WorkList) {
