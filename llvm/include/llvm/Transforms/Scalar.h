@@ -203,12 +203,6 @@ Pass *createLoopIdiomPass();
 
 //===----------------------------------------------------------------------===//
 //
-// LoopVersioningLICM - This pass is a loop versioning pass for LICM.
-//
-Pass *createLoopVersioningLICMPass();
-
-//===----------------------------------------------------------------------===//
-//
 // DemoteRegisterToMemoryPass - This pass is used to demote registers to memory
 // references. In basically undoes the PromoteMemoryToRegister pass to make cfg
 // hacking easier.
@@ -471,12 +465,6 @@ FunctionPass *createFloat2IntPass();
 // NaryReassociate - Simplify n-ary operations by reassociation.
 //
 FunctionPass *createNaryReassociatePass();
-
-//===----------------------------------------------------------------------===//
-//
-// LoopFuse - Fuse loops.
-//
-FunctionPass *createLoopFusePass();
 
 //===----------------------------------------------------------------------===//
 //

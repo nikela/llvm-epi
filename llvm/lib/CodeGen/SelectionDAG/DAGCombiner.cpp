@@ -11268,20 +11268,14 @@ SDValue DAGCombiner::visitSELECT(SDNode *N) {
         if (!C0 || !C1)
           return false;
 
+        bool AreInverse = ISD::getSetCCInverse(CC0, C0->getValueType(0)) == CC1;
         bool ConstantsAreSame =
           APInt::isSameValue(C0->getAPIntValue(), C1->getAPIntValue());
         auto IsEqual = [](ISD::CondCode CC) {
           return CC == ISD::SETEQ;
         };
-        auto IsNotEqual = [](ISD::CondCode CC) {
-          return CC == ISD::SETLT || CC == ISD::SETULT ||
-                 CC == ISD::SETGT || CC == ISD::SETUGT ||
-                 CC == ISD::SETNE;
-        };
 
-        if (ConstantsAreSame && IsNotEqual(CC0) && IsEqual(CC1))
-          return true;
-        if (ConstantsAreSame && IsNotEqual(CC1) && IsEqual(CC0))
+        if (ConstantsAreSame && AreInverse)
           return true;
         if (!ConstantsAreSame && IsEqual(CC0) && IsEqual(CC1))
           return true;

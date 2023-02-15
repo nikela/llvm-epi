@@ -984,13 +984,13 @@ private:
     if (!IsOffsetKnown)
       return PI.setAborted(&LI);
 
-    if ((isa<ScalableVectorType>(AllocTy) !=
-            isa<ScalableVectorType>(LI.getType())) &&
+    TypeSize Size = DL.getTypeStoreSize(LI.getType());
+    if (Size.isScalable() &&
         !isStructOfScalableVectorType(AllocTy, LI.getType()))
       return PI.setAborted(&LI);
 
-    uint64_t Size = DL.getTypeStoreSize(LI.getType()).getKnownMinValue();
-    return handleLoadOrStore(LI.getType(), LI, Offset, Size, LI.isVolatile());
+    return handleLoadOrStore(LI.getType(), LI, Offset, Size.getKnownMinValue(),
+                             LI.isVolatile());
   }
 
   void visitStoreInst(StoreInst &SI) {
@@ -1000,12 +1000,12 @@ private:
     if (!IsOffsetKnown)
       return PI.setAborted(&SI);
 
-    if ((isa<ScalableVectorType>(AllocTy) !=
-            isa<ScalableVectorType>(SI.getValueOperand()->getType())) &&
-        !isStructOfScalableVectorType(AllocTy, SI.getValueOperand()->getType()))
+    TypeSize StoreSize = DL.getTypeStoreSize(ValOp->getType());
+    if (StoreSize.isScalable() &&
+        !isStructOfScalableVectorType(AllocTy, ValOp->getType()))
       return PI.setAborted(&SI);
 
-    uint64_t Size = DL.getTypeStoreSize(ValOp->getType()).getKnownMinValue();
+    uint64_t Size = StoreSize.getKnownMinValue();
 
     // If this memory access can be shown to *statically* extend outside the
     // bounds of the allocation, it's behavior is undefined, so simply
@@ -3676,7 +3676,8 @@ private:
       Value *Base = AggStore->getPointerOperand()->stripInBoundsOffsets();
       if (auto *OldAI = dyn_cast<AllocaInst>(Base)) {
         uint64_t SizeInBits =
-            DL.getTypeSizeInBits(Store->getValueOperand()->getType());
+            DL.getTypeSizeInBits(Store->getValueOperand()->getType())
+                .getKnownMinValue();
         migrateDebugInfo(OldAI, /*IsSplit*/ true, Offset.getZExtValue() * 8,
                          SizeInBits, AggStore, Store,
                          Store->getPointerOperand(), Store->getValueOperand(),
@@ -4907,8 +4908,9 @@ SROAPass::runOnAlloca(AllocaInst &AI) {
 
   // Skip alloca forms that this analysis can't handle.
   auto *AT = AI.getAllocatedType();
-  if (AI.isArrayAllocation() || !AT->isSized() || isa<ScalableVectorType>(AT) ||
-      DL.getTypeAllocSize(AT).getFixedValue() == 0)
+  TypeSize Size = DL.getTypeAllocSize(AT);
+  if (AI.isArrayAllocation() || !AT->isSized() || Size.isScalable() ||
+      Size.getFixedValue() == 0)
     return {Changed, CFGChanged};
 
   // First, split any FCA loads and stores touching this alloca to promote
@@ -5036,16 +5038,16 @@ PreservedAnalyses SROAPass::runImpl(Function &F, DomTreeUpdater &RunDTU,
   DTU = &RunDTU;
   AC = &RunAC;
 
+  const DataLayout &DL = F.getParent()->getDataLayout();
   BasicBlock &EntryBB = F.getEntryBlock();
   for (BasicBlock::iterator I = EntryBB.begin(), E = std::prev(EntryBB.end());
        I != E; ++I) {
     if (AllocaInst *AI = dyn_cast<AllocaInst>(I)) {
-      if (isa<ScalableVectorType>(AI->getAllocatedType())) {
-        if (isAllocaPromotable(AI))
-          PromotableAllocas.push_back(AI);
-      } else {
+      if (DL.getTypeAllocSize(AI->getAllocatedType()).isScalable() &&
+          isAllocaPromotable(AI))
+        PromotableAllocas.push_back(AI);
+      else
         Worklist.insert(AI);
-      }
     }
   }
 

@@ -3817,6 +3817,8 @@ cc_library(
         ":NVVMDialect",
         ":Pass",
         ":Transforms",
+        "//llvm:BinaryFormat",
+        "//llvm:Support",
     ],
 )
 
@@ -8710,6 +8712,7 @@ cc_library(
         ":IR",
         ":LLVMCommonConversion",
         ":LLVMDialect",
+        ":MaskableOpInterface",
         ":MemRefDialect",
         ":Pass",
         ":Support",
@@ -9901,6 +9904,7 @@ cc_library(
         ":ArithDialect",
         ":ArithTransforms",
         ":ArithUtils",
+        ":BufferizationDialect",
         ":ControlFlowDialect",
         ":DialectUtils",
         ":FuncDialect",
