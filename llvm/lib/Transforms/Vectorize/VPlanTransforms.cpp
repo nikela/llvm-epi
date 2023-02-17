@@ -553,8 +553,8 @@ static VPRegionBlock *GetReplicateRegion(VPRecipeBase *R) {
   return nullptr;
 }
 
-static bool dominates(const VPRecipeBase *A, const VPRecipeBase *B,
-                      VPDominatorTree &VPDT) {
+static bool properlyDominates(const VPRecipeBase *A, const VPRecipeBase *B,
+                              VPDominatorTree &VPDT) {
   auto LocalComesBefore = [](const VPRecipeBase *A, const VPRecipeBase *B) {
     for (auto &R : *A->getParent()) {
       if (&R == A)
@@ -577,13 +577,14 @@ static bool dominates(const VPRecipeBase *A, const VPRecipeBase *B,
     ParentA = RegionA->getExiting();
   if (RegionB)
     ParentB = RegionB->getExiting();
-  return VPDT.dominates(ParentA, ParentB);
+  return VPDT.properlyDominates(ParentA, ParentB);
 }
 
 // Sink users of \p FOR after the recipe defining the previous value \p Previous
 // of the recurrence.
+template <typename VPGenericFirstOrderRecurrencePHIRecipe>
 static void
-sinkRecurrenceUsersAfterPrevious(VPFirstOrderRecurrencePHIRecipe *FOR,
+sinkRecurrenceUsersAfterPrevious(VPGenericFirstOrderRecurrencePHIRecipe *FOR,
                                  VPRecipeBase *Previous,
                                  VPDominatorTree &VPDT) {
   // Collect recipes that need sinking.
@@ -596,7 +597,7 @@ sinkRecurrenceUsersAfterPrevious(VPFirstOrderRecurrencePHIRecipe *FOR,
         "The previous value cannot depend on the users of the recurrence phi.");
     if (isa<VPHeaderPHIRecipe>(SinkCandidate) ||
         !Seen.insert(SinkCandidate).second ||
-        dominates(Previous, SinkCandidate, VPDT))
+        properlyDominates(Previous, SinkCandidate, VPDT))
       return;
 
     WorkList.push_back(SinkCandidate);
@@ -617,7 +618,7 @@ sinkRecurrenceUsersAfterPrevious(VPFirstOrderRecurrencePHIRecipe *FOR,
   // Keep recipes to sink ordered by dominance so earlier instructions are
   // processed first.
   sort(WorkList, [&VPDT](const VPRecipeBase *A, const VPRecipeBase *B) {
-    return dominates(A, B, VPDT);
+    return properlyDominates(A, B, VPDT);
   });
 
   for (VPRecipeBase *SinkCandidate : WorkList) {
@@ -682,49 +683,59 @@ void VPlanTransforms::adjustFixedOrderRecurrences(VPlan &Plan,
   VPDominatorTree VPDT;
   VPDT.recalculate(Plan);
 
+  SmallVector<VPFirstOrderRecurrencePHIRecipe *> RecurrencePhis;
+  SmallVector<VPPredicatedFirstOrderRecurrencePHIRecipe *> PredicatedRecurrencePhis;
   for (VPRecipeBase &R :
        Plan.getVectorLoopRegion()->getEntry()->getEntryBasicBlock()->phis()) {
-    if (auto *PredFOR =
-            dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R)) {
-      VPRecipeBase *PrevRecipe = &PredFOR->getBackedgeRecipe();
-      // Fixed-order recurrences do not contain cycles, so this loop is
-      // guaranteed to terminate.
-      while (
-          auto *PrevPhi =
-              dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(PrevRecipe)) {
-        PrevRecipe = &PrevPhi->getBackedgeRecipe();
-      }
-      VPBasicBlock *InsertBlock = PrevRecipe->getParent();
-      auto *Region = GetReplicateRegion(PrevRecipe);
-      if (Region)
-        InsertBlock = dyn_cast<VPBasicBlock>(Region->getSingleSuccessor());
-      if (!InsertBlock) {
-        InsertBlock = new VPBasicBlock(Region->getName() + ".succ");
-        VPBlockUtils::insertBlockAfter(InsertBlock, Region);
-      }
-      if (Region || PrevRecipe->isPhi())
-        Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
-      else
-        Builder.setInsertPoint(InsertBlock,
-                               std::next(PrevRecipe->getIterator()));
-      auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
-          VPInstruction::PredicatedFirstOrderRecurrenceSplice,
-          {PredFOR, PredFOR->getBackedgeValue(), EVLRecipe}));
+    if (auto *FOR = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R))
+      RecurrencePhis.push_back(FOR);
+    if (auto *PredFOR = dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(&R))
+      PredicatedRecurrencePhis.push_back(PredFOR);
+  }
 
-      PredFOR->replaceAllUsesWith(RecurSplice);
-      // Set the first operand of RecurSplice to PredFOR again, after replacing
-      // all users.
-      RecurSplice->setOperand(0, PredFOR);
-      // Also add the EVL phi that we will need when emitting the predicated
-      // splice.
-      RecurSplice->addOperand(PredFOR->getEVLPhi());
-      continue;
+  for (VPPredicatedFirstOrderRecurrencePHIRecipe *PredFOR :
+       PredicatedRecurrencePhis) {
+    SmallPtrSet<VPPredicatedFirstOrderRecurrencePHIRecipe *, 4> SeenPhis;
+    VPRecipeBase *Previous = &PredFOR->getBackedgeRecipe();
+    // Fixed-order recurrences do not contain cycles, so this loop is
+    // guaranteed to terminate.
+    while (auto *PrevPhi =
+               dyn_cast<VPPredicatedFirstOrderRecurrencePHIRecipe>(Previous)) {
+      assert(PrevPhi->getParent() == PredFOR->getParent());
+      assert(SeenPhis.insert(PrevPhi).second);
+      Previous = PrevPhi->getBackedgeValue()->getDefiningRecipe();
     }
 
-    auto *FOR = dyn_cast<VPFirstOrderRecurrencePHIRecipe>(&R);
-    if (!FOR)
-      continue;
+    sinkRecurrenceUsersAfterPrevious(PredFOR, Previous, VPDT);
 
+    // Introduce a recipe to combine the incoming and previous values of a
+    // fixed-order recurrence.
+    VPBasicBlock *InsertBlock = Previous->getParent();
+    auto *Region = GetReplicateRegion(Previous);
+    if (Region)
+      InsertBlock = dyn_cast<VPBasicBlock>(Region->getSingleSuccessor());
+    if (!InsertBlock) {
+      InsertBlock = new VPBasicBlock(Region->getName() + ".succ");
+      VPBlockUtils::insertBlockAfter(InsertBlock, Region);
+    }
+    if (Region || Previous->isPhi())
+      Builder.setInsertPoint(InsertBlock, InsertBlock->getFirstNonPhi());
+    else
+      Builder.setInsertPoint(InsertBlock, std::next(Previous->getIterator()));
+    auto *RecurSplice = cast<VPInstruction>(Builder.createNaryOp(
+        VPInstruction::PredicatedFirstOrderRecurrenceSplice,
+        {PredFOR, PredFOR->getBackedgeValue(), EVLRecipe}));
+
+    PredFOR->replaceAllUsesWith(RecurSplice);
+    // Set the first operand of RecurSplice to PredFOR again, after replacing
+    // all users.
+    RecurSplice->setOperand(0, PredFOR);
+    // Also add the EVL phi that we will need when emitting the predicated
+    // splice.
+    RecurSplice->addOperand(PredFOR->getEVLPhi());
+  }
+
+  for (VPFirstOrderRecurrencePHIRecipe *FOR : RecurrencePhis) {
     SmallPtrSet<VPFirstOrderRecurrencePHIRecipe *, 4> SeenPhis;
     VPRecipeBase *Previous = FOR->getBackedgeValue()->getDefiningRecipe();
     // Fixed-order recurrences do not contain cycles, so this loop is guaranteed

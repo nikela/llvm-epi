@@ -313,12 +313,12 @@ RISCVTTIImpl::getFeasibleMaxVFRange(TargetTransformInfo::RegisterKind K,
       std::min(ST->getRealMinVLen(), MaxSafeRegisterWidth);
 
   unsigned LowerBoundVFKnownMin =
-      std::max<unsigned>(1, PowerOf2Floor(SmallestRegister / SmallestType));
+      std::max<unsigned>(1, llvm::bit_floor(SmallestRegister / SmallestType));
   ElementCount LowerBoundVF =
       ElementCount::get(LowerBoundVFKnownMin, IsScalable);
 
   unsigned UpperBoundVFKnownMin =
-      std::min<unsigned>(64, PowerOf2Floor(WidestRegister / WidestType));
+      std::min<unsigned>(64, llvm::bit_floor(WidestRegister / WidestType));
   ElementCount UpperBoundVF =
       ElementCount::get(UpperBoundVFKnownMin, IsScalable);
 

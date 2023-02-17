@@ -2371,12 +2371,17 @@ define <2 x i64> @ustest_f64i64_mm(<2 x double> %x) {
 ; CHECK-NEXT:    i32.const 32
 ; CHECK-NEXT:    i32.add
 ; CHECK-NEXT:    global.set __stack_pointer
+; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 5
 ; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 4
 ; CHECK-NEXT:    i64.const 1
 ; CHECK-NEXT:    i64.lt_s
 ; CHECK-NEXT:    local.tee 1
+; CHECK-NEXT:    i64.select
+; CHECK-NEXT:    local.get 4
+; CHECK-NEXT:    i64.const 1
+; CHECK-NEXT:    i64.eq
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    local.tee 5
 ; CHECK-NEXT:    local.get 5
@@ -2393,12 +2398,17 @@ define <2 x i64> @ustest_f64i64_mm(<2 x double> %x) {
 ; CHECK-NEXT:    i64.eqz
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    i64x2.splat
+; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 3
 ; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 2
 ; CHECK-NEXT:    i64.const 1
 ; CHECK-NEXT:    i64.lt_s
 ; CHECK-NEXT:    local.tee 1
+; CHECK-NEXT:    i64.select
+; CHECK-NEXT:    local.get 2
+; CHECK-NEXT:    i64.const 1
+; CHECK-NEXT:    i64.eq
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    local.tee 4
 ; CHECK-NEXT:    local.get 4
@@ -2653,12 +2663,17 @@ define <2 x i64> @ustest_f32i64_mm(<2 x float> %x) {
 ; CHECK-NEXT:    i32.const 32
 ; CHECK-NEXT:    i32.add
 ; CHECK-NEXT:    global.set __stack_pointer
+; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 5
 ; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 4
 ; CHECK-NEXT:    i64.const 1
 ; CHECK-NEXT:    i64.lt_s
 ; CHECK-NEXT:    local.tee 1
+; CHECK-NEXT:    i64.select
+; CHECK-NEXT:    local.get 4
+; CHECK-NEXT:    i64.const 1
+; CHECK-NEXT:    i64.eq
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    local.tee 5
 ; CHECK-NEXT:    local.get 5
@@ -2675,12 +2690,17 @@ define <2 x i64> @ustest_f32i64_mm(<2 x float> %x) {
 ; CHECK-NEXT:    i64.eqz
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    i64x2.splat
+; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 3
 ; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 2
 ; CHECK-NEXT:    i64.const 1
 ; CHECK-NEXT:    i64.lt_s
 ; CHECK-NEXT:    local.tee 1
+; CHECK-NEXT:    i64.select
+; CHECK-NEXT:    local.get 2
+; CHECK-NEXT:    i64.const 1
+; CHECK-NEXT:    i64.eq
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    local.tee 4
 ; CHECK-NEXT:    local.get 4
@@ -2941,12 +2961,17 @@ define <2 x i64> @ustest_f16i64_mm(<2 x half> %x) {
 ; CHECK-NEXT:    i32.const 32
 ; CHECK-NEXT:    i32.add
 ; CHECK-NEXT:    global.set __stack_pointer
+; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 6
 ; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 5
 ; CHECK-NEXT:    i64.const 1
 ; CHECK-NEXT:    i64.lt_s
 ; CHECK-NEXT:    local.tee 2
+; CHECK-NEXT:    i64.select
+; CHECK-NEXT:    local.get 5
+; CHECK-NEXT:    i64.const 1
+; CHECK-NEXT:    i64.eq
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    local.tee 6
 ; CHECK-NEXT:    local.get 6
@@ -2963,12 +2988,17 @@ define <2 x i64> @ustest_f16i64_mm(<2 x half> %x) {
 ; CHECK-NEXT:    i64.eqz
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    i64x2.splat
+; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 4
 ; CHECK-NEXT:    i64.const 0
 ; CHECK-NEXT:    local.get 3
 ; CHECK-NEXT:    i64.const 1
 ; CHECK-NEXT:    i64.lt_s
 ; CHECK-NEXT:    local.tee 2
+; CHECK-NEXT:    i64.select
+; CHECK-NEXT:    local.get 3
+; CHECK-NEXT:    i64.const 1
+; CHECK-NEXT:    i64.eq
 ; CHECK-NEXT:    i64.select
 ; CHECK-NEXT:    local.tee 5
 ; CHECK-NEXT:    local.get 5
