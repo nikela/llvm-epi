@@ -109,13 +109,10 @@ namespace {
       (void) llvm::createLoopSinkPass();
       (void) llvm::createLazyValueInfoPass();
       (void) llvm::createLoopExtractorPass();
-      (void) llvm::createLoopInterchangePass();
-      (void) llvm::createLoopFlattenPass();
       (void) llvm::createLoopPredicationPass();
       (void) llvm::createLoopSimplifyPass();
       (void) llvm::createLoopSimplifyCFGPass();
       (void) llvm::createLoopStrengthReducePass();
-      (void) llvm::createLoopRerollPass();
       (void) llvm::createLoopUnrollPass();
       (void) llvm::createLoopIdiomPass();
       (void) llvm::createLoopRotatePass();
@@ -157,7 +154,6 @@ namespace {
       (void) llvm::createGVNPass();
       (void) llvm::createNewGVNPass();
       (void) llvm::createMemCpyOptPass();
-      (void) llvm::createLoopDeletionPass();
       (void) llvm::createPostDomTree();
       (void) llvm::createInstructionNamerPass();
       (void) llvm::createMetaRenamerPass();
