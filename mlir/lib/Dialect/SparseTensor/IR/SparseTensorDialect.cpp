@@ -114,18 +114,19 @@ SparseTensorDimSliceAttr::verify(function_ref<InFlightDiagnostic()> emitError,
          << "expect positive value or ? for slice offset/size/stride";
 }
 
-static Type getIntegerOrIndexType(MLIRContext *ctx, unsigned bitwidth) {
+Type mlir::sparse_tensor::detail::getIntegerOrIndexType(MLIRContext *ctx,
+                                                        unsigned bitwidth) {
   if (bitwidth)
     return IntegerType::get(ctx, bitwidth);
   return IndexType::get(ctx);
 }
 
 Type SparseTensorEncodingAttr::getPointerType() const {
-  return getIntegerOrIndexType(getContext(), getPointerBitWidth());
+  return detail::getIntegerOrIndexType(getContext(), getPointerBitWidth());
 }
 
 Type SparseTensorEncodingAttr::getIndexType() const {
-  return getIntegerOrIndexType(getContext(), getIndexBitWidth());
+  return detail::getIntegerOrIndexType(getContext(), getIndexBitWidth());
 }
 
 SparseTensorEncodingAttr SparseTensorEncodingAttr::withoutOrdering() const {
@@ -650,12 +651,6 @@ static LogicalResult verifySparsifierGetterSetter(
   return success();
 }
 
-LogicalResult NewOp::verify() {
-  if (getExpandSymmetry() && getDimRank(getResult()) != 2)
-    return emitOpError("expand_symmetry can only be used for 2D tensors");
-  return success();
-}
-
 static LogicalResult verifyPackUnPack(Operation *op, TensorType cooTp,
                                       TensorType dataTp, TensorType idxTp) {
   if (!isUniqueCOOType(cooTp))
@@ -761,6 +756,20 @@ LogicalResult ToValuesOp::verify() {
   auto mtp = getMemRefType(getResult());
   if (ttp.getElementType() != mtp.getElementType())
     return emitError("unexpected mismatch in element types");
+  return success();
+}
+
+LogicalResult ToSliceOffsetOp::verify() {
+  auto rank = getRankedTensorType(getSlice()).getRank();
+  if (rank <= getDim().getSExtValue() || getDim().getSExtValue() < 0)
+    return emitError("requested dimension out of bound");
+  return success();
+}
+
+LogicalResult ToSliceStrideOp::verify() {
+  auto rank = getRankedTensorType(getSlice()).getRank();
+  if (rank <= getDim().getSExtValue() || getDim().getSExtValue() < 0)
+    return emitError("requested dimension out of bound");
   return success();
 }
 
@@ -973,17 +982,10 @@ LogicalResult CompressOp::verify() {
 
 void ForeachOp::build(
     OpBuilder &builder, OperationState &result, Value tensor,
+    ValueRange initArgs, AffineMapAttr order,
     function_ref<void(OpBuilder &, Location, ValueRange, Value, ValueRange)>
         bodyBuilder) {
-  build(builder, result, tensor, std::nullopt, bodyBuilder);
-}
-
-void ForeachOp::build(
-    OpBuilder &builder, OperationState &result, Value tensor,
-    ValueRange initArgs,
-    function_ref<void(OpBuilder &, Location, ValueRange, Value, ValueRange)>
-        bodyBuilder) {
-  build(builder, result, initArgs.getTypes(), tensor, initArgs);
+  build(builder, result, initArgs.getTypes(), tensor, initArgs, order);
   // Builds foreach body.
   if (!bodyBuilder)
     return;
@@ -1013,6 +1015,10 @@ LogicalResult ForeachOp::verify() {
   const auto t = getSparseTensorType(getTensor());
   const Dimension dimRank = t.getDimRank();
   const auto args = getBody()->getArguments();
+
+  if (getOrder().has_value() &&
+      (t.getEncoding() || !getOrder()->isPermutation()))
+    return emitError("Only support permuted order on non encoded dense tensor");
 
   if (static_cast<size_t>(dimRank) + 1 + getInitArgs().size() != args.size())
     return emitError("Unmatched number of arguments in the block");
