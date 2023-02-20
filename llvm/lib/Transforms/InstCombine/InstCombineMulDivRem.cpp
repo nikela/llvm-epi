@@ -270,7 +270,7 @@ Instruction *InstCombinerImpl::visitMul(BinaryOperator &I) {
     if (match(Op0, m_ZExtOrSExt(m_Value(X))) &&
         match(Op1, m_APIntAllowUndef(NegPow2C))) {
       unsigned SrcWidth = X->getType()->getScalarSizeInBits();
-      unsigned ShiftAmt = NegPow2C->countTrailingZeros();
+      unsigned ShiftAmt = NegPow2C->countr_zero();
       if (ShiftAmt >= BitWidth - SrcWidth) {
         Value *N = Builder.CreateNeg(X, X->getName() + ".neg");
         Value *Z = Builder.CreateZExt(N, Ty, N->getName() + ".z");
@@ -1359,7 +1359,8 @@ Instruction *InstCombinerImpl::visitSDiv(BinaryOperator &I) {
     // (sext X) sdiv C --> sext (X sdiv C)
     Value *Op0Src;
     if (match(Op0, m_OneUse(m_SExt(m_Value(Op0Src)))) &&
-        Op0Src->getType()->getScalarSizeInBits() >= Op1C->getMinSignedBits()) {
+        Op0Src->getType()->getScalarSizeInBits() >=
+            Op1C->getSignificantBits()) {
 
       // In the general case, we need to make sure that the dividend is not the
       // minimum signed value because dividing that by -1 is UB. But here, we
@@ -1402,7 +1403,7 @@ Instruction *InstCombinerImpl::visitSDiv(BinaryOperator &I) {
   KnownBits KnownDividend = computeKnownBits(Op0, 0, &I);
   if (!I.isExact() &&
       (match(Op1, m_Power2(Op1C)) || match(Op1, m_NegatedPower2(Op1C))) &&
-      KnownDividend.countMinTrailingZeros() >= Op1C->countTrailingZeros()) {
+      KnownDividend.countMinTrailingZeros() >= Op1C->countr_zero()) {
     I.setIsExact();
     return &I;
   }
@@ -1784,6 +1785,17 @@ Instruction *InstCombinerImpl::visitURem(BinaryOperator &I) {
   if (match(Op1, m_SExt(m_Value(X))) && X->getType()->isIntOrIntVectorTy(1)) {
     Value *Cmp = Builder.CreateICmpEQ(Op0, ConstantInt::getAllOnesValue(Ty));
     return SelectInst::Create(Cmp, ConstantInt::getNullValue(Ty), Op0);
+  }
+
+  // For "(X + 1) % Op1" and if (X u< Op1) => (X + 1) == Op1 ? 0 : X + 1 .
+  if (match(Op0, m_Add(m_Value(X), m_One()))) {
+    Value *Val =
+        simplifyICmpInst(ICmpInst::ICMP_ULT, X, Op1, SQ.getWithInstruction(&I));
+    if (Val && match(Val, m_One())) {
+      Value *FrozenOp0 = Builder.CreateFreeze(Op0, Op0->getName() + ".frozen");
+      Value *Cmp = Builder.CreateICmpEQ(FrozenOp0, Op1);
+      return SelectInst::Create(Cmp, ConstantInt::getNullValue(Ty), FrozenOp0);
+    }
   }
 
   return nullptr;
