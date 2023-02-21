@@ -319,6 +319,8 @@ enum NodeType : unsigned {
   VWSUB_W_VL,
   VWSUBU_W_VL,
 
+  // Narrowing logical shift right.
+  // Operands are (source, shift, passthru, mask, vl)
   VNSRL_VL,
 
   // Vector compare producing a mask. Fourth operand is input mask. Fifth
@@ -385,6 +387,12 @@ enum NodeType : unsigned {
   // Load address.
   LA = ISD::FIRST_TARGET_MEMORY_OPCODE,
   LA_TLS_IE,
+
+  TH_LWD,
+  TH_LWUD,
+  TH_LDD,
+  TH_SWD,
+  TH_SDD,
 };
 } // namespace RISCVISD
 
