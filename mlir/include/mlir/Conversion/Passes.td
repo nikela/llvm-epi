@@ -561,10 +561,11 @@ def ConvertMathToLibm : Pass<"convert-math-to-libm", "ModuleOp"> {
 
 def ConvertMathToLLVMPass : Pass<"convert-math-to-llvm"> {
   let summary = "Convert Math dialect to LLVM dialect";
-  let description = [{
-    This pass converts supported Math ops to LLVM dialect intrinsics.
-  }];
   let dependentDialects = ["LLVM::LLVMDialect"];
+  let options = [
+    Option<"approximateLog1p", "approximate-log1p", "bool", "true",
+           "Enable approximation of Log1p.">
+  ];
 }
 
 //===----------------------------------------------------------------------===//
@@ -690,6 +691,11 @@ def ConvertOpenACCToSCF : Pass<"convert-openacc-to-scf", "ModuleOp"> {
 def ConvertOpenACCToLLVMPass : Pass<"convert-openacc-to-llvm", "ModuleOp"> {
   let summary = "Convert the OpenACC ops to LLVM dialect";
   let dependentDialects = ["LLVM::LLVMDialect"];
+  let options = [
+    Option<"useOpaquePointers", "use-opaque-pointers", "bool",
+           /*default=*/"false", "Generate LLVM IR using opaque pointers "
+           "instead of typed pointers">,
+  ];
 }
 
 //===----------------------------------------------------------------------===//
