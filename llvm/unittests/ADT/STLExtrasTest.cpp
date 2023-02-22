@@ -962,6 +962,7 @@ enum Doggos {
 
 struct WooferCmp {
   // Not copyable.
+  WooferCmp() = default;
   WooferCmp(const WooferCmp &) = delete;
   WooferCmp &operator=(const WooferCmp &) = delete;
 
