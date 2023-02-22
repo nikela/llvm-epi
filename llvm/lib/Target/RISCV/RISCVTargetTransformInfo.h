@@ -407,12 +407,9 @@ public:
     }
   }
 
-  unsigned getMaxInterleaveFactor(unsigned VF) {
-    // If the loop will not be vectorized, don't interleave the loop.
-    // Let regular unroll to unroll the loop.
-    return VF == 1 ? 1 : ST->getMaxInterleaveFactor();
-  }
-  unsigned getMaxInterleaveFactorEC(ElementCount VF) {
+  unsigned getMaxInterleaveFactor(ElementCount VF) {
+    if (VF.isScalable() && !ST->hasEPI())
+      return 1;
     // If the loop will not be vectorized, don't interleave the loop.
     // Let regular unroll to unroll the loop.
     return VF.isScalar() ? 1 : ST->getMaxInterleaveFactor();
