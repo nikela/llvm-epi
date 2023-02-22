@@ -3241,10 +3241,10 @@ Instruction *InstCombinerImpl::visitSwitchInst(SwitchInst &SI) {
   // Compute the number of leading bits we can ignore.
   // TODO: A better way to determine this would use ComputeNumSignBits().
   for (const auto &C : SI.cases()) {
-    LeadingKnownZeros = std::min(
-        LeadingKnownZeros, C.getCaseValue()->getValue().countLeadingZeros());
-    LeadingKnownOnes = std::min(
-        LeadingKnownOnes, C.getCaseValue()->getValue().countLeadingOnes());
+    LeadingKnownZeros =
+        std::min(LeadingKnownZeros, C.getCaseValue()->getValue().countl_zero());
+    LeadingKnownOnes =
+        std::min(LeadingKnownOnes, C.getCaseValue()->getValue().countl_one());
   }
 
   unsigned NewWidth = Known.getBitWidth() - std::max(LeadingKnownZeros, LeadingKnownOnes);
@@ -3963,6 +3963,17 @@ bool InstCombinerImpl::freezeOtherUses(FreezeInst &FI) {
   return Changed;
 }
 
+// Check if any direct or bitcast user of this value is a shuffle instruction.
+static bool isUsedWithinShuffleVector(Value *V) {
+  for (auto *U : V->users()) {
+    if (isa<ShuffleVectorInst>(U))
+      return true;
+    else if (match(U, m_BitCast(m_Specific(V))) && isUsedWithinShuffleVector(U))
+      return true;
+  }
+  return false;
+}
+
 Instruction *InstCombinerImpl::visitFreeze(FreezeInst &I) {
   Value *Op0 = I.getOperand(0);
 
@@ -4012,8 +4023,14 @@ Instruction *InstCombinerImpl::visitFreeze(FreezeInst &I) {
     return BestValue;
   };
 
-  if (match(Op0, m_Undef()))
+  if (match(Op0, m_Undef())) {
+    // Don't fold freeze(undef/poison) if it's used as a vector operand in
+    // a shuffle. This may improve codegen for shuffles that allow
+    // unspecified inputs.
+    if (isUsedWithinShuffleVector(&I))
+      return nullptr;
     return replaceInstUsesWith(I, getUndefReplacement(I.getType()));
+  }
 
   Constant *C;
   if (match(Op0, m_Constant(C)) && C->containsUndefOrPoisonElement()) {
@@ -4224,23 +4241,6 @@ bool InstCombinerImpl::run() {
 
     if (!DebugCounter::shouldExecute(VisitCounter))
       continue;
-
-    // Instruction isn't dead, see if we can constant propagate it.
-    if (!I->use_empty() &&
-        (I->getNumOperands() == 0 || isa<Constant>(I->getOperand(0)))) {
-      if (Constant *C = ConstantFoldInstruction(I, DL, &TLI)) {
-        LLVM_DEBUG(dbgs() << "IC: ConstFold to: " << *C << " from: " << *I
-                          << '\n');
-
-        // Add operands to the worklist.
-        replaceInstUsesWith(*I, C);
-        ++NumConstProp;
-        if (isInstructionTriviallyDead(I, &TLI))
-          eraseInstFromFunction(*I);
-        MadeIRChange = true;
-        continue;
-      }
-    }
 
     // See if we can trivially sink this instruction to its user if we can
     // prove that the successor is not executed more frequently than our block.

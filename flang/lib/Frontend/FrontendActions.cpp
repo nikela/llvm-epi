@@ -562,7 +562,8 @@ void CodeGenAction::generateLLVMIR() {
   pm.enableVerifier(/*verifyPasses=*/true);
 
   // Create the pass pipeline
-  fir::createMLIRToLLVMPassPipeline(pm, level, opts.StackArrays);
+  fir::createMLIRToLLVMPassPipeline(pm, level, opts.StackArrays,
+                                    opts.Underscoring);
   mlir::applyPassManagerCLOptions(pm);
 
   // run the pass manager
@@ -590,13 +591,6 @@ void CodeGenAction::generateLLVMIR() {
     if (opts.IsPIE)
       llvmModule->setPIELevel(
           static_cast<llvm::PIELevel::Level>(opts.PICLevel));
-  }
-
-  if (uint32_t PLevel = invoc.PICLevel) {
-    assert(PLevel < 3 && "Invalid PIC Level");
-    llvmModule->setPICLevel(static_cast<llvm::PICLevel::Level>(PLevel));
-    if (invoc.PIE)
-      llvmModule->setPIELevel(static_cast<llvm::PIELevel::Level>(PLevel));
   }
 
   // -- Heinous code starts here.

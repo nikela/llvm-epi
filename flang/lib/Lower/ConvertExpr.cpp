@@ -2053,6 +2053,8 @@ public:
         },
         [&](const fir::BoxValue &x) -> ExtValue {
           // Derived type scalar that may be polymorphic.
+          if (fir::isPolymorphicType(fir::getBase(x).getType()))
+            TODO(loc, "polymorphic array temporary");
           assert(!x.hasRank() && x.isDerived());
           if (x.isDerivedWithLenParameters())
             fir::emitFatalError(

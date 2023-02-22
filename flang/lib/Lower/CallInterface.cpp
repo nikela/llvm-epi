@@ -428,7 +428,7 @@ std::string Fortran::lower::CalleeInterface::getMangledName() const {
 const Fortran::semantics::Symbol *
 Fortran::lower::CalleeInterface::getProcedureSymbol() const {
   if (funit.isMainProgram())
-    return nullptr;
+    return funit.getMainProgramSymbol();
   return &funit.getSubprogramSymbol();
 }
 
@@ -530,8 +530,15 @@ void Fortran::lower::CallInterface<T>::declare() {
       mlir::FunctionType ty = genFunctionType();
       func = fir::FirOpBuilder::createFunction(loc, module, name, ty,
                                                functionAttributes);
-      if (const Fortran::semantics::Symbol *sym = side().getProcedureSymbol())
-        addSymbolAttribute(func, *sym, converter.getMLIRContext());
+      if (const Fortran::semantics::Symbol *sym = side().getProcedureSymbol()) {
+        if (side().isMainProgram()) {
+          func->setAttr(fir::getSymbolAttrName(),
+                        mlir::StringAttr::get(&converter.getMLIRContext(),
+                                              sym->name().ToString()));
+        } else {
+          addSymbolAttribute(func, *sym, converter.getMLIRContext());
+        }
+      }
       for (const auto &placeHolder : llvm::enumerate(inputs))
         if (!placeHolder.value().attributes.empty())
           func.setArgAttrs(placeHolder.index(), placeHolder.value().attributes);

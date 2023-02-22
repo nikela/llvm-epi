@@ -9753,21 +9753,6 @@ VPBasicBlock *VPRecipeBuilder::handleReplication(Instruction *I, VFRange &Range,
   auto *Recipe = new VPReplicateRecipe(I, Plan.mapToVPValues(I->operands()),
                                        IsUniform, IsPredicated);
 
-  // Find if I uses a predicated instruction. If so, it will use its scalar
-  // value. Avoid hoisting the insert-element which packs the scalar value into
-  // a vector value, as that happens iff all users use the vector value.
-  for (VPValue *Op : Recipe->operands()) {
-    auto *PredR =
-        dyn_cast_or_null<VPPredInstPHIRecipe>(Op->getDefiningRecipe());
-    if (!PredR)
-      continue;
-    auto *RepR = cast<VPReplicateRecipe>(
-        PredR->getOperand(0)->getDefiningRecipe());
-    assert(RepR->isPredicated() &&
-           "expected Replicate recipe to be predicated");
-    RepR->setAlsoPack(false);
-  }
-
   // Finalize the recipe for Instr, first if it is not predicated.
   if (!IsPredicated) {
     LLVM_DEBUG(dbgs() << "LV: Scalarizing:" << *I << "\n");
@@ -10921,7 +10906,7 @@ void VPReplicateRecipe::execute(VPTransformState &State) {
     State.ILV->scalarizeInstruction(UI, this, *State.Instance,
                                     IsPredicated, State);
     // Insert scalar instance packing it into a vector.
-    if (AlsoPack && State.VF.isVector()) {
+    if (State.VF.isVector() && shouldPack()) {
       // If we're constructing lane 0, initialize to start from poison.
       if (State.Instance->Lane.isFirstLane()) {
         Value *Poison = PoisonValue::get(
@@ -12185,8 +12170,8 @@ void LoopVectorizePass::printPipeline(
   static_cast<PassInfoMixin<LoopVectorizePass> *>(this)->printPipeline(
       OS, MapClassName2PassName);
 
-  OS << "<";
+  OS << '<';
   OS << (InterleaveOnlyWhenForced ? "" : "no-") << "interleave-forced-only;";
   OS << (VectorizeOnlyWhenForced ? "" : "no-") << "vectorize-forced-only;";
-  OS << ">";
+  OS << '>';
 }

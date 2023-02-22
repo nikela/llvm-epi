@@ -51,6 +51,7 @@
 ! HELP-NEXT: -freciprocal-math       Allow division operations to be reassociated
 ! HELP-NEXT: -fstack-arrays          Attempt to allocate array temporaries on the stack, no matter their size
 ! HELP-NEXT: -fsyntax-only           Run the preprocessor, parser and semantic analysis stages
+! HELP-NEXT: -funderscoring          Appends one trailing underscore to external names
 ! HELP-NEXT: -fxor-operator          Enable .XOR. as a synonym of .NEQV.
 ! HELP-NEXT: -help                   Display available options
 ! HELP-NEXT: -I <dir>                Add directory to the end of the list of include search paths
@@ -222,6 +223,7 @@
 ! HELP-FC1-NEXT:                         Sanitizer coverage type
 ! HELP-FC1-NEXT: -fstack-arrays          Attempt to allocate array temporaries on the stack, no matter their size
 ! HELP-FC1-NEXT: -fsyntax-only           Run the preprocessor, parser and semantic analysis stages
+! HELP-FC1-NEXT: -funderscoring          Appends one trailing underscore to external names
 ! HELP-FC1-NEXT: -funroll-loops          Turn on loop unroller
 ! HELP-FC1-NEXT: -funwind-tables=<value> Generate unwinding tables for all functions
 ! HELP-FC1-NEXT: -fuse-register-sized-bitfield-access
