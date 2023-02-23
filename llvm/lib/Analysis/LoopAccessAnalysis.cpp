@@ -149,8 +149,10 @@ Value *llvm::stripIntegerCast(Value *V) {
 
 const SCEV *llvm::replaceSymbolicStrideSCEV(PredicatedScalarEvolution &PSE,
                                             const ValueToValueMap &PtrToStride,
-                                            Value *Ptr) {
+                                            Value *Ptr, bool AddPredicate) {
   const SCEV *OrigSCEV = PSE.getSCEV(Ptr);
+  if (!AddPredicate)
+    return OrigSCEV;
 
   // If there is an entry in the map return the SCEV of the pointer with the
   // symbolic stride replaced by one.
@@ -1366,11 +1368,10 @@ static bool isNoWrapAddRec(Value *Ptr, const SCEVAddRecExpr *AR,
 }
 
 /// Check whether the access through \p Ptr has a constant stride.
-std::optional<int64_t> llvm::getPtrStride(PredicatedScalarEvolution &PSE,
-                                          Type *AccessTy, Value *Ptr,
-                                          const Loop *Lp,
-                                          const ValueToValueMap &StridesMap,
-                                          bool Assume, bool ShouldCheckWrap) {
+std::optional<int64_t>
+llvm::getPtrStride(PredicatedScalarEvolution &PSE, Type *AccessTy, Value *Ptr,
+                   const Loop *Lp, const ValueToValueMap &StridesMap,
+                   bool AddPredicate, bool ShouldCheckWrap) {
   Type *Ty = Ptr->getType();
   assert(Ty->isPointerTy() && "Unexpected non-ptr");
 
@@ -1380,10 +1381,11 @@ std::optional<int64_t> llvm::getPtrStride(PredicatedScalarEvolution &PSE,
     return std::nullopt;
   }
 
-  const SCEV *PtrScev = replaceSymbolicStrideSCEV(PSE, StridesMap, Ptr);
+  const SCEV *PtrScev =
+      replaceSymbolicStrideSCEV(PSE, StridesMap, Ptr, AddPredicate);
 
   const SCEVAddRecExpr *AR = dyn_cast<SCEVAddRecExpr>(PtrScev);
-  if (Assume && !AR)
+  if (AddPredicate && !AR)
     AR = PSE.getAsAddRec(Ptr);
 
   if (!AR) {
@@ -1413,7 +1415,7 @@ std::optional<int64_t> llvm::getPtrStride(PredicatedScalarEvolution &PSE,
     isNoWrapAddRec(Ptr, AR, PSE, Lp);
   if (!IsNoWrapAddRec && !IsInBoundsGEP &&
       NullPointerIsDefined(Lp->getHeader()->getParent(), AddrSpace)) {
-    if (Assume) {
+    if (AddPredicate) {
       PSE.setNoOverflow(Ptr, SCEVWrapPredicate::IncrementNUSW);
       IsNoWrapAddRec = true;
       LLVM_DEBUG(dbgs() << "LAA: Pointer may wrap in the address space:\n"
@@ -1462,7 +1464,7 @@ std::optional<int64_t> llvm::getPtrStride(PredicatedScalarEvolution &PSE,
   if (!IsNoWrapAddRec && Stride != 1 && Stride != -1 &&
       (IsInBoundsGEP || !NullPointerIsDefined(Lp->getHeader()->getParent(),
                                               AddrSpace))) {
-    if (Assume) {
+    if (AddPredicate) {
       // We can avoid this case by adding a run-time check.
       LLVM_DEBUG(dbgs() << "LAA: Non unit strided pointer which is not either "
                         << "inbounds or in address space 0 may wrap:\n"
