@@ -712,13 +712,15 @@ Value *stripIntegerCast(Value *V);
 /// \p PSE is true.
 ///
 /// If necessary this method will version the stride of the pointer according
-/// to \p PtrToStride and therefore add further predicates to \p PSE.
+/// to \p PtrToStride and therefore add further predicates to \p PSE, unless
+/// \p AddPredicate is false.
 ///
 /// \p PtrToStride provides the mapping between the pointer value and its
 /// stride as collected by LoopVectorizationLegality::collectStridedAccess.
 const SCEV *replaceSymbolicStrideSCEV(PredicatedScalarEvolution &PSE,
                                       const ValueToValueMap &PtrToStride,
-                                      Value *Ptr);
+                                      Value *Ptr,
+                                      bool AddPredicate = true);
 
 /// If the pointer has a constant stride return it in units of the access type
 /// size.  Otherwise return std::nullopt.
@@ -728,13 +730,13 @@ const SCEV *replaceSymbolicStrideSCEV(PredicatedScalarEvolution &PSE,
 ///
 /// If necessary this method will version the stride of the pointer according
 /// to \p PtrToStride and therefore add further predicates to \p PSE.
-/// The \p Assume parameter indicates if we are allowed to make additional
-/// run-time assumptions.
+/// The \p AddPredicate parameter indicates if we are allowed to make additional
+/// run-time assumptions via PSE predicates.
 std::optional<int64_t>
 getPtrStride(PredicatedScalarEvolution &PSE, Type *AccessTy, Value *Ptr,
              const Loop *Lp,
              const ValueToValueMap &StridesMap = ValueToValueMap(),
-             bool Assume = false, bool ShouldCheckWrap = true);
+             bool AddPredicate = false, bool ShouldCheckWrap = true);
 
 /// Returns the distance between the pointers \p PtrA and \p PtrB iff they are
 /// compatible and it is possible to calculate the distance between them. This
