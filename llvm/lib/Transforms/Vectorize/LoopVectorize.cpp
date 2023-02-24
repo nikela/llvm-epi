@@ -99,6 +99,7 @@
 #include "llvm/IR/Constant.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DataLayout.h"
+#include "llvm/IR/DebugInfo.h"
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/DebugLoc.h"
 #include "llvm/IR/DerivedTypes.h"
@@ -2708,6 +2709,17 @@ static Value *emitTransformedIndex(IRBuilderBase &B, Value *Index,
     return nullptr;
   }
   llvm_unreachable("invalid enum");
+}
+
+std::optional<unsigned> getMaxVScale(const Function &F,
+                                     const TargetTransformInfo &TTI) {
+  if (std::optional<unsigned> MaxVScale = TTI.getMaxVScale())
+    return MaxVScale;
+
+  if (F.hasFnAttribute(Attribute::VScaleRange))
+    return F.getFnAttribute(Attribute::VScaleRange).getVScaleRangeMax();
+
+  return std::nullopt;
 }
 
 void InnerLoopVectorizer::packScalarIntoVectorValue(VPValue *Def,
@@ -5442,12 +5454,11 @@ LoopVectorizationCostModel::getMaxLegalScalableVF(unsigned MaxSafeElements) {
     return MaxScalableVF;
 
   // Limit MaxScalableVF by the maximum safe dependence distance.
-  std::optional<unsigned> MaxVScale = TTI.getMaxVScale();
-  if (!MaxVScale && TheFunction->hasFnAttribute(Attribute::VScaleRange))
-    MaxVScale =
-        TheFunction->getFnAttribute(Attribute::VScaleRange).getVScaleRangeMax();
-  MaxScalableVF =
-      ElementCount::getScalable(MaxVScale ? (MaxSafeElements / *MaxVScale) : 0);
+  if (std::optional<unsigned> MaxVScale = getMaxVScale(*TheFunction, TTI))
+    MaxScalableVF = ElementCount::getScalable(MaxSafeElements / *MaxVScale);
+  else
+    MaxScalableVF = ElementCount::getScalable(0);
+
   if (!MaxScalableVF)
     reportVectorizationInfo(
         "Max legal vector width too small, scalable vectorization "
@@ -12142,6 +12153,11 @@ PreservedAnalyses LoopVectorizePass::run(Function &F,
     if (!Result.MadeAnyChange)
       return PreservedAnalyses::all();
     PreservedAnalyses PA;
+
+    if (isAssignmentTrackingEnabled(*F.getParent())) {
+      for (auto &BB : F)
+        RemoveRedundantDbgInstrs(&BB);
+    }
 
     // We currently do not preserve loopinfo/dominator analyses with outer loop
     // vectorization. Until this is addressed, mark these analyses as preserved
