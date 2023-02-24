@@ -4195,9 +4195,10 @@ AMDGPUInstructionSelector::selectMUBUFScratchOffen(MachineOperand &Root) const {
 
     // TODO: Should this be inside the render function? The iterator seems to
     // move.
+    const uint32_t MaxOffset = SIInstrInfo::getMaxMUBUFImmOffset();
     BuildMI(*MBB, MI, MI->getDebugLoc(), TII.get(AMDGPU::V_MOV_B32_e32),
             HighBits)
-      .addImm(Offset & ~4095);
+        .addImm(Offset & ~MaxOffset);
 
     return {{[=](MachineInstrBuilder &MIB) { // rsrc
                MIB.addReg(Info->getScratchRSrcReg());
@@ -4211,7 +4212,7 @@ AMDGPUInstructionSelector::selectMUBUFScratchOffen(MachineOperand &Root) const {
                MIB.addImm(0);
              },
              [=](MachineInstrBuilder &MIB) { // offset
-               MIB.addImm(Offset & 4095);
+               MIB.addImm(Offset & MaxOffset);
              }}};
   }
 
@@ -5040,6 +5041,13 @@ void AMDGPUInstructionSelector::renderTruncTImm(MachineInstrBuilder &MIB,
                                                 const MachineInstr &MI,
                                                 int OpIdx) const {
   MIB.addImm(MI.getOperand(OpIdx).getImm());
+}
+
+void AMDGPUInstructionSelector::renderOpSelTImm(MachineInstrBuilder &MIB,
+                                                const MachineInstr &MI,
+                                                int OpIdx) const {
+  assert(OpIdx >= 0 && "expected to match an immediate operand");
+  MIB.addImm(MI.getOperand(OpIdx).getImm() ? SISrcMods::OP_SEL_0 : 0);
 }
 
 void AMDGPUInstructionSelector::renderExtractCPol(MachineInstrBuilder &MIB,
