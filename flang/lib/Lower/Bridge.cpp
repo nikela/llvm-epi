@@ -2179,6 +2179,19 @@ private:
     unsigned typeGuardIdx = 0;
     std::size_t defaultAttrPos = std::numeric_limits<size_t>::max();
     bool hasLocalScope = false;
+    llvm::SmallVector<const Fortran::semantics::Scope *> typeCaseScopes;
+
+    const auto &typeCaseList =
+        std::get<std::list<Fortran::parser::SelectTypeConstruct::TypeCase>>(
+            selectTypeConstruct.t);
+    for (const auto &typeCase : typeCaseList) {
+      const auto &stmt =
+          std::get<Fortran::parser::Statement<Fortran::parser::TypeGuardStmt>>(
+              typeCase.t);
+      const Fortran::semantics::Scope &scope =
+          bridge.getSemanticsContext().FindScope(stmt.source);
+      typeCaseScopes.push_back(&scope);
+    }
 
     for (Fortran::lower::pft::Evaluation &eval :
          getEval().getNestedEvaluations()) {
@@ -2190,9 +2203,8 @@ private:
         const auto &s = std::get<Fortran::parser::Selector>(selectTypeStmt->t);
         if (const auto *v = std::get_if<Fortran::parser::Variable>(&s.u))
           selector = genExprBox(loc, *Fortran::semantics::GetExpr(*v), stmtCtx);
-        else
-          fir::emitFatalError(
-              loc, "selector with expr not expected in select type statement");
+        else if (const auto *e = std::get_if<Fortran::parser::Expr>(&s.u))
+          selector = genExprBox(loc, *Fortran::semantics::GetExpr(*e), stmtCtx);
 
         // Going through the controlSuccessor first to create the
         // fir.select_type operation.
@@ -2275,13 +2287,11 @@ private:
                "TypeGuard attribute missing");
         mlir::Attribute typeGuardAttr = attrList[typeGuardIdx];
         mlir::Block *typeGuardBlock = blockList[typeGuardIdx];
-        const Fortran::semantics::Scope &guardScope =
-            bridge.getSemanticsContext().FindScope(eval.position);
         mlir::OpBuilder::InsertPoint crtInsPt = builder->saveInsertionPoint();
         builder->setInsertionPointToStart(typeGuardBlock);
 
         auto addAssocEntitySymbol = [&](fir::ExtendedValue exv) {
-          for (auto &symbol : guardScope.GetSymbols()) {
+          for (auto &symbol : typeCaseScopes[typeGuardIdx]->GetSymbols()) {
             if (symbol->GetUltimate()
                     .detailsIf<Fortran::semantics::AssocEntityDetails>()) {
               addSymbol(symbol, exv);
@@ -2844,13 +2854,20 @@ private:
               std::optional<Fortran::evaluate::DynamicType> lhsType =
                   assign.lhs.GetType();
               assert(lhsType && "lhs cannot be typeless");
+              std::optional<Fortran::evaluate::DynamicType> rhsType =
+                  assign.rhs.GetType();
 
-              // Assignment to polymorphic allocatables may require changing the
-              // variable dynamic type (See Fortran 2018 10.2.1.3 p3).
-              if ((lhsType->IsPolymorphic() ||
-                   lhsType->IsUnlimitedPolymorphic()) &&
-                  Fortran::lower::isWholeAllocatable(assign.lhs)) {
-                mlir::Value lhs = genExprMutableBox(loc, assign.lhs).getAddr();
+              // Assignment to/from polymorphic entities are done with the
+              // runtime.
+              if (lhsType->IsPolymorphic() ||
+                  lhsType->IsUnlimitedPolymorphic() ||
+                  rhsType->IsPolymorphic() ||
+                  rhsType->IsUnlimitedPolymorphic()) {
+                mlir::Value lhs;
+                if (Fortran::lower::isWholeAllocatable(assign.lhs))
+                  lhs = genExprMutableBox(loc, assign.lhs).getAddr();
+                else
+                  lhs = fir::getBase(genExprBox(loc, assign.lhs, stmtCtx));
                 mlir::Value rhs =
                     fir::getBase(genExprBox(loc, assign.rhs, stmtCtx));
                 fir::runtime::genAssign(*builder, loc, lhs, rhs);

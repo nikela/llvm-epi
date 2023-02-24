@@ -71,8 +71,9 @@ static LogicalResult convertIntrinsicImpl(OpBuilder &odsBuilder,
 /// dialect attributes.
 static ArrayRef<unsigned> getSupportedMetadataImpl() {
   static const SmallVector<unsigned> convertibleMetadata = {
-      llvm::LLVMContext::MD_prof, llvm::LLVMContext::MD_tbaa,
-      llvm::LLVMContext::MD_access_group, llvm::LLVMContext::MD_loop};
+      llvm::LLVMContext::MD_prof,         llvm::LLVMContext::MD_tbaa,
+      llvm::LLVMContext::MD_access_group, llvm::LLVMContext::MD_loop,
+      llvm::LLVMContext::MD_noalias,      llvm::LLVMContext::MD_alias_scope};
   return convertibleMetadata;
 }
 
@@ -106,30 +107,25 @@ private:
 static LogicalResult setProfilingAttr(OpBuilder &builder, llvm::MDNode *node,
                                       Operation *op,
                                       LLVM::ModuleImport &moduleImport) {
-  // Return success for empty metadata nodes since there is nothing to import.
+  // Return failure for empty metadata nodes since there is nothing to import.
   if (!node->getNumOperands())
-    return op->emitWarning() << "expected non-empty profiling metadata node";
+    return failure();
 
   auto *name = dyn_cast<llvm::MDString>(node->getOperand(0));
   if (!name)
-    return op->emitWarning()
-           << "expected profiling metadata node to have a string identifier";
+    return failure();
 
   // Handle function entry count metadata.
   if (name->getString().equals("function_entry_count")) {
-    auto emitNodeWarning = [&]() {
-      return op->emitWarning()
-             << "expected function_entry_count to hold a single i64 value";
-    };
 
     // TODO support function entry count metadata with GUID fields.
     if (node->getNumOperands() != 2)
-      return emitNodeWarning();
+      return failure();
 
     llvm::ConstantInt *entryCount =
         llvm::mdconst::dyn_extract<llvm::ConstantInt>(node->getOperand(1));
     if (!entryCount)
-      return emitNodeWarning();
+      return failure();
     if (auto funcOp = dyn_cast<LLVMFuncOp>(op)) {
       funcOp.setFunctionEntryCount(entryCount->getZExtValue());
       return success();
@@ -139,8 +135,7 @@ static LogicalResult setProfilingAttr(OpBuilder &builder, llvm::MDNode *node,
   }
 
   if (!name->getString().equals("branch_weights"))
-    return op->emitWarning()
-           << "unknown profiling metadata node " << name->getString();
+    return failure();
 
   // Handle branch weights metadata.
   SmallVector<int32_t> branchWeights;
@@ -149,7 +144,7 @@ static LogicalResult setProfilingAttr(OpBuilder &builder, llvm::MDNode *node,
     llvm::ConstantInt *branchWeight =
         llvm::mdconst::dyn_extract<llvm::ConstantInt>(node->getOperand(i));
     if (!branchWeight)
-      return op->emitWarning() << "expected branch weights to be integers";
+      return failure();
     branchWeights.push_back(branchWeight->getZExtValue());
   }
 
@@ -178,8 +173,9 @@ static LogicalResult setTBAAAttr(const llvm::MDNode *node, Operation *op,
 /// that map to the access group nodes starting from the access group metadata
 /// `node`, and attaches all of them to the imported operation if the lookups
 /// succeed. Returns failure otherwise.
-static LogicalResult setAccessGroupAttr(const llvm::MDNode *node, Operation *op,
-                                        LLVM::ModuleImport &moduleImport) {
+static LogicalResult setAccessGroupsAttr(const llvm::MDNode *node,
+                                         Operation *op,
+                                         LLVM::ModuleImport &moduleImport) {
   FailureOr<SmallVector<SymbolRefAttr>> accessGroups =
       moduleImport.lookupAccessGroupAttrs(node);
   if (failed(accessGroups))
@@ -211,6 +207,45 @@ static LogicalResult setLoopAttr(const llvm::MDNode *node, Operation *op,
       .Default([](auto) { return failure(); });
 }
 
+/// Looks up all the symbol references pointing to the alias scope operations
+/// that map to the alias scope nodes starting from the alias scope metadata
+/// `node`, and attaches all of them to the imported operation if the lookups
+/// succeed. Returns failure otherwise.
+static LogicalResult setAliasScopesAttr(const llvm::MDNode *node, Operation *op,
+                                        LLVM::ModuleImport &moduleImport) {
+  FailureOr<SmallVector<SymbolRefAttr>> aliasScopes =
+      moduleImport.lookupAliasScopeAttrs(node);
+  if (failed(aliasScopes))
+    return failure();
+
+  SmallVector<Attribute> aliasScopeAttrs(aliasScopes->begin(),
+                                         aliasScopes->end());
+  return AttributeSetter<LoadOp, StoreOp>(op).apply([&](auto memOp) {
+    memOp.setAliasScopesAttr(
+        ArrayAttr::get(memOp.getContext(), aliasScopeAttrs));
+  });
+}
+
+/// Looks up all the symbol references pointing to the alias scope operations
+/// that map to the alias scope nodes starting from the noalias metadata `node`,
+/// and attaches all of them to the imported operation if the lookups succeed.
+/// Returns failure otherwise.
+static LogicalResult setNoaliasScopesAttr(const llvm::MDNode *node,
+                                          Operation *op,
+                                          LLVM::ModuleImport &moduleImport) {
+  FailureOr<SmallVector<SymbolRefAttr>> noaliasScopes =
+      moduleImport.lookupAliasScopeAttrs(node);
+  if (failed(noaliasScopes))
+    return failure();
+
+  SmallVector<Attribute> noaliasScopeAttrs(noaliasScopes->begin(),
+                                           noaliasScopes->end());
+  return AttributeSetter<LoadOp, StoreOp>(op).apply([&](auto memOp) {
+    memOp.setNoaliasScopesAttr(
+        ArrayAttr::get(memOp.getContext(), noaliasScopeAttrs));
+  });
+}
+
 namespace {
 
 /// Implementation of the dialect interface that converts operations belonging
@@ -238,9 +273,13 @@ public:
     if (kind == llvm::LLVMContext::MD_tbaa)
       return setTBAAAttr(node, op, moduleImport);
     if (kind == llvm::LLVMContext::MD_access_group)
-      return setAccessGroupAttr(node, op, moduleImport);
+      return setAccessGroupsAttr(node, op, moduleImport);
     if (kind == llvm::LLVMContext::MD_loop)
       return setLoopAttr(node, op, moduleImport);
+    if (kind == llvm::LLVMContext::MD_alias_scope)
+      return setAliasScopesAttr(node, op, moduleImport);
+    if (kind == llvm::LLVMContext::MD_noalias)
+      return setNoaliasScopesAttr(node, op, moduleImport);
 
     // A handler for a supported metadata kind is missing.
     llvm_unreachable("unknown metadata type");

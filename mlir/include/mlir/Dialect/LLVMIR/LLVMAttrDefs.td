@@ -261,11 +261,11 @@ def LLVM_DITagParameter : LLVM_DIParameter<
 >;
 
 //===----------------------------------------------------------------------===//
-// DIVoidResultTypeAttr
+// DINullTypeAttr
 //===----------------------------------------------------------------------===//
 
-def LLVM_DIVoidResultTypeAttr : LLVM_Attr<"DIVoidResultType", "di_void_result_type",
-                                          /*traits=*/[], "DITypeAttr"> {
+def LLVM_DINullTypeAttr : LLVM_Attr<"DINullType", "di_null_type",
+                                    /*traits=*/[], "DITypeAttr"> {
   let parameters = (ins);
 }
 
@@ -340,7 +340,7 @@ def LLVM_DIDerivedTypeAttr : LLVM_Attr<"DIDerivedType", "di_derived_type",
   let parameters = (ins
     LLVM_DITagParameter:$tag,
     OptionalParameter<"StringAttr">:$name,
-    "DITypeAttr":$baseType,
+    OptionalParameter<"DITypeAttr">:$baseType,
     OptionalParameter<"uint64_t">:$sizeInBits,
     OptionalParameter<"uint32_t">:$alignInBits,
     OptionalParameter<"uint64_t">:$offsetInBits
@@ -442,7 +442,7 @@ def LLVM_DILocalVariableAttr : LLVM_Attr<"DILocalVariable", "di_local_variable",
 def LLVM_DISubprogramAttr : LLVM_Attr<"DISubprogram", "di_subprogram",
                                       /*traits=*/[], "DIScopeAttr"> {
   let parameters = (ins
-    "DICompileUnitAttr":$compileUnit,
+    OptionalParameter<"DICompileUnitAttr">:$compileUnit,
     "DIScopeAttr":$scope,
     "StringAttr":$name,
     OptionalParameter<"StringAttr">:$linkageName,
@@ -465,6 +465,21 @@ def LLVM_DISubprogramAttr : LLVM_Attr<"DISubprogram", "di_subprogram",
                    scopeLine, subprogramFlags, type);
     }]>
   ];
+
+  let assemblyFormat = "`<` struct(params) `>`";
+}
+
+//===----------------------------------------------------------------------===//
+// DINamespaceAttr
+//===----------------------------------------------------------------------===//
+
+def LLVM_DINamespaceAttr : LLVM_Attr<"DINamespace", "di_namespace",
+                                      /*traits=*/[], "DIScopeAttr"> {
+  let parameters = (ins
+    "StringAttr":$name,
+    OptionalParameter<"DIScopeAttr">:$scope,
+    "bool":$exportSymbols
+  );
 
   let assemblyFormat = "`<` struct(params) `>`";
 }
@@ -500,7 +515,6 @@ def LLVM_DISubroutineTypeAttr : LLVM_Attr<"DISubroutineType", "di_subroutine_typ
     }]>
   ];
   let assemblyFormat = "`<` struct(params) `>`";
-  let genVerifyDecl = 1;
 }
 
 //===----------------------------------------------------------------------===//

@@ -48,12 +48,6 @@ static bool isSparseTensor(OpOperand *op) {
          llvm::is_contained(enc.getDimLevelType(), DimLevelType::Compressed);
 }
 
-static bool hasSameDimOrdering(RankedTensorType rtp1, RankedTensorType rtp2) {
-  assert(rtp1.getRank() == rtp2.getRank());
-  return SparseTensorType(rtp1).getDimToLvlMap() ==
-         SparseTensorType(rtp2).getDimToLvlMap();
-}
-
 // Helper method to find zero/uninitialized allocation.
 static bool isAlloc(OpOperand *op, bool isZero) {
   Value val = op->get();
@@ -164,7 +158,7 @@ static LogicalResult genForeachOnSparseConstant(ForeachOp op,
 
   // Foreach on constant.
   foreachInSparseConstant(
-      loc, rewriter, attr,
+      loc, rewriter, attr, op.getOrder().value_or(AffineMap()),
       [&reduc, &rewriter, op](ArrayRef<Value> coords, Value v) mutable {
         SmallVector<Value> args;
         args.append(coords.begin(), coords.end());
@@ -519,13 +513,11 @@ struct ConcatenateRewriter : public OpRewritePattern<ConcatenateOp> {
       }
 
       needTmpCOO = !allDense && !allOrdered;
+      const RankedTensorType tp = needTmpCOO ? getUnorderedCOOFromType(dstTp)
+                                             : dstTp.getRankedTensorType();
+      encDst = needTmpCOO ? getSparseTensorEncoding(tp) : encDst;
       SmallVector<Value> dynSizes;
       getDynamicSizes(dstTp, sizes, dynSizes);
-      RankedTensorType tp = dstTp;
-      if (needTmpCOO) {
-        tp = getUnorderedCOOFromType(dstTp);
-        encDst = getSparseTensorEncoding(tp);
-      }
       dst = rewriter.create<AllocTensorOp>(loc, tp, dynSizes).getResult();
       if (allDense) {
         // Create a view of the values buffer to match the unannotated dense
@@ -598,21 +590,20 @@ struct ConcatenateRewriter : public OpRewritePattern<ConcatenateOp> {
     // Temp variable to avoid needing to call `getRankedTensorType`
     // in the three use-sites below.
     const RankedTensorType dstRTT = dstTp;
-    if (encDst) {
-      if (!allDense) {
-        dst = rewriter.create<LoadOp>(loc, dst, true);
-        if (needTmpCOO) {
-          Value tmpCoo = dst;
-          dst = rewriter.create<ConvertOp>(loc, dstRTT, tmpCoo).getResult();
-          rewriter.create<DeallocTensorOp>(loc, tmpCoo);
-        }
-      } else {
-        dst = rewriter.create<ConvertOp>(loc, dstRTT, annotatedDenseDst)
-                  .getResult();
+    if (!encDst) {
+      rewriter.replaceOpWithNewOp<bufferization::ToTensorOp>(op, dstRTT, dst);
+    } else if (allDense) {
+      rewriter.replaceOp(
+          op, rewriter.create<ConvertOp>(loc, dstRTT, annotatedDenseDst)
+                  .getResult());
+    } else {
+      dst = rewriter.create<LoadOp>(loc, dst, true);
+      if (needTmpCOO) {
+        Value tmpCoo = dst;
+        dst = rewriter.create<ConvertOp>(loc, dstRTT, tmpCoo).getResult();
+        rewriter.create<DeallocTensorOp>(loc, tmpCoo);
       }
       rewriter.replaceOp(op, dst);
-    } else {
-      rewriter.replaceOpWithNewOp<bufferization::ToTensorOp>(op, dstRTT, dst);
     }
     return success();
   }
@@ -796,8 +787,9 @@ private:
     // 2. the src tensor is not ordered in the same way as the target
     // tensor (e.g., src tensor is not ordered or src tensor haves a different
     // dimOrdering).
-    if (!isUniqueCOOType(srcRTT) && !(SparseTensorType(srcRTT).isAllOrdered() &&
-                                      hasSameDimOrdering(srcRTT, dstTp))) {
+    if (const SparseTensorType srcTp(srcRTT);
+        !isUniqueCOOType(srcRTT) &&
+        !(srcTp.isAllOrdered() && srcTp.hasSameDimToLvlMap(dstTp))) {
       // Construct a COO tensor from the src tensor.
       // TODO: there may be cases for which more efficiently without
       // going through an intermediate COO, such as cases that only change
@@ -841,7 +833,7 @@ private:
       // Sort the COO tensor so that its elements are ordered via increasing
       // indices for the storage ordering of the dst tensor. Use SortCoo if the
       // COO tensor has the same dim ordering as the dst tensor.
-      if (dimRank > 1 && hasSameDimOrdering(srcTp, dstTp)) {
+      if (dimRank > 1 && srcTp.hasSameDimToLvlMap(dstTp)) {
         MemRefType indTp =
             get1DMemRefType(getIndexOverheadType(rewriter, encSrc),
                             /*withLayout=*/false);
@@ -936,16 +928,28 @@ public:
     for (Dimension d = 0; d < dimRank; d++) {
       // TODO: provide utility function for loop sequences that only contains
       // one for loop?
-      loopEmitter.enterNewLoopSeq(rewriter, loc, 0, static_cast<size_t>(d));
+      Dimension ld =
+          op.getOrder()
+              ? op.getOrder()->getResult(d).cast<AffineDimExpr>().getPosition()
+              : d;
+      loopEmitter.enterNewLoopSeq(rewriter, loc, 0, static_cast<size_t>(ld));
       // Note that reduc will be taken care of by loop emitter and get updated
       // in place.
-      loopEmitter.enterLoopOverTensorAtDim(rewriter, loc, 0, d, reduc);
+
+      loopEmitter.enterLoopOverTensorAtDim(rewriter, loc, 0, ld, reduc);
     }
 
     SmallVector<Value> coords;
     coords.reserve(dimRank);
     loopEmitter.getCoordinateArray(coords);
 
+    if (op.getOrder()) {
+      SmallVector<Value> tmp = coords; // keep a copy
+      for (Dimension d = 0; d < dimRank; d++) {
+        auto l = op.getOrder()->getDimPosition(d);
+        coords[l] = tmp[d];
+      }
+    }
     Value vals = loopEmitter.getValBuffer()[0];
     Value pidx = loopEmitter.getPidxs()[0].back();
     // Loads the value from sparse tensor using pointer index;
@@ -1055,16 +1059,6 @@ struct NewRewriter : public OpRewritePattern<NewOp> {
                                    /*sizeHint=*/nnz, Attribute())
             .getResult();
 
-    // The verifier ensures only 2D tensors can have the expandSymmetry flag.
-    Value symmetric;
-    if (dimRank == 2 && op.getExpandSymmetry()) {
-      symmetric =
-          createFuncCall(rewriter, loc, "getSparseTensorReaderIsSymmetric",
-                         {rewriter.getI1Type()}, {reader}, EmitCInterface::Off)
-              .getResult(0);
-    } else {
-      symmetric = Value();
-    }
     Type eltTp = dstTp.getElementType();
     Value value = genAllocaScalar(rewriter, loc, eltTp);
     scf::ForOp forOp = rewriter.create<scf::ForOp>(loc, c0, nnz, c1,
@@ -1085,21 +1079,6 @@ struct NewRewriter : public OpRewritePattern<NewOp> {
     Value v = rewriter.create<memref::LoadOp>(loc, value);
     Value t = rewriter.create<InsertOp>(loc, v, forOp.getRegionIterArg(0),
                                         indicesArray);
-    if (symmetric) {
-      Value eq = rewriter.create<arith::CmpIOp>(
-          loc, arith::CmpIPredicate::ne, indicesArray[0], indicesArray[1]);
-      Value cond = rewriter.create<arith::AndIOp>(loc, symmetric, eq);
-      scf::IfOp ifOp =
-          rewriter.create<scf::IfOp>(loc, t.getType(), cond, /*else*/ true);
-      rewriter.setInsertionPointToStart(&ifOp.getThenRegion().front());
-      rewriter.create<scf::YieldOp>(
-          loc, Value(rewriter.create<InsertOp>(
-                   loc, v, t, ValueRange{indicesArray[1], indicesArray[0]})));
-      rewriter.setInsertionPointToStart(&ifOp.getElseRegion().front());
-      rewriter.create<scf::YieldOp>(loc, t);
-      t = ifOp.getResult(0);
-      rewriter.setInsertionPointAfter(ifOp);
-    }
     rewriter.create<scf::YieldOp>(loc, ArrayRef<Value>(t));
     rewriter.setInsertionPointAfter(forOp);
     // Link SSA chain.

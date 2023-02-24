@@ -145,19 +145,6 @@ Pass *createLoopPredicationPass();
 
 //===----------------------------------------------------------------------===//
 //
-// LoopInterchange - This pass interchanges loops to provide a more
-// cache-friendly memory access patterns.
-//
-Pass *createLoopInterchangePass();
-
-//===----------------------------------------------------------------------===//
-//
-// LoopFlatten - This pass flattens nested loops into a single loop.
-//
-FunctionPass *createLoopFlattenPass();
-
-//===----------------------------------------------------------------------===//
-//
 // LoopStrengthReduce - This pass is strength reduces GEP instructions that use
 // a loop's canonical induction variable as one of their indices.
 //
@@ -185,21 +172,9 @@ Pass *createSimpleLoopUnrollPass(int OptLevel = 2, bool OnlyWhenForced = false,
 
 //===----------------------------------------------------------------------===//
 //
-// LoopReroll - This pass is a simple loop rerolling pass.
-//
-Pass *createLoopRerollPass();
-
-//===----------------------------------------------------------------------===//
-//
 // LoopRotate - This pass is a simple loop rotating pass.
 //
 Pass *createLoopRotatePass(int MaxHeaderSize = -1, bool PrepareForLTO = false);
-
-//===----------------------------------------------------------------------===//
-//
-// LoopIdiom - This pass recognizes and replaces idioms in loops.
-//
-Pass *createLoopIdiomPass();
 
 //===----------------------------------------------------------------------===//
 //
@@ -314,13 +289,6 @@ FunctionPass *createDivRemPairsPass();
 // calls and/or combining multiple stores into memset's.
 //
 FunctionPass *createMemCpyOptPass();
-
-//===----------------------------------------------------------------------===//
-//
-// LoopDeletion - This pass performs DCE of non-infinite loops that it
-// can prove are dead.
-//
-Pass *createLoopDeletionPass();
 
 //===----------------------------------------------------------------------===//
 //
