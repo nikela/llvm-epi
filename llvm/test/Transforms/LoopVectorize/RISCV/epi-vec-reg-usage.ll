@@ -30,19 +30,19 @@
 ; CHECK-NEXT: LV(REG): RegisterClass: RISCV::GPRRC, 2 registers
 ; CHECK-NEXT: LV(REG): RegisterClass: RISCV::VRRC, 10 registers
 ; CHECK-NEXT: LV(REG): Found invariant usage: 1 item
-; CHECK-NEXT: LV(REG): RegisterClass: RISCV::VRRC, 2 registers
+; CHECK-NEXT: LV(REG): RegisterClass: RISCV::GPRRC, 1 registers
 ; CHECK-NEXT: LV(REG): VF = vscale x 4
 ; CHECK-NEXT: LV(REG): Found max usage: 2 item
 ; CHECK-NEXT: LV(REG): RegisterClass: RISCV::GPRRC, 2 registers
 ; CHECK-NEXT: LV(REG): RegisterClass: RISCV::VRRC, 20 registers
 ; CHECK-NEXT: LV(REG): Found invariant usage: 1 item
-; CHECK-NEXT: LV(REG): RegisterClass: RISCV::VRRC, 4 registers
+; CHECK-NEXT: LV(REG): RegisterClass: RISCV::GPRRC, 1 registers
 ; CHECK-NEXT: LV(REG): VF = vscale x 8
 ; CHECK-NEXT: LV(REG): Found max usage: 2 item
 ; CHECK-NEXT: LV(REG): RegisterClass: RISCV::GPRRC, 2 registers
 ; CHECK-NEXT: LV(REG): RegisterClass: RISCV::VRRC, 40 registers
 ; CHECK-NEXT: LV(REG): Found invariant usage: 1 item
-; CHECK-NEXT: LV(REG): RegisterClass: RISCV::VRRC, 8 registers
+; CHECK-NEXT: LV(REG): RegisterClass: RISCV::GPRRC, 1 registers
 ; CHECK: LV: Selecting VF: vscale x 4.
 ;
 ; ModuleID = './vec-reg-usage.c'
