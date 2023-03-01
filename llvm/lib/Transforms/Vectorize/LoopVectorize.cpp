@@ -2409,7 +2409,7 @@ struct LoopVectorize : public FunctionPass {
     auto *PSI = &getAnalysis<ProfileSummaryInfoWrapperPass>().getPSI();
 
     return Impl
-        .runImpl(F, *SE, *LI, *TTI, *DT, *BFI, TLI, *DB, *AC, LAIs, *ORE, PSI)
+        .runImpl(F, *SE, *LI, *TTI, *DT, BFI, TLI, *DB, *AC, LAIs, *ORE, PSI)
         .MadeAnyChange;
   }
 
@@ -6778,7 +6778,7 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
   // Saves the list of values that are used in the loop but are defined outside
   // the loop (not including non-instruction values such as arguments and
   // constants).
-  SmallPtrSet<Value *, 8> LoopInvariants;
+  SmallPtrSet<Instruction *, 8> LoopInvariants;
 
   for (BasicBlock *BB : make_range(DFS.beginRPO(), DFS.endRPO())) {
     for (Instruction &I : BB->instructionsWithoutDebug()) {
@@ -6912,11 +6912,16 @@ LoopVectorizationCostModel::calculateRegisterUsage(ArrayRef<ElementCount> VFs) {
     for (auto *Inst : LoopInvariants) {
       // FIXME: The target might use more than one register for the type
       // even in the scalar case.
-      unsigned Usage =
-          VFs[i].isScalar() ? 1 : GetRegUsage(Inst->getType(), VFs[i]);
+      bool IsScalar = all_of(Inst->users(), [&](User *U) {
+        auto *I = cast<Instruction>(U);
+        return TheLoop != LI->getLoopFor(I->getParent()) ||
+               isScalarAfterVectorization(I, VFs[i]);
+      });
+
+      ElementCount VF = IsScalar ? ElementCount::getFixed(1) : VFs[i];
       unsigned ClassID =
-          TTI.getRegisterClassForType(VFs[i].isVector(), Inst->getType());
-      Invariant[ClassID] += Usage;
+          TTI.getRegisterClassForType(VF.isVector(), Inst->getType());
+      Invariant[ClassID] += GetRegUsage(Inst->getType(), VF);
     }
 
     LLVM_DEBUG({
@@ -12063,14 +12068,14 @@ bool LoopVectorizePass::processLoop(Loop *L) {
 
 LoopVectorizeResult LoopVectorizePass::runImpl(
     Function &F, ScalarEvolution &SE_, LoopInfo &LI_, TargetTransformInfo &TTI_,
-    DominatorTree &DT_, BlockFrequencyInfo &BFI_, TargetLibraryInfo *TLI_,
+    DominatorTree &DT_, BlockFrequencyInfo *BFI_, TargetLibraryInfo *TLI_,
     DemandedBits &DB_, AssumptionCache &AC_, LoopAccessInfoManager &LAIs_,
     OptimizationRemarkEmitter &ORE_, ProfileSummaryInfo *PSI_) {
   SE = &SE_;
   LI = &LI_;
   TTI = &TTI_;
   DT = &DT_;
-  BFI = &BFI_;
+  BFI = BFI_;
   TLI = TLI_;
   AC = &AC_;
   LAIs = &LAIs_;
@@ -12138,7 +12143,6 @@ PreservedAnalyses LoopVectorizePass::run(Function &F,
     auto &SE = AM.getResult<ScalarEvolutionAnalysis>(F);
     auto &TTI = AM.getResult<TargetIRAnalysis>(F);
     auto &DT = AM.getResult<DominatorTreeAnalysis>(F);
-    auto &BFI = AM.getResult<BlockFrequencyAnalysis>(F);
     auto &TLI = AM.getResult<TargetLibraryAnalysis>(F);
     auto &AC = AM.getResult<AssumptionAnalysis>(F);
     auto &DB = AM.getResult<DemandedBitsAnalysis>(F);
@@ -12148,6 +12152,9 @@ PreservedAnalyses LoopVectorizePass::run(Function &F,
     auto &MAMProxy = AM.getResult<ModuleAnalysisManagerFunctionProxy>(F);
     ProfileSummaryInfo *PSI =
         MAMProxy.getCachedResult<ProfileSummaryAnalysis>(*F.getParent());
+    BlockFrequencyInfo *BFI = nullptr;
+    if (PSI && PSI->hasProfileSummary())
+      BFI = &AM.getResult<BlockFrequencyAnalysis>(F);
     LoopVectorizeResult Result =
         runImpl(F, SE, LI, TTI, DT, BFI, &TLI, DB, AC, LAIs, ORE, PSI);
     if (!Result.MadeAnyChange)
