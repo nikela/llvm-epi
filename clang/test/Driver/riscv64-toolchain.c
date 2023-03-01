@@ -205,6 +205,9 @@ int align_ll = __alignof(long long);
 // CHECK: @align_p = dso_local global i32 8
 int align_p = __alignof(void*);
 
+// CHECK: @align_f16 = dso_local global i32 2
+int align_f16 = __alignof(_Float16);
+
 // CHECK: @align_f = dso_local global i32 4
 int align_f = __alignof(float);
 
@@ -240,6 +243,9 @@ int align_a_ll = __alignof(_Atomic(long long));
 
 // CHECK: @align_a_p = dso_local global i32 8
 int align_a_p = __alignof(_Atomic(void*));
+
+// CHECK: @align_a_f16 = dso_local global i32 2
+int align_a_f16 = __alignof(_Atomic(_Float16));
 
 // CHECK: @align_a_f = dso_local global i32 4
 int align_a_f = __alignof(_Atomic(float));
@@ -289,6 +295,9 @@ int size_a_ll = sizeof(_Atomic(long long));
 // CHECK: @size_a_p = dso_local global i32 8
 int size_a_p = sizeof(_Atomic(void*));
 
+// CHECK: @size_a_f16 = dso_local global i32 2
+int size_a_f16 = sizeof(_Atomic(_Float16));
+
 // CHECK: @size_a_f = dso_local global i32 4
 int size_a_f = sizeof(_Atomic(float));
 
@@ -336,6 +345,9 @@ unsigned long long check_ulonglong(void) { return 0; }
 
 // CHECK: define dso_local i64 @check_size_t()
 size_t check_size_t(void) { return 0; }
+
+// CHECK: define dso_local half @check_float16()
+_Float16 check_float16(void) { return 0; }
 
 // CHECK: define dso_local float @check_float()
 float check_float(void) { return 0; }
