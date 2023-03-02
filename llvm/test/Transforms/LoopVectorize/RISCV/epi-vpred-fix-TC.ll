@@ -13,50 +13,35 @@ target triple = "riscv64-unknown-linux-gnu"
 define dso_local void @notail(i32* noalias nocapture %c, i32* noalias nocapture readonly %a, i32* noalias nocapture readonly %b) local_unnamed_addr {
 ; CHECK-LABEL: @notail(
 ; CHECK-NEXT:  entry:
-; CHECK-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.vscale.i64()
-; CHECK-NEXT:    [[TMP1:%.*]] = shl i64 [[TMP0]], 1
-; CHECK-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP1]], -32001
-; CHECK-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
+; CHECK-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; CHECK:       vector.body:
-; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
-; CHECK-NEXT:    [[TMP3:%.*]] = sub i64 32000, [[INDEX]]
-; CHECK-NEXT:    [[TMP4:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 0)
-; CHECK-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
-; CHECK-NEXT:    [[TMP6:%.*]] = getelementptr inbounds i32, ptr [[A:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP6]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; CHECK-NEXT:    [[TMP7:%.*]] = getelementptr inbounds i32, ptr [[B:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    [[VP_OP_LOAD1:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP7]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; CHECK-NEXT:    [[VP_OP:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD1]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; CHECK-NEXT:    [[TMP8:%.*]] = getelementptr inbounds i32, ptr [[C:%.*]], i64 [[INDEX]]
-; CHECK-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP]], ptr [[TMP8]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; CHECK-NEXT:    [[TMP9:%.*]] = and i64 [[TMP4]], 4294967295
-; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP9]]
-; CHECK-NEXT:    [[TMP10:%.*]] = icmp eq i64 [[INDEX_NEXT]], 32000
-; CHECK-NEXT:    br i1 [[TMP10]], label [[FOR_END:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
-; CHECK:       for.body:
-; CHECK-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY]] ]
-; CHECK-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, ptr [[A]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP11:%.*]] = load i32, ptr [[ARRAYIDX]], align 4
-; CHECK-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i32, ptr [[B]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    [[TMP12:%.*]] = load i32, ptr [[ARRAYIDX2]], align 4
-; CHECK-NEXT:    [[ADD:%.*]] = add nsw i32 [[TMP12]], [[TMP11]]
-; CHECK-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds i32, ptr [[C]], i64 [[INDVARS_IV]]
-; CHECK-NEXT:    store i32 [[ADD]], ptr [[ARRAYIDX4]], align 4
-; CHECK-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
-; CHECK-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 32000
-; CHECK-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP3:![0-9]+]]
+; CHECK-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[ENTRY:%.*]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; CHECK-NEXT:    [[TMP0:%.*]] = sub i64 32000, [[INDEX]]
+; CHECK-NEXT:    [[TMP1:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP0]], i64 2, i64 0)
+; CHECK-NEXT:    [[TMP2:%.*]] = trunc i64 [[TMP1]] to i32
+; CHECK-NEXT:    [[TMP3:%.*]] = getelementptr inbounds i32, ptr [[A:%.*]], i64 [[INDEX]]
+; CHECK-NEXT:    [[VP_OP_LOAD:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP3]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; CHECK-NEXT:    [[TMP4:%.*]] = getelementptr inbounds i32, ptr [[B:%.*]], i64 [[INDEX]]
+; CHECK-NEXT:    [[VP_OP_LOAD1:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP4]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; CHECK-NEXT:    [[VP_OP:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD1]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; CHECK-NEXT:    [[TMP5:%.*]] = getelementptr inbounds i32, ptr [[C:%.*]], i64 [[INDEX]]
+; CHECK-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP]], ptr [[TMP5]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; CHECK-NEXT:    [[TMP6:%.*]] = and i64 [[TMP1]], 4294967295
+; CHECK-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP6]]
+; CHECK-NEXT:    [[TMP7:%.*]] = icmp eq i64 [[INDEX_NEXT]], 32000
+; CHECK-NEXT:    br i1 [[TMP7]], label [[FOR_END:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; CHECK:       for.end:
 ; CHECK-NEXT:    ret void
 ;
 ; INTERLEAVE-LABEL: @notail(
 ; INTERLEAVE-NEXT:  entry:
-; INTERLEAVE-NEXT:    [[TMP0:%.*]] = tail call i64 @llvm.vscale.i64()
-; INTERLEAVE-NEXT:    [[TMP1:%.*]] = shl i64 [[TMP0]], 4
-; INTERLEAVE-NEXT:    [[TMP2:%.*]] = icmp ugt i64 [[TMP1]], -32001
-; INTERLEAVE-NEXT:    br i1 [[TMP2]], label [[FOR_BODY:%.*]], label [[VECTOR_BODY:%.*]]
+; INTERLEAVE-NEXT:    br label [[VECTOR_BODY:%.*]]
 ; INTERLEAVE:       vector.body:
-; INTERLEAVE-NEXT:    [[INDEX:%.*]] = phi i64 [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ], [ 0, [[ENTRY:%.*]] ]
-; INTERLEAVE-NEXT:    [[TMP3:%.*]] = sub i64 32000, [[INDEX]]
+; INTERLEAVE-NEXT:    [[INDEX:%.*]] = phi i64 [ 0, [[ENTRY:%.*]] ], [ [[INDEX_NEXT:%.*]], [[VECTOR_BODY]] ]
+; INTERLEAVE-NEXT:    [[TMP0:%.*]] = sub i64 32000, [[INDEX]]
+; INTERLEAVE-NEXT:    [[TMP1:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP0]], i64 2, i64 0)
+; INTERLEAVE-NEXT:    [[TMP2:%.*]] = trunc i64 [[TMP1]] to i32
+; INTERLEAVE-NEXT:    [[TMP3:%.*]] = sub i64 [[TMP0]], [[TMP1]]
 ; INTERLEAVE-NEXT:    [[TMP4:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP3]], i64 2, i64 0)
 ; INTERLEAVE-NEXT:    [[TMP5:%.*]] = trunc i64 [[TMP4]] to i32
 ; INTERLEAVE-NEXT:    [[TMP6:%.*]] = sub i64 [[TMP3]], [[TMP4]]
@@ -77,193 +62,178 @@ define dso_local void @notail(i32* noalias nocapture %c, i32* noalias nocapture 
 ; INTERLEAVE-NEXT:    [[TMP21:%.*]] = sub i64 [[TMP18]], [[TMP19]]
 ; INTERLEAVE-NEXT:    [[TMP22:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP21]], i64 2, i64 0)
 ; INTERLEAVE-NEXT:    [[TMP23:%.*]] = trunc i64 [[TMP22]] to i32
-; INTERLEAVE-NEXT:    [[TMP24:%.*]] = sub i64 [[TMP21]], [[TMP22]]
-; INTERLEAVE-NEXT:    [[TMP25:%.*]] = tail call i64 @llvm.epi.vsetvl(i64 [[TMP24]], i64 2, i64 0)
-; INTERLEAVE-NEXT:    [[TMP26:%.*]] = trunc i64 [[TMP25]] to i32
-; INTERLEAVE-NEXT:    [[TMP27:%.*]] = getelementptr inbounds i32, ptr [[A:%.*]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP27]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; INTERLEAVE-NEXT:    [[SEXT:%.*]] = shl i64 [[TMP4]], 32
-; INTERLEAVE-NEXT:    [[TMP28:%.*]] = ashr exact i64 [[SEXT]], 32
-; INTERLEAVE-NEXT:    [[TMP29:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP28]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD20:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP29]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; INTERLEAVE-NEXT:    [[TMP30:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[SEXT42:%.*]] = shl i64 [[TMP30]], 32
-; INTERLEAVE-NEXT:    [[TMP31:%.*]] = ashr exact i64 [[SEXT42]], 32
-; INTERLEAVE-NEXT:    [[TMP32:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP31]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD21:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP32]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
-; INTERLEAVE-NEXT:    [[TMP33:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP34:%.*]] = add i64 [[TMP33]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[SEXT43:%.*]] = shl i64 [[TMP34]], 32
-; INTERLEAVE-NEXT:    [[TMP35:%.*]] = ashr exact i64 [[SEXT43]], 32
-; INTERLEAVE-NEXT:    [[TMP36:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP35]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD22:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP36]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
-; INTERLEAVE-NEXT:    [[TMP37:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP38:%.*]] = add i64 [[TMP37]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP39:%.*]] = add i64 [[TMP38]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[SEXT44:%.*]] = shl i64 [[TMP39]], 32
-; INTERLEAVE-NEXT:    [[TMP40:%.*]] = ashr exact i64 [[SEXT44]], 32
-; INTERLEAVE-NEXT:    [[TMP41:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP40]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD23:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP41]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
-; INTERLEAVE-NEXT:    [[TMP42:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP43:%.*]] = add i64 [[TMP42]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP44:%.*]] = add i64 [[TMP43]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP45:%.*]] = add i64 [[TMP44]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[SEXT45:%.*]] = shl i64 [[TMP45]], 32
-; INTERLEAVE-NEXT:    [[TMP46:%.*]] = ashr exact i64 [[SEXT45]], 32
-; INTERLEAVE-NEXT:    [[TMP47:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP46]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD24:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP47]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP48:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP49:%.*]] = add i64 [[TMP48]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP50:%.*]] = add i64 [[TMP49]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP51:%.*]] = add i64 [[TMP50]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP52:%.*]] = add i64 [[TMP51]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[SEXT46:%.*]] = shl i64 [[TMP52]], 32
-; INTERLEAVE-NEXT:    [[TMP53:%.*]] = ashr exact i64 [[SEXT46]], 32
-; INTERLEAVE-NEXT:    [[TMP54:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP53]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD25:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP54]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
-; INTERLEAVE-NEXT:    [[TMP55:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP56:%.*]] = add i64 [[TMP55]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP57:%.*]] = add i64 [[TMP56]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP58:%.*]] = add i64 [[TMP57]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP59:%.*]] = add i64 [[TMP58]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[TMP60:%.*]] = add i64 [[TMP59]], [[TMP22]]
-; INTERLEAVE-NEXT:    [[SEXT47:%.*]] = shl i64 [[TMP60]], 32
-; INTERLEAVE-NEXT:    [[TMP61:%.*]] = ashr exact i64 [[SEXT47]], 32
-; INTERLEAVE-NEXT:    [[TMP62:%.*]] = getelementptr inbounds i32, ptr [[TMP27]], i64 [[TMP61]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD26:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP62]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP26]])
-; INTERLEAVE-NEXT:    [[TMP63:%.*]] = getelementptr inbounds i32, ptr [[B:%.*]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD27:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP63]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; INTERLEAVE-NEXT:    [[SEXT48:%.*]] = shl i64 [[TMP4]], 32
-; INTERLEAVE-NEXT:    [[TMP64:%.*]] = ashr exact i64 [[SEXT48]], 32
-; INTERLEAVE-NEXT:    [[TMP65:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP64]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD28:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP65]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; INTERLEAVE-NEXT:    [[TMP66:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[SEXT49:%.*]] = shl i64 [[TMP66]], 32
-; INTERLEAVE-NEXT:    [[TMP67:%.*]] = ashr exact i64 [[SEXT49]], 32
-; INTERLEAVE-NEXT:    [[TMP68:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP67]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD29:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP68]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
-; INTERLEAVE-NEXT:    [[TMP69:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP70:%.*]] = add i64 [[TMP69]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[SEXT50:%.*]] = shl i64 [[TMP70]], 32
-; INTERLEAVE-NEXT:    [[TMP71:%.*]] = ashr exact i64 [[SEXT50]], 32
-; INTERLEAVE-NEXT:    [[TMP72:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP71]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD30:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP72]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
-; INTERLEAVE-NEXT:    [[TMP73:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP74:%.*]] = add i64 [[TMP73]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP75:%.*]] = add i64 [[TMP74]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[SEXT51:%.*]] = shl i64 [[TMP75]], 32
-; INTERLEAVE-NEXT:    [[TMP76:%.*]] = ashr exact i64 [[SEXT51]], 32
-; INTERLEAVE-NEXT:    [[TMP77:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP76]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD31:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP77]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
-; INTERLEAVE-NEXT:    [[TMP78:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP79:%.*]] = add i64 [[TMP78]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP80:%.*]] = add i64 [[TMP79]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP81:%.*]] = add i64 [[TMP80]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[SEXT52:%.*]] = shl i64 [[TMP81]], 32
-; INTERLEAVE-NEXT:    [[TMP82:%.*]] = ashr exact i64 [[SEXT52]], 32
-; INTERLEAVE-NEXT:    [[TMP83:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP82]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD32:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP83]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP84:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP85:%.*]] = add i64 [[TMP84]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP86:%.*]] = add i64 [[TMP85]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP87:%.*]] = add i64 [[TMP86]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP88:%.*]] = add i64 [[TMP87]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[SEXT53:%.*]] = shl i64 [[TMP88]], 32
-; INTERLEAVE-NEXT:    [[TMP89:%.*]] = ashr exact i64 [[SEXT53]], 32
-; INTERLEAVE-NEXT:    [[TMP90:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP89]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD33:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP90]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
-; INTERLEAVE-NEXT:    [[TMP91:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP92:%.*]] = add i64 [[TMP91]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP93:%.*]] = add i64 [[TMP92]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP94:%.*]] = add i64 [[TMP93]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP95:%.*]] = add i64 [[TMP94]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[TMP96:%.*]] = add i64 [[TMP95]], [[TMP22]]
-; INTERLEAVE-NEXT:    [[SEXT54:%.*]] = shl i64 [[TMP96]], 32
-; INTERLEAVE-NEXT:    [[TMP97:%.*]] = ashr exact i64 [[SEXT54]], 32
-; INTERLEAVE-NEXT:    [[TMP98:%.*]] = getelementptr inbounds i32, ptr [[TMP63]], i64 [[TMP97]]
-; INTERLEAVE-NEXT:    [[VP_OP_LOAD34:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP98]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP26]])
-; INTERLEAVE-NEXT:    [[VP_OP:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD27]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; INTERLEAVE-NEXT:    [[VP_OP35:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD28]], <vscale x 2 x i32> [[VP_OP_LOAD20]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; INTERLEAVE-NEXT:    [[VP_OP36:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD29]], <vscale x 2 x i32> [[VP_OP_LOAD21]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
-; INTERLEAVE-NEXT:    [[VP_OP37:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD30]], <vscale x 2 x i32> [[VP_OP_LOAD22]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
-; INTERLEAVE-NEXT:    [[VP_OP38:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD31]], <vscale x 2 x i32> [[VP_OP_LOAD23]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
-; INTERLEAVE-NEXT:    [[VP_OP39:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD32]], <vscale x 2 x i32> [[VP_OP_LOAD24]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[VP_OP40:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD33]], <vscale x 2 x i32> [[VP_OP_LOAD25]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
-; INTERLEAVE-NEXT:    [[VP_OP41:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD34]], <vscale x 2 x i32> [[VP_OP_LOAD26]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP26]])
-; INTERLEAVE-NEXT:    [[TMP99:%.*]] = getelementptr inbounds i32, ptr [[C:%.*]], i64 [[INDEX]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP]], ptr [[TMP99]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
-; INTERLEAVE-NEXT:    [[SEXT55:%.*]] = shl i64 [[TMP4]], 32
-; INTERLEAVE-NEXT:    [[TMP100:%.*]] = ashr exact i64 [[SEXT55]], 32
-; INTERLEAVE-NEXT:    [[TMP101:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP100]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP35]], ptr [[TMP101]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
-; INTERLEAVE-NEXT:    [[TMP102:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[SEXT56:%.*]] = shl i64 [[TMP102]], 32
-; INTERLEAVE-NEXT:    [[TMP103:%.*]] = ashr exact i64 [[SEXT56]], 32
-; INTERLEAVE-NEXT:    [[TMP104:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP103]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP36]], ptr [[TMP104]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
-; INTERLEAVE-NEXT:    [[TMP105:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP106:%.*]] = add i64 [[TMP105]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[SEXT57:%.*]] = shl i64 [[TMP106]], 32
-; INTERLEAVE-NEXT:    [[TMP107:%.*]] = ashr exact i64 [[SEXT57]], 32
-; INTERLEAVE-NEXT:    [[TMP108:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP107]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP37]], ptr [[TMP108]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
-; INTERLEAVE-NEXT:    [[TMP109:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP110:%.*]] = add i64 [[TMP109]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP111:%.*]] = add i64 [[TMP110]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[SEXT58:%.*]] = shl i64 [[TMP111]], 32
-; INTERLEAVE-NEXT:    [[TMP112:%.*]] = ashr exact i64 [[SEXT58]], 32
-; INTERLEAVE-NEXT:    [[TMP113:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP112]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP38]], ptr [[TMP113]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
-; INTERLEAVE-NEXT:    [[TMP114:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP115:%.*]] = add i64 [[TMP114]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP116:%.*]] = add i64 [[TMP115]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP117:%.*]] = add i64 [[TMP116]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[SEXT59:%.*]] = shl i64 [[TMP117]], 32
-; INTERLEAVE-NEXT:    [[TMP118:%.*]] = ashr exact i64 [[SEXT59]], 32
-; INTERLEAVE-NEXT:    [[TMP119:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP118]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP39]], ptr [[TMP119]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
-; INTERLEAVE-NEXT:    [[TMP120:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP121:%.*]] = add i64 [[TMP120]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP122:%.*]] = add i64 [[TMP121]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP123:%.*]] = add i64 [[TMP122]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP124:%.*]] = add i64 [[TMP123]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[SEXT60:%.*]] = shl i64 [[TMP124]], 32
-; INTERLEAVE-NEXT:    [[TMP125:%.*]] = ashr exact i64 [[SEXT60]], 32
-; INTERLEAVE-NEXT:    [[TMP126:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP125]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP40]], ptr [[TMP126]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
-; INTERLEAVE-NEXT:    [[TMP127:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP128:%.*]] = add i64 [[TMP127]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP129:%.*]] = add i64 [[TMP128]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP130:%.*]] = add i64 [[TMP129]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP131:%.*]] = add i64 [[TMP130]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[TMP132:%.*]] = add i64 [[TMP131]], [[TMP22]]
-; INTERLEAVE-NEXT:    [[SEXT61:%.*]] = shl i64 [[TMP132]], 32
-; INTERLEAVE-NEXT:    [[TMP133:%.*]] = ashr exact i64 [[SEXT61]], 32
-; INTERLEAVE-NEXT:    [[TMP134:%.*]] = getelementptr inbounds i32, ptr [[TMP99]], i64 [[TMP133]]
-; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP41]], ptr [[TMP134]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP26]])
-; INTERLEAVE-NEXT:    [[TMP135:%.*]] = add i64 [[TMP4]], [[TMP7]]
-; INTERLEAVE-NEXT:    [[TMP136:%.*]] = add i64 [[TMP135]], [[TMP10]]
-; INTERLEAVE-NEXT:    [[TMP137:%.*]] = add i64 [[TMP136]], [[TMP13]]
-; INTERLEAVE-NEXT:    [[TMP138:%.*]] = add i64 [[TMP137]], [[TMP16]]
-; INTERLEAVE-NEXT:    [[TMP139:%.*]] = add i64 [[TMP138]], [[TMP19]]
-; INTERLEAVE-NEXT:    [[TMP140:%.*]] = add i64 [[TMP139]], [[TMP22]]
-; INTERLEAVE-NEXT:    [[TMP141:%.*]] = add i64 [[TMP140]], [[TMP25]]
-; INTERLEAVE-NEXT:    [[TMP142:%.*]] = and i64 [[TMP141]], 4294967295
-; INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP142]]
-; INTERLEAVE-NEXT:    [[TMP143:%.*]] = icmp eq i64 [[INDEX_NEXT]], 32000
-; INTERLEAVE-NEXT:    br i1 [[TMP143]], label [[FOR_END:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
-; INTERLEAVE:       for.body:
-; INTERLEAVE-NEXT:    [[INDVARS_IV:%.*]] = phi i64 [ [[INDVARS_IV_NEXT:%.*]], [[FOR_BODY]] ], [ 0, [[ENTRY]] ]
-; INTERLEAVE-NEXT:    [[ARRAYIDX:%.*]] = getelementptr inbounds i32, ptr [[A]], i64 [[INDVARS_IV]]
-; INTERLEAVE-NEXT:    [[TMP144:%.*]] = load i32, ptr [[ARRAYIDX]], align 4
-; INTERLEAVE-NEXT:    [[ARRAYIDX2:%.*]] = getelementptr inbounds i32, ptr [[B]], i64 [[INDVARS_IV]]
-; INTERLEAVE-NEXT:    [[TMP145:%.*]] = load i32, ptr [[ARRAYIDX2]], align 4
-; INTERLEAVE-NEXT:    [[ADD:%.*]] = add nsw i32 [[TMP145]], [[TMP144]]
-; INTERLEAVE-NEXT:    [[ARRAYIDX4:%.*]] = getelementptr inbounds i32, ptr [[C]], i64 [[INDVARS_IV]]
-; INTERLEAVE-NEXT:    store i32 [[ADD]], ptr [[ARRAYIDX4]], align 4
-; INTERLEAVE-NEXT:    [[INDVARS_IV_NEXT]] = add nuw nsw i64 [[INDVARS_IV]], 1
-; INTERLEAVE-NEXT:    [[EXITCOND_NOT:%.*]] = icmp eq i64 [[INDVARS_IV_NEXT]], 32000
-; INTERLEAVE-NEXT:    br i1 [[EXITCOND_NOT]], label [[FOR_END]], label [[FOR_BODY]], !llvm.loop [[LOOP3:![0-9]+]]
+; INTERLEAVE-NEXT:    [[TMP24:%.*]] = getelementptr inbounds i32, ptr [[A:%.*]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP24]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; INTERLEAVE-NEXT:    [[SEXT:%.*]] = shl i64 [[TMP1]], 32
+; INTERLEAVE-NEXT:    [[TMP25:%.*]] = ashr exact i64 [[SEXT]], 32
+; INTERLEAVE-NEXT:    [[TMP26:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP25]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD27:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP26]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
+; INTERLEAVE-NEXT:    [[TMP27:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[SEXT49:%.*]] = shl i64 [[TMP27]], 32
+; INTERLEAVE-NEXT:    [[TMP28:%.*]] = ashr exact i64 [[SEXT49]], 32
+; INTERLEAVE-NEXT:    [[TMP29:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP28]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD28:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP29]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
+; INTERLEAVE-NEXT:    [[TMP30:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP31:%.*]] = add i64 [[TMP30]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[SEXT50:%.*]] = shl i64 [[TMP31]], 32
+; INTERLEAVE-NEXT:    [[TMP32:%.*]] = ashr exact i64 [[SEXT50]], 32
+; INTERLEAVE-NEXT:    [[TMP33:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP32]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD29:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP33]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
+; INTERLEAVE-NEXT:    [[TMP34:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP35:%.*]] = add i64 [[TMP34]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP36:%.*]] = add i64 [[TMP35]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[SEXT51:%.*]] = shl i64 [[TMP36]], 32
+; INTERLEAVE-NEXT:    [[TMP37:%.*]] = ashr exact i64 [[SEXT51]], 32
+; INTERLEAVE-NEXT:    [[TMP38:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP37]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD30:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP38]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; INTERLEAVE-NEXT:    [[TMP39:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP40:%.*]] = add i64 [[TMP39]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP41:%.*]] = add i64 [[TMP40]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP42:%.*]] = add i64 [[TMP41]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[SEXT52:%.*]] = shl i64 [[TMP42]], 32
+; INTERLEAVE-NEXT:    [[TMP43:%.*]] = ashr exact i64 [[SEXT52]], 32
+; INTERLEAVE-NEXT:    [[TMP44:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP43]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD31:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP44]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
+; INTERLEAVE-NEXT:    [[TMP45:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP46:%.*]] = add i64 [[TMP45]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP47:%.*]] = add i64 [[TMP46]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP48:%.*]] = add i64 [[TMP47]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP49:%.*]] = add i64 [[TMP48]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[SEXT53:%.*]] = shl i64 [[TMP49]], 32
+; INTERLEAVE-NEXT:    [[TMP50:%.*]] = ashr exact i64 [[SEXT53]], 32
+; INTERLEAVE-NEXT:    [[TMP51:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP50]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD32:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP51]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP52:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP53:%.*]] = add i64 [[TMP52]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP54:%.*]] = add i64 [[TMP53]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP55:%.*]] = add i64 [[TMP54]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP56:%.*]] = add i64 [[TMP55]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[TMP57:%.*]] = add i64 [[TMP56]], [[TMP19]]
+; INTERLEAVE-NEXT:    [[SEXT54:%.*]] = shl i64 [[TMP57]], 32
+; INTERLEAVE-NEXT:    [[TMP58:%.*]] = ashr exact i64 [[SEXT54]], 32
+; INTERLEAVE-NEXT:    [[TMP59:%.*]] = getelementptr inbounds i32, ptr [[TMP24]], i64 [[TMP58]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD33:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP59]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
+; INTERLEAVE-NEXT:    [[TMP60:%.*]] = getelementptr inbounds i32, ptr [[B:%.*]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD34:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP60]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; INTERLEAVE-NEXT:    [[SEXT55:%.*]] = shl i64 [[TMP1]], 32
+; INTERLEAVE-NEXT:    [[TMP61:%.*]] = ashr exact i64 [[SEXT55]], 32
+; INTERLEAVE-NEXT:    [[TMP62:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP61]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD35:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP62]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
+; INTERLEAVE-NEXT:    [[TMP63:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[SEXT56:%.*]] = shl i64 [[TMP63]], 32
+; INTERLEAVE-NEXT:    [[TMP64:%.*]] = ashr exact i64 [[SEXT56]], 32
+; INTERLEAVE-NEXT:    [[TMP65:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP64]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD36:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP65]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
+; INTERLEAVE-NEXT:    [[TMP66:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP67:%.*]] = add i64 [[TMP66]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[SEXT57:%.*]] = shl i64 [[TMP67]], 32
+; INTERLEAVE-NEXT:    [[TMP68:%.*]] = ashr exact i64 [[SEXT57]], 32
+; INTERLEAVE-NEXT:    [[TMP69:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP68]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD37:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP69]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
+; INTERLEAVE-NEXT:    [[TMP70:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP71:%.*]] = add i64 [[TMP70]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP72:%.*]] = add i64 [[TMP71]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[SEXT58:%.*]] = shl i64 [[TMP72]], 32
+; INTERLEAVE-NEXT:    [[TMP73:%.*]] = ashr exact i64 [[SEXT58]], 32
+; INTERLEAVE-NEXT:    [[TMP74:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP73]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD38:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP74]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; INTERLEAVE-NEXT:    [[TMP75:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP76:%.*]] = add i64 [[TMP75]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP77:%.*]] = add i64 [[TMP76]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP78:%.*]] = add i64 [[TMP77]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[SEXT59:%.*]] = shl i64 [[TMP78]], 32
+; INTERLEAVE-NEXT:    [[TMP79:%.*]] = ashr exact i64 [[SEXT59]], 32
+; INTERLEAVE-NEXT:    [[TMP80:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP79]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD39:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP80]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
+; INTERLEAVE-NEXT:    [[TMP81:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP82:%.*]] = add i64 [[TMP81]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP83:%.*]] = add i64 [[TMP82]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP84:%.*]] = add i64 [[TMP83]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP85:%.*]] = add i64 [[TMP84]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[SEXT60:%.*]] = shl i64 [[TMP85]], 32
+; INTERLEAVE-NEXT:    [[TMP86:%.*]] = ashr exact i64 [[SEXT60]], 32
+; INTERLEAVE-NEXT:    [[TMP87:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP86]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD40:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP87]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP88:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP89:%.*]] = add i64 [[TMP88]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP90:%.*]] = add i64 [[TMP89]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP91:%.*]] = add i64 [[TMP90]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP92:%.*]] = add i64 [[TMP91]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[TMP93:%.*]] = add i64 [[TMP92]], [[TMP19]]
+; INTERLEAVE-NEXT:    [[SEXT61:%.*]] = shl i64 [[TMP93]], 32
+; INTERLEAVE-NEXT:    [[TMP94:%.*]] = ashr exact i64 [[SEXT61]], 32
+; INTERLEAVE-NEXT:    [[TMP95:%.*]] = getelementptr inbounds i32, ptr [[TMP60]], i64 [[TMP94]]
+; INTERLEAVE-NEXT:    [[VP_OP_LOAD41:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.load.nxv2i32.p0(ptr [[TMP95]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
+; INTERLEAVE-NEXT:    [[VP_OP:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD34]], <vscale x 2 x i32> [[VP_OP_LOAD]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; INTERLEAVE-NEXT:    [[VP_OP42:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD35]], <vscale x 2 x i32> [[VP_OP_LOAD27]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
+; INTERLEAVE-NEXT:    [[VP_OP43:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD36]], <vscale x 2 x i32> [[VP_OP_LOAD28]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
+; INTERLEAVE-NEXT:    [[VP_OP44:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD37]], <vscale x 2 x i32> [[VP_OP_LOAD29]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
+; INTERLEAVE-NEXT:    [[VP_OP45:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD38]], <vscale x 2 x i32> [[VP_OP_LOAD30]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; INTERLEAVE-NEXT:    [[VP_OP46:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD39]], <vscale x 2 x i32> [[VP_OP_LOAD31]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
+; INTERLEAVE-NEXT:    [[VP_OP47:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD40]], <vscale x 2 x i32> [[VP_OP_LOAD32]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[VP_OP48:%.*]] = tail call <vscale x 2 x i32> @llvm.vp.add.nxv2i32(<vscale x 2 x i32> [[VP_OP_LOAD41]], <vscale x 2 x i32> [[VP_OP_LOAD33]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
+; INTERLEAVE-NEXT:    [[TMP96:%.*]] = getelementptr inbounds i32, ptr [[C:%.*]], i64 [[INDEX]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP]], ptr [[TMP96]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP2]])
+; INTERLEAVE-NEXT:    [[SEXT62:%.*]] = shl i64 [[TMP1]], 32
+; INTERLEAVE-NEXT:    [[TMP97:%.*]] = ashr exact i64 [[SEXT62]], 32
+; INTERLEAVE-NEXT:    [[TMP98:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP97]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP42]], ptr [[TMP98]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP5]])
+; INTERLEAVE-NEXT:    [[TMP99:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[SEXT63:%.*]] = shl i64 [[TMP99]], 32
+; INTERLEAVE-NEXT:    [[TMP100:%.*]] = ashr exact i64 [[SEXT63]], 32
+; INTERLEAVE-NEXT:    [[TMP101:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP100]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP43]], ptr [[TMP101]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP8]])
+; INTERLEAVE-NEXT:    [[TMP102:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP103:%.*]] = add i64 [[TMP102]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[SEXT64:%.*]] = shl i64 [[TMP103]], 32
+; INTERLEAVE-NEXT:    [[TMP104:%.*]] = ashr exact i64 [[SEXT64]], 32
+; INTERLEAVE-NEXT:    [[TMP105:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP104]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP44]], ptr [[TMP105]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP11]])
+; INTERLEAVE-NEXT:    [[TMP106:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP107:%.*]] = add i64 [[TMP106]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP108:%.*]] = add i64 [[TMP107]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[SEXT65:%.*]] = shl i64 [[TMP108]], 32
+; INTERLEAVE-NEXT:    [[TMP109:%.*]] = ashr exact i64 [[SEXT65]], 32
+; INTERLEAVE-NEXT:    [[TMP110:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP109]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP45]], ptr [[TMP110]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP14]])
+; INTERLEAVE-NEXT:    [[TMP111:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP112:%.*]] = add i64 [[TMP111]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP113:%.*]] = add i64 [[TMP112]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP114:%.*]] = add i64 [[TMP113]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[SEXT66:%.*]] = shl i64 [[TMP114]], 32
+; INTERLEAVE-NEXT:    [[TMP115:%.*]] = ashr exact i64 [[SEXT66]], 32
+; INTERLEAVE-NEXT:    [[TMP116:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP115]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP46]], ptr [[TMP116]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP17]])
+; INTERLEAVE-NEXT:    [[TMP117:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP118:%.*]] = add i64 [[TMP117]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP119:%.*]] = add i64 [[TMP118]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP120:%.*]] = add i64 [[TMP119]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP121:%.*]] = add i64 [[TMP120]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[SEXT67:%.*]] = shl i64 [[TMP121]], 32
+; INTERLEAVE-NEXT:    [[TMP122:%.*]] = ashr exact i64 [[SEXT67]], 32
+; INTERLEAVE-NEXT:    [[TMP123:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP122]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP47]], ptr [[TMP123]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP20]])
+; INTERLEAVE-NEXT:    [[TMP124:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP125:%.*]] = add i64 [[TMP124]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP126:%.*]] = add i64 [[TMP125]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP127:%.*]] = add i64 [[TMP126]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP128:%.*]] = add i64 [[TMP127]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[TMP129:%.*]] = add i64 [[TMP128]], [[TMP19]]
+; INTERLEAVE-NEXT:    [[SEXT68:%.*]] = shl i64 [[TMP129]], 32
+; INTERLEAVE-NEXT:    [[TMP130:%.*]] = ashr exact i64 [[SEXT68]], 32
+; INTERLEAVE-NEXT:    [[TMP131:%.*]] = getelementptr inbounds i32, ptr [[TMP96]], i64 [[TMP130]]
+; INTERLEAVE-NEXT:    tail call void @llvm.vp.store.nxv2i32.p0(<vscale x 2 x i32> [[VP_OP48]], ptr [[TMP131]], <vscale x 2 x i1> shufflevector (<vscale x 2 x i1> insertelement (<vscale x 2 x i1> poison, i1 true, i64 0), <vscale x 2 x i1> poison, <vscale x 2 x i32> zeroinitializer), i32 [[TMP23]])
+; INTERLEAVE-NEXT:    [[TMP132:%.*]] = add i64 [[TMP1]], [[TMP4]]
+; INTERLEAVE-NEXT:    [[TMP133:%.*]] = add i64 [[TMP132]], [[TMP7]]
+; INTERLEAVE-NEXT:    [[TMP134:%.*]] = add i64 [[TMP133]], [[TMP10]]
+; INTERLEAVE-NEXT:    [[TMP135:%.*]] = add i64 [[TMP134]], [[TMP13]]
+; INTERLEAVE-NEXT:    [[TMP136:%.*]] = add i64 [[TMP135]], [[TMP16]]
+; INTERLEAVE-NEXT:    [[TMP137:%.*]] = add i64 [[TMP136]], [[TMP19]]
+; INTERLEAVE-NEXT:    [[TMP138:%.*]] = add i64 [[TMP137]], [[TMP22]]
+; INTERLEAVE-NEXT:    [[TMP139:%.*]] = and i64 [[TMP138]], 4294967295
+; INTERLEAVE-NEXT:    [[INDEX_NEXT]] = add i64 [[INDEX]], [[TMP139]]
+; INTERLEAVE-NEXT:    [[TMP140:%.*]] = icmp eq i64 [[INDEX_NEXT]], 32000
+; INTERLEAVE-NEXT:    br i1 [[TMP140]], label [[FOR_END:%.*]], label [[VECTOR_BODY]], !llvm.loop [[LOOP0:![0-9]+]]
 ; INTERLEAVE:       for.end:
 ; INTERLEAVE-NEXT:    ret void
 ;
