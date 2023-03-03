@@ -1054,6 +1054,11 @@ void CheckHelper::CheckSubprogram(
             *host);
       }
     }
+    if (GetProgramUnitOrBlockConstructContaining(symbol).kind() ==
+        Scope::Kind::BlockConstruct) { // C1107
+      messages_.Say(symbol.name(),
+          "A statement function definition may not appear in a BLOCK construct"_err_en_US);
+    }
   }
   if (IsElementalProcedure(symbol)) {
     // See comment on the similar check in CheckProcEntity()
@@ -1918,7 +1923,7 @@ void CheckHelper::CheckProcBinding(
           if (isNopass) {
             if (!bindingChars->CanOverride(*overriddenChars, std::nullopt)) {
               SayWithDeclaration(*overridden,
-                  "A type-bound procedure and its override must have compatible interfaces"_err_en_US);
+                  "A NOPASS type-bound procedure and its override must have identical interfaces"_err_en_US);
             }
           } else if (!context_.HasError(binding.symbol())) {
             int passIndex{bindingChars->FindPassIndex(binding.passName())};
@@ -1930,7 +1935,7 @@ void CheckHelper::CheckProcBinding(
             } else if (!bindingChars->CanOverride(
                            *overriddenChars, passIndex)) {
               SayWithDeclaration(*overridden,
-                  "A type-bound procedure and its override must have compatible interfaces apart from their passed argument"_err_en_US);
+                  "A type-bound procedure and its override must have compatible interfaces"_err_en_US);
             }
           }
         }
