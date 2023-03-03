@@ -302,9 +302,12 @@ libc_support_library(
         ":__support_builtin_wrappers",
         ":__support_common",
         ":__support_cpp_limits",
+        ":__support_cpp_optional",
         ":__support_ctype_utils",
+        ":__support_fputil_fenv_impl",
         ":__support_fputil_fp_bits",
         ":__support_str_to_integer",
+        ":__support_str_to_num_result",
         ":__support_uint128",
     ],
 )
@@ -591,6 +594,16 @@ libc_support_library(
     deps = [
         ":__support_common",
         ":libc_root",
+    ],
+)
+############################### errno targets ################################
+
+libc_function(
+    name = "errno",
+    srcs = ["src/errno/libc_errno.cpp"],
+    hdrs = ["src/errno/libc_errno.h"],
+    deps = [
+        ":__support_common",
     ],
 )
 
@@ -1750,6 +1763,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1760,6 +1774,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1770,6 +1785,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1780,6 +1796,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1790,6 +1807,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1800,6 +1818,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1810,6 +1829,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1820,6 +1840,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1830,6 +1851,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1840,6 +1862,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1850,6 +1873,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1860,6 +1884,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1870,6 +1895,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1880,6 +1906,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1890,6 +1917,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1900,6 +1928,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1910,6 +1939,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )
 
@@ -1920,5 +1950,6 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_osutil",
+        ":errno",
     ],
 )

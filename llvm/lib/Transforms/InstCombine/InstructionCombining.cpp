@@ -34,7 +34,6 @@
 
 #include "InstCombineInternal.h"
 #include "llvm-c/Initialization.h"
-#include "llvm-c/Transforms/InstCombine.h"
 #include "llvm/ADT/APInt.h"
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseMap.h"
@@ -4598,13 +4597,6 @@ static bool combineInstructionsOverFunction(
   bool MadeIRChange = false;
   if (ShouldLowerDbgDeclare)
     MadeIRChange = LowerDbgDeclare(F);
-  // LowerDbgDeclare calls RemoveRedundantDbgInstrs, but LowerDbgDeclare will
-  // almost never return true when running an assignment tracking build. Take
-  // this opportunity to do some clean up for assignment tracking builds too.
-  if (!MadeIRChange && isAssignmentTrackingEnabled(*F.getParent())) {
-    for (auto &BB : F)
-      RemoveRedundantDbgInstrs(&BB);
-  }
 
   // Iterate while there is work to do.
   unsigned Iteration = 0;
@@ -4770,8 +4762,4 @@ FunctionPass *llvm::createInstructionCombiningPass() {
 
 FunctionPass *llvm::createInstructionCombiningPass(unsigned MaxIterations) {
   return new InstructionCombiningPass(MaxIterations);
-}
-
-void LLVMAddInstructionCombiningPass(LLVMPassManagerRef PM) {
-  unwrap(PM)->add(createInstructionCombiningPass());
 }

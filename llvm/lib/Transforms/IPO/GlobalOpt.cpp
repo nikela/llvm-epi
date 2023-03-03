@@ -206,8 +206,10 @@ CleanupPointerRootUsers(GlobalVariable *GV,
   // chain of computation and the store to the global in Dead[n].second.
   SmallVector<std::pair<Instruction *, Instruction *>, 32> Dead;
 
+  SmallVector<User *> Worklist(GV->users());
   // Constants can't be pointers to dynamically allocated memory.
-  for (User *U : llvm::make_early_inc_range(GV->users())) {
+  while (!Worklist.empty()) {
+    User *U = Worklist.pop_back_val();
     if (StoreInst *SI = dyn_cast<StoreInst>(U)) {
       Value *V = SI->getValueOperand();
       if (isa<Constant>(V)) {
@@ -238,7 +240,8 @@ CleanupPointerRootUsers(GlobalVariable *GV,
       if (CE->use_empty()) {
         CE->destroyConstant();
         Changed = true;
-      }
+      } else if (isa<GEPOperator>(CE))
+        append_range(Worklist, CE->users());
     } else if (Constant *C = dyn_cast<Constant>(U)) {
       if (isSafeToDestroyConstant(C)) {
         C->destroyConstant();
@@ -335,10 +338,18 @@ static bool CleanupConstantGlobalUsers(GlobalVariable *GV,
   return Changed;
 }
 
+/// Part of the global at a specific offset, which is only accessed through
+/// loads and stores with the given type.
+struct GlobalPart {
+  Type *Ty;
+  bool IsLoaded = false;
+  bool IsStored = false;
+};
+
 /// Look at all uses of the global and determine which (offset, type) pairs it
 /// can be split into.
-static bool collectSRATypes(DenseMap<uint64_t, Type *> &Types, GlobalValue *GV,
-                            const DataLayout &DL) {
+static bool collectSRATypes(DenseMap<uint64_t, GlobalPart> &Parts,
+                            GlobalVariable *GV, const DataLayout &DL) {
   SmallVector<Use *, 16> Worklist;
   SmallPtrSet<Use *, 16> Visited;
   auto AppendUses = [&](Value *V) {
@@ -373,14 +384,16 @@ static bool collectSRATypes(DenseMap<uint64_t, Type *> &Types, GlobalValue *GV,
       // TODO: We currently require that all accesses at a given offset must
       // use the same type. This could be relaxed.
       Type *Ty = getLoadStoreType(V);
-      auto It = Types.try_emplace(Offset.getZExtValue(), Ty).first;
-      if (Ty != It->second)
+      auto It = Parts.try_emplace(Offset.getZExtValue(), GlobalPart{Ty}).first;
+      if (Ty != It->second.Ty)
         return false;
 
       // Scalable types not currently supported.
       if (isa<ScalableVectorType>(Ty))
         return false;
 
+      It->second.IsLoaded |= isa<LoadInst>(V);
+      It->second.IsStored |= isa<StoreInst>(V);
       continue;
     }
 
@@ -459,21 +472,27 @@ static GlobalVariable *SRAGlobal(GlobalVariable *GV, const DataLayout &DL) {
   assert(GV->hasLocalLinkage());
 
   // Collect types to split into.
-  DenseMap<uint64_t, Type *> Types;
-  if (!collectSRATypes(Types, GV, DL) || Types.empty())
+  DenseMap<uint64_t, GlobalPart> Parts;
+  if (!collectSRATypes(Parts, GV, DL) || Parts.empty())
     return nullptr;
 
   // Make sure we don't SRA back to the same type.
-  if (Types.size() == 1 && Types.begin()->second == GV->getValueType())
+  if (Parts.size() == 1 && Parts.begin()->second.Ty == GV->getValueType())
     return nullptr;
 
-  // Don't perform SRA if we would have to split into many globals.
-  if (Types.size() > 16)
+  // Don't perform SRA if we would have to split into many globals. Ignore
+  // parts that are either only loaded or only stored, because we expect them
+  // to be optimized away.
+  unsigned NumParts = count_if(Parts, [](const auto &Pair) {
+    return Pair.second.IsLoaded && Pair.second.IsStored;
+  });
+  if (NumParts > 16)
     return nullptr;
 
   // Sort by offset.
   SmallVector<std::pair<uint64_t, Type *>, 16> TypesVector;
-  append_range(TypesVector, Types);
+  for (const auto &Pair : Parts)
+    TypesVector.push_back({Pair.first, Pair.second.Ty});
   sort(TypesVector, llvm::less_first());
 
   // Check that the types are non-overlapping.
@@ -493,7 +512,7 @@ static GlobalVariable *SRAGlobal(GlobalVariable *GV, const DataLayout &DL) {
   // Collect initializers for new globals.
   Constant *OrigInit = GV->getInitializer();
   DenseMap<uint64_t, Constant *> Initializers;
-  for (const auto &Pair : Types) {
+  for (const auto &Pair : TypesVector) {
     Constant *NewInit = ConstantFoldLoadFromConst(OrigInit, Pair.second,
                                                   APInt(64, Pair.first), DL);
     if (!NewInit) {
@@ -1330,18 +1349,6 @@ static bool isPointerValueDeadOnEntryToFunction(
   SmallVector<LoadInst *, 4> Loads;
   SmallVector<StoreInst *, 4> Stores;
   for (auto *U : GV->users()) {
-    if (Operator::getOpcode(U) == Instruction::BitCast) {
-      for (auto *UU : U->users()) {
-        if (auto *LI = dyn_cast<LoadInst>(UU))
-          Loads.push_back(LI);
-        else if (auto *SI = dyn_cast<StoreInst>(UU))
-          Stores.push_back(SI);
-        else
-          return false;
-      }
-      continue;
-    }
-
     Instruction *I = dyn_cast<Instruction>(U);
     if (!I)
       return false;
@@ -1389,62 +1396,6 @@ static bool isPointerValueDeadOnEntryToFunction(
   }
   // All loads have known dependences inside F, so the global can be localized.
   return true;
-}
-
-/// C may have non-instruction users. Can all of those users be turned into
-/// instructions?
-static bool allNonInstructionUsersCanBeMadeInstructions(Constant *C) {
-  // We don't do this exhaustively. The most common pattern that we really need
-  // to care about is a constant GEP or constant bitcast - so just looking
-  // through one single ConstantExpr.
-  //
-  // The set of constants that this function returns true for must be able to be
-  // handled by makeAllConstantUsesInstructions.
-  for (auto *U : C->users()) {
-    if (isa<Instruction>(U))
-      continue;
-    if (!isa<ConstantExpr>(U))
-      // Non instruction, non-constantexpr user; cannot convert this.
-      return false;
-    for (auto *UU : U->users())
-      if (!isa<Instruction>(UU))
-        // A constantexpr used by another constant. We don't try and recurse any
-        // further but just bail out at this point.
-        return false;
-  }
-
-  return true;
-}
-
-/// C may have non-instruction users, and
-/// allNonInstructionUsersCanBeMadeInstructions has returned true. Convert the
-/// non-instruction users to instructions.
-static void makeAllConstantUsesInstructions(Constant *C) {
-  SmallVector<ConstantExpr*,4> Users;
-  for (auto *U : C->users()) {
-    if (isa<ConstantExpr>(U))
-      Users.push_back(cast<ConstantExpr>(U));
-    else
-      // We should never get here; allNonInstructionUsersCanBeMadeInstructions
-      // should not have returned true for C.
-      assert(
-          isa<Instruction>(U) &&
-          "Can't transform non-constantexpr non-instruction to instruction!");
-  }
-
-  SmallVector<Value*,4> UUsers;
-  for (auto *U : Users) {
-    UUsers.clear();
-    append_range(UUsers, U->users());
-    for (auto *UU : UUsers) {
-      Instruction *UI = cast<Instruction>(UU);
-      Instruction *NewU = U->getAsInstruction(UI);
-      UI->replaceUsesOfWith(U, NewU);
-    }
-    // We've replaced all the uses, so destroy the constant. (destroyConstant
-    // will update value handles and metadata.)
-    U->destroyConstant();
-  }
 }
 
 // For a global variable with one store, if the store dominates any loads,
@@ -1504,7 +1455,6 @@ processInternalGlobal(GlobalVariable *GV, const GlobalStatus &GS,
       GV->getValueType()->isSingleValueType() &&
       GV->getType()->getAddressSpace() == 0 &&
       !GV->isExternallyInitialized() &&
-      allNonInstructionUsersCanBeMadeInstructions(GV) &&
       GS.AccessingFunction->doesNotRecurse() &&
       isPointerValueDeadOnEntryToFunction(GS.AccessingFunction, GV,
                                           LookupDomTree)) {
@@ -1519,8 +1469,6 @@ processInternalGlobal(GlobalVariable *GV, const GlobalStatus &GS,
                                         GV->getName(), &FirstI);
     if (!isa<UndefValue>(GV->getInitializer()))
       new StoreInst(GV->getInitializer(), Alloca, &FirstI);
-
-    makeAllConstantUsesInstructions(GV);
 
     GV->replaceAllUsesWith(Alloca);
     GV->eraseFromParent();

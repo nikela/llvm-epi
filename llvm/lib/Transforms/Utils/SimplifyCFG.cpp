@@ -1595,12 +1595,13 @@ bool SimplifyCFGOpt::HoistThenElseCodeToIf(BranchInst *BI,
       if (!TTI.isProfitableToHoist(I1) || !TTI.isProfitableToHoist(I2))
         return Changed;
 
-      // If any of the two call sites has nomerge attribute, stop hoisting.
+      // If any of the two call sites has nomerge or convergent attribute, stop
+      // hoisting.
       if (const auto *CB1 = dyn_cast<CallBase>(I1))
-        if (CB1->cannotMerge())
+        if (CB1->cannotMerge() || CB1->isConvergent())
           return Changed;
       if (const auto *CB2 = dyn_cast<CallBase>(I2))
-        if (CB2->cannotMerge())
+        if (CB2->cannotMerge() || CB2->isConvergent())
           return Changed;
 
       if (isa<DbgInfoIntrinsic>(I1) || isa<DbgInfoIntrinsic>(I2)) {
@@ -1808,9 +1809,9 @@ static bool canSinkInstructions(
     // Conservatively return false if I is an inline-asm instruction. Sinking
     // and merging inline-asm instructions can potentially create arguments
     // that cannot satisfy the inline-asm constraints.
-    // If the instruction has nomerge attribute, return false.
+    // If the instruction has nomerge or convergent attribute, return false.
     if (const auto *C = dyn_cast<CallBase>(I))
-      if (C->isInlineAsm() || C->cannotMerge())
+      if (C->isInlineAsm() || C->cannotMerge() || C->isConvergent())
         return false;
 
     // Each instruction must have zero or one use.
@@ -7121,7 +7122,16 @@ static bool passingValueIsAlwaysUndefined(Value *V, Instruction *I, bool PtrValu
     // Look through GEPs. A load from a GEP derived from NULL is still undefined
     if (GetElementPtrInst *GEP = dyn_cast<GetElementPtrInst>(Use))
       if (GEP->getPointerOperand() == I) {
-        if (!GEP->isInBounds() || !GEP->hasAllZeroIndices())
+        // The current base address is null, there are four cases to consider:
+        // getelementptr (TY, null, 0)                 -> null
+        // getelementptr (TY, null, not zero)          -> may be modified
+        // getelementptr inbounds (TY, null, 0)        -> null
+        // getelementptr inbounds (TY, null, not zero) -> poison iff null is
+        // undefined?
+        if (!GEP->hasAllZeroIndices() &&
+            (!GEP->isInBounds() ||
+             NullPointerIsDefined(GEP->getFunction(),
+                                  GEP->getPointerAddressSpace())))
           PtrValueMayBeModified = true;
         return passingValueIsAlwaysUndefined(V, GEP, PtrValueMayBeModified);
       }

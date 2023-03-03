@@ -5073,9 +5073,6 @@ SDValue DAGCombiner::visitABD(SDNode *N) {
   // fold (abd c1, c2)
   if (SDValue C = DAG.FoldConstantArithmetic(Opcode, DL, VT, {N0, N1}))
     return C;
-  // reassociate if possible
-  if (SDValue C = reassociateOps(Opcode, DL, N0, N1, N->getFlags()))
-    return C;
 
   // canonicalize constant to RHS.
   if (DAG.isConstantIntBuildVectorOrConstantInt(N0) &&
@@ -5907,8 +5904,8 @@ static SDValue foldAndOrOfSETCC(SDNode *LogicOp, SelectionDAG &DAG) {
   SDValue LHS1 = LHS->getOperand(1);
   SDValue RHS1 = RHS->getOperand(1);
 
-  // TODO: We don't actually need a splat here, for vectors we just need
-  // LaneLHS[N] == -LaneRHS[N];
+  // TODO: We don't actually need a splat here, for vectors we just need the
+  // invariants to hold for each element.
   auto *LHS1C = isConstOrConstSplat(LHS1);
   auto *RHS1C = isConstOrConstSplat(RHS1);
 
@@ -5919,15 +5916,16 @@ static SDValue foldAndOrOfSETCC(SDNode *LogicOp, SelectionDAG &DAG) {
   if (CCL == CCR &&
       CCL == (LogicOp->getOpcode() == ISD::AND ? ISD::SETNE : ISD::SETEQ) &&
       LHS0 == RHS0 && LHS1C && RHS1C && OpVT.isInteger() && LHS.hasOneUse() &&
-      RHS.hasOneUse() && LHS1C->getAPIntValue() == (-RHS1C->getAPIntValue())) {
+      RHS.hasOneUse()) {
+    const APInt &APLhs = LHS1C->getAPIntValue();
+    const APInt &APRhs = RHS1C->getAPIntValue();
 
     // Preference is to use ISD::ABS or we already have an ISD::ABS (in which
     // case this is just a compare).
-    if (TargetPreference == AndOrSETCCFoldKind::ABS ||
-        DAG.doesNodeExist(ISD::ABS, DAG.getVTList(OpVT), {LHS0})) {
-      APInt C = LHS1C->getAPIntValue();
-      if (C.isNegative())
-        C = RHS1C->getAPIntValue();
+    if (APLhs == (-APRhs) &&
+        ((TargetPreference & AndOrSETCCFoldKind::ABS) ||
+         DAG.doesNodeExist(ISD::ABS, DAG.getVTList(OpVT), {LHS0}))) {
+      const APInt &C = APLhs.isNegative() ? APRhs : APLhs;
       // (icmp eq A, C) | (icmp eq A, -C)
       //    -> (icmp eq Abs(A), C)
       // (icmp ne A, C) & (icmp ne A, -C)
@@ -5935,26 +5933,45 @@ static SDValue foldAndOrOfSETCC(SDNode *LogicOp, SelectionDAG &DAG) {
       SDValue AbsOp = DAG.getNode(ISD::ABS, DL, OpVT, LHS0);
       return DAG.getNode(ISD::SETCC, DL, VT, AbsOp,
                          DAG.getConstant(C, DL, OpVT), LHS.getOperand(2));
-    } else if (TargetPreference == AndOrSETCCFoldKind::AddAnd) {
-      // With C as a power of 2 and C != 0 and C != INT_MIN:
-      //   (icmp eq A, C) | (icmp eq A, -C)
-      //        -> (icmp eq and(add(A, C), ~(C + C)), 0)
-      //   (icmp ne A, C) & (icmp ne A, -C)w
-      //        -> (icmp ne and(add(A, C), ~(C + C)), 0)
-      const ConstantSDNode *Pow2 = nullptr;
-      if (LHS1C->getAPIntValue().isPowerOf2())
-        Pow2 = LHS1C;
-      else if (RHS1C->getAPIntValue().isPowerOf2())
-        Pow2 = RHS1C;
-      // isPowerOf2 is only for non-zero powers of 2.
-      if (Pow2 != nullptr && !Pow2->getAPIntValue().isMinSignedValue()) {
-        const APInt &C = Pow2->getAPIntValue();
-        SDValue AddOp =
-            DAG.getNode(ISD::ADD, DL, OpVT, LHS0, DAG.getConstant(C, DL, OpVT));
-        SDValue AndOp = DAG.getNode(ISD::AND, DL, OpVT, AddOp,
-                                    DAG.getConstant(~(C + C), DL, OpVT));
-        return DAG.getNode(ISD::SETCC, DL, VT, AndOp,
-                           DAG.getConstant(0, DL, OpVT), LHS.getOperand(2));
+    } else if (TargetPreference &
+               (AndOrSETCCFoldKind::AddAnd | AndOrSETCCFoldKind::NotAnd)) {
+
+      // AndOrSETCCFoldKind::AddAnd:
+      // A == C0 | A == C1
+      //  IF IsPow2(smax(C0, C1)-smin(C0, C1))
+      //    -> ((A - smin(C0, C1)) & ~(smax(C0, C1)-smin(C0, C1))) == 0
+      // A != C0 & A != C1
+      //  IF IsPow2(smax(C0, C1)-smin(C0, C1))
+      //    -> ((A - smin(C0, C1)) & ~(smax(C0, C1)-smin(C0, C1))) != 0
+
+      // AndOrSETCCFoldKind::NotAnd:
+      // A == C0 | A == C1
+      //  IF smax(C0, C1) == -1 AND IsPow2(smax(C0, C1) - smin(C0, C1))
+      //    -> ~A & smin(C0, C1) == 0
+      // A != C0 & A != C1
+      //  IF smax(C0, C1) == -1 AND IsPow2(smax(C0, C1) - smin(C0, C1))
+      //    -> ~A & smin(C0, C1) != 0
+
+      const APInt &MaxC = APIntOps::smax(APRhs, APLhs);
+      const APInt &MinC = APIntOps::smin(APRhs, APLhs);
+      APInt Dif = MaxC - MinC;
+      if (!Dif.isZero() && Dif.isPowerOf2()) {
+        if (MaxC.isAllOnes() &&
+            (TargetPreference & AndOrSETCCFoldKind::NotAnd)) {
+          SDValue NotOp = DAG.getNOT(DL, LHS0, OpVT);
+          SDValue AndOp = DAG.getNode(ISD::AND, DL, OpVT, NotOp,
+                                      DAG.getConstant(MinC, DL, OpVT));
+          return DAG.getNode(ISD::SETCC, DL, VT, AndOp,
+                             DAG.getConstant(0, DL, OpVT), LHS.getOperand(2));
+        } else if (TargetPreference & AndOrSETCCFoldKind::AddAnd) {
+
+          SDValue AddOp = DAG.getNode(ISD::ADD, DL, OpVT, LHS0,
+                                      DAG.getConstant(-MinC, DL, OpVT));
+          SDValue AndOp = DAG.getNode(ISD::AND, DL, OpVT, AddOp,
+                                      DAG.getConstant(~Dif, DL, OpVT));
+          return DAG.getNode(ISD::SETCC, DL, VT, AndOp,
+                             DAG.getConstant(0, DL, OpVT), LHS.getOperand(2));
+        }
       }
     }
   }
@@ -10815,7 +10832,8 @@ SDValue DAGCombiner::combineMinNumMaxNum(const SDLoc &DL, EVT VT, SDValue LHS,
       if (NegRHS == False) {
         SDValue Combined = combineMinNumMaxNumImpl(DL, VT, LHS, RHS, NegTrue,
                                                    False, CC, TLI, DAG);
-        return DAG.getNode(ISD::FNEG, DL, VT, Combined);
+        if (Combined)
+          return DAG.getNode(ISD::FNEG, DL, VT, Combined);
       }
     }
   }
@@ -11238,67 +11256,6 @@ SDValue DAGCombiner::visitSELECT(SDNode *N) {
         SDValue UAO = DAG.getNode(ISD::UADDO, DL, VTs, Cond0, N2.getOperand(1));
         return DAG.getSelect(DL, VT, UAO.getValue(1), N1, UAO.getValue(0));
       }
-    }
-
-    // If we have a chain of two selects, which share a true/false value and
-    // both are controlled from the two setcc nodes which cannot produce the
-    // same value, we can fold away N.
-    // select (setcc X), Y, (select (setcc X), Z, Y) -> select (setcc X), Z, Y
-    auto IsSelect = [](SDValue Op) {
-      return Op->getOpcode() == ISD::SELECT;
-    };
-    if ((IsSelect(N1) || IsSelect(N2)) && (N1.getOpcode() != N2.getOpcode())) {
-      auto AreSame = [](SDValue Op0, SDValue Op1) {
-        if (Op0 == Op1)
-          return true;
-        auto *C0 = dyn_cast<ConstantSDNode>(Op0);
-        auto *C1 = dyn_cast<ConstantSDNode>(Op1);
-        return C0 && C1 &&
-               APInt::isSameValue(C0->getAPIntValue(), C1->getAPIntValue());
-      };
-
-      SDValue OtherSelect;
-      bool SelectsShareOp = false;
-      if (IsSelect(N1)) {
-        OtherSelect = N1;
-        SelectsShareOp = AreSame(OtherSelect.getOperand(1), N2);
-      } else {
-        OtherSelect = N2;
-        SelectsShareOp = AreSame(OtherSelect.getOperand(2), N1);
-      }
-
-      auto CanNeverBeEqual = [](SDValue SetCC0, SDValue SetCC1) {
-        if (SetCC0->getOpcode() != ISD::SETCC ||
-            SetCC1->getOpcode() != ISD::SETCC ||
-            SetCC0->getOperand(0) != SetCC1->getOperand(0))
-          return false;
-
-        ISD::CondCode CC0 = cast<CondCodeSDNode>(SetCC0.getOperand(2))->get();
-        ISD::CondCode CC1 = cast<CondCodeSDNode>(SetCC1.getOperand(2))->get();
-        auto *C0 = dyn_cast<ConstantSDNode>(SetCC0.getOperand(1));
-        auto *C1 = dyn_cast<ConstantSDNode>(SetCC1.getOperand(1));
-        if (!C0 || !C1)
-          return false;
-
-        bool AreInverse = ISD::getSetCCInverse(CC0, C0->getValueType(0)) == CC1;
-        bool ConstantsAreSame =
-          APInt::isSameValue(C0->getAPIntValue(), C1->getAPIntValue());
-        auto IsEqual = [](ISD::CondCode CC) {
-          return CC == ISD::SETEQ;
-        };
-
-        if (ConstantsAreSame && AreInverse)
-          return true;
-        if (!ConstantsAreSame && IsEqual(CC0) && IsEqual(CC1))
-          return true;
-
-        return false;
-      };
-
-      SDValue SetCC0 = N0;
-      SDValue SetCC1 = OtherSelect.getOperand(0);
-      if (SelectsShareOp && CanNeverBeEqual(SetCC0, SetCC1))
-        return OtherSelect;
     }
 
     if (TLI.isOperationLegal(ISD::SELECT_CC, VT) ||
@@ -12899,7 +12856,8 @@ SDValue DAGCombiner::visitSIGN_EXTEND(SDNode *N) {
   if (N0.getOpcode() == ISD::SIGN_EXTEND_INREG) {
     SDValue N00 = N0.getOperand(0);
     EVT ExtVT = cast<VTSDNode>(N0->getOperand(1))->getVT();
-    if (N00.getOpcode() == ISD::TRUNCATE && (!LegalOperations || TLI.isTypeLegal(ExtVT))) {
+    if (N00.getOpcode() == ISD::TRUNCATE &&
+        (!LegalTypes || TLI.isTypeLegal(ExtVT))) {
       SDValue T = DAG.getNode(ISD::TRUNCATE, DL, ExtVT, N00.getOperand(0));
       return DAG.getNode(ISD::SIGN_EXTEND, DL, VT, T);
     }
@@ -17812,8 +17770,8 @@ SDValue DAGCombiner::ForwardStoreValueToDirectLoad(LoadSDNode *LD) {
   //  2. The store is scalable and the load is fixed width. We could
   //     potentially support a limited number of cases here, but there has been
   //     no cost-benefit analysis to prove it's worth it.
-  bool LdStScalable = LDMemType.isScalableVector();
-  if (LdStScalable != STMemType.isScalableVector())
+  bool LdStScalable = LDMemType.isScalableVT();
+  if (LdStScalable != STMemType.isScalableVT())
     return SDValue();
 
   // If we are dealing with scalable vectors on a big endian platform the
@@ -19968,7 +19926,7 @@ bool DAGCombiner::mergeConsecutiveStores(StoreSDNode *St) {
   // store since we know <vscale x 16 x i8> is exactly twice as large as
   // <vscale x 8 x i8>). Until then, bail out for scalable vectors.
   EVT MemVT = St->getMemoryVT();
-  if (MemVT.isScalableVector())
+  if (MemVT.isScalableVT())
     return false;
   if (!MemVT.isSimple() || MemVT.getSizeInBits() * 2 > MaximumLegalStoreInBits)
     return false;
@@ -22435,7 +22393,7 @@ static SDValue combineConcatVectorOfScalars(SDNode *N, SelectionDAG &DAG) {
   EVT OpVT = N->getOperand(0).getValueType();
 
   // If the operands are legal vectors, leave them alone.
-  if (TLI.isTypeLegal(OpVT))
+  if (TLI.isTypeLegal(OpVT) || OpVT.isScalableVector())
     return SDValue();
 
   SDLoc DL(N);
@@ -26858,7 +26816,7 @@ bool DAGCombiner::parallelizeChainedStores(StoreSDNode *St) {
   // BaseIndexOffset assumes that offsets are fixed-size, which
   // is not valid for scalable vectors where the offsets are
   // scaled by `vscale`, so bail out early.
-  if (St->getMemoryVT().isScalableVector())
+  if (St->getMemoryVT().isScalableVT())
     return false;
 
   // Add ST's interval.

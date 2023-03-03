@@ -546,18 +546,24 @@ public:
       updateRootInPlace(op, [&]() { operand.set(to); });
     }
   }
+  void replaceAllUsesWith(ValueRange from, ValueRange to) {
+    assert(from.size() == to.size() && "incorrect number of replacements");
+    for (auto it : llvm::zip(from, to))
+      replaceAllUsesWith(std::get<0>(it), std::get<1>(it));
+  }
 
   /// Find uses of `from` and replace them with `to` if the `functor` returns
   /// true. It also marks every modified uses and notifies the rewriter that an
   /// in-place operation modification is about to happen.
-  void replaceUseIf(Value from, Value to,
+  void
+  replaceUsesWithIf(Value from, Value to,
                     llvm::unique_function<bool(OpOperand &) const> functor);
 
   /// Find uses of `from` and replace them with `to` except if the user is
   /// `exceptedUser`. It also marks every modified uses and notifies the
   /// rewriter that an in-place operation modification is about to happen.
   void replaceAllUsesExcept(Value from, Value to, Operation *exceptedUser) {
-    return replaceUseIf(from, to, [&](OpOperand &use) {
+    return replaceUsesWithIf(from, to, [&](OpOperand &use) {
       Operation *user = use.getOwner();
       return user != exceptedUser;
     });

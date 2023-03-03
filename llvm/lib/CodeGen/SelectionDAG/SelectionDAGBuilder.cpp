@@ -497,7 +497,6 @@ getCopyToParts(SelectionDAG &DAG, const SDLoc &DL, SDValue Val, SDValue *Parts,
     return getCopyToPartsVector(DAG, DL, Val, Parts, NumParts, PartVT, V,
                                 CallConv);
 
-  unsigned PartBits = PartVT.getSizeInBits();
   unsigned OrigNumParts = NumParts;
   assert(DAG.getTargetLoweringInfo().isTypeLegal(PartVT) &&
          "Copying to an illegal type!");
@@ -513,6 +512,7 @@ getCopyToParts(SelectionDAG &DAG, const SDLoc &DL, SDValue Val, SDValue *Parts,
     return;
   }
 
+  unsigned PartBits = PartVT.getSizeInBits();
   if (NumParts * PartBits > ValueVT.getSizeInBits()) {
     // If the parts cover more bits than the value has, promote the value.
     if (PartVT.isFloatingPoint() && ValueVT.isFloatingPoint()) {
@@ -1608,7 +1608,7 @@ SDValue SelectionDAGBuilder::getValueImpl(const Value *V) {
                              TLI.getPointerTy(DAG.getDataLayout(), AS));
     }
 
-    if (match(C, m_VScale(DAG.getDataLayout())))
+    if (match(C, m_VScale()))
       return DAG.getVScale(getCurSDLoc(), VT, APInt(VT.getSizeInBits(), 1));
 
     if (const ConstantFP *CFP = dyn_cast<ConstantFP>(C))
@@ -5918,7 +5918,6 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     visitTargetIntrinsic(I, Intrinsic);
     return;
   case Intrinsic::vscale: {
-    match(&I, m_VScale(DAG.getDataLayout()));
     EVT VT = TLI.getValueType(DAG.getDataLayout(), I.getType());
     setValue(&I, DAG.getVScale(sdl, VT, APInt(VT.getSizeInBits(), 1)));
     return;
@@ -6137,13 +6136,12 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     DAG.setRoot(Res.getValue(1));
     return;
   }
-  case Intrinsic::dbg_addr:
   case Intrinsic::dbg_declare: {
-    // Debug intrinsics are handled seperately in assignment tracking mode.
+    // Debug intrinsics are handled separately in assignment tracking mode.
     if (isAssignmentTrackingEnabled(*I.getFunction()->getParent()))
       return;
-    // Assume dbg.addr and dbg.declare can not currently use DIArgList, i.e.
-    // they are non-variadic.
+    // Assume dbg.declare can not currently use DIArgList, i.e.
+    // it is non-variadic.
     const auto &DI = cast<DbgVariableIntrinsic>(I);
     assert(!DI.hasArgList() && "Only dbg.value should currently use DIArgList");
     DILocalVariable *Variable = DI.getVariable();
@@ -6178,19 +6176,11 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
       FI = FuncInfo.getArgumentFrameIndex(Arg);
     }
 
-    // llvm.dbg.addr is control dependent and always generates indirect
-    // DBG_VALUE instructions. llvm.dbg.declare is handled as a frame index in
-    // the MachineFunction variable table.
+    // llvm.dbg.declare is handled as a frame index in the MachineFunction
+    // variable table.
     if (FI != std::numeric_limits<int>::max()) {
-      if (Intrinsic == Intrinsic::dbg_addr) {
-        SDDbgValue *SDV = DAG.getFrameIndexDbgValue(
-            Variable, Expression, FI, getRoot().getNode(), /*IsIndirect*/ true,
-            dl, SDNodeOrder);
-        DAG.AddDbgValue(SDV, isParameter);
-      } else {
-        LLVM_DEBUG(dbgs() << "Skipping " << DI
-                          << " (variable info stashed in MF side table)\n");
-      }
+      LLVM_DEBUG(dbgs() << "Skipping " << DI
+                        << " (variable info stashed in MF side table)\n");
       return;
     }
 
@@ -6560,7 +6550,8 @@ void SelectionDAGBuilder::visitIntrinsicCall(const CallInst &I,
     const DataLayout DLayout = DAG.getDataLayout();
     EVT DestVT = TLI.getValueType(DLayout, I.getType());
     EVT ArgVT = TLI.getValueType(DLayout, I.getArgOperand(0)->getType());
-    unsigned Test = cast<ConstantInt>(I.getArgOperand(1))->getZExtValue();
+    FPClassTest Test = static_cast<FPClassTest>(
+        cast<ConstantInt>(I.getArgOperand(1))->getZExtValue());
     MachineFunction &MF = DAG.getMachineFunction();
     const Function &F = MF.getFunction();
     SDValue Op = getValue(I.getArgOperand(0));
@@ -7496,12 +7487,12 @@ static unsigned getISDForVPIntrinsic(const VPIntrinsic &VPIntrin) {
   std::optional<unsigned> ResOPC;
   switch (VPIntrin.getIntrinsicID()) {
   case Intrinsic::vp_ctlz: {
-    bool IsZeroUndef = cast<ConstantInt>(VPIntrin.getArgOperand(3))->isOne();
+    bool IsZeroUndef = cast<ConstantInt>(VPIntrin.getArgOperand(1))->isOne();
     ResOPC = IsZeroUndef ? ISD::VP_CTLZ_ZERO_UNDEF : ISD::VP_CTLZ;
     break;
   }
   case Intrinsic::vp_cttz: {
-    bool IsZeroUndef = cast<ConstantInt>(VPIntrin.getArgOperand(3))->isOne();
+    bool IsZeroUndef = cast<ConstantInt>(VPIntrin.getArgOperand(1))->isOne();
     ResOPC = IsZeroUndef ? ISD::VP_CTTZ_ZERO_UNDEF : ISD::VP_CTTZ;
     break;
   }
@@ -7921,10 +7912,8 @@ void SelectionDAGBuilder::visitVectorPredicationIntrinsic(
   case ISD::VP_CTLZ_ZERO_UNDEF:
   case ISD::VP_CTTZ:
   case ISD::VP_CTTZ_ZERO_UNDEF: {
-    // Pop is_zero_poison operand for cp.ctlz/cttz or
-    // is_int_min_poison operand for vp.abs.
-    OpValues.pop_back();
-    SDValue Result = DAG.getNode(Opcode, DL, VTs, OpValues);
+    SDValue Result =
+        DAG.getNode(Opcode, DL, VTs, {OpValues[0], OpValues[2], OpValues[3]});
     setValue(&VPIntrin, Result);
     break;
   }

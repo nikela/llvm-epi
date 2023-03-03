@@ -16794,7 +16794,14 @@ Decl *Sema::BuildStaticAssertDeclaration(SourceLocation StaticAssertLoc,
                        FoldKind).isInvalid())
       Failed = true;
 
-    if (!Failed && !Cond) {
+    // CWG2518
+    // [dcl.pre]/p10  If [...] the expression is evaluated in the context of a
+    // template definition, the declaration has no effect.
+    bool InTemplateDefinition =
+        getLangOpts().CPlusPlus && CurContext->isDependentContext();
+
+    if (!Failed && !Cond && !InTemplateDefinition) {
+
       SmallString<256> MsgBuffer;
       llvm::raw_svector_ostream Msg(MsgBuffer);
       if (AssertMessage) {
@@ -16825,7 +16832,8 @@ Decl *Sema::BuildStaticAssertDeclaration(SourceLocation StaticAssertLoc,
         DiagnoseStaticAssertDetails(InnerCond);
       } else {
         Diag(StaticAssertLoc, diag::err_static_assert_failed)
-          << !AssertMessage << Msg.str() << AssertExpr->getSourceRange();
+            << !AssertMessage << Msg.str() << AssertExpr->getSourceRange();
+        PrintContextStack();
       }
       Failed = true;
     }
@@ -17977,7 +17985,7 @@ void Sema::MarkVTableUsed(SourceLocation Loc, CXXRecordDecl *Class,
   // immediately. For all other classes, we mark their virtual members
   // at the end of the translation unit.
   if (Class->isLocalClass())
-    MarkVirtualMembersReferenced(Loc, Class);
+    MarkVirtualMembersReferenced(Loc, Class->getDefinition());
   else
     VTableUses.push_back(std::make_pair(Class, Loc));
 }

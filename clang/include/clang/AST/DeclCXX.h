@@ -1092,6 +1092,11 @@ public:
 
   unsigned capture_size() const { return getLambdaData().NumCaptures; }
 
+  const LambdaCapture *getCapture(unsigned I) const {
+    assert(isLambda() && I < capture_size() && "invalid index for capture");
+    return captures_begin() + I;
+  }
+
   using conversion_iterator = UnresolvedSetIterator;
 
   conversion_iterator conversion_begin() const {
@@ -1546,11 +1551,8 @@ public:
   ///
   /// \param Base the base class we are searching for.
   ///
-  /// \param LookupInDependentTypes whether to look up in dependent types.
-  ///
   /// \returns true if this class is derived from Base, false otherwise.
-  bool isDerivedFrom(const CXXRecordDecl *Base,
-                     bool LookupInDependentTypes = false) const;
+  bool isDerivedFrom(const CXXRecordDecl *Base) const;
 
   /// Determine whether this class is derived from the type \p Base.
   ///
@@ -1564,14 +1566,11 @@ public:
   /// \param Paths will contain the paths taken from the current class to the
   /// given \p Base class.
   ///
-  /// \param LookupInDependentTypes whether to look up independent types.
-  ///
   /// \returns true if this class is derived from \p Base, false otherwise.
   ///
   /// \todo add a separate parameter to configure IsDerivedFrom, rather than
   /// tangling input and output in \p Paths
-  bool isDerivedFrom(const CXXRecordDecl *Base, CXXBasePaths &Paths,
-                     bool LookupInDependentTypes = false) const;
+  bool isDerivedFrom(const CXXRecordDecl *Base, CXXBasePaths &Paths) const;
 
   /// Determine whether this class is virtually derived from
   /// the class \p Base.
@@ -1830,6 +1829,20 @@ public:
 
   TypeSourceInfo *getLambdaTypeInfo() const {
     return getLambdaData().MethodTyInfo;
+  }
+
+  void setLambdaTypeInfo(TypeSourceInfo *TS) {
+    assert(DefinitionData && DefinitionData->IsLambda &&
+           "setting lambda property of non-lambda class");
+    auto &DL = static_cast<LambdaDefinitionData &>(*DefinitionData);
+    DL.MethodTyInfo = TS;
+  }
+
+  void setLambdaIsGeneric(bool IsGeneric) {
+    assert(DefinitionData && DefinitionData->IsLambda &&
+           "setting lambda property of non-lambda class");
+    auto &DL = static_cast<LambdaDefinitionData &>(*DefinitionData);
+    DL.IsGenericLambda = IsGeneric;
   }
 
   // Determine whether this type is an Interface Like type for

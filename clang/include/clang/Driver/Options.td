@@ -1241,10 +1241,10 @@ defm autolink : BoolFOption<"autolink",
 def offload_EQ : CommaJoined<["--"], "offload=">, Flags<[NoXarchOption]>,
   HelpText<"Specify comma-separated list of offloading target triples (CUDA and HIP only)">;
 
-// C++ Coroutines TS
-defm coroutines_ts : BoolFOption<"coroutines-ts",
+// C++ Coroutines
+defm coroutines : BoolFOption<"coroutines",
   LangOpts<"Coroutines">, Default<cpp20.KeyPath>,
-  PosFlag<SetTrue, [CC1Option], "Enable support for the C++ Coroutines TS">,
+  PosFlag<SetTrue, [CC1Option], "Enable support for the C++ Coroutines">,
   NegFlag<SetFalse>>;
 
 defm coro_aligned_allocation : BoolFOption<"coro-aligned-allocation",
@@ -4352,8 +4352,8 @@ def print_supported_cpus : Flag<["-", "--"], "print-supported-cpus">,
   HelpText<"Print supported cpu models for the given target (if target is not specified,"
            " it will print the supported cpus for the default target)">,
   MarshallingInfoFlag<FrontendOpts<"PrintSupportedCPUs">>;
-def mcpu_EQ_QUESTION : Flag<["-"], "mcpu=?">, Alias<print_supported_cpus>;
-def mtune_EQ_QUESTION : Flag<["-"], "mtune=?">, Alias<print_supported_cpus>;
+def : Flag<["-"], "mcpu=help">, Alias<print_supported_cpus>;
+def : Flag<["-"], "mtune=help">, Alias<print_supported_cpus>;
 def time : Flag<["-"], "time">,
   HelpText<"Time individual commands">;
 def traditional_cpp : Flag<["-", "--"], "traditional-cpp">, Flags<[CC1Option]>,
