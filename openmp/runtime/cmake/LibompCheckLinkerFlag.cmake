@@ -19,7 +19,7 @@ function(libomp_check_linker_flag flag boolean)
   set(library_source
     "int foo(int a) { return a*a; }")
   set(cmake_source
-    "cmake_minimum_required(VERSION 3.20.0)
+    "cmake_minimum_required(VERSION 3.13.4)
      project(foo C)
      set(CMAKE_C_FLAGS \"${CMAKE_C_FLAGS}\")
      set(CMAKE_CXX_FLAGS \"${CMAKE_CXX_FLAGS}\")
