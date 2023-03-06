@@ -13,7 +13,7 @@ Written by the `LLVM Team <https://llvm.org/>`_
   .. warning::
      These are in-progress notes for the upcoming Clang |version| release.
      Release notes for previous releases can be found on
-     `the Releases Page <https://llvm.org/releases>`_.
+     `the Releases Page <https://llvm.org/releases/>`_.
 
 Introduction
 ============
@@ -157,6 +157,8 @@ Improvements to Clang's diagnostics
   ``-Wno-deprecated-this-capture``.
 - Clang had failed to emit some ``-Wundefined-internal`` for members of a local
   class if that class was first introduced with a forward declaration.
+- Diagnostic notes and fix-its are now generated for ``ifunc``/``alias`` attributes
+  which point to functions whose names are mangled.
 
 Bug Fixes in This Version
 -------------------------
@@ -176,6 +178,10 @@ Bug Fixes in This Version
   (`#60268 <https://github.com/llvm/llvm-project/issues/60268>`_)
 - Fix crash when taking the address of a consteval lambda call operator.
   (`#57682 <https://github.com/llvm/llvm-project/issues/57682>`_)
+- Clang now support export declarations in the language linkage.
+  (`#60405 <https://github.com/llvm/llvm-project/issues/60405>`_)
+- Fix aggregate initialization inside lambda constexpr.
+  (`#60936 <https://github.com/llvm/llvm-project/issues/60936>`_)
 
 Bug Fixes to Compiler Builtins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

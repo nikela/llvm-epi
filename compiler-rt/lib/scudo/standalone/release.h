@@ -18,8 +18,8 @@ namespace scudo {
 
 class ReleaseRecorder {
 public:
-  ReleaseRecorder(uptr Base, MapPlatformData *Data = nullptr)
-      : Base(Base), Data(Data) {}
+  ReleaseRecorder(uptr Base, uptr Offset = 0, MapPlatformData *Data = nullptr)
+      : Base(Base), Offset(Offset), Data(Data) {}
 
   uptr getReleasedRangesCount() const { return ReleasedRangesCount; }
 
@@ -30,7 +30,7 @@ public:
   // Releases [From, To) range of pages back to OS.
   void releasePageRangeToOS(uptr From, uptr To) {
     const uptr Size = To - From;
-    releasePagesToOS(Base, From, Size, Data);
+    releasePagesToOS(Base, From + Offset, Size, Data);
     ReleasedRangesCount++;
     ReleasedBytes += Size;
   }
@@ -38,7 +38,14 @@ public:
 private:
   uptr ReleasedRangesCount = 0;
   uptr ReleasedBytes = 0;
+  // The starting address to release. Note that we may want to combine (Base +
+  // Offset) as a new Base. However, the Base is retrieved from
+  // `MapPlatformData` on Fuchsia, which means the offset won't be aware.
+  // Therefore, store them separately to make it work on all the platforms.
   uptr Base = 0;
+  // The release offset from Base. This is used when we know a given range after
+  // Base will not be released.
+  uptr Offset = 0;
   MapPlatformData *Data = nullptr;
 };
 

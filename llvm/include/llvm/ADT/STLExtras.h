@@ -827,32 +827,28 @@ public:
 };
 
 template <typename... Iters>
-struct zip_first : public zip_common<zip_first<Iters...>, Iters...> {
-  using Base = zip_common<zip_first<Iters...>, Iters...>;
+struct zip_first : zip_common<zip_first<Iters...>, Iters...> {
+  using zip_common<zip_first, Iters...>::zip_common;
 
-  bool operator==(const zip_first<Iters...> &other) const {
+  bool operator==(const zip_first &other) const {
     return std::get<0>(this->iterators) == std::get<0>(other.iterators);
   }
-
-  zip_first(Iters &&... ts) : Base(std::forward<Iters>(ts)...) {}
 };
 
 template <typename... Iters>
-class zip_shortest : public zip_common<zip_shortest<Iters...>, Iters...> {
-  template <size_t... Ns>
-  bool test(const zip_shortest<Iters...> &other,
-            std::index_sequence<Ns...>) const {
-    return ((std::get<Ns>(this->iterators) != std::get<Ns>(other.iterators)) &&
-            ...);
+struct zip_shortest : zip_common<zip_shortest<Iters...>, Iters...> {
+  using zip_common<zip_shortest, Iters...>::zip_common;
+
+  bool operator==(const zip_shortest &other) const {
+    return any_iterator_equals(other, std::index_sequence_for<Iters...>{});
   }
 
-public:
-  using Base = zip_common<zip_shortest<Iters...>, Iters...>;
-
-  zip_shortest(Iters &&... ts) : Base(std::forward<Iters>(ts)...) {}
-
-  bool operator==(const zip_shortest<Iters...> &other) const {
-    return !test(other, std::index_sequence_for<Iters...>{});
+private:
+  template <size_t... Ns>
+  bool any_iterator_equals(const zip_shortest &other,
+                           std::index_sequence<Ns...>) const {
+    return ((std::get<Ns>(this->iterators) == std::get<Ns>(other.iterators)) ||
+            ...);
   }
 };
 
@@ -2197,17 +2193,8 @@ template <typename R> struct result_pair {
 
   friend class enumerator_iter<R>;
 
-  result_pair() = default;
   result_pair(std::size_t Index, IterOfRange<R> Iter)
       : Index(Index), Iter(Iter) {}
-
-  result_pair(const result_pair<R> &Other)
-      : Index(Other.Index), Iter(Other.Iter) {}
-  result_pair &operator=(const result_pair &Other) {
-    Index = Other.Index;
-    Iter = Other.Iter;
-    return *this;
-  }
 
   std::size_t index() const { return Index; }
   value_reference value() const { return *Iter; }
@@ -2256,12 +2243,6 @@ public:
     return Result.Iter == RHS.Result.Iter;
   }
 
-  enumerator_iter(const enumerator_iter &Other) : Result(Other.Result) {}
-  enumerator_iter &operator=(const enumerator_iter &Other) {
-    Result = Other.Result;
-    return *this;
-  }
-
 private:
   result_type Result;
 };
@@ -2294,13 +2275,13 @@ private:
 ///
 /// std::vector<char> Items = {'A', 'B', 'C', 'D'};
 /// for (auto X : enumerate(Items)) {
-///   printf("Item %d - %c\n", X.index(), X.value());
+///   printf("Item %zu - %c\n", X.index(), X.value());
 /// }
 ///
 /// or using structured bindings:
 ///
 /// for (auto [Index, Value] : enumerate(Items)) {
-///   printf("Item %d - %c\n", Index, Value);
+///   printf("Item %zu - %c\n", Index, Value);
 /// }
 ///
 /// Output:
