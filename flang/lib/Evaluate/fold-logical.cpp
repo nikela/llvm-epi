@@ -154,26 +154,15 @@ Expr<Type<TypeCategory::Logical, KIND>> FoldIntrinsicFunction(
         }
       }
     }
-  } else if (name == "isnan") {
-    // A warning about an invalid argument is discarded from converting
-    // the argument of isnan().
-    auto restorer{context.messages().DiscardMessages()};
+  } else if (name == "isnan" || name == "__builtin_ieee_is_nan") {
     using DefaultReal = Type<TypeCategory::Real, 4>;
-    return FoldElementalIntrinsic<T, DefaultReal>(context, std::move(funcRef),
-        ScalarFunc<T, DefaultReal>([](const Scalar<DefaultReal> &x) {
-          return Scalar<T>{x.IsNotANumber()};
-        }));
-  } else if (name == "__builtin_ieee_is_nan") {
-    if (auto *arg{UnwrapExpr<Expr<SomeReal>>(args[0])}) {
-      return std::visit(
-          [&](const auto &x) {
-            using RT = ResultType<decltype(x)>;
-            return FoldElementalIntrinsic<T, RT>(context, std::move(funcRef),
-                ScalarFunc<T, RT>([](const Scalar<RT> &x) {
-                  return Scalar<T>{x.IsNotANumber()};
-                }));
-          },
-          arg->u);
+    // Only replace the type of the function if we can do the fold
+    if (args[0] && args[0]->UnwrapExpr() &&
+        IsActuallyConstant(*args[0]->UnwrapExpr())) {
+      return FoldElementalIntrinsic<T, DefaultReal>(context, std::move(funcRef),
+          ScalarFunc<T, DefaultReal>([](const Scalar<DefaultReal> &x) {
+            return Scalar<T>{x.IsNotANumber()};
+          }));
     }
   } else if (name == "__builtin_ieee_is_negative") {
     auto restorer{context.messages().DiscardMessages()};
