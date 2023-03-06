@@ -13,7 +13,7 @@ Written by the `LLVM Team <https://llvm.org/>`_
   .. warning::
      These are in-progress notes for the upcoming Clang |version| release.
      Release notes for previous releases can be found on
-     `the Releases Page <https://llvm.org/releases>`_.
+     `the Releases Page <https://llvm.org/releases/>`_.
 
 Introduction
 ============
@@ -176,6 +176,8 @@ Bug Fixes in This Version
   (`#60268 <https://github.com/llvm/llvm-project/issues/60268>`_)
 - Fix crash when taking the address of a consteval lambda call operator.
   (`#57682 <https://github.com/llvm/llvm-project/issues/57682>`_)
+- Clang now support export declarations in the language linkage.
+  (`#60405 <https://github.com/llvm/llvm-project/issues/60405>`_)
 
 Bug Fixes to Compiler Builtins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
