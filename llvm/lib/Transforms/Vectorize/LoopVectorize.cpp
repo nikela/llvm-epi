@@ -2124,9 +2124,11 @@ public:
               Value *TripCount =
                   SCEVExp.expandCodeFor(TripCountSCEV, TripCountSCEV->getType(),
                                         &*Builder.GetInsertPoint());
-              GVL = createVSETVL(Builder, TripCount,
-                                 Builder.getInt64Ty()->getScalarSizeInBits(),
-                                 VF.getKnownMinValue());
+              GVL = Builder.CreateZExtOrTrunc(
+                  createVSETVL(Builder, TripCount,
+                               Builder.getInt64Ty()->getScalarSizeInBits(),
+                               VF.getKnownMinValue()),
+                  Builder.getIntNTy(Bits));
             }
             return GVL;
           };
