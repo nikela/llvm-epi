@@ -689,6 +689,11 @@ MAP_LLVM_NONVP(log10)
 MAP_LLVM_NONVP(sqrt)
 MAP_LLVM_NONVP(fma)
 MAP_LLVM_NONVP(fmuladd)
+// EPI
+MAP_LLVM_NONVP(smax)
+MAP_LLVM_NONVP(smin)
+MAP_LLVM_NONVP(umax)
+MAP_LLVM_NONVP(umin)
 
 ///// } libm functions
 
