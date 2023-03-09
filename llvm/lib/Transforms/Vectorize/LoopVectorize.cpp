@@ -10497,9 +10497,12 @@ void LoopVectorizationPlanner::adjustRecipesForReductions(
                "Expected to replace a VPWidenSelectSC");
         FirstOpId = 1;
       } else {
-        assert((MinVF.isScalar() || isa<VPWidenRecipe>(WidenRecipe) ||
-                (IsFMulAdd && isa<VPWidenCallRecipe>(WidenRecipe))) &&
-               "Expected to replace a VPWidenSC");
+        assert(
+            (MinVF.isScalar() || isa<VPWidenRecipe>(WidenRecipe) ||
+             isa<VPPredicatedWidenRecipe>(WidenRecipe) ||
+             (IsFMulAdd && (isa<VPWidenCallRecipe>(WidenRecipe) ||
+                            isa<VPPredicatedWidenCallRecipe>(WidenRecipe)))) &&
+            "Expected to replace a VPWidenSC");
         FirstOpId = 0;
       }
       unsigned VecOpId =
