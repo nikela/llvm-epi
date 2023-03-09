@@ -144,8 +144,8 @@ public:
   void selectVLSEG(SDNode *Node, bool IsMasked, bool IsStrided);
   void selectVLSEGFF(SDNode *Node, bool IsMasked);
   void selectVLXSEG(SDNode *Node, bool IsMasked, bool IsOrdered);
-  void selectVSETVL(SDNode *Node, MVT XLenVT, uint8_t FlagsIndex);
-  void selectVSETVLMAX(SDNode *Node, MVT XLenVT, uint8_t FlagsIndex);
+  void selectVSETVL(SDNode *Node, MVT XLenVT);
+  void selectVSETVLMAX(SDNode *Node, MVT XLenVT);
   void selectVSSEG(SDNode *Node, bool IsMasked, bool IsStrided);
   void selectVSXSEG(SDNode *Node, bool IsMasked, bool IsOrdered);
 
