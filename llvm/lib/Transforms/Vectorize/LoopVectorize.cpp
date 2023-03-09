@@ -2121,9 +2121,12 @@ public:
           auto GetVL = [this, TripCountSCEV, VF, &GVL](IRBuilderBase &Builder,
                                                        unsigned Bits) {
             if (!GVL) {
-              Value *TripCount =
-                  SCEVExp.expandCodeFor(TripCountSCEV, TripCountSCEV->getType(),
-                                        &*Builder.GetInsertPoint());
+              SCEVExpander VLSCEVExp(*SCEVExp.getSE(),
+                                     SCEVExp.getSE()->getDataLayout(),
+                                     "vl.scev.check");
+              Value *TripCount = VLSCEVExp.expandCodeFor(
+                  TripCountSCEV, TripCountSCEV->getType(),
+                  &*Builder.GetInsertPoint());
               GVL = Builder.CreateZExtOrTrunc(
                   createVSETVL(Builder, TripCount,
                                Builder.getInt64Ty()->getScalarSizeInBits(),
