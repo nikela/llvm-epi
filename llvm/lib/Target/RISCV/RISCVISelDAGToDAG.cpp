@@ -2354,7 +2354,7 @@ void RISCVDAGToDAGISel::Select(SDNode *Node) {
   case ISD::INSERT_VECTOR_ELT: {
     SDValue Idx = Node->getOperand(2);
     if (auto *C = dyn_cast<ConstantSDNode>(Idx)) {
-      if (C->isNullValue()) {
+      if (C->isZero()) {
         // We have a pattern for this case.
         break;
       }
