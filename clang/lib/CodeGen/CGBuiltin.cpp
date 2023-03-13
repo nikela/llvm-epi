@@ -3102,6 +3102,12 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
   case Builtin::BI__builtin_elementwise_ceil:
     return RValue::get(
         emitUnaryBuiltin(*this, E, llvm::Intrinsic::ceil, "elt.ceil"));
+  case Builtin::BI__builtin_elementwise_exp:
+    return RValue::get(
+        emitUnaryBuiltin(*this, E, llvm::Intrinsic::exp, "elt.exp"));
+  case Builtin::BI__builtin_elementwise_exp2:
+    return RValue::get(
+        emitUnaryBuiltin(*this, E, llvm::Intrinsic::exp2, "elt.exp2"));
   case Builtin::BI__builtin_elementwise_log:
     return RValue::get(
         emitUnaryBuiltin(*this, E, llvm::Intrinsic::log, "elt.log"));
@@ -3375,14 +3381,6 @@ RValue CodeGenFunction::EmitBuiltinExpr(const GlobalDecl GD, unsigned BuiltinID,
       Result = Builder.CreateIntCast(Result, ResultType, /*isSigned*/true,
                                      "cast");
     return RValue::get(Result);
-  }
-
-  case Builtin::BI__builtin_set_flt_rounds: {
-    Function *F = CGM.getIntrinsic(Intrinsic::set_rounding);
-
-    Value *V = EmitScalarExpr(E->getArg(0));
-    Builder.CreateCall(F, V);
-    return RValue::get(nullptr);
   }
 
   case Builtin::BI__builtin_fpclassify: {
@@ -9526,6 +9524,9 @@ Value *CodeGenFunction::EmitAArch64SVEBuiltinExpr(unsigned BuiltinID,
     else if (TypeFlags.isReverseMergeAnyBinOp() &&
              TypeFlags.getMergeType() == SVETypeFlags::MergeAny)
       std::swap(Ops[1], Ops[2]);
+    else if (TypeFlags.isReverseMergeAnyAccOp() &&
+             TypeFlags.getMergeType() == SVETypeFlags::MergeAny)
+      std::swap(Ops[1], Ops[3]);
 
     // Predicated intrinsics with _z suffix need a select w/ zeroinitializer.
     if (TypeFlags.getMergeType() == SVETypeFlags::MergeZero) {
