@@ -28,8 +28,12 @@ CODEGENOPT(VectorizeLoop, 1, 0)
 CODEGENOPT(VectorizeSLP, 1, 0)
 CODEGENOPT(UnrollLoops, 1, 0)
 
-CODEGENOPT(PICLevel, 2, 0) ///< PIC level of the LLVM module.
 CODEGENOPT(IsPIE, 1, 0) ///< PIE level is the same as PIC Level.
+CODEGENOPT(PICLevel, 2, 0) ///< PIC level of the LLVM module.
+CODEGENOPT(PrepareForFullLTO , 1, 0) ///< Set when -flto is enabled on the
+                                     ///< compile step.
+CODEGENOPT(PrepareForThinLTO , 1, 0) ///< Set when -flto=thin is enabled on the
+                                     ///< compile step.
 CODEGENOPT(StackArrays, 1, 0) ///< -fstack-arrays (enable the stack-arrays pass)
 
 CODEGENOPT(Underscoring, 1, 1)

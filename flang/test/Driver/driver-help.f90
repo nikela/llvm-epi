@@ -40,6 +40,8 @@
 ! HELP-NEXT:                         Specify where to find the compiled intrinsic modules
 ! HELP-NEXT: -flarge-sizes           Use INTEGER(KIND=8) for the result type in size-related intrinsics
 ! HELP-NEXT: -flogical-abbreviations Enable logical abbreviations
+! HELP-NEXT: -flto=<value>           Set LTO mode
+! HELP-NEXT: -flto                   Enable LTO in 'full' mode
 ! HELP-NEXT: -fno-automatic          Implies the SAVE attribute for non-automatic local objects in subprograms unless RECURSIVE
 ! HELP-NEXT: -fno-color-diagnostics  Disable colors in diagnostics
 ! HELP-NEXT: -fno-integrated-as      Disable the integrated assembler
@@ -166,6 +168,8 @@
 ! HELP-FC1-NEXT: -flto-unit              Emit IR to support LTO unit features (CFI, whole program vtable opt)
 ! HELP-FC1-NEXT: -flto-visibility-public-std
 ! HELP-FC1-NEXT:                         Use public LTO visibility for classes in std and stdext namespaces
+! HELP-FC1-NEXT: -flto=<value>           Set LTO mode
+! HELP-FC1-NEXT: -flto                   Enable LTO in 'full' mode
 ! HELP-FC1-NEXT: -fmerge-functions       Permit merging of identical functions when optimizing.
 ! HELP-FC1-NEXT: -fno-analyzed-objects-for-unparse
 ! HELP-FC1-NEXT:                         Do not use the analyzed objects when unparsing
@@ -296,6 +300,5 @@
 ! HELP-FC1-NEXT: -version                Print the compiler version
 ! HELP-FC1-NEXT: -W<warning>             Enable the specified warning
 ! HELP-FC1-NEXT: -x <language>           Treat subsequent input files as having type <language>
-
 
 ! ERROR: error: unknown argument '-helps'; did you mean '-help'

@@ -35,6 +35,7 @@
 #include <__type_traits/disjunction.h>
 #include <__type_traits/is_array.h>
 #include <__type_traits/is_bounded_array.h>
+#include <__type_traits/is_convertible.h>
 #include <__type_traits/is_move_constructible.h>
 #include <__type_traits/is_reference.h>
 #include <__type_traits/is_unbounded_array.h>
@@ -53,7 +54,7 @@
 #include <stdexcept>
 #include <typeinfo>
 #if !defined(_LIBCPP_HAS_NO_ATOMIC_HEADER)
-#  include <atomic>
+#  include <__atomic/memory_order.h>
 #endif
 
 #if !defined(_LIBCPP_HAS_NO_PRAGMA_SYSTEM_HEADER)

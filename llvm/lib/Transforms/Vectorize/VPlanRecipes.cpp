@@ -787,7 +787,7 @@ void VPWidenSelectRecipe::print(raw_ostream &O, const Twine &Indent,
   getOperand(1)->printAsOperand(O, SlotTracker);
   O << ", ";
   getOperand(2)->printAsOperand(O, SlotTracker);
-  O << (InvariantCond ? " (condition is loop invariant)" : "");
+  O << (isInvariantCond() ? " (condition is loop invariant)" : "");
 }
 #endif
 
@@ -800,10 +800,10 @@ void VPWidenSelectRecipe::execute(VPTransformState &State) {
   // We have to take the 'vectorized' value and pick the first lane.
   // Instcombine will make this a no-op.
   auto *InvarCond =
-      InvariantCond ? State.get(getOperand(0), VPIteration(0, 0)) : nullptr;
+      isInvariantCond() ? State.get(getCond(), VPIteration(0, 0)) : nullptr;
 
   for (unsigned Part = 0; Part < State.UF; ++Part) {
-    Value *Cond = InvarCond ? InvarCond : State.get(getOperand(0), Part);
+    Value *Cond = InvarCond ? InvarCond : State.get(getCond(), Part);
     Value *Op0 = State.get(getOperand(1), Part);
     Value *Op1 = State.get(getOperand(2), Part);
     Value *Sel = State.Builder.CreateSelect(Cond, Op0, Op1);
@@ -825,7 +825,7 @@ void VPPredicatedWidenSelectRecipe::print(raw_ostream &O, const Twine &Indent,
   getOperand(2)->printAsOperand(O, SlotTracker);
   O << ", ";
   getOperand(3)->printAsOperand(O, SlotTracker);
-  O << (InvariantCond ? " (condition is loop invariant)" : "");
+  O << (isInvariantCond() ? " (condition is loop invariant)" : "");
 }
 #endif
 
@@ -838,7 +838,7 @@ void VPPredicatedWidenSelectRecipe::execute(VPTransformState &State) {
   // We have to take the 'vectorized' value and pick the first lane.
   // Instcombine will make this a no-op.
   auto *InvarCond =
-      InvariantCond ? State.get(getOperand(0), VPIteration(0, 0)) : nullptr;
+      isInvariantCond() ? State.get(getCond(), VPIteration(0, 0)) : nullptr;
 
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     Value *Cond = InvarCond ? InvarCond : State.get(getOperand(0), Part);
@@ -1068,7 +1068,7 @@ void VPWidenGEPRecipe::execute(VPTransformState &State) {
   // is vector-typed. Thus, to keep the representation compact, we only use
   // vector-typed operands for loop-varying values.
 
-  if (State.VF.isVector() && IsPtrLoopInvariant && IsIndexLoopInvariant.all()) {
+  if (State.VF.isVector() && areAllOperandsInvariant()) {
     // If we are vectorizing, but the GEP has only loop-invariant operands,
     // the GEP we build (by only using vector-typed operands for
     // loop-varying values) would be a scalar pointer. Thus, to ensure we
@@ -1098,7 +1098,7 @@ void VPWidenGEPRecipe::execute(VPTransformState &State) {
     for (unsigned Part = 0; Part < State.UF; ++Part) {
       // The pointer operand of the new GEP. If it's loop-invariant, we
       // won't broadcast it.
-      auto *Ptr = IsPtrLoopInvariant
+      auto *Ptr = isPointerLoopInvariant()
                       ? State.get(getOperand(0), VPIteration(0, 0))
                       : State.get(getOperand(0), Part);
 
@@ -1107,7 +1107,7 @@ void VPWidenGEPRecipe::execute(VPTransformState &State) {
       SmallVector<Value *, 4> Indices;
       for (unsigned I = 1, E = getNumOperands(); I < E; I++) {
         VPValue *Operand = getOperand(I);
-        if (IsIndexLoopInvariant[I - 1])
+        if (isIndexLoopInvariant(I - 1))
           Indices.push_back(State.get(Operand, VPIteration(0, 0)));
         else
           Indices.push_back(State.get(Operand, Part));
@@ -1137,10 +1137,9 @@ void VPWidenGEPRecipe::execute(VPTransformState &State) {
 void VPWidenGEPRecipe::print(raw_ostream &O, const Twine &Indent,
                              VPSlotTracker &SlotTracker) const {
   O << Indent << "WIDEN-GEP ";
-  O << (IsPtrLoopInvariant ? "Inv" : "Var");
-  size_t IndicesNumber = IsIndexLoopInvariant.size();
-  for (size_t I = 0; I < IndicesNumber; ++I)
-    O << "[" << (IsIndexLoopInvariant[I] ? "Inv" : "Var") << "]";
+  O << (isPointerLoopInvariant() ? "Inv" : "Var");
+  for (size_t I = 0; I < getNumOperands() - 1; ++I)
+    O << "[" << (isIndexLoopInvariant(I) ? "Inv" : "Var") << "]";
 
   O << " ";
   printAsOperand(O, SlotTracker);

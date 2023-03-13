@@ -198,6 +198,10 @@ static cl::opt<bool> EnableLoopInterchange(
     "enable-loopinterchange", cl::init(false), cl::Hidden,
     cl::desc("Enable the experimental LoopInterchange Pass"));
 
+static cl::opt<bool> EnableEarlyUnrollAndJam(
+    "enable-early-unroll-and-jam", cl::init(false), cl::Hidden,
+    cl::desc("EXPERIMENTAL: Enable Early Unroll And Jam Pass"));
+
 static cl::opt<bool> EnableUnrollAndJam("enable-unroll-and-jam",
                                         cl::init(false), cl::Hidden,
                                         cl::desc("Enable Unroll And Jam Pass"));
@@ -1090,6 +1094,12 @@ void PassBuilder::addVectorPasses(OptimizationLevel Level,
   // This is caused by #pragma omp declare simd.
   if (PTO.WFVVectorization) {
     MPM.addPass(VecCloneVPPass());
+  }
+
+  if (EnableEarlyUnrollAndJam && PTO.LoopUnrolling) {
+    FPM.addPass(createFunctionToLoopPassAdaptor(
+        LoopUnrollAndJamPass(Level.getSpeedupLevel())));
+    FPM.addPass(WarnMissedTransformationsPass());
   }
 
   FPM.addPass(LoopVectorizePass(
