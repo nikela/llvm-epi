@@ -7,14 +7,12 @@
 define dso_local i64 @vl_zero() local_unnamed_addr #0 {
 ; CHECK-O0-LABEL: vl_zero:
 ; CHECK-O0:       # %bb.0: # %entry
-; CHECK-O0-NEXT:    li a0, 0
-; CHECK-O0-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O0-NEXT:    vsetivli a0, 0, e64, m1, ta, mu
 ; CHECK-O0-NEXT:    ret
 ;
 ; CHECK-O2-LABEL: vl_zero:
 ; CHECK-O2:       # %bb.0: # %entry
-; CHECK-O2-NEXT:    li a0, 0
-; CHECK-O2-NEXT:    vsetvli a0, a0, e64, m1, ta, mu
+; CHECK-O2-NEXT:    vsetivli a0, 0, e64, m1, ta, mu
 ; CHECK-O2-NEXT:    ret
 entry:
   %0 = tail call i64 @llvm.epi.vsetvl(i64 0, i64 3, i64 0)

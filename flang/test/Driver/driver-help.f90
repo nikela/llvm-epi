@@ -176,6 +176,7 @@
 ! HELP-FC1-NEXT: -fno-stack-arrays       Allocate array temporaries on the heap (default)
 ! HELP-FC1-NEXT: -fno-unroll-loops       Turn off loop unroller
 ! HELP-FC1-NEXT: -fopenacc               Enable OpenACC
+! HELP-FC1-NEXT: -fopenmp-is-device      Generate code only for an OpenMP target device.
 ! HELP-FC1-NEXT: -fopenmp                Parse OpenMP pragmas and generate parallel code.
 ! HELP-FC1-NEXT: -fpass-plugin=<dsopath> Load pass plugin from a dynamic shared object file (only with new pass manager).
 ! HELP-FC1-NEXT: -fpatchable-function-entry-offset=<M>
@@ -295,5 +296,6 @@
 ! HELP-FC1-NEXT: -version                Print the compiler version
 ! HELP-FC1-NEXT: -W<warning>             Enable the specified warning
 ! HELP-FC1-NEXT: -x <language>           Treat subsequent input files as having type <language>
+
 
 ! ERROR: error: unknown argument '-helps'; did you mean '-help'
