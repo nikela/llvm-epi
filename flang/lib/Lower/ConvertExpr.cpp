@@ -2755,12 +2755,13 @@ public:
             // actually a variable.
             box = Fortran::evaluate::IsVariable(*expr)
                       ? builder.createBox(loc, genBoxArg(*expr),
-                                          fir::isPolymorphicType(argTy))
+                                          fir::isPolymorphicType(argTy),
+                                          fir::isAssumedType(argTy))
                       : builder.createBox(getLoc(), genTempExtAddr(*expr),
-                                          fir::isPolymorphicType(argTy));
-
+                                          fir::isPolymorphicType(argTy),
+                                          fir::isAssumedType(argTy));
             if (box.getType().isa<fir::BoxType>() &&
-                fir::isPolymorphicType(argTy)) {
+                fir::isPolymorphicType(argTy) && !fir::isAssumedType(argTy)) {
               mlir::Type actualTy = argTy;
               if (Fortran::lower::isParentComponent(*expr))
                 actualTy = fir::BoxType::get(converter.genType(*expr));
@@ -2799,7 +2800,6 @@ public:
               box = fir::getBase(newExv);
             }
           }
-
           caller.placeInput(arg, box);
         }
       } else if (arg.passBy == PassBy::AddressAndLength) {

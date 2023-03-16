@@ -382,10 +382,11 @@ fir::FirOpBuilder::convertWithSemantics(mlir::Location loc, mlir::Type toTy,
     return create<fir::EmboxProcOp>(loc, toTy, proc);
   }
 
-  if ((fir::isPolymorphicType(fromTy) &&
-       (fir::isAllocatableType(fromTy) || fir::isPointerType(fromTy)) &&
-       fir::isPolymorphicType(toTy)) ||
-      (fir::isPolymorphicType(fromTy) && toTy.isa<fir::BoxType>()))
+  if (((fir::isPolymorphicType(fromTy) &&
+        (fir::isAllocatableType(fromTy) || fir::isPointerType(fromTy)) &&
+        fir::isPolymorphicType(toTy)) ||
+       (fir::isPolymorphicType(fromTy) && toTy.isa<fir::BoxType>())) &&
+      !(fir::isUnlimitedPolymorphicType(fromTy) && fir::isAssumedType(toTy)))
     return create<fir::ReboxOp>(loc, toTy, val, mlir::Value{},
                                 /*slice=*/mlir::Value{});
 
@@ -528,7 +529,8 @@ mlir::Value fir::FirOpBuilder::createSlice(mlir::Location loc,
 
 mlir::Value fir::FirOpBuilder::createBox(mlir::Location loc,
                                          const fir::ExtendedValue &exv,
-                                         bool isPolymorphic) {
+                                         bool isPolymorphic,
+                                         bool isAssumedType) {
   mlir::Value itemAddr = fir::getBase(exv);
   if (itemAddr.getType().isa<fir::BaseBoxType>())
     return itemAddr;
@@ -547,7 +549,10 @@ mlir::Value fir::FirOpBuilder::createBox(mlir::Location loc,
     boxTy = fir::BoxType::get(elementType);
     if (isPolymorphic) {
       elementType = fir::updateTypeForUnlimitedPolymorphic(elementType);
-      boxTy = fir::ClassType::get(elementType);
+      if (isAssumedType)
+        boxTy = fir::BoxType::get(elementType);
+      else
+        boxTy = fir::ClassType::get(elementType);
     }
   }
 
