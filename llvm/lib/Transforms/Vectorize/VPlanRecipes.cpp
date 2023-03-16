@@ -683,7 +683,7 @@ void VPPredicatedWidenCallRecipe::execute(VPTransformState &State) {
   for (unsigned Part = 0; Part < State.UF; ++Part) {
     SmallVector<Type *, 2> TysForDecl = {CI.getType()};
     SmallVector<Value *, 4> Args;
-    for (auto &I : enumerate(operands())) {
+    for (const auto &I : enumerate(operands())) {
       Value *Arg;
       if (VPVectorIntrinsicID) {
         if (isVectorIntrinsicWithScalarOpAtArg(VPVectorIntrinsicID,
