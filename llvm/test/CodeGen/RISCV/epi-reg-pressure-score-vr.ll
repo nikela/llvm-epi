@@ -261,12 +261,12 @@ declare void @llvm.epi.vstore.nxv2f32(<vscale x 2 x float>, <vscale x 2 x float>
 ; Function Attrs: inaccessiblemem_or_argmemonly nounwind willreturn mustprogress
 declare dso_local void @free(i8* nocapture noundef) local_unnamed_addr #5
 
-attributes #0 = { nounwind "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+64bit,+a,+c,+d,+v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" }
-attributes #1 = { inaccessiblememonly nofree nounwind willreturn mustprogress "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+64bit,+a,+c,+d,+v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" }
+attributes #0 = { nounwind "frame-pointer"="none" "min-legal-vector-width"="0" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+64bit,+a,+c,+d,+v,+f,+m,-relax,-save-restore" }
+attributes #1 = { inaccessiblememonly nofree nounwind willreturn mustprogress "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+64bit,+a,+c,+d,+v,+f,+m,-relax,-save-restore" }
 attributes #2 = { nofree nosync nounwind readnone }
 attributes #3 = { nofree nounwind readonly }
 attributes #4 = { nounwind writeonly }
-attributes #5 = { inaccessiblemem_or_argmemonly nounwind willreturn mustprogress "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+64bit,+a,+c,+d,+v,+experimental-zvlsseg,+f,+m,-relax,-save-restore" }
+attributes #5 = { inaccessiblemem_or_argmemonly nounwind willreturn mustprogress "frame-pointer"="none" "no-trapping-math"="true" "stack-protector-buffer-size"="8" "target-features"="+64bit,+a,+c,+d,+v,+f,+m,-relax,-save-restore" }
 
 !llvm.module.flags = !{!0, !1, !2}
 !llvm.ident = !{!3}

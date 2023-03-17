@@ -209,6 +209,7 @@ libc_support_library(
     hdrs = ["src/__support/CPP/atomic.h"],
     deps = [
         ":__support_cpp_type_traits",
+        ":__support_macros_attributes",
         ":libc_root",
     ],
 )
@@ -288,6 +289,7 @@ libc_support_library(
         ":__support_cpp_limits",
         ":__support_ctype_utils",
         ":__support_str_to_num_result",
+        ":errno",
     ],
 )
 
@@ -309,6 +311,7 @@ libc_support_library(
         ":__support_str_to_integer",
         ":__support_str_to_num_result",
         ":__support_uint128",
+        ":errno",
     ],
 )
 
@@ -378,6 +381,7 @@ libc_support_library(
         ":__support_macros_attributes",
         ":__support_macros_properties_architectures",
         ":__support_macros_sanitizer",
+        ":errno",
         ":libc_root",
     ],
 )
@@ -759,6 +763,7 @@ libc_support_library(
         "__support_cpp_bit",
         "__support_cpp_type_traits",
         ":__support_common",
+        ":errno",
         ":libc_root",
     ],
 )
@@ -1331,6 +1336,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1341,6 +1347,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1351,6 +1358,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1361,6 +1369,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_float",
+        ":errno",
     ],
 )
 
@@ -1389,6 +1398,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1399,6 +1409,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1409,6 +1420,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1419,6 +1431,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_integer",
+        ":errno",
     ],
 )
 
@@ -1429,6 +1442,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_float",
+        ":errno",
     ],
 )
 
@@ -1439,6 +1453,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_float",
+        ":errno",
     ],
 )
 
@@ -1449,6 +1464,7 @@ libc_function(
     deps = [
         ":__support_common",
         ":__support_str_to_float",
+        ":errno",
     ],
 )
 
@@ -1471,16 +1487,18 @@ libc_support_library(
         "src/string/memory_utils/utils.h",
     ],
     textual_hdrs = [
+        "src/string/memory_utils/aarch64/memcmp_implementations.h",
+        "src/string/memory_utils/aarch64/memcpy_implementations.h",
         "src/string/memory_utils/bcmp_implementations.h",
         "src/string/memory_utils/bzero_implementations.h",
         "src/string/memory_utils/memcmp_implementations.h",
         "src/string/memory_utils/memcpy_implementations.h",
-        "src/string/memory_utils/aarch64/memcpy_implementations.h",
-        "src/string/memory_utils/x86_64/memcpy_implementations.h",
         "src/string/memory_utils/memmove_implementations.h",
         "src/string/memory_utils/memset_implementations.h",
         "src/string/memory_utils/strcmp_implementations.h",
         "src/string/memory_utils/strstr_implementations.h",
+        "src/string/memory_utils/x86_64/memcmp_implementations.h",
+        "src/string/memory_utils/x86_64/memcpy_implementations.h",
     ],
     deps = [
         ":__support_common",

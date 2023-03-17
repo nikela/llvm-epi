@@ -254,7 +254,7 @@ struct VPTransformState {
   }
 
   bool hasAnyVectorValue(VPValue *Def) const {
-    return Data.PerPartOutput.find(Def) != Data.PerPartOutput.end();
+    return Data.PerPartOutput.contains(Def);
   }
 
   bool hasScalarValue(VPValue *Def, VPIteration Instance) {
@@ -1052,17 +1052,10 @@ public:
 };
 
 /// A recipe for widening select instructions.
-class VPWidenSelectRecipe : public VPRecipeBase, public VPValue {
-
-  /// Is the condition of the select loop invariant?
-  bool InvariantCond;
-
-public:
+struct VPWidenSelectRecipe : public VPRecipeBase, public VPValue {
   template <typename IterT>
-  VPWidenSelectRecipe(SelectInst &I, iterator_range<IterT> Operands,
-                      bool InvariantCond)
-      : VPRecipeBase(VPDef::VPWidenSelectSC, Operands), VPValue(this, &I),
-        InvariantCond(InvariantCond) {}
+  VPWidenSelectRecipe(SelectInst &I, iterator_range<IterT> Operands)
+      : VPRecipeBase(VPDef::VPWidenSelectSC, Operands), VPValue(this, &I) {}
 
   ~VPWidenSelectRecipe() override = default;
 
@@ -1076,20 +1069,23 @@ public:
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
 #endif
+
+  VPValue *getCond() const {
+    return getOperand(0);
+  }
+
+  bool isInvariantCond() const {
+    return getCond()->isDefinedOutsideVectorRegions();
+  }
 };
 
 /// A recipe for predicate widening select instructions.
 class VPPredicatedWidenSelectRecipe : public VPRecipeBase, public VPValue {
-
-  /// Is the condition of the select loop invariant?
-  bool InvariantCond;
-
 public:
   template <typename IterT>
   VPPredicatedWidenSelectRecipe(SelectInst &I, iterator_range<IterT> Operands,
-                                VPValue *EVL, bool InvariantCond)
-      : VPRecipeBase(VPDef::VPWidenSelectSC, Operands), VPValue(this, &I),
-        InvariantCond(InvariantCond) {
+                                VPValue *EVL)
+      : VPRecipeBase(VPDef::VPWidenSelectSC, Operands), VPValue(this, &I) {
     addOperand(EVL);
   }
 
@@ -1108,29 +1104,37 @@ public:
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
 #endif
+
+  VPValue *getCond() const {
+    return getOperand(0);
+  }
+
+  bool isInvariantCond() const {
+    return getCond()->isDefinedOutsideVectorRegions();
+  }
 };
 
 /// A recipe for handling GEP instructions.
 class VPWidenGEPRecipe : public VPRecipeBase, public VPValue {
-  bool IsPtrLoopInvariant;
-  SmallBitVector IsIndexLoopInvariant;
+  bool isPointerLoopInvariant() const {
+    return getOperand(0)->isDefinedOutsideVectorRegions();
+  }
+
+  bool isIndexLoopInvariant(unsigned I) const {
+    return getOperand(I + 1)->isDefinedOutsideVectorRegions();
+  }
+
+  bool areAllOperandsInvariant() const {
+    return all_of(operands(), [](VPValue *Op) {
+      return Op->isDefinedOutsideVectorRegions();
+    });
+  }
 
 public:
   template <typename IterT>
   VPWidenGEPRecipe(GetElementPtrInst *GEP, iterator_range<IterT> Operands)
-      : VPRecipeBase(VPDef::VPWidenGEPSC, Operands), VPValue(this, GEP),
-        IsIndexLoopInvariant(GEP->getNumIndices(), false) {}
+      : VPRecipeBase(VPDef::VPWidenGEPSC, Operands), VPValue(this, GEP) {}
 
-  template <typename IterT>
-  VPWidenGEPRecipe(GetElementPtrInst *GEP, iterator_range<IterT> Operands,
-                   Loop *OrigLoop)
-      : VPRecipeBase(VPDef::VPWidenGEPSC, Operands), VPValue(this, GEP),
-        IsIndexLoopInvariant(GEP->getNumIndices(), false) {
-    IsPtrLoopInvariant = OrigLoop->isLoopInvariant(GEP->getPointerOperand());
-    for (auto Index : enumerate(GEP->indices()))
-      IsIndexLoopInvariant[Index.index()] =
-          OrigLoop->isLoopInvariant(Index.value().get());
-  }
   ~VPWidenGEPRecipe() override = default;
 
   VP_CLASSOF_IMPL(VPDef::VPWidenGEPSC)
@@ -1138,98 +1142,11 @@ public:
   /// Generate the gep nodes.
   void execute(VPTransformState &State) override;
 
-  bool getIsPtrLoopInvariant() const { return IsPtrLoopInvariant; }
-  bool getIsIndexLoopInvariantr(int i) const { return IsIndexLoopInvariant[i]; }
-
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
   /// Print the recipe.
   void print(raw_ostream &O, const Twine &Indent,
              VPSlotTracker &SlotTracker) const override;
 #endif
-};
-
-/// A recipe for handling phi nodes of integer and floating-point inductions,
-/// producing their vector values.
-class VPWidenIntOrFpInductionRecipe : public VPRecipeBase, public VPValue {
-  PHINode *IV;
-  const InductionDescriptor &IndDesc;
-  bool NeedsVectorIV;
-
-public:
-  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
-                                const InductionDescriptor &IndDesc,
-                                bool NeedsVectorIV, VPValue *EVLRecipe)
-      : VPRecipeBase(VPDef::VPWidenIntOrFpInductionSC, {Start, Step}),
-        VPValue(this, IV), IV(IV), IndDesc(IndDesc),
-        NeedsVectorIV(NeedsVectorIV) {
-    if (EVLRecipe)
-      addOperand(EVLRecipe);
-  }
-
-  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
-                                const InductionDescriptor &IndDesc,
-                                TruncInst *Trunc, bool NeedsVectorIV,
-                                VPValue *EVLRecipe)
-      : VPRecipeBase(VPDef::VPWidenIntOrFpInductionSC, {Start, Step}),
-        VPValue(this, Trunc), IV(IV), IndDesc(IndDesc),
-        NeedsVectorIV(NeedsVectorIV) {
-    if (EVLRecipe)
-      addOperand(EVLRecipe);
-  }
-
-  ~VPWidenIntOrFpInductionRecipe() override = default;
-
-  VP_CLASSOF_IMPL(VPDef::VPWidenIntOrFpInductionSC)
-
-  /// Generate the vectorized and scalarized versions of the phi node as
-  /// needed by their users.
-  void execute(VPTransformState &State) override;
-
-#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
-  /// Print the recipe.
-  void print(raw_ostream &O, const Twine &Indent,
-             VPSlotTracker &SlotTracker) const override;
-#endif
-
-  /// Returns the start value of the induction.
-  VPValue *getStartValue() { return getOperand(0); }
-  const VPValue *getStartValue() const { return getOperand(0); }
-
-  /// Returns the step value of the induction.
-  VPValue *getStepValue() { return getOperand(1); }
-  const VPValue *getStepValue() const { return getOperand(1); }
-
-  /// Returns the first defined value as TruncInst, if it is one or nullptr
-  /// otherwise.
-  TruncInst *getTruncInst() {
-    return dyn_cast_or_null<TruncInst>(getVPValue(0)->getUnderlyingValue());
-  }
-  const TruncInst *getTruncInst() const {
-    return dyn_cast_or_null<TruncInst>(getVPValue(0)->getUnderlyingValue());
-  }
-
-  PHINode *getPHINode() { return IV; }
-
-  /// Returns the induction descriptor for the recipe.
-  const InductionDescriptor &getInductionDescriptor() const { return IndDesc; }
-
-  /// Returns true if the induction is canonical, i.e. starting at 0 and
-  /// incremented by UF * VF (= the original IV is incremented by 1).
-  bool isCanonical() const;
-
-  /// Returns the scalar type of the induction.
-  const Type *getScalarType() const {
-    const TruncInst *TruncI = getTruncInst();
-    return TruncI ? TruncI->getType() : IV->getType();
-  }
-
-  /// Returns true if a vector phi needs to be created for the induction.
-  bool needsVectorIV() const { return NeedsVectorIV; }
-
-  /// Returns the EVLRecipe VP Value.
-  VPValue *getEVLRecipe() const {
-    return getNumOperands() > 2 ? getOperand(2) : nullptr;
-  }
 };
 
 /// A pure virtual base class for all recipes modeling header phis, including
@@ -1257,9 +1174,9 @@ public:
 ///    per-lane based on the canonical induction.
 class VPHeaderPHIRecipe : public VPRecipeBase, public VPValue {
 protected:
-  VPHeaderPHIRecipe(unsigned char VPDefID, PHINode *Phi,
+  VPHeaderPHIRecipe(unsigned char VPDefID, Instruction *UnderlyingInstr,
                     VPValue *Start = nullptr)
-      : VPRecipeBase(VPDefID, {}), VPValue(this, Phi) {
+      : VPRecipeBase(VPDefID, {}), VPValue(this, UnderlyingInstr) {
     if (Start)
       addOperand(Start);
   }
@@ -1270,12 +1187,12 @@ public:
   /// Method to support type inquiry through isa, cast, and dyn_cast.
   static inline bool classof(const VPRecipeBase *B) {
     return B->getVPDefID() >= VPDef::VPFirstHeaderPHISC &&
-           B->getVPDefID() <= VPDef::VPLastPHISC;
+           B->getVPDefID() <= VPDef::VPLastHeaderPHISC;
   }
   static inline bool classof(const VPValue *V) {
     auto *B = V->getDefiningRecipe();
     return B && B->getVPDefID() >= VPRecipeBase::VPFirstHeaderPHISC &&
-           B->getVPDefID() <= VPRecipeBase::VPLastPHISC;
+           B->getVPDefID() <= VPRecipeBase::VPLastHeaderPHISC;
   }
 
   /// Generate the phi nodes.
@@ -1299,14 +1216,104 @@ public:
   void setStartValue(VPValue *V) { setOperand(0, V); }
 
   /// Returns the incoming value from the loop backedge.
-  VPValue *getBackedgeValue() {
+  virtual VPValue *getBackedgeValue() {
     return getOperand(1);
   }
 
   /// Returns the backedge value as a recipe. The backedge value is guaranteed
   /// to be a recipe.
-  VPRecipeBase &getBackedgeRecipe() {
+  virtual VPRecipeBase &getBackedgeRecipe() {
     return *getBackedgeValue()->getDefiningRecipe();
+  }
+};
+
+/// A recipe for handling phi nodes of integer and floating-point inductions,
+/// producing their vector values.
+class VPWidenIntOrFpInductionRecipe : public VPHeaderPHIRecipe {
+  PHINode *IV;
+  TruncInst *Trunc;
+  const InductionDescriptor &IndDesc;
+  bool NeedsVectorIV;
+
+public:
+  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
+                                const InductionDescriptor &IndDesc,
+                                bool NeedsVectorIV, VPValue *EVLRecipe)
+      : VPHeaderPHIRecipe(VPDef::VPWidenIntOrFpInductionSC, IV, Start), IV(IV),
+        Trunc(nullptr), IndDesc(IndDesc), NeedsVectorIV(NeedsVectorIV) {
+    addOperand(Step);
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
+
+  VPWidenIntOrFpInductionRecipe(PHINode *IV, VPValue *Start, VPValue *Step,
+                                const InductionDescriptor &IndDesc,
+                                TruncInst *Trunc, bool NeedsVectorIV,
+                                VPValue *EVLRecipe)
+      : VPHeaderPHIRecipe(VPDef::VPWidenIntOrFpInductionSC, Trunc, Start),
+        IV(IV), Trunc(Trunc), IndDesc(IndDesc), NeedsVectorIV(NeedsVectorIV) {
+    addOperand(Step);
+    if (EVLRecipe)
+      addOperand(EVLRecipe);
+  }
+
+  ~VPWidenIntOrFpInductionRecipe() override = default;
+
+  VP_CLASSOF_IMPL(VPDef::VPWidenIntOrFpInductionSC)
+
+  /// Generate the vectorized and scalarized versions of the phi node as
+  /// needed by their users.
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+
+  VPValue *getBackedgeValue() override {
+    // TODO: All operands of base recipe must exist and be at same index in
+    // derived recipe.
+    llvm_unreachable(
+        "VPWidenIntOrFpInductionRecipe generates its own backedge value");
+  }
+
+  VPRecipeBase &getBackedgeRecipe() override {
+    // TODO: All operands of base recipe must exist and be at same index in
+    // derived recipe.
+    llvm_unreachable(
+        "VPWidenIntOrFpInductionRecipe generates its own backedge value");
+  }
+
+  /// Returns the step value of the induction.
+  VPValue *getStepValue() { return getOperand(1); }
+  const VPValue *getStepValue() const { return getOperand(1); }
+
+  /// Returns the first defined value as TruncInst, if it is one or nullptr
+  /// otherwise.
+  TruncInst *getTruncInst() { return Trunc; }
+  const TruncInst *getTruncInst() const { return Trunc; }
+
+  PHINode *getPHINode() { return IV; }
+
+  /// Returns the induction descriptor for the recipe.
+  const InductionDescriptor &getInductionDescriptor() const { return IndDesc; }
+
+  /// Returns true if the induction is canonical, i.e. starting at 0 and
+  /// incremented by UF * VF (= the original IV is incremented by 1).
+  bool isCanonical() const;
+
+  /// Returns the scalar type of the induction.
+  const Type *getScalarType() const {
+    return Trunc ? Trunc->getType() : IV->getType();
+  }
+
+  /// Returns true if a vector phi needs to be created for the induction.
+  bool needsVectorIV() const { return NeedsVectorIV; }
+
+  /// Returns the EVLRecipe VP Value.
+  VPValue *getEVLRecipe() const {
+    return getNumOperands() > 2 ? getOperand(2) : nullptr;
   }
 };
 
@@ -1756,9 +1763,12 @@ class VPReplicateRecipe : public VPRecipeBase, public VPValue {
 public:
   template <typename IterT>
   VPReplicateRecipe(Instruction *I, iterator_range<IterT> Operands,
-                    bool IsUniform, bool IsPredicated = false)
+                    bool IsUniform, VPValue *Mask = nullptr)
       : VPRecipeBase(VPDef::VPReplicateSC, Operands), VPValue(this, I),
-        IsUniform(IsUniform), IsPredicated(IsPredicated) {}
+        IsUniform(IsUniform), IsPredicated(Mask) {
+    if (Mask)
+      addOperand(Mask);
+  }
 
   ~VPReplicateRecipe() override = default;
 
@@ -1797,6 +1807,12 @@ public:
   /// VPPredInstPHIRecipe. In this case, the scalar values should also be packed
   /// in a vector.
   bool shouldPack() const;
+
+  /// Return the mask of a predicated VPReplicateRecipe.
+  VPValue *getMask() {
+    assert(isPredicated() && "Trying to get the mask of a unpredicated recipe");
+    return getOperand(getNumOperands() - 1);
+  }
 };
 
 /// A recipe for generating conditional branches on the bits of a mask.

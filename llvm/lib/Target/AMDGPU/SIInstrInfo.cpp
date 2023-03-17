@@ -537,7 +537,7 @@ static void reportIllegalCopy(const SIInstrInfo *TII, MachineBasicBlock &MBB,
                               MachineBasicBlock::iterator MI,
                               const DebugLoc &DL, MCRegister DestReg,
                               MCRegister SrcReg, bool KillSrc,
-                              const char *Msg = "illegal SGPR to VGPR copy") {
+                              const char *Msg = "illegal VGPR to SGPR copy") {
   MachineFunction *MF = MBB.getParent();
   DiagnosticInfoUnsupported IllegalCopy(MF->getFunction(), Msg, DL, DS_Error);
   LLVMContext &C = MF->getFunction().getContext();
@@ -4346,7 +4346,7 @@ bool SIInstrInfo::verifyInstruction(const MachineInstr &MI,
 
       // Adjust for packed 16 bit values
       if (D16 && D16->getImm() && !ST.hasUnpackedD16VMem())
-        RegCount >>= 1;
+        RegCount = divideCeil(RegCount, 2);
 
       // Adjust if using LWE or TFE
       if ((LWE && LWE->getImm()) || (TFE && TFE->getImm()))
@@ -4359,7 +4359,7 @@ bool SIInstrInfo::verifyInstruction(const MachineInstr &MI,
         const TargetRegisterClass *DstRC = getOpRegClass(MI, DstIdx);
         uint32_t DstSize = RI.getRegSizeInBits(*DstRC) / 32;
         if (RegCount > DstSize) {
-          ErrInfo = "MIMG instruction returns too many registers for dst "
+          ErrInfo = "Image instruction returns too many registers for dst "
                     "register class";
           return false;
         }

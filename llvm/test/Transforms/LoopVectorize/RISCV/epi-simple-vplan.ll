@@ -16,7 +16,7 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-LABEL: simple_add
 ; CHECK: VPlan 'Initial VPlan for VF={vscale x 1,vscale x 2,vscale x 4,vscale x 8,vscale x 16},UF>=1' {
 ; CHECK-NEXT: Live-in vp<%1> = vector-trip-count
-; CHECK-EMPTY:
+; CHECK-NEXT: Live-in vp<%3> = original trip-count
 ; CHECK-NEXT: Live-in vp<%2> = backedge-taken count
 ; CHECK-EMPTY:
 ; CHECK-NEXT: vector.ph:
@@ -27,7 +27,7 @@ target triple = "riscv64-unknown-linux-gnu"
 ; CHECK-NEXT:     EMIT vp<%4> = CANONICAL-INDUCTION
 ; CHECK-NEXT:     EMIT vp<%5> = GENERATE-EXPLICIT-VECTOR-LENGTH vp<%3>
 ; CHECK-NEXT:     vp<%6>    = SCALAR-STEPS vp<%4>, ir<1>
-; CHECK-NEXT:     EMIT vp<%7> = WIDEN-CANONICAL-INDUCTION vp<%4>
+; CHECK-NEXT:     EMIT vp<%7> = WIDEN-CANONICAL-INDUCTION vp<%4>, vp<%5>
 ; CHECK-NEXT:     EMIT vp<%8> = vp icmp ule vp<%7> vp<%2> vp<%5>
 ; CHECK-NEXT:     CLONE ir<%arrayidx> = getelementptr ir<%a>, vp<%6>
 ; CHECK-NEXT:     PREDICATED-WIDEN ir<%0> = load ir<%arrayidx>, vp<%8>, vp<%5> (ALL-ONES-MASK)
