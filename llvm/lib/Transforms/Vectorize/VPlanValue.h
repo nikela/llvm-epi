@@ -342,6 +342,7 @@ public:
     VPPredicatedWidenMemoryInstructionSC,
     VPPredicatedWidenSC,
     VPReductionSC,
+    VPPredicatedReductionSC,
     VPReplicateSC,
     VPScalarIVStepsSC,
     VPWidenCallSC,
