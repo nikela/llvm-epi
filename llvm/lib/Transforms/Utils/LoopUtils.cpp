@@ -1093,6 +1093,71 @@ Value *llvm::createOrderedReduction(IRBuilderBase &B,
   return B.CreateFAddReduce(Start, Src);
 }
 
+Value *llvm::createVPReduction(IRBuilderBase &Builder, RecurKind &RK,
+                               Value *Acc, Value *Src, Value *Mask,
+                               Value *EVL) {
+  auto *RetTy = cast<VectorType>(Src->getType());
+  SmallVector<Value*, 4> Ops;
+  Intrinsic::ID IID = Intrinsic::not_intrinsic;
+  switch (RK) {
+  default:
+    llvm_unreachable("Unhandled opcode");
+  case RecurKind::Add:
+    IID = Intrinsic::vp_reduce_add;
+    break;
+  case RecurKind::FAdd:
+  case RecurKind::FMulAdd: {
+    IID = Intrinsic::vp_reduce_fadd;
+    if (!Acc)
+      Acc = ConstantFP::getNegativeZero(RetTy->getElementType());
+    Ops.push_back(Acc);
+    break;
+  }
+  case RecurKind::Mul: {
+    IID = Intrinsic::vp_reduce_mul;
+    if (!Acc)
+      Acc = ConstantFP::get(RetTy->getElementType(), 1.0);
+    Ops.push_back(Acc);
+    break;
+  }
+  case RecurKind::FMul:
+    IID = Intrinsic::vp_reduce_fmul;
+    break;
+  case RecurKind::And:
+    IID = Intrinsic::vp_reduce_and;
+    break;
+  case RecurKind::Or:
+    IID = Intrinsic::vp_reduce_or;
+    break;
+  case RecurKind::Xor:
+    IID = Intrinsic::vp_reduce_xor;
+    break;
+  case RecurKind::SMax:
+    IID = Intrinsic::vp_reduce_smax;
+    break;
+  case RecurKind::SMin:
+    IID = Intrinsic::vp_reduce_smin;
+    break;
+  case RecurKind::UMax:
+    IID = Intrinsic::vp_reduce_umax;
+    break;
+  case RecurKind::UMin:
+    IID = Intrinsic::vp_reduce_umin;
+    break;
+  case RecurKind::FMax:
+    IID = Intrinsic::vp_reduce_fmax;
+    break;
+  case RecurKind::FMin:
+    IID = Intrinsic::vp_reduce_fmin;
+    break;
+  }
+  Ops.push_back(Src);
+  Ops.push_back(Mask);
+  Ops.push_back(EVL);
+
+  return Builder.CreateIntrinsic(IID, RetTy, Ops);
+}
+
 void llvm::propagateIRFlags(Value *I, ArrayRef<Value *> VL, Value *OpValue,
                             bool IncludeWrapFlags) {
   auto *VecOp = dyn_cast<Instruction>(I);

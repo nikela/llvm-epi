@@ -1749,6 +1749,46 @@ public:
   }
 };
 
+/// A recipe to represent inloop reduction operations, performing a reduction on
+/// a vector operand into a scalar value, and adding the result to a chain.
+/// The Operands are {ChainOp, VecOp, Mask, EVL}.
+class VPPredicatedReductionRecipe : public VPRecipeBase, public VPValue {
+  /// The recurrence decriptor for the reduction in question.
+  const RecurrenceDescriptor *RdxDesc;
+
+public:
+  VPPredicatedReductionRecipe(const RecurrenceDescriptor *R, Instruction *I,
+                              VPValue *ChainOp, VPValue *VecOp, VPValue *Mask,
+                              VPValue *EVL)
+      : VPRecipeBase(VPDef::VPReductionSC, {ChainOp, VecOp}), VPValue(this, I),
+        RdxDesc(R) {
+    assert(Mask && "Mask can't be nullptr in VPPredicatedReductionRecipe.");
+    addOperand(Mask);
+    addOperand(EVL);
+  }
+
+  ~VPPredicatedReductionRecipe() override = default;
+
+  VP_CLASSOF_IMPL(VPDef::VPPredicatedReductionSC)
+
+  /// Generate the reduction in the loop
+  void execute(VPTransformState &State) override;
+
+#if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
+  /// Print the recipe.
+  void print(raw_ostream &O, const Twine &Indent,
+             VPSlotTracker &SlotTracker) const override;
+#endif
+
+  /// The VPValue of the scalar Chain being accumulated.
+  VPValue *getChainOp() const { return getOperand(0); }
+  /// The VPValue of the vector value to be reduced.
+  VPValue *getVecOp() const { return getOperand(1); }
+  /// The VPValue of the condition for the block.
+  VPValue *getMaskOp() const { return getOperand(2); }
+  VPValue *getEVLOp() const { return getOperand(3); }
+};
+
 /// VPReplicateRecipe replicates a given instruction producing multiple scalar
 /// copies of the original scalar type, one per lane, instead of producing a
 /// single copy of widened type for all lanes. If the instruction is known to be

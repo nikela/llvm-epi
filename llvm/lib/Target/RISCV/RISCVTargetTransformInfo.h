@@ -421,7 +421,7 @@ public:
     return VF.isScalar() ? 1 : ST->getMaxInterleaveFactor();
   }
 
-  bool enableInterleavedAccessVectorization() { return true; }
+  bool enableInterleavedAccessVectorization() { return !ST->hasEPI(); }
 
   enum RISCVRegisterClass { GPRRC, FPRRC, VRRC };
 
