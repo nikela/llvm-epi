@@ -408,6 +408,10 @@ Value *createOrderedReduction(IRBuilderBase &B,
                               const RecurrenceDescriptor &Desc, Value *Src,
                               Value *Start);
 
+/// Create a generic VP recution intrinsic.
+Value *createVPReduction(IRBuilderBase &Builder, RecurKind &RK, Value *Acc,
+                         Value *Src, Value *Mask, Value *EVL);
+
 /// Get the intersection (logical and) of all of the potential IR flags
 /// of each scalar operation (VL) that will be converted into a vector (I).
 /// If OpValue is non-null, we only consider operations similar to OpValue

@@ -6706,10 +6706,10 @@ canFoldTermCondOfLoop(Loop *L, ScalarEvolution &SE, DominatorTree &DT,
   BranchInst *BI = cast<BranchInst>(LoopLatch->getTerminator());
   if (BI->isUnconditional())
     return std::nullopt;
-  Value *TermCond = BI->getCondition();
-  if (!isa<ICmpInst>(TermCond) || !cast<ICmpInst>(TermCond)->isEquality()) {
-    LLVM_DEBUG(dbgs() << "Cannot fold on branching condition that is not an "
-                         "ICmpInst::eq / ICmpInst::ne\n");
+  auto *TermCond = dyn_cast<ICmpInst>(BI->getCondition());
+  if (!TermCond) {
+    LLVM_DEBUG(
+        dbgs() << "Cannot fold on branching condition that is not an ICmpInst");
     return std::nullopt;
   }
   if (!TermCond->hasOneUse()) {
@@ -6800,8 +6800,7 @@ canFoldTermCondOfLoop(Loop *L, ScalarEvolution &SE, DominatorTree &DT,
                            "terminating condition folding.\n");
       continue;
     }
-    const SCEV *S = SE.getSCEV(&PN);
-    const SCEVAddRecExpr *AddRec = dyn_cast<SCEVAddRecExpr>(S);
+    const SCEVAddRecExpr *AddRec = dyn_cast<SCEVAddRecExpr>(SE.getSCEV(&PN));
     // Only speculate on affine AddRec
     if (!AddRec || !AddRec->isAffine()) {
       LLVM_DEBUG(dbgs() << "SCEV of phi '" << PN
@@ -6935,9 +6934,12 @@ static bool ReduceLoopStrength(Loop *L, IVUsers &IU, ScalarEvolution &SE,
       IRBuilder<> LatchBuilder(LoopLatch->getTerminator());
       // FIXME: We are adding a use of an IV here without account for poison safety.
       // This is incorrect.
-      Value *NewTermCond = LatchBuilder.CreateICmp(
-          OldTermCond->getPredicate(), LoopValue, TermValue,
-          "lsr_fold_term_cond.replaced_term_cond");
+      Value *NewTermCond =
+          LatchBuilder.CreateICmp(CmpInst::ICMP_EQ, LoopValue, TermValue,
+                                  "lsr_fold_term_cond.replaced_term_cond");
+      // Swap successors to exit loop body if IV equals to new TermValue
+      if (BI->getSuccessor(0) == L->getHeader())
+        BI->swapSuccessors();
 
       LLVM_DEBUG(dbgs() << "Old term-cond:\n"
                         << *OldTermCond << "\n"

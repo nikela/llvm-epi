@@ -787,6 +787,9 @@ public:
   const LoopAccessInfo &getInfo(Loop &L);
 
   void clear() { LoopAccessInfoMap.clear(); }
+
+  bool invalidate(Function &F, const PreservedAnalyses &PA,
+                  FunctionAnalysisManager::Invalidator &Inv);
 };
 
 /// This analysis provides dependence information for the memory accesses

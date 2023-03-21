@@ -1250,6 +1250,27 @@ void VPReductionRecipe::print(raw_ostream &O, const Twine &Indent,
     O << " (with final reduction value stored in invariant address sank "
          "outside of loop)";
 }
+
+void VPPredicatedReductionRecipe::print(raw_ostream &O, const Twine &Indent,
+                                        VPSlotTracker &SlotTracker) const {
+  O << Indent << "PREDICATED-REDUCE ";
+  printAsOperand(O, SlotTracker);
+  O << " = ";
+  getChainOp()->printAsOperand(O, SlotTracker);
+  O << " +";
+  if (isa<FPMathOperator>(getUnderlyingInstr()))
+    O << getUnderlyingInstr()->getFastMathFlags();
+  O << " vp.reduce." << Instruction::getOpcodeName(RdxDesc->getOpcode()) << " (";
+  getVecOp()->printAsOperand(O, SlotTracker);
+  O << ", ";
+  getMaskOp()->printAsOperand(O, SlotTracker);
+  O << ", ";
+  getEVLOp()->printAsOperand(O, SlotTracker);
+  O << ")";
+  if (RdxDesc->IntermediateStore)
+    O << " (with final reduction value stored in invariant address sank "
+         "outside of loop)";
+}
 #endif
 
 bool VPReplicateRecipe::shouldPack() const {
