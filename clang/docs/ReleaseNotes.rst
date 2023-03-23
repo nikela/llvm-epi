@@ -83,6 +83,8 @@ C++20 Feature Support
 - Lambda templates with a requires clause directly after the template parameters now parse
   correctly if the requires clause consists of a variable with a dependent type.
   (`#61278 <https://github.com/llvm/llvm-project/issues/61278>`_)
+- Announced C++20 Coroutines is fully supported on all targets except Windows, which
+  still has some stability and ABI issues.
 
 C++2b Feature Support
 ^^^^^^^^^^^^^^^^^^^^^
@@ -172,13 +174,15 @@ Improvements to Clang's diagnostics
 - Diagnostic notes and fix-its are now generated for ``ifunc``/``alias`` attributes
   which point to functions whose names are mangled.
 - Diagnostics relating to macros on the command line of a preprocessed assembly
-  file are now reported as coming from the file ``<command line>`` instead of
-  ``<built-in>``.
+  file or precompiled header are now reported as coming from the file
+  ``<command line>`` instead of ``<built-in>``.
 - Clang constexpr evaluator now provides a more concise diagnostic when calling
   function pointer that is known to be null.
 - Clang now avoids duplicate warnings on unreachable ``[[fallthrough]];`` statements
   previously issued from ``-Wunreachable-code`` and ``-Wunreachable-code-fallthrough``
   by prioritizing ``-Wunreachable-code-fallthrough``.
+- Clang now correctly diagnoses statement attributes ``[[clang::always_inine]]`` and
+  ``[[clang::noinline]]`` when used on a statement with dependent call expressions.
 
 Bug Fixes in This Version
 -------------------------
@@ -215,6 +219,12 @@ Bug Fixes in This Version
 - Fix crash when using ``[[clang::always_inline]]`` or ``[[clang::noinline]]``
   statement attributes on a call to a template function in the body of a
   template function.
+- Fix coroutines issue where ``get_return_object()`` result was always eargerly
+  converted to the return type. Eager initialization (allowing RVO) is now only
+  perfomed when these types match, otherwise deferred initialization is used,
+  enabling short-circuiting coroutines use cases. This fixes
+  (`#56532 <https://github.com/llvm/llvm-project/issues/56532>`_) in
+  antecipation of `CWG2563 <https://cplusplus.github.io/CWG/issues/2563.html>_`.
 
 Bug Fixes to Compiler Builtins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -236,6 +246,9 @@ Bug Fixes to C++ Support
   (`#58674 <https://github.com/llvm/llvm-project/issues/58674>`_)
 - Fix incorrect deletion of the default constructor of unions in some
   cases. (`#48416 <https://github.com/llvm/llvm-project/issues/48416>`_)
+- No longer issue a pre-C++2b compatibility warning in ``-pedantic`` mode
+  regading overloaded `operator[]` with more than one parmeter or for static
+  lambdas. (`#61582 <https://github.com/llvm/llvm-project/issues/61582>`_)
 
 Bug Fixes to AST Handling
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -355,6 +368,14 @@ libclang
   has an evaluable bit width. Fixes undefined behavior when called on a
   bit-field whose width depends on a template paramter.
 
+- ``clang_parseTranslationUnit`` and ``clang_parseTranslationUnit2`` have been
+  changed to automatically locate the Clang installation directory relative to
+  the location of the libclang binary and use it for system headers installed
+  alongside the Clang installation. It is no longer necessary to manually
+  locate such system headers or use the ``clang_parseTranslationUnit2FullArgv``
+  function for this purpose if libclang has been installed in the default
+  location.
+ 
 Static Analyzer
 ---------------
 - Fix incorrect alignment attribute on the this parameter of certain

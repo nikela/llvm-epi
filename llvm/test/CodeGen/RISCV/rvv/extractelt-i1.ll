@@ -162,7 +162,7 @@ define i1 @extractelt_nxv128i1(<vscale x 128 x i8>* %x, i64 %idx) nounwind {
 ; CHECK32-NEXT:    vmv1r.v v0, v8
 ; CHECK32-NEXT:    vmerge.vim v8, v16, 1, v0
 ; CHECK32-NEXT:    vs8r.v v8, (a2)
-; CHECK32-NEXT:    lb a0, 0(a1)
+; CHECK32-NEXT:    lbu a0, 0(a1)
 ; CHECK32-NEXT:    addi sp, s0, -80
 ; CHECK32-NEXT:    lw ra, 76(sp) # 4-byte Folded Reload
 ; CHECK32-NEXT:    lw s0, 72(sp) # 4-byte Folded Reload
@@ -198,7 +198,7 @@ define i1 @extractelt_nxv128i1(<vscale x 128 x i8>* %x, i64 %idx) nounwind {
 ; CHECK64-NEXT:    vmv1r.v v0, v8
 ; CHECK64-NEXT:    vmerge.vim v8, v16, 1, v0
 ; CHECK64-NEXT:    vs8r.v v8, (a2)
-; CHECK64-NEXT:    lb a0, 0(a1)
+; CHECK64-NEXT:    lbu a0, 0(a1)
 ; CHECK64-NEXT:    csrr a1, vlenb
 ; CHECK64-NEXT:    slli a1, a1, 4
 ; CHECK64-NEXT:    add sp, sp, a1

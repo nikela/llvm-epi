@@ -2483,16 +2483,14 @@ SDValue DAGCombiner::foldBinOpIntoSelect(SDNode *BO) {
     // constant. Eliminate the binop by pulling the constant math into the
     // select. Example: add (select Cond, CT, CF), CBO --> select Cond, CT +
     // CBO, CF + CBO
-    NewCT = SelOpNo ? DAG.getNode(BinOpcode, DL, VT, CBO, CT)
-                    : DAG.getNode(BinOpcode, DL, VT, CT, CBO);
-    if (!NewCT.isUndef() && !isConstantOrConstantVector(NewCT, true) &&
-        !DAG.isConstantFPBuildVectorOrConstantFP(NewCT))
+    NewCT = SelOpNo ? DAG.FoldConstantArithmetic(BinOpcode, DL, VT, {CBO, CT})
+                    : DAG.FoldConstantArithmetic(BinOpcode, DL, VT, {CT, CBO});
+    if (!NewCT)
       return SDValue();
 
-    NewCF = SelOpNo ? DAG.getNode(BinOpcode, DL, VT, CBO, CF)
-                    : DAG.getNode(BinOpcode, DL, VT, CF, CBO);
-    if (!NewCF.isUndef() && !isConstantOrConstantVector(NewCF, true) &&
-        !DAG.isConstantFPBuildVectorOrConstantFP(NewCF))
+    NewCF = SelOpNo ? DAG.FoldConstantArithmetic(BinOpcode, DL, VT, {CBO, CF})
+                    : DAG.FoldConstantArithmetic(BinOpcode, DL, VT, {CF, CBO});
+    if (!NewCF)
       return SDValue();
   }
 
@@ -4107,7 +4105,7 @@ SDValue DAGCombiner::visitSUBO(SDNode *N) {
   ConstantSDNode *N1C = getAsNonOpaqueConstant(N1);
 
   // fold (subox, c) -> (addo x, -c)
-  if (IsSigned && N1C && !N1C->getAPIntValue().isMinSignedValue()) {
+  if (IsSigned && N1C && !N1C->isMinSignedValue()) {
     return DAG.getNode(ISD::SADDO, DL, N->getVTList(), N0,
                        DAG.getConstant(-N1C->getAPIntValue(), DL, VT));
   }
@@ -4587,7 +4585,7 @@ SDValue DAGCombiner::visitSDIV(SDNode *N) {
     return DAG.getNegative(N0, DL, VT);
 
   // fold (sdiv X, MIN_SIGNED) -> select(X == MIN_SIGNED, 1, 0)
-  if (N1C && N1C->getAPIntValue().isMinSignedValue())
+  if (N1C && N1C->isMinSignedValue())
     return DAG.getSelect(DL, VT, DAG.getSetCC(DL, CCVT, N0, N1, ISD::SETEQ),
                          DAG.getConstant(1, DL, VT),
                          DAG.getConstant(0, DL, VT));
@@ -10619,8 +10617,8 @@ SDValue DAGCombiner::visitABS(SDNode *N) {
   EVT VT = N->getValueType(0);
 
   // fold (abs c1) -> c2
-  if (DAG.isConstantIntBuildVectorOrConstantInt(N0))
-    return DAG.getNode(ISD::ABS, SDLoc(N), VT, N0);
+  if (SDValue C = DAG.FoldConstantArithmetic(ISD::ABS, SDLoc(N), VT, {N0}))
+    return C;
   // fold (abs (abs x)) -> (abs x)
   if (N0.getOpcode() == ISD::ABS)
     return N0;

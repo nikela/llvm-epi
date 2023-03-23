@@ -3849,12 +3849,6 @@ public:
 
 } // namespace
 
-bool ASTWriter::isLookupResultExternal(StoredDeclsList &Result,
-                                       DeclContext *DC) {
-  return Result.hasExternalDecls() &&
-         DC->hasNeedToReconcileExternalVisibleStorage();
-}
-
 bool ASTWriter::isLookupResultEntirelyExternal(StoredDeclsList &Result,
                                                DeclContext *DC) {
   for (auto *D : Result.getLookupResult())
@@ -3897,8 +3891,7 @@ ASTWriter::GenerateNameLookupTable(const DeclContext *ConstDC,
     // don't need to write an entry for the name at all. If we can't
     // write out a lookup set without performing more deserialization,
     // just skip this entry.
-    if (isLookupResultExternal(Result, DC) &&
-        isLookupResultEntirelyExternal(Result, DC))
+    if (isLookupResultEntirelyExternal(Result, DC))
       continue;
 
     // We also skip empty results. If any of the results could be external and
@@ -4443,6 +4436,11 @@ void ASTWriter::AddString(StringRef Str, RecordDataImpl &Record) {
 
 bool ASTWriter::PreparePathForOutput(SmallVectorImpl<char> &Path) {
   assert(Context && "should have context when outputting path");
+
+  // Leave special file names as they are.
+  StringRef PathStr(Path.data(), Path.size());
+  if (PathStr == "<built-in>" || PathStr == "<command line>")
+    return false;
 
   bool Changed =
       cleanPathForOutput(Context->getSourceManager().getFileManager(), Path);

@@ -62,6 +62,14 @@ public:
                       StringRef FileName,
                       LinkGraph::GetEdgeKindNameFunction GetEdgeKindName);
 
+  /// Debug sections are included in the graph by default. Use
+  /// setProcessDebugSections(false) to ignore them if debug info is not
+  /// needed.
+  ELFLinkGraphBuilder &setProcessDebugSections(bool ProcessDebugSections) {
+    this->ProcessDebugSections = ProcessDebugSections;
+    return *this;
+  }
+
   /// Attempt to construct and return the LinkGraph.
   Expected<std::unique_ptr<LinkGraph>> buildGraph();
 
@@ -104,6 +112,17 @@ protected:
   Expected<std::pair<Linkage, Scope>>
   getSymbolLinkageAndScope(const typename ELFT::Sym &Sym, StringRef Name);
 
+  /// Set the target flags on the given Symbol.
+  virtual TargetFlagsType makeTargetFlags(const typename ELFT::Sym &Sym) {
+    return TargetFlagsType{};
+  }
+
+  /// Get the physical offset of the symbol on the target platform.
+  virtual orc::ExecutorAddrDiff getRawOffset(const typename ELFT::Sym &Sym,
+                                             TargetFlagsType Flags) {
+    return Sym.getValue();
+  }
+
   Error prepare();
   Error graphifySections();
   Error graphifySymbols();
@@ -115,8 +134,7 @@ protected:
   ///
   template <typename RelocHandlerMethod>
   Error forEachRelaRelocation(const typename ELFT::Shdr &RelSect,
-                              RelocHandlerMethod &&Func,
-                              bool ProcessDebugSections = false);
+                              RelocHandlerMethod &&Func);
 
   /// Traverse all matching ELFT::Rel relocation records in the given section.
   /// The handler function Func should be callable with this signature:
@@ -125,22 +143,19 @@ protected:
   ///
   template <typename RelocHandlerMethod>
   Error forEachRelRelocation(const typename ELFT::Shdr &RelSect,
-                             RelocHandlerMethod &&Func,
-                             bool ProcessDebugSections = false);
+                             RelocHandlerMethod &&Func);
 
   /// Traverse all matching rela relocation records in the given section.
   /// Convenience wrapper to allow passing a member function for the handler.
   ///
   template <typename ClassT, typename RelocHandlerMethod>
   Error forEachRelaRelocation(const typename ELFT::Shdr &RelSect,
-                              ClassT *Instance, RelocHandlerMethod &&Method,
-                              bool ProcessDebugSections = false) {
+                              ClassT *Instance, RelocHandlerMethod &&Method) {
     return forEachRelaRelocation(
         RelSect,
         [Instance, Method](const auto &Rel, const auto &Target, auto &GS) {
           return (Instance->*Method)(Rel, Target, GS);
-        },
-        ProcessDebugSections);
+        });
   }
 
   /// Traverse all matching rel relocation records in the given section.
@@ -148,14 +163,12 @@ protected:
   ///
   template <typename ClassT, typename RelocHandlerMethod>
   Error forEachRelRelocation(const typename ELFT::Shdr &RelSect,
-                             ClassT *Instance, RelocHandlerMethod &&Method,
-                             bool ProcessDebugSections = false) {
+                             ClassT *Instance, RelocHandlerMethod &&Method) {
     return forEachRelRelocation(
         RelSect,
         [Instance, Method](const auto &Rel, const auto &Target, auto &GS) {
           return (Instance->*Method)(Rel, Target, GS);
-        },
-        ProcessDebugSections);
+        });
   }
 
   const ELFFile &Obj;
@@ -163,6 +176,7 @@ protected:
   typename ELFFile::Elf_Shdr_Range Sections;
   const typename ELFFile::Elf_Shdr *SymTabSec = nullptr;
   StringRef SectionStringTab;
+  bool ProcessDebugSections = true;
 
   // Maps ELF section indexes to LinkGraph Blocks.
   // Only SHF_ALLOC sections will have graph blocks.
@@ -318,7 +332,7 @@ template <typename ELFT> Error ELFLinkGraphBuilder<ELFT>::graphifySections() {
 
     // If the name indicates that it's a debug section then skip it: We don't
     // support those yet.
-    if (isDwarfSection(*Name)) {
+    if (!ProcessDebugSections && isDwarfSection(*Name)) {
       LLVM_DEBUG({
         dbgs() << "    " << SecIndex << ": \"" << *Name
                << "\" is a debug section: "
@@ -475,6 +489,9 @@ template <typename ELFT> Error ELFLinkGraphBuilder<ELFT>::graphifySymbols() {
                  << "\"\n";
         });
 
+        TargetFlagsType Flags = makeTargetFlags(Sym);
+        orc::ExecutorAddrDiff Offset = getRawOffset(Sym, Flags);
+
         // In RISCV, temporary symbols (Used to generate dwarf, eh_frame
         // sections...) will appear in object code's symbol table, and LLVM does
         // not use names on these temporary symbols (RISCV gnu toolchain uses
@@ -482,10 +499,13 @@ template <typename ELFT> Error ELFLinkGraphBuilder<ELFT>::graphifySymbols() {
         // anonymous symbol.
         auto &GSym =
             Name->empty()
-                ? G->addAnonymousSymbol(*B, Sym.getValue(), Sym.st_size,
+                ? G->addAnonymousSymbol(*B, Offset, Sym.st_size,
                                         false, false)
-                : G->addDefinedSymbol(*B, Sym.getValue(), *Name, Sym.st_size, L,
-                                      S, Sym.getType() == ELF::STT_FUNC, false);
+                : G->addDefinedSymbol(*B, Offset, *Name, Sym.st_size, L,
+                                      S, Sym.getType() == ELF::STT_FUNC,
+                                      false);
+
+        GSym.setTargetFlags(Flags);
         setGraphSymbol(SymIndex, GSym);
       }
     } else if (Sym.isUndefined() && Sym.isExternal()) {
@@ -522,8 +542,7 @@ template <typename ELFT> Error ELFLinkGraphBuilder<ELFT>::graphifySymbols() {
 template <typename ELFT>
 template <typename RelocHandlerFunction>
 Error ELFLinkGraphBuilder<ELFT>::forEachRelaRelocation(
-    const typename ELFT::Shdr &RelSect, RelocHandlerFunction &&Func,
-    bool ProcessDebugSections) {
+    const typename ELFT::Shdr &RelSect, RelocHandlerFunction &&Func) {
   // Only look into sections that store relocation entries.
   if (RelSect.sh_type != ELF::SHT_RELA)
     return Error::success();
@@ -569,8 +588,7 @@ Error ELFLinkGraphBuilder<ELFT>::forEachRelaRelocation(
 template <typename ELFT>
 template <typename RelocHandlerFunction>
 Error ELFLinkGraphBuilder<ELFT>::forEachRelRelocation(
-    const typename ELFT::Shdr &RelSect, RelocHandlerFunction &&Func,
-    bool ProcessDebugSections) {
+    const typename ELFT::Shdr &RelSect, RelocHandlerFunction &&Func) {
   // Only look into sections that store relocation entries.
   if (RelSect.sh_type != ELF::SHT_REL)
     return Error::success();

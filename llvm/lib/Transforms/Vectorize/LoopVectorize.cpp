@@ -2822,8 +2822,8 @@ void InnerLoopVectorizer::vectorizeInterleaveGroup(
     bool InBounds = false;
     if (auto *gep = dyn_cast<GetElementPtrInst>(AddrPart->stripPointerCasts()))
       InBounds = gep->isInBounds();
-    AddrPart = Builder.CreateGEP(ScalarTy, AddrPart, Builder.getInt32(-Index));
-    cast<GetElementPtrInst>(AddrPart)->setIsInBounds(InBounds);
+    AddrPart = Builder.CreateGEP(ScalarTy, AddrPart, Builder.getInt32(-Index),
+                                 "", InBounds);
 
     // Cast to the vector pointer type.
     unsigned AddressSpace = AddrPart->getType()->getPointerAddressSpace();
@@ -11017,7 +11017,7 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
 
   const auto CreateVecPtr = [&](unsigned Part, Value *Ptr) -> Value * {
     // Calculate the pointer for the specific unroll-part.
-    GetElementPtrInst *PartPtr = nullptr;
+    Value *PartPtr = nullptr;
 
     // Use i32 for the gep index type when the value is constant,
     // or query DataLayout for a more suitable index type otherwise.
@@ -11053,12 +11053,9 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
         NumElt = Builder.CreateMul(ConstantInt::get(IndexTy, -(int64_t)Part), RunTimeVF);
         LastLane = Builder.CreateSub(ConstantInt::get(IndexTy, 1), RunTimeVF);
       }
-      PartPtr =
-          cast<GetElementPtrInst>(Builder.CreateGEP(ScalarDataTy, Ptr, NumElt));
-      PartPtr->setIsInBounds(InBounds);
+      PartPtr = Builder.CreateGEP(ScalarDataTy, Ptr, NumElt, "", InBounds);
       PartPtr = cast<GetElementPtrInst>(
-          Builder.CreateGEP(ScalarDataTy, PartPtr, LastLane));
-      PartPtr->setIsInBounds(InBounds);
+          Builder.CreateGEP(ScalarDataTy, PartPtr, LastLane, "", InBounds));
       if (isMaskRequired) { // We reverse the mask only if it is not an all-ones
                             // mask.
         if (getEVL()) {
@@ -11086,9 +11083,7 @@ void VPWidenMemoryInstructionRecipe::execute(VPTransformState &State) {
       } else {
         Increment = createStepForVF(Builder, IndexTy, State.VF, Part);
       }
-      PartPtr = cast<GetElementPtrInst>(
-          Builder.CreateGEP(ScalarDataTy, Ptr, Increment));
-      PartPtr->setIsInBounds(InBounds);
+      PartPtr = Builder.CreateGEP(ScalarDataTy, Ptr, Increment, "", InBounds);
     }
 
     unsigned AddressSpace = Ptr->getType()->getPointerAddressSpace();
