@@ -24167,6 +24167,10 @@ static SDValue LowerVectorAllZero(const SDLoc &DL, SDValue V, ISD::CondCode CC,
     return SDValue();
   }
 
+  // Quit if not convertable to legal scalar or 128/256-bit vector.
+  if (!llvm::has_single_bit<uint32_t>(VT.getSizeInBits()))
+    return SDValue();
+
   assert((CC == ISD::SETEQ || CC == ISD::SETNE) && "Unsupported ISD::CondCode");
   X86CC = (CC == ISD::SETEQ ? X86::COND_E : X86::COND_NE);
 
@@ -24187,10 +24191,6 @@ static SDValue LowerVectorAllZero(const SDLoc &DL, SDValue V, ISD::CondCode CC,
                        DAG.getBitcast(IntVT, MaskBits(V)),
                        DAG.getConstant(0, DL, IntVT));
   }
-
-  // Quit if not splittable to 128/256-bit vector.
-  if (!llvm::has_single_bit<uint32_t>(VT.getSizeInBits()))
-    return SDValue();
 
   // Split down to 128/256-bit vector.
   unsigned TestSize = Subtarget.hasAVX() ? 256 : 128;
@@ -44646,6 +44646,23 @@ static SDValue combinePredicateReduction(SDNode *Extract, SelectionDAG &DAG,
     // Special case for (pre-legalization) vXi1 reductions.
     if (NumElts > 64 || !isPowerOf2_32(NumElts))
       return SDValue();
+    if (Match.getOpcode() == ISD::SETCC) {
+      ISD::CondCode CC = cast<CondCodeSDNode>(Match.getOperand(2))->get();
+      if ((BinOp == ISD::AND && CC == ISD::CondCode::SETEQ) ||
+          (BinOp == ISD::OR && CC == ISD::CondCode::SETNE)) {
+        // If representable as a scalar integer:
+        // For all_of(setcc(x,y,eq)) - use (iX)x == (iX)y.
+        // For any_of(setcc(x,y,ne)) - use (iX)x != (iX)y.
+        EVT VecVT = Match.getOperand(0).getValueType();
+        EVT IntVT = EVT::getIntegerVT(Ctx, VecVT.getSizeInBits());
+        if (TLI.isTypeLegal(IntVT)) {
+          SDValue LHS = DAG.getFreeze(Match.getOperand(0));
+          SDValue RHS = DAG.getFreeze(Match.getOperand(1));
+          return DAG.getSetCC(DL, ExtractVT, DAG.getBitcast(IntVT, LHS),
+                              DAG.getBitcast(IntVT, RHS), CC);
+        }
+      }
+    }
     if (TLI.isTypeLegal(MatchVT)) {
       // If this is a legal AVX512 predicate type then we can just bitcast.
       EVT MovmskVT = EVT::getIntegerVT(Ctx, NumElts);
@@ -44657,20 +44674,7 @@ static SDValue combinePredicateReduction(SDNode *Extract, SelectionDAG &DAG,
         ISD::CondCode CC = cast<CondCodeSDNode>(Match.getOperand(2))->get();
         if ((BinOp == ISD::AND && CC == ISD::CondCode::SETEQ) ||
             (BinOp == ISD::OR && CC == ISD::CondCode::SETNE)) {
-          EVT VecVT = Match.getOperand(0).getValueType();
-
-          // If representable as a scalar integer:
-          // For all_of(setcc(x,y,eq)) - use (iX)x == (iX)y.
-          // For any_of(setcc(x,y,ne)) - use (iX)x != (iX)y.
-          EVT IntVT = EVT::getIntegerVT(Ctx, VecVT.getSizeInBits());
-          if (TLI.isTypeLegal(IntVT)) {
-            SDValue LHS = DAG.getFreeze(Match.getOperand(0));
-            SDValue RHS = DAG.getFreeze(Match.getOperand(1));
-            return DAG.getSetCC(DL, ExtractVT, DAG.getBitcast(IntVT, LHS),
-                                DAG.getBitcast(IntVT, RHS), CC);
-          }
-
-          EVT VecSVT = VecVT.getScalarType();
+          EVT VecSVT = Match.getOperand(0).getValueType().getScalarType();
           if (VecSVT != MVT::i8 && (VecSVT.getSizeInBits() % 8) == 0) {
             NumElts *= VecSVT.getSizeInBits() / 8;
             EVT CmpVT = EVT::getVectorVT(Ctx, MVT::i8, NumElts);
@@ -56700,11 +56704,9 @@ static SDValue combineScalarToVector(SDNode *N, SelectionDAG &DAG) {
   // This occurs frequently in our masked scalar intrinsic code and our
   // floating point select lowering with AVX512.
   // TODO: SimplifyDemandedBits instead?
-  if (VT == MVT::v1i1 && Src.getOpcode() == ISD::AND && Src.hasOneUse())
-    if (auto *C = dyn_cast<ConstantSDNode>(Src.getOperand(1)))
-      if (C->getAPIntValue().isOne())
-        return DAG.getNode(ISD::SCALAR_TO_VECTOR, DL, MVT::v1i1,
-                           Src.getOperand(0));
+  if (VT == MVT::v1i1 && Src.getOpcode() == ISD::AND && Src.hasOneUse() &&
+      isOneConstant(Src.getOperand(1)))
+    return DAG.getNode(ISD::SCALAR_TO_VECTOR, DL, MVT::v1i1, Src.getOperand(0));
 
   // Combine scalar_to_vector of an extract_vector_elt into an extract_subvec.
   if (VT == MVT::v1i1 && Src.getOpcode() == ISD::EXTRACT_VECTOR_ELT &&

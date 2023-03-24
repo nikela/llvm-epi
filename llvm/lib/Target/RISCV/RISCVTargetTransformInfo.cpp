@@ -34,7 +34,7 @@ static cl::opt<unsigned> RVVRegisterWidthLMUL(
     cl::desc(
         "The LMUL to use for getRegisterBitWidth queries. Affects LMUL used "
         "by autovectorized code. Fractional LMULs are not supported."),
-    cl::init(1), cl::Hidden);
+    cl::init(2), cl::Hidden);
 
 static cl::opt<unsigned> SLPMaxVF(
     "riscv-v-slp-max-vf",
@@ -364,6 +364,9 @@ TypeSize
 RISCVTTIImpl::getRegisterBitWidth(TargetTransformInfo::RegisterKind K) const {
   unsigned LMUL =
       llvm::bit_floor(std::clamp<unsigned>(RVVRegisterWidthLMUL, 1, 8));
+  // For now we do not want to use LMUL>1 if we can avoid it.
+  if (ST->hasEPI())
+    LMUL = 1;
   switch (K) {
   case TargetTransformInfo::RGK_Scalar:
     return TypeSize::getFixed(ST->getXLen());

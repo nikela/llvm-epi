@@ -960,8 +960,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:  .LBB0_16: # %for.body243
 ; CHECK-NEXT:    # Parent Loop BB0_8 Depth=1
 ; CHECK-NEXT:    # => This Inner Loop Header: Depth=2
-; CHECK-NEXT:    lb a6, 0(s1)
-; CHECK-NEXT:    lb a4, 0(a5)
+; CHECK-NEXT:    lbu a6, 0(s1)
+; CHECK-NEXT:    lbu a4, 0(a5)
 ; CHECK-NEXT:    xor a4, a4, a6
 ; CHECK-NEXT:    sb a4, 0(s0)
 ; CHECK-NEXT:    addi a7, a7, -1
@@ -982,8 +982,8 @@ define dso_local void @foo(%struct.crypto_stream_chacha20_dolbeau_riscv_v_ECRYPT
 ; CHECK-NEXT:    addi a0, sp, 24
 ; CHECK-NEXT:  .LBB0_20: # %for.body228
 ; CHECK-NEXT:    # =>This Inner Loop Header: Depth=1
-; CHECK-NEXT:    lb a3, 0(a1)
-; CHECK-NEXT:    lb a4, 0(a0)
+; CHECK-NEXT:    lbu a3, 0(a1)
+; CHECK-NEXT:    lbu a4, 0(a0)
 ; CHECK-NEXT:    xor a3, a3, a4
 ; CHECK-NEXT:    sb a3, 0(a2)
 ; CHECK-NEXT:    addi t1, t1, -1
