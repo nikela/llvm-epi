@@ -44,6 +44,8 @@
 #include <numeric>
 #include <optional>
 
+#include "llvm/IR/IntrinsicsEPI.h"
+
 using namespace clang;
 using namespace CodeGen;
 using namespace llvm::omp;
@@ -5089,6 +5091,418 @@ llvm::Function *CGOpenMPRuntime::emitReductionFunction(
   return Fn;
 }
 
+
+llvm::Constant* getReductionOpIdentityVal( llvm::Type *SrcElemType,
+                  const clang::BinaryOperator::Opcode ReductionOpCode) {
+  llvm::Constant *IdentityVal = nullptr;
+  bool isIntTy = SrcElemType->isIntegerTy();  
+  switch (ReductionOpCode) {
+    case BinaryOperatorKind::BO_Sub:
+    case BinaryOperatorKind::BO_Add:    
+      IdentityVal = isIntTy ? llvm::ConstantInt::get(SrcElemType, 0) : 
+                              llvm::ConstantFP::get(SrcElemType, 0.0);
+      break;      
+    case BinaryOperatorKind::BO_Mul:
+      IdentityVal = isIntTy ? llvm::ConstantInt::get(SrcElemType, 1) : 
+                              llvm::ConstantFP::get(SrcElemType, 1.0);
+      break;
+    case BinaryOperatorKind::BO_And:
+      IdentityVal = llvm::ConstantInt::get(SrcElemType, ~0);
+      break;
+    case BinaryOperatorKind::BO_Or:
+    case BinaryOperatorKind::BO_Xor:
+      IdentityVal = llvm::ConstantInt::get(SrcElemType, 0);
+      break;
+    default:
+      assert(false && "Reduction Operation is not supported");
+      break;
+  }
+  return IdentityVal;
+}    
+
+llvm::Value* emitReductionOpInstruction( clang::CodeGen::CodeGenFunction &CGF,
+                    llvm::Value *SrcLVec, llvm::Value *SrcRVec, bool isIntTy,
+                    const clang::BinaryOperator::Opcode ReductionOpCode) {
+  llvm::Value *ReducedVec = nullptr;
+  switch (ReductionOpCode)
+    {
+    case BinaryOperatorKind::BO_Add:
+      ReducedVec = isIntTy ?  CGF.Builder.CreateAdd(SrcLVec, SrcRVec) : 
+                              CGF.Builder.CreateFAdd(SrcLVec, SrcRVec);
+      break;
+    case BinaryOperatorKind::BO_Sub:      
+      ReducedVec = isIntTy ?  CGF.Builder.CreateSub(SrcLVec, SrcRVec) : 
+                              CGF.Builder.CreateFSub(SrcLVec, SrcRVec);
+      break;
+    case BinaryOperatorKind::BO_Mul:
+      ReducedVec = isIntTy ?  CGF.Builder.CreateMul(SrcLVec, SrcRVec) : 
+                              CGF.Builder.CreateFMul(SrcLVec, SrcRVec);
+      break;
+    case BinaryOperatorKind::BO_And:
+      ReducedVec = CGF.Builder.CreateAnd(SrcLVec, SrcRVec);
+      break;
+    case BinaryOperatorKind::BO_Or:
+      ReducedVec = CGF.Builder.CreateOr(SrcLVec, SrcRVec);
+      break;
+    case BinaryOperatorKind::BO_Xor:
+      ReducedVec = CGF.Builder.CreateXor(SrcLVec, SrcRVec);
+      break;
+    default:
+      assert(false && "Reduction Operation is not supported");
+      break;
+    }
+  return ReducedVec;
+}
+
+llvm::Intrinsic::ID getReductionOpVPIntrinsicID( bool isIntTy,
+                        const clang::BinaryOperator::Opcode ReductionOpCode ){
+
+  llvm::Intrinsic::ID VPOpCodeID = 0;    
+    switch (ReductionOpCode)
+    {
+    case BinaryOperatorKind::BO_Add:
+      VPOpCodeID = isIntTy? llvm::Intrinsic::vp_add : llvm::Intrinsic::vp_fadd;
+      break;
+    case BinaryOperatorKind::BO_Sub:
+      VPOpCodeID = isIntTy? llvm::Intrinsic::vp_sub : llvm::Intrinsic::vp_fsub;
+      break;
+    case BinaryOperatorKind::BO_Mul:
+      VPOpCodeID = isIntTy? llvm::Intrinsic::vp_mul : llvm::Intrinsic::vp_fmul;
+      break;
+    case BinaryOperatorKind::BO_And:
+      VPOpCodeID = llvm::Intrinsic::vp_and;
+      break;
+    case BinaryOperatorKind::BO_Or:
+      VPOpCodeID = llvm::Intrinsic::vp_or;
+      break;
+    case BinaryOperatorKind::BO_Xor:
+      VPOpCodeID = llvm::Intrinsic::vp_xor;
+      break;
+    default:
+      assert(false && "Operation is not supported in VP intrinsics");
+      break;
+    }
+  return VPOpCodeID;
+}
+
+llvm::Value* emitReductionOpIntrinsic( clang::CodeGen::CodeGenFunction &CGF,
+                    llvm::Value *SrcVector, llvm::Type *SrcVecElemType, 
+                    const clang::BinaryOperator::Opcode ReductionOpCode) {
+  llvm::Value *ReducedValue = nullptr;
+  switch (ReductionOpCode)
+    {
+    case BinaryOperatorKind::BO_Add:
+    case BinaryOperatorKind::BO_Sub:
+      if( SrcVecElemType->isIntegerTy() )
+        ReducedValue = CGF.Builder.CreateAddReduce(SrcVector);        
+      else
+      {
+        llvm::Value *Acc = 
+            CGF.Builder.CreateSIToFP(CGF.Builder.getInt32(0), SrcVecElemType);
+        ReducedValue = CGF.Builder.CreateFAddReduce(Acc, SrcVector);
+      }
+      break;
+    case BinaryOperatorKind::BO_Mul:
+      if( SrcVecElemType->isIntegerTy() )
+        ReducedValue = CGF.Builder.CreateMulReduce(SrcVector);
+      else
+      {
+        llvm::Value *Acc = 
+            CGF.Builder.CreateSIToFP(CGF.Builder.getInt32(1), SrcVecElemType);
+        ReducedValue = CGF.Builder.CreateFMulReduce(Acc, SrcVector);
+      }
+      break;
+    case BinaryOperatorKind::BO_And:
+      ReducedValue = CGF.Builder.CreateAndReduce(SrcVector);
+      break;
+    case BinaryOperatorKind::BO_Or:
+      ReducedValue = CGF.Builder.CreateOrReduce(SrcVector);
+      break;
+    case BinaryOperatorKind::BO_Xor:
+      ReducedValue = CGF.Builder.CreateXorReduce(SrcVector);      
+      break;
+    default:      
+      assert(false && "Operation is not supported in VP intrinsics");
+      break;
+    }
+  return ReducedValue;
+}
+
+
+llvm::Value* emitReductionOpIntrinsic( clang::CodeGen::CodeGenFunction &CGF,
+                    llvm::Value *SrcVector, llvm::Type *SrcVecElemType, 
+                    const clang::BinaryOperator::Opcode ReductionOpCode) {
+  llvm::Value *ReducedValue = nullptr;
+  switch (ReductionOpCode)
+    {
+    case BinaryOperatorKind::BO_Add:
+    case BinaryOperatorKind::BO_Sub:
+      if( SrcVecElemType->isIntegerTy() )
+        ReducedValue = CGF.Builder.CreateAddReduce(SrcVector);        
+      else
+      {
+        llvm::Value *Acc = 
+            CGF.Builder.CreateSIToFP(CGF.Builder.getInt32(0), SrcVecElemType);
+        ReducedValue = CGF.Builder.CreateFAddReduce(Acc, SrcVector);
+      }
+      break;
+    case BinaryOperatorKind::BO_Mul:
+      if( SrcVecElemType->isIntegerTy() )
+        ReducedValue = CGF.Builder.CreateMulReduce(SrcVector);
+      else
+      {
+        llvm::Value *Acc = 
+            CGF.Builder.CreateSIToFP(CGF.Builder.getInt32(1), SrcVecElemType);
+        ReducedValue = CGF.Builder.CreateFMulReduce(Acc, SrcVector);
+      }
+      break;
+    case BinaryOperatorKind::BO_And:
+      ReducedValue = CGF.Builder.CreateAndReduce(SrcVector);
+      break;
+    case BinaryOperatorKind::BO_Or:
+      ReducedValue = CGF.Builder.CreateOrReduce(SrcVector);
+      break;
+    case BinaryOperatorKind::BO_Xor:
+      ReducedValue = CGF.Builder.CreateXorReduce(SrcVector);      
+      break;
+    default:      
+      assert(false && "Operation is not supported in VP intrinsics");
+      break;
+    }
+  return ReducedValue;
+}
+
+uint32_t getNumElem64bits(llvm::Type* SrcElemType) {
+  uint32_t numElems=1; 
+  if(SrcElemType->isDoubleTy() || SrcElemType->isIntegerTy(64))
+    numElems = 1;
+  else if(SrcElemType->isFloatTy() || SrcElemType->isIntegerTy(32))
+    numElems = 2;
+  else if(SrcElemType->isIntegerTy(16))
+    numElems = 4;
+  else if(SrcElemType->isIntegerTy(8))
+    numElems = 8;
+  else
+    assert(false && "Vec Reduction is not supported for this data type");
+  return numElems;
+}
+
+uint32_t getSEWParam(llvm::Type* SrcElemType) {
+  uint32_t SEW=0; 
+  if(SrcElemType->isDoubleTy() || SrcElemType->isIntegerTy(64))
+    SEW = 3;
+  else if(SrcElemType->isFloatTy() || SrcElemType->isIntegerTy(32))
+    SEW = 2;
+  else if(SrcElemType->isIntegerTy(16))
+    SEW = 1;
+  else if(SrcElemType->isIntegerTy(8))
+    SEW = 0;
+  else
+    assert(false && "SEW for vsetvl is not supported for this data type");
+  return SEW;
+}
+
+llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
+    SourceLocation Loc, llvm::Type *ArgsType, ArrayRef<const Expr *> Privates,
+    ArrayRef<const Expr *> LHSExprs, ArrayRef<const Expr *> RHSExprs,
+    ArrayRef<const Expr *> ReductionOps) {
+  ASTContext &C = CGM.getContext();
+
+  // void reduction_func(void *LHSArg, void *RHSArrayArg);
+  // void *LHSArg: 1D array where each element is 
+  // an address to store LHS of each reduction operation
+  // void *RHSArrayArg is a 2D array. 
+  // 1st sub-Array only contain a single element i.e number of Threads  
+  // rest of the sub arrays contains RHS values from all threads 
+  // for each reduction operations.
+
+  FunctionArgList Args;
+  ImplicitParamDecl LHSArg(C, /*DC=*/nullptr, Loc, /*Id=*/nullptr, 
+                            C.VoidPtrTy, ImplicitParamDecl::Other);
+  ImplicitParamDecl RHSArrayArg(C, /*DC=*/nullptr, Loc, /*Id=*/nullptr, 
+                                C.VoidPtrTy, ImplicitParamDecl::Other);
+
+  Args.push_back(&LHSArg);
+  Args.push_back(&RHSArrayArg);
+  
+  const auto &CGFI =
+      CGM.getTypes().arrangeBuiltinFunctionDeclaration(C.VoidTy, Args);
+  std::string Name = getName({"omp", "reduction", "reduction_func"});
+  auto *Fn = llvm::Function::Create(CGM.getTypes().GetFunctionType(CGFI),
+                                    llvm::GlobalValue::InternalLinkage, Name,
+                                    &CGM.getModule());
+  CGM.SetInternalFunctionAttributes(GlobalDecl(), Fn, CGFI);
+  Fn->setDoesNotRecurse();
+  CodeGenFunction CGF(CGM);
+  CGF.StartFunction(GlobalDecl(), C.VoidTy, Fn, CGFI, Args, Loc, Loc);
+
+  llvm::APInt RHSArraySize(/*unsigned int numBits=*/32, 
+                  ArgsType->getPointerElementType()->getArrayNumElements()+1);
+  QualType RHSArraySizeTy = C.getConstantArrayType(C.VoidPtrTy, RHSArraySize, 
+                            nullptr, ArrayType::Normal, /*IndexTypeQuals=*/0);
+  llvm::Type* ArgsTypeRHSArray = 
+                    CGF.ConvertTypeForMem(RHSArraySizeTy)->getPointerTo();
+
+  llvm::BasicBlock *VectorReductionEntryBB = CGF.createBasicBlock("vec.entry");
+
+  CGF.EmitBlock(VectorReductionEntryBB);
+  Address LHS(CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
+      CGF.Builder.CreateLoad(CGF.GetAddrOfLocalVar(&LHSArg)),
+      ArgsType), CGF.getPointerAlign());
+  Address RHSArray(CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
+      CGF.Builder.CreateLoad(CGF.GetAddrOfLocalVar(&RHSArrayArg)),
+      ArgsTypeRHSArray), CGF.getPointerAlign()); 
+      
+  ///////////////////////////////////  
+  CodeGenFunction::OMPPrivateScope Scope(CGF);
+  auto IPriv = Privates.begin();  
+  unsigned Idx = 0;
+  unsigned RIdx = 0; 
+  auto PVarNThreads = ParmVarDecl::Create(C, /*DC=*/nullptr, Loc, Loc, 
+                                  /*Id=*/nullptr, C.IntTy , /*TInfo=*/nullptr,
+                                  StorageClass::SC_None, nullptr );
+  const VarDecl *VarNThreads = cast<VarDecl>(PVarNThreads);   
+  Scope.addPrivate(VarNThreads, [&CGF, RHSArray, RIdx, VarNThreads]() {
+    return emitAddrOfVarFromArray(CGF, RHSArray, RIdx, VarNThreads);
+  }); 
+  RIdx++;
+
+  for (unsigned I = 0, E = ReductionOps.size(); 
+                                      I < E; ++I, ++IPriv, ++Idx, ++RIdx) {
+    const auto *RHSArrayVar =
+        cast<VarDecl>(cast<DeclRefExpr>(RHSExprs[I])->getDecl());        
+    Scope.addPrivate(RHSArrayVar, [&CGF, RHSArray, RIdx, RHSArrayVar]() {
+      return emitAddrOfVarFromArray(CGF, RHSArray, RIdx, RHSArrayVar);
+    });            
+    const auto *LHSVar =
+        cast<VarDecl>(cast<DeclRefExpr>(LHSExprs[I])->getDecl());
+    Scope.addPrivate(LHSVar, [&CGF, LHS, Idx, LHSVar]() {
+      return emitAddrOfVarFromArray(CGF, LHS, Idx, LHSVar);
+    });
+  }  
+  Scope.Privatize();
+  //////////////////////////////////////////////////////
+
+
+  auto VarAddressNThreads = CGF.GetAddrOfLocalVar(VarNThreads);
+  auto nThreads =  CGF.Builder.CreateLoad(VarAddressNThreads);
+
+  unsigned I = 0;
+  for (const Expr *E : ReductionOps) {                
+    llvm::BasicBlock *ForHead = CGF.createBasicBlock("VLoopHead");
+    llvm::BasicBlock *ForBody = CGF.createBasicBlock("VLoopBody");
+    llvm::BasicBlock *ForExit = CGF.createBasicBlock("VLoopExit");        
+
+    CGF.EmitBranch(ForHead);
+
+    CGF.EmitBlock(ForHead); 
+    const auto ReductionOpCode = 
+        cast<BinaryOperator>(cast<BinaryOperator>(E)->getRHS())->getOpcode();
+    const auto *RHSArrayVar =
+        cast<VarDecl>(cast<DeclRefExpr>(RHSExprs[I])->getDecl()); 
+    auto RHSArrayVarAddress = CGF.GetAddrOfLocalVar(RHSArrayVar);
+    auto SrcElemType = RHSArrayVarAddress.getElementType();
+    bool isIntTy = SrcElemType->isIntegerTy();    
+    uint32_t numElems= getNumElem64bits(SrcElemType);
+    auto SrcVecType = llvm::VectorType::get(SrcElemType, numElems, true);
+    auto SrcVecPtrType = SrcVecType->getPointerTo(); 
+    
+    llvm::Value *StepVec = CGF.Builder.CreateIntrinsic(
+                              llvm::Intrinsic::experimental_stepvector,
+                              llvm::VectorType::get(CGF.Builder.getInt64Ty(),
+                              numElems,true), 
+                              {}, nullptr);  
+    
+    llvm::Constant *IdentityVal = getReductionOpIdentityVal(SrcElemType, 
+                                                            ReductionOpCode);
+    
+    llvm::Value *Zero = CGF.Builder.getInt32(0);
+    llvm::Value *ZeroCVec = llvm::ConstantVector::getSplat(
+                                  SrcVecType->getElementCount(), IdentityVal);
+    llvm::Value *ZeroVec = CGF.Builder.CreateInsertElement( ZeroCVec, 
+                                                            IdentityVal, Zero);
+
+    CGF.EmitBranch(ForBody);
+
+    CGF.EmitBlock(ForBody);
+    llvm::PHINode *IndexVar = CGF.Builder.CreatePHI(CGM.Int32Ty, 2);
+    llvm::PHINode *PhiVec = CGF.Builder.CreatePHI(SrcVecType, 2);
+
+    IndexVar->addIncoming(CGF.Builder.getInt32(0), ForHead);           
+    PhiVec->addIncoming( ZeroVec, ForHead);
+
+    auto VecGEP = CGF.Builder.CreateGEP(RHSArrayVarAddress.getElementType(), 
+                                  RHSArrayVarAddress.getPointer(), IndexVar);
+    auto VecGEPCast = CGF.Builder.CreateBitCast(VecGEP, SrcVecPtrType);      
+
+    llvm::SmallVector<llvm::Type *> arg_vec;
+    arg_vec.push_back(VecGEPCast->getType());
+    llvm::ArrayRef<llvm::Type *> arg_type(arg_vec); 
+    auto vTy = SrcVecType;
+    
+    auto vpLoadDecl = llvm::Intrinsic::getDeclaration(&CGM.getModule(), 
+                                  llvm::Intrinsic::vp_load, 
+                                  {SrcVecType, VecGEPCast->getType()});
+    llvm::Value *BlockInMaskPart = 
+                        CGF.Builder.getTrueVector(vTy->getElementCount()); 
+    llvm::Value *RVL = CGF.Builder.CreateSub(nThreads, IndexVar);
+    llvm::Value *RVLArg = CGF.Builder.CreateZExtOrTrunc(RVL, 
+                              llvm::Type::getInt64Ty(CGF.getLLVMContext()));
+    llvm::Constant *SEWArg = llvm::ConstantInt::get( 
+                              llvm::IntegerType::get(CGF.getLLVMContext(), 64),
+                              getSEWParam(SrcElemType));
+    llvm::Constant *LMULArg = llvm::ConstantInt::get(
+                              llvm::IntegerType::get(CGF.getLLVMContext(), 64),
+                              0);
+    llvm::Value *GVL64 = CGF.Builder.CreateIntrinsic(
+                                          llvm::Intrinsic::epi_vsetvl, {},
+                                          {RVLArg, SEWArg, LMULArg});
+    llvm::Value *GVL = CGF.Builder.CreateZExtOrTrunc( GVL64, 
+                                                      IndexVar->getType());
+    
+    auto vpLoadedVec = CGF.Builder.CreateCall(vpLoadDecl, 
+                                      {VecGEPCast, BlockInMaskPart, GVL});
+    SmallVector<llvm::Value*, 4> Ops;
+    Ops.push_back(PhiVec);    
+    Ops.push_back(vpLoadedVec);
+    llvm::Intrinsic::ID VPOpCodeID = getReductionOpVPIntrinsicID( isIntTy, 
+                                                            ReductionOpCode);
+    llvm::Value* PredMask = CGF.Builder.getTrueVector(vTy->getElementCount());
+    Ops.push_back(PredMask);    
+    Ops.push_back(GVL);    
+    llvm::CallInst *VecHReduced = CGF.Builder.CreateIntrinsic(VPOpCodeID, 
+                                                vpLoadedVec->getType(), Ops);
+    llvm::Value *EVLSplat = 
+        CGF.Builder.CreateVectorSplat(vTy->getElementCount(), GVL64);
+    llvm::Value *EVLMask = 
+        CGF.Builder.CreateICmpULT(StepVec, EVLSplat);
+    llvm::Value *VecSelect = 
+        CGF.Builder.CreateSelect(EVLMask, VecHReduced, PhiVec);
+
+    llvm::Value *NextIndexVar = CGF.Builder.CreateAdd(IndexVar, GVL);
+    IndexVar->addIncoming(NextIndexVar, ForBody);    
+    PhiVec->addIncoming(VecSelect, ForBody);
+    
+    CGF.Builder.CreateCondBr(
+                CGF.Builder.CreateICmpULT( NextIndexVar, nThreads ),
+                ForBody, ForExit); 
+
+    CGF.EmitBlock(ForExit);
+    llvm::Value *ReducedValue = emitReductionOpIntrinsic(CGF, VecSelect, 
+                                              SrcElemType, ReductionOpCode);
+    const auto *LHSVar =
+          cast<VarDecl>(cast<DeclRefExpr>(LHSExprs[I])->getDecl());
+    auto LHSVarAddress = CGF.GetAddrOfLocalVar(LHSVar);
+    CGF.Builder.CreateStore(ReducedValue, LHSVarAddress);
+    ++I;
+  }
+  Scope.ForceCleanup();    
+  
+  CGF.FinishFunction();
+  return Fn;
+} // emitVReductionFunctionRISCV
+
+
 void CGOpenMPRuntime::emitSingleReductionCombiner(CodeGenFunction &CGF,
                                                   const Expr *ReductionOp,
                                                   const Expr *PrivateRef,
@@ -5187,6 +5601,13 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
                              /*IndexTypeQuals=*/0);
   Address ReductionList =
       CGF.CreateMemTemp(ReductionArrayTy, ".omp.reduction.red_list");
+
+  QualType ReductionArrayTySizes =
+    C.getConstantArrayType(C.IntTy, ArraySize, nullptr, ArrayType::Normal,
+                             /*IndexTypeQuals=*/0);
+  Address ReductionArrayTySizesList =
+    CGF.CreateMemTemp(ReductionArrayTySizes, ".omp.reduction.red_list.sizes");
+
   const auto *IPriv = Privates.begin();
   unsigned Idx = 0;
   for (unsigned I = 0, E = RHSExprs.size(); I < E; ++I, ++IPriv, ++Idx) {
@@ -5207,13 +5628,29 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
       CGF.Builder.CreateStore(CGF.Builder.CreateIntToPtr(Size, CGF.VoidPtrTy),
                               Elem);
     }
+    if (CGM.getLangOpts().OpenMPUseVBR) {
+      Elem = CGF.Builder.CreateConstArrayGEP(ReductionArrayTySizesList, Idx);      
+      CGF.Builder.CreateStore(CGF.Builder.getInt32(
+          CGF.ConvertTypeForMem((*IPriv)->getType())->getScalarSizeInBits()/8),
+                              Elem);
+    }    
+
   }
 
   // 2. Emit reduce_func().
-  llvm::Function *ReductionFn =
-      emitReductionFunction(Loc, CGF.ConvertTypeForMem(ReductionArrayTy),
-                            Privates, LHSExprs, RHSExprs, ReductionOps);
-
+  llvm::Function *ReductionFn;  
+  if (CGM.getLangOpts().OpenMPUseVBR && CGM.getTriple().isRISCV()) {
+    ReductionFn = emitVReductionFunctionRISCV(
+            Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(), 
+            Privates, LHSExprs, RHSExprs, ReductionOps);
+  }
+  else {
+    ReductionFn = emitReductionFunction(
+            Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(), 
+            Privates, LHSExprs, RHSExprs, ReductionOps);
+            //getPointerTo() may not be necessary
+  }
+ 
   // 3. Create static kmp_critical_name lock = { 0 };
   std::string Name = getName({"reduction"});
   llvm::Value *Lock = getCriticalRegionLock(Name);
@@ -5225,7 +5662,51 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
   llvm::Value *ReductionArrayTySize = CGF.getTypeSize(ReductionArrayTy);
   llvm::Value *RL = CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
       ReductionList.getPointer(), CGF.VoidPtrTy);
-  llvm::Value *Args[] = {
+  llvm::Value *Res;  
+  if (CGM.getLangOpts().OpenMPUseVBR) {    
+    Address FirstElem = CGF.Builder.CreateConstArrayGEP(
+                                            ReductionArrayTySizesList, 0);
+    llvm::Value *RLsize = CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
+                                      FirstElem.getPointer(), CGF.VoidPtrTy);
+  
+    llvm::APInt ArraySizeRLS(/*unsigned int numBits=*/32, 2);
+    QualType ReductionArraySizesHelperTy =
+        C.getConstantArrayType( C.VoidPtrTy, ArraySizeRLS, nullptr, 
+                                ArrayType::Normal, /*IndexTypeQuals=*/0);
+    Address ReductionListSizesListHelper = CGF.CreateMemTemp(
+        ReductionArraySizesHelperTy, ".omp.reduction.red_list_sizes_helper");
+
+    Address Elem0 = CGF.Builder.CreateConstArrayGEP(
+                                      ReductionListSizesListHelper, 0);
+    Address Elem1 = CGF.Builder.CreateConstArrayGEP(
+                                      ReductionListSizesListHelper, 1);
+    CGF.Builder.CreateStore(RLsize, Elem0);
+    CGF.Builder.CreateStore(RL, Elem1);
+    llvm::Value *RLsizeHelp = CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
+            ReductionListSizesListHelper.getPointer(), CGF.VoidPtrTy);    
+    // To keep the __kmpc_reduce_nowait/__kmpc_reduce function signature intact
+    // RLsizeHelp is passed instead of RL. RLsizeHelp is 2D List 
+    // List 0 contains  void * RedListVarSizes 
+    // List 1 contains  void * RedList
+    // This 2D List is read like as above in the OpenMP runtime 
+    // by vectorized barriers subroutine
+    llvm::Value *Args[] = {
+      IdentTLoc,                             // ident_t *<loc>
+      ThreadId,                              // i32 <gtid>
+      CGF.Builder.getInt32(RHSExprs.size()), // i32 <n>
+      ReductionArrayTySize,                  // size_type sizeof(RedList)
+      RLsizeHelp,                            // void *RedList + RedListVarSizes
+      ReductionFn, // void (*) (void *, void *) <reduce_func>
+      Lock         // kmp_critical_name *&<lock>
+    };
+    Res = CGF.EmitRuntimeCall(
+        OMPBuilder.getOrCreateRuntimeFunction(
+            CGM.getModule(),
+            WithNowait ? OMPRTL___kmpc_reduce_nowait : OMPRTL___kmpc_reduce),
+        Args);
+  }    
+  else {
+    llvm::Value *Args[] = {
       IdentTLoc,                             // ident_t *<loc>
       ThreadId,                              // i32 <gtid>
       CGF.Builder.getInt32(RHSExprs.size()), // i32 <n>
