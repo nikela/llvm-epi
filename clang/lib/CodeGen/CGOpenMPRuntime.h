@@ -1205,13 +1205,6 @@ public:
                                          ArrayRef<const Expr *> RHSExprs,
                                          ArrayRef<const Expr *> ReductionOps);
 
-  llvm::Function *emitVReductionFunctionARMAVX(SourceLocation Loc,
-                                         llvm::Type *ArgsType,
-                                         ArrayRef<const Expr *> Privates,
-                                         ArrayRef<const Expr *> LHSExprs,
-                                         ArrayRef<const Expr *> RHSExprs,
-                                         ArrayRef<const Expr *> ReductionOps);
-
   /// Emits single reduction combiner
   void emitSingleReductionCombiner(CodeGenFunction &CGF,
                                    const Expr *ReductionOp,
