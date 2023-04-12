@@ -281,7 +281,7 @@ void *KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SINGLE_COPY_START)(void) {
   }
   OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 
   // Retrieve the value of the copyprivate data point, and wait for all
   // threads to do likewise, then return.
@@ -290,7 +290,7 @@ void *KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SINGLE_COPY_START)(void) {
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
-    __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+    __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
   }
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   if (ompt_enabled.enabled) {
@@ -317,12 +317,12 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SINGLE_COPY_END)(void *data) {
   }
   OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
   {
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
-    __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+    __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
   }
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   if (ompt_enabled.enabled) {
@@ -869,7 +869,7 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_LOOP_END)(void) {
     OMPT_STORE_RETURN_ADDRESS(gtid);
   }
 #endif
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   if (ompt_enabled.enabled) {
     ompt_frame->enter_frame = ompt_data_none;
@@ -1452,7 +1452,7 @@ void KMP_EXPAND_NAME(KMP_API_NAME_GOMP_SECTIONS_END)(void) {
   }
   OMPT_STORE_RETURN_ADDRESS(gtid);
 #endif
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT
   if (ompt_enabled.enabled) {
     ompt_frame->enter_frame = ompt_data_none;

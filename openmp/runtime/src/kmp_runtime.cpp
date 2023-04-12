@@ -27,7 +27,9 @@
 #if KMP_USE_HIER_SCHED
 #include "kmp_dispatch_hier.h"
 #endif
-
+#if KMP_VBR_ENABLED
+#include <cmath>
+#endif
 #if OMPT_SUPPORT
 #include "ompt-specific.h"
 #endif
@@ -78,7 +80,9 @@ kmp_info_t __kmp_monitor;
 #endif
 
 /* Forward declarations */
-
+#if KMP_VBR_ENABLED
+static void __kmp_set_team_vector_array(kmp_team_t *team);
+#endif
 void __kmp_cleanup(void);
 
 static void __kmp_initialize_info(kmp_info_t *, kmp_team_t *, int tid,
@@ -2812,7 +2816,9 @@ void __kmp_set_num_threads(int new_nth, int gtid) {
       hot_team->t.b->update_num_threads(new_nth);
       __kmp_add_threads_to_team(hot_team, new_nth);
     }
-
+#if KMP_VBR_ENABLED
+    __kmp_set_team_vector_array(hot_team);
+#endif
     __kmp_release_bootstrap_lock(&__kmp_forkjoin_lock);
 
     // Update the t_nproc field in the threads that are still active.
@@ -3218,7 +3224,71 @@ static void __kmp_allocate_team_arrays(kmp_team_t *team, int max_nth) {
     team->t.t_disp_buffer[i].buffer_index = i;
     team->t.t_disp_buffer[i].doacross_buf_idx = i;
   }
+
+#if KMP_VBR_ENABLED
+  // vectorized barrier array allocation and initialization
+  for (int bt=0; bt<bs_last_barrier; bt++){
+    kmp_uint32 num_threads = max_nth;
+    kmp_uint32 branch_bits = __kmp_barrier_release_branch_bits[bt];
+    kmp_uint32 branch_factor = 1 << branch_bits;
+
+    team->t.t_bar[bt].padding = __kmp_barrier_vector_padding;
+    team->t.t_bar[bt].levels = num_threads < branch_factor ? 1 : 
+                                ceil(log10(num_threads)/log10(branch_factor));
+
+    team->t.t_bar[bt].b_arrived_vflags = (kmp_uint8 **)__kmp_allocate( 
+                            sizeof(kmp_uint8 *) * team->t.t_bar[bt].levels );
+    for (int l = 0; l < team->t.t_bar[bt].levels; l++) {
+      team->t.t_bar[bt].b_arrived_vflags[l] = 
+                              (kmp_uint8 *)__kmp_allocate(sizeof(kmp_uint8) * 
+                              team->t.t_max_nproc * team->t.t_bar[bt].padding);
+      for (int i = 0; i < team->t.t_max_nproc * team->t.t_bar[bt].padding; i++)
+        team->t.t_bar[bt].b_arrived_vflags[l][i] = 0;      
+    }
+    // reduction array
+    team->t.t_bar[bt].reduction_arrays = (void **)__kmp_allocate( 
+                                  sizeof(void*) * REDUCTION_ARRAYS_CAPACITY );
+    // reduction_arrays[0] is dedicated to pass 
+    // number of threads to reduction_function
+    team->t.t_bar[bt].reduction_arrays[0] = 
+                                (void *)__kmp_allocate(sizeof(kmp_uint8) * 64);
+    for (int i=1; i < REDUCTION_ARRAYS_CAPACITY; i++) {
+	    // max 64 bytes (one cache line) per element
+	    team->t.t_bar[bt].reduction_arrays[i] = (void *)__kmp_allocate( 
+                                sizeof(kmp_uint8) * 64 * team->t.t_max_nproc );
+    }
+  }
+#endif //KMP_VBR_ENABLED
+  KA_TRACE(10, ("__kmp_allocate_team_arrays:\n"));
 }
+
+#if KMP_VBR_ENABLED
+static void __kmp_set_team_vector_array(kmp_team_t *team) {  
+  for (int bt=0; bt<bs_last_barrier; bt++){
+    kmp_uint32 padding = team->t.t_bar[bt].padding;
+    kmp_uint32 num_threads = team->t.t_nproc;
+    kmp_uint32 branch_bits = __kmp_barrier_release_branch_bits[bt];
+    kmp_uint32 branch_factor = 1 << branch_bits;
+
+    team->t.t_bar[bt].levels = num_threads < branch_factor ? 1 : 
+                                ceil(log10(num_threads)/log10(branch_factor));
+    kmp_uint32 nlevels = team->t.t_bar[bt].levels;
+    kmp_uint32 num_threads_level = num_threads;
+
+    for (int l = 0; l < nlevels; l++) {
+      for (int i = 0; i < num_threads_level; i++)
+        if (i%branch_factor != 0 && bt != bs_forkjoin_barrier)
+          team->t.t_bar[bt].b_arrived_vflags[l][i*padding] = 1;
+      
+      float nt = (float)num_threads_level / branch_factor;
+      if ( nt == (int) nt)
+        num_threads_level = nt;
+      else
+        num_threads_level = (int)nt+1;
+    }
+  }
+}
+#endif //KMP_VBR_ENABLED
 
 static void __kmp_free_team_arrays(kmp_team_t *team) {
   /* Note: this does not free the threads in t_threads (__kmp_free_threads) */
@@ -3240,6 +3310,23 @@ static void __kmp_free_team_arrays(kmp_team_t *team) {
   team->t.t_disp_buffer = NULL;
   team->t.t_dispatch = NULL;
   team->t.t_implicit_task_taskdata = 0;
+#if KMP_VBR_ENABLED  
+  for (int bt=0; bt<bs_last_barrier; bt++) {
+    for (size_t l = 0; l < team->t.t_bar[bt].levels; l++) {
+      __kmp_free(team->t.t_bar[bt].b_arrived_vflags[l]);
+      team->t.t_bar[bt].b_arrived_vflags[l] = NULL;
+    }
+    __kmp_free(team->t.t_bar[bt].b_arrived_vflags);
+    team->t.t_bar[bt].b_arrived_vflags = NULL;
+    team->t.t_bar[bt].levels = 0;
+    team->t.t_bar[bt].padding = 1;
+    for (size_t i = 0; i < REDUCTION_ARRAYS_CAPACITY; i++)
+      __kmp_free(team->t.t_bar[bt].reduction_arrays[i]);
+    __kmp_free(team->t.t_bar[bt].reduction_arrays);
+    team->t.t_bar[bt].reduction_arrays = NULL;
+  }
+#endif //KMP_VBR_ENABLED
+  KA_TRACE(10, ("__kmp_free_team_arrays:\n"));
 }
 
 static void __kmp_reallocate_team_arrays(kmp_team_t *team, int max_nth) {
@@ -3248,6 +3335,18 @@ static void __kmp_reallocate_team_arrays(kmp_team_t *team, int max_nth) {
   __kmp_free(team->t.t_disp_buffer);
   __kmp_free(team->t.t_dispatch);
   __kmp_free(team->t.t_implicit_task_taskdata);
+#if KMP_VBR_ENABLED  
+  for (int bt=0; bt<bs_last_barrier; bt++) {
+    for (size_t l = 0; l < team->t.t_bar[bt].levels; l++)
+      __kmp_free(team->t.t_bar[bt].b_arrived_vflags[l]);  
+    
+    __kmp_free(team->t.t_bar[bt].b_arrived_vflags);
+    for (size_t i = 0; i < REDUCTION_ARRAYS_CAPACITY; i++)
+      __kmp_free(team->t.t_bar[bt].reduction_arrays[i]);
+
+    __kmp_free(team->t.t_bar[bt].reduction_arrays);
+  }
+#endif  
   __kmp_allocate_team_arrays(team, max_nth);
 
   KMP_MEMCPY(team->t.t_threads, oldThreads,
@@ -5513,7 +5612,9 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
 #if OMPT_SUPPORT
     __ompt_team_assign_id(team, ompt_parallel_data);
 #endif
-
+#if KMP_VBR_ENABLED    
+    __kmp_set_team_vector_array(team);
+#endif    
     KMP_MB();
 
     return team;
@@ -5570,7 +5671,9 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
 #if OMPT_SUPPORT
       __ompt_team_assign_id(team, ompt_parallel_data);
 #endif
-
+#if KMP_VBR_ENABLED
+      __kmp_set_team_vector_array(team);
+#endif      
       KMP_MB();
 
       return team;
@@ -5631,6 +5734,9 @@ __kmp_allocate_team(kmp_root_t *root, int new_nproc, int max_nproc,
       team->t.t_bar[b].b_team_arrived = 0;
 #endif
     }
+#if KMP_VBR_ENABLED    
+    __kmp_set_team_vector_array(team);
+#endif    
   }
 
   team->t.t_proc_bind = new_proc_bind;

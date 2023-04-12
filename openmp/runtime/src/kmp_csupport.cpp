@@ -751,7 +751,7 @@ void __kmpc_barrier(ident_t *loc, kmp_int32 global_tid) {
   // 2) set to 0 when a new team is created
   // 4) no sync is required
 
-  __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   if (ompt_enabled.enabled) {
     ompt_frame->enter_frame = ompt_data_none;
@@ -1729,7 +1729,7 @@ kmp_int32 __kmpc_barrier_master(ident_t *loc, kmp_int32 global_tid) {
 #if USE_ITT_NOTIFY
   __kmp_threads[global_tid]->th.th_ident = loc;
 #endif
-  status = __kmp_barrier(bs_plain_barrier, global_tid, TRUE, 0, NULL, NULL);
+  status = __kmp_barrier(bs_plain_barrier, global_tid, TRUE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   if (ompt_enabled.enabled) {
     ompt_frame->enter_frame = ompt_data_none;
@@ -1793,7 +1793,7 @@ kmp_int32 __kmpc_barrier_master_nowait(ident_t *loc, kmp_int32 global_tid) {
 #if USE_ITT_NOTIFY
   __kmp_threads[global_tid]->th.th_ident = loc;
 #endif
-  __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
   if (ompt_enabled.enabled) {
     ompt_frame->enter_frame = ompt_data_none;
@@ -2210,7 +2210,7 @@ void __kmpc_copyprivate(ident_t *loc, kmp_int32 gtid, size_t cpy_size,
 #if USE_ITT_NOTIFY
   __kmp_threads[gtid]->th.th_ident = loc;
 #endif
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 
   if (!didit)
     (*cpy_func)(cpy_data, *data_ptr);
@@ -2225,7 +2225,7 @@ void __kmpc_copyprivate(ident_t *loc, kmp_int32 gtid, size_t cpy_size,
     __kmp_threads[gtid]->th.th_ident = loc; // TODO: check if it is needed (e.g.
 // tasks can overwrite the location)
 #endif
-    __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     if (ompt_enabled.enabled) {
       ompt_frame->enter_frame = ompt_data_none;
@@ -3653,7 +3653,8 @@ __kmpc_reduce_nowait(ident_t *loc, kmp_int32 global_tid, kmp_int32 num_vars,
 #endif
     retval =
         __kmp_barrier(UNPACK_REDUCTION_BARRIER(packed_reduction_method),
-                      global_tid, FALSE, reduce_size, reduce_data, reduce_func);
+                      global_tid, FALSE, num_vars, reduce_size, reduce_data, 
+                      reduce_func);
     retval = (retval != 0) ? (0) : (1);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     if (ompt_enabled.enabled) {
@@ -3843,7 +3844,8 @@ kmp_int32 __kmpc_reduce(ident_t *loc, kmp_int32 global_tid, kmp_int32 num_vars,
 #endif
     retval =
         __kmp_barrier(UNPACK_REDUCTION_BARRIER(packed_reduction_method),
-                      global_tid, TRUE, reduce_size, reduce_data, reduce_func);
+                      global_tid, TRUE, num_vars, reduce_size, reduce_data, 
+                      reduce_func);
     retval = (retval != 0) ? (0) : (1);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     if (ompt_enabled.enabled) {
@@ -3922,7 +3924,7 @@ void __kmpc_end_reduce(ident_t *loc, kmp_int32 global_tid,
 #if USE_ITT_NOTIFY
     __kmp_threads[global_tid]->th.th_ident = loc;
 #endif
-    __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, NULL, NULL);
+    __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     if (ompt_enabled.enabled) {
       ompt_frame->enter_frame = ompt_data_none;
@@ -3948,7 +3950,7 @@ void __kmpc_end_reduce(ident_t *loc, kmp_int32 global_tid,
 #if USE_ITT_NOTIFY
     __kmp_threads[global_tid]->th.th_ident = loc;
 #endif
-    __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, NULL, NULL);
+    __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     if (ompt_enabled.enabled) {
       ompt_frame->enter_frame = ompt_data_none;
@@ -3970,7 +3972,7 @@ void __kmpc_end_reduce(ident_t *loc, kmp_int32 global_tid,
 #if USE_ITT_NOTIFY
     __kmp_threads[global_tid]->th.th_ident = loc;
 #endif
-    __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, NULL, NULL);
+    __kmp_barrier(bs_plain_barrier, global_tid, FALSE, 0, 0, NULL, NULL);
 #if OMPT_SUPPORT && OMPT_OPTIONAL
     if (ompt_enabled.enabled) {
       ompt_frame->enter_frame = ompt_data_none;

@@ -1804,6 +1804,26 @@ static void __kmp_stg_print_barrier_pattern(kmp_str_buf_t *buffer,
 } // __kmp_stg_print_barrier_pattern
 
 // -----------------------------------------------------------------------------
+// KMP_BARRIER_VECTOR_PADDING
+
+static void __kmp_stg_parse_barrier_vector_padding(char const *name, char const *value,
+                                    void *data) {
+  __kmp_stg_parse_int(name, value, 1, 64,
+                      (int *)&__kmp_barrier_vector_padding);
+  if(__kmp_barrier_vector_padding % 2 != 0)
+    __kmp_barrier_vector_padding = 1;
+  if(__kmp_barrier_vector_padding > 64)
+    __kmp_barrier_vector_padding = 64;
+  if(__kmp_barrier_vector_padding < 1)
+    __kmp_barrier_vector_padding = 1;    
+} // __kmp_stg_parse_barrier_vector_padding
+
+static void __kmp_stg_print_barrier_vector_padding(kmp_str_buf_t *buffer, char const *name,
+                                    void *data) {
+  __kmp_stg_print_int(buffer, name, __kmp_barrier_vector_padding);
+} // __kmp_stg_print_barrier_vector_padding
+
+// -----------------------------------------------------------------------------
 // KMP_ABORT_DELAY
 
 static void __kmp_stg_parse_abort_delay(char const *name, char const *value,
@@ -5466,6 +5486,8 @@ static kmp_setting_t __kmp_stg_table[] = {
      __kmp_stg_print_barrier_branch_bit, NULL, 0, 0},
     {"KMP_FORKJOIN_BARRIER_PATTERN", __kmp_stg_parse_barrier_pattern,
      __kmp_stg_print_barrier_pattern, NULL, 0, 0},
+    {"KMP_BARRIER_VECTOR_PADDING", __kmp_stg_parse_barrier_vector_padding,
+     __kmp_stg_print_barrier_vector_padding, NULL, 0, 0},    
 #if KMP_FAST_REDUCTION_BARRIER
     {"KMP_REDUCTION_BARRIER", __kmp_stg_parse_barrier_branch_bit,
      __kmp_stg_print_barrier_branch_bit, NULL, 0, 0},

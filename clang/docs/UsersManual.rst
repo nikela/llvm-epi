@@ -3306,6 +3306,12 @@ Controlling implementation limits
  is provided or target does not support TLS, code generation for threadprivate
  variables relies on OpenMP runtime library.
 
+.. option:: -fopenmp-use-vbr
+
+ Controls code generation for OpenMP vectorized barrier aand reduction. In presence of
+ this option vectorized barrier and reduction are used. If `-fno-openmp-use-vbr`
+ is provided the default (non-vectorized) barrier and reduction are used.
+
 .. _opencl:
 
 OpenCL Features

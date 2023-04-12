@@ -251,6 +251,8 @@ enum stats_state_e {
 // KMP_hyper_release      -- time in __kmp_hyper_barrier_release
 // KMP_dist_gather       -- time in __kmp_dist_barrier_gather
 // KMP_dist_release      -- time in __kmp_dist_barrier_release
+// KMP_vector_gather       -- time in __kmp_vector_barrier_gather
+// KMP_vector_release      -- time in __kmp_vector_barrier_release
 // clang-format off
 #define KMP_FOREACH_DEVELOPER_TIMER(macro, arg)                                \
   macro(KMP_fork_call, 0, arg)                                                 \
@@ -266,6 +268,8 @@ enum stats_state_e {
   macro(KMP_linear_release, 0, arg)                                            \
   macro(KMP_tree_gather, 0, arg)                                               \
   macro(KMP_tree_release, 0, arg)                                              \
+  macro(KMP_vector_gather, 0, arg)                                             \
+  macro(KMP_vector_release, 0, arg)                                            \
   macro(USER_resume, 0, arg)                                                   \
   macro(USER_suspend, 0, arg)                                                  \
   macro(USER_mwait, 0, arg)                                                    \

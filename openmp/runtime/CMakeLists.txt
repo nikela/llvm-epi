@@ -382,6 +382,10 @@ set(LIBOMP_LIB_FILE ${LIBOMP_LIB_NAME}${LIBOMP_LIBRARY_SUFFIX})
 set(LIBOMP_INSTALL_ALIASES TRUE CACHE BOOL
   "Install libgomp and libiomp5 library aliases for backwards compatibility")
 
+# Hierarchical scheduling support
+set(LIBOMP_ENABLE_VBR FALSE CACHE BOOL
+  "Enable vectorized barrier and reduction support?")
+
 # Print configuration after all variables are set.
 if(${OPENMP_STANDALONE_BUILD})
   libomp_say("Operating System     -- ${CMAKE_SYSTEM_NAME}")

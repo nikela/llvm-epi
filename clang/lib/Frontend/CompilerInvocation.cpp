@@ -3393,6 +3393,9 @@ void CompilerInvocation::GenerateLangArgs(const LangOptions &Opts,
     if (!Opts.OpenMPUseTLS)
       GenerateArg(Args, OPT_fnoopenmp_use_tls, SA);
 
+    if (!Opts.OpenMPUseVBR)
+      GenerateArg(Args, OPT_fnoopenmp_use_vbr, SA);
+
     if (Opts.OpenMPIsDevice)
       GenerateArg(Args, OPT_fopenmp_is_device, SA);
 
@@ -3782,6 +3785,8 @@ bool CompilerInvocation::ParseLangArgs(LangOptions &Opts, ArgList &Args,
   Opts.OpenMPSimd = !Opts.OpenMP && IsSimdSpecified;
   Opts.OpenMPUseTLS =
       Opts.OpenMP && !Args.hasArg(options::OPT_fnoopenmp_use_tls);
+  Opts.OpenMPUseVBR =
+      Opts.OpenMP && !Args.hasArg(options::OPT_fnoopenmp_use_vbr);
   Opts.OpenMPIsDevice =
       Opts.OpenMP && Args.hasArg(options::OPT_fopenmp_is_device);
   Opts.OpenMPIRBuilder =

@@ -2048,6 +2048,10 @@ typedef enum kmp_bar_pat { /* Barrier communication patterns */
                                                 branching factor 2^n */
                            bp_hierarchical_bar = 3, /* Machine hierarchy tree */
                            bp_dist_bar = 4, /* Distributed barrier */
+#if KMP_VBR_ENABLED                           
+                           bp_vector_bar = 5, /* Vectorized tree with min 
+                                                branching factor 2^n */
+#endif                                                
                            bp_last_bar /* Placeholder to mark the end */
 } kmp_bar_pat_e;
 
@@ -2123,12 +2127,18 @@ union KMP_ALIGN_CACHE kmp_barrier_union {
 
 typedef union kmp_barrier_union kmp_balign_t;
 
+#define REDUCTION_ARRAYS_CAPACITY 4
+  
 /* Team barrier needs only non-volatile arrived counter */
 union KMP_ALIGN_CACHE kmp_barrier_team_union {
   double b_align; /* use worst case alignment */
   char b_pad[CACHE_LINE];
   struct {
     kmp_uint64 b_arrived; /* STATE => task reached synch point. */
+    kmp_uint8 ** b_arrived_vflags;
+    void ** reduction_arrays;
+    kmp_uint padding;
+    kmp_uint levels;
 #if USE_DEBUGGER
     // The following two fields are indended for the debugger solely. Only
     // primary thread of the team accesses these fields: the first one is
@@ -3152,6 +3162,9 @@ extern int __kmp_version;
 extern kmp_cached_addr_t *__kmp_threadpriv_cache_list;
 
 /* Barrier algorithm types and options */
+
+extern kmp_uint32 __kmp_barrier_vector_padding;
+
 extern kmp_uint32 __kmp_barrier_gather_bb_dflt;
 extern kmp_uint32 __kmp_barrier_release_bb_dflt;
 extern kmp_bar_pat_e __kmp_barrier_gather_pat_dflt;
@@ -3801,9 +3814,9 @@ KMP_EXPORT void kmpc_free(void *ptr);
 
 /* declarations for internal use */
 
-extern int __kmp_barrier(enum barrier_type bt, int gtid, int is_split,
-                         size_t reduce_size, void *reduce_data,
-                         void (*reduce)(void *, void *));
+  extern int __kmp_barrier(enum barrier_type bt, int gtid, int is_split, 
+                            kmp_int32 num_vars, size_t reduce_size, 
+                            void *reduce_data, void (*reduce)(void *, void *));
 extern void __kmp_end_split_barrier(enum barrier_type bt, int gtid);
 extern int __kmp_barrier_gomp_cancel(int gtid);
 
@@ -4121,13 +4134,13 @@ KMP_EXPORT void __kmpc_init_nest_lock_with_hint(ident_t *loc, kmp_int32 gtid,
 /* Interface to fast scalable reduce methods routines */
 
 KMP_EXPORT kmp_int32 __kmpc_reduce_nowait(
-    ident_t *loc, kmp_int32 global_tid, kmp_int32 num_vars, size_t reduce_size,
+    ident_t *loc, kmp_int32 global_tid, kmp_int32 num_vars, size_t reduce_size, 
     void *reduce_data, void (*reduce_func)(void *lhs_data, void *rhs_data),
     kmp_critical_name *lck);
 KMP_EXPORT void __kmpc_end_reduce_nowait(ident_t *loc, kmp_int32 global_tid,
                                          kmp_critical_name *lck);
 KMP_EXPORT kmp_int32 __kmpc_reduce(
-    ident_t *loc, kmp_int32 global_tid, kmp_int32 num_vars, size_t reduce_size,
+    ident_t *loc, kmp_int32 global_tid, kmp_int32 num_vars, size_t reduce_size, 
     void *reduce_data, void (*reduce_func)(void *lhs_data, void *rhs_data),
     kmp_critical_name *lck);
 KMP_EXPORT void __kmpc_end_reduce(ident_t *loc, kmp_int32 global_tid,

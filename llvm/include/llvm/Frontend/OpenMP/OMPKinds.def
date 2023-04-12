@@ -109,6 +109,7 @@ __OMP_STRUCT_TYPE(DependInfo, kmp_dep_info, false, SizeTy, SizeTy, Int8)
 
 __OMP_FUNCTION_TYPE(ParallelTask, true, Void, Int32Ptr, Int32Ptr)
 __OMP_FUNCTION_TYPE(ReduceFunction, false, Void, VoidPtr, VoidPtr)
+__OMP_FUNCTION_TYPE(VReduceFunction, false, Void, VoidPtr, VoidPtr, Int32)
 __OMP_FUNCTION_TYPE(CopyFunction, false, Void, VoidPtr, VoidPtr)
 __OMP_FUNCTION_TYPE(KmpcCtor, false, VoidPtr, VoidPtr)
 __OMP_FUNCTION_TYPE(KmpcDtor, false, Void, VoidPtr)

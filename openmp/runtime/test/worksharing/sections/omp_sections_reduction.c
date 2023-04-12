@@ -1,4 +1,5 @@
 // RUN: %libomp-compile-and-run
+// RUN: %libomp-compile -fopenmp-use-vbr && env KMP_REDUCTION_BARRIER_PATTERN='vector,vector' %libomp-run
 #include <stdio.h>
 #include <math.h>
 #include "omp_testsuite.h"

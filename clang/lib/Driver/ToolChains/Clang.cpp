@@ -6214,13 +6214,18 @@ void Clang::ConstructJob(Compilation &C, const JobAction &JA,
     case Driver::OMPRT_IOMP5:
       // Clang can generate useful OpenMP code for these two runtime libraries.
       CmdArgs.push_back("-fopenmp");
-
       // If no option regarding the use of TLS in OpenMP codegeneration is
       // given, decide a default based on the target. Otherwise rely on the
       // options and pass the right information to the frontend.
       if (!Args.hasFlag(options::OPT_fopenmp_use_tls,
                         options::OPT_fnoopenmp_use_tls, /*Default=*/true))
         CmdArgs.push_back("-fnoopenmp-use-tls");
+      // If no option regarding the use of VBR in OpenMP codegeneration is
+      // given, decide a default based on the target. Otherwise rely on the
+      // options and pass the right information to the frontend.
+      if (!Args.hasFlag(options::OPT_fopenmp_use_vbr,
+                        options::OPT_fnoopenmp_use_vbr, /*Default=*/false))
+        CmdArgs.push_back("-fnoopenmp-use-vbr");
       Args.AddLastArg(CmdArgs, options::OPT_fopenmp_simd,
                       options::OPT_fno_openmp_simd);
       Args.AddAllArgs(CmdArgs, options::OPT_fopenmp_enable_irbuilder);

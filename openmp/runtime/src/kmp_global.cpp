@@ -82,6 +82,7 @@ kmp_uint32 __kmp_barrier_gather_bb_dflt = 2;
 kmp_uint32 __kmp_barrier_release_bb_dflt = 2;
 /* branch_factor = 4 */ /* hyper2: C78980 */
 
+kmp_uint32 __kmp_barrier_vector_padding = 1;
 kmp_bar_pat_e __kmp_barrier_gather_pat_dflt = bp_hyper_bar;
 /* hyper2: C78980 */
 kmp_bar_pat_e __kmp_barrier_release_pat_dflt = bp_hyper_bar;
@@ -112,7 +113,11 @@ char const *__kmp_barrier_type_name[bs_last_barrier] = {"plain", "forkjoin"
 #endif // KMP_FAST_REDUCTION_BARRIER
 };
 char const *__kmp_barrier_pattern_name[bp_last_bar] = {
-    "linear", "tree", "hyper", "hierarchical", "dist"};
+    "linear", "tree", "hyper", "hierarchical", "dist"
+#if KMP_VBR_ENABLED    
+    , "vector"
+#endif    
+    };
 
 int __kmp_allThreadsSpecified = 0;
 size_t __kmp_align_alloc = CACHE_LINE;
