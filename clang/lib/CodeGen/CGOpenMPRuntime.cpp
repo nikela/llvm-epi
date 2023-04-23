@@ -5185,49 +5185,6 @@ llvm::Intrinsic::ID getReductionOpVPIntrinsicID( bool isIntTy,
   return VPOpCodeID;
 }
 
-llvm::Value* emitReductionOpIntrinsic( clang::CodeGen::CodeGenFunction &CGF,
-                    llvm::Value *SrcVector, llvm::Type *SrcVecElemType, 
-                    const clang::BinaryOperator::Opcode ReductionOpCode) {
-  llvm::Value *ReducedValue = nullptr;
-  switch (ReductionOpCode)
-    {
-    case BinaryOperatorKind::BO_Add:
-    case BinaryOperatorKind::BO_Sub:
-      if( SrcVecElemType->isIntegerTy() )
-        ReducedValue = CGF.Builder.CreateAddReduce(SrcVector);        
-      else
-      {
-        llvm::Value *Acc = 
-            CGF.Builder.CreateSIToFP(CGF.Builder.getInt32(0), SrcVecElemType);
-        ReducedValue = CGF.Builder.CreateFAddReduce(Acc, SrcVector);
-      }
-      break;
-    case BinaryOperatorKind::BO_Mul:
-      if( SrcVecElemType->isIntegerTy() )
-        ReducedValue = CGF.Builder.CreateMulReduce(SrcVector);
-      else
-      {
-        llvm::Value *Acc = 
-            CGF.Builder.CreateSIToFP(CGF.Builder.getInt32(1), SrcVecElemType);
-        ReducedValue = CGF.Builder.CreateFMulReduce(Acc, SrcVector);
-      }
-      break;
-    case BinaryOperatorKind::BO_And:
-      ReducedValue = CGF.Builder.CreateAndReduce(SrcVector);
-      break;
-    case BinaryOperatorKind::BO_Or:
-      ReducedValue = CGF.Builder.CreateOrReduce(SrcVector);
-      break;
-    case BinaryOperatorKind::BO_Xor:
-      ReducedValue = CGF.Builder.CreateXorReduce(SrcVector);      
-      break;
-    default:      
-      assert(false && "Operation is not supported in VP intrinsics");
-      break;
-    }
-  return ReducedValue;
-}
-
 
 llvm::Value* emitReductionOpIntrinsic( clang::CodeGen::CodeGenFunction &CGF,
                     llvm::Value *SrcVector, llvm::Type *SrcVecElemType, 
@@ -5337,7 +5294,7 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
   CGF.StartFunction(GlobalDecl(), C.VoidTy, Fn, CGFI, Args, Loc, Loc);
 
   llvm::APInt RHSArraySize(/*unsigned int numBits=*/32, 
-                  ArgsType->getPointerElementType()->getArrayNumElements()+1);
+                  ArgsType->getPointerTo()->getArrayNumElements()+1);
   QualType RHSArraySizeTy = C.getConstantArrayType(C.VoidPtrTy, RHSArraySize, 
                             nullptr, ArrayType::Normal, /*IndexTypeQuals=*/0);
   llvm::Type* ArgsTypeRHSArray = 
@@ -5348,11 +5305,11 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
   CGF.EmitBlock(VectorReductionEntryBB);
   Address LHS(CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
       CGF.Builder.CreateLoad(CGF.GetAddrOfLocalVar(&LHSArg)),
-      ArgsType), CGF.getPointerAlign());
+      ArgsType->getPointerTo()), ArgsType, CGF.getPointerAlign());
   Address RHSArray(CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
       CGF.Builder.CreateLoad(CGF.GetAddrOfLocalVar(&RHSArrayArg)),
-      ArgsTypeRHSArray), CGF.getPointerAlign()); 
-      
+      ArgsTypeRHSArray->getPointerTo()), ArgsTypeRHSArray, CGF.getPointerAlign()); 
+     
   ///////////////////////////////////  
   CodeGenFunction::OMPPrivateScope Scope(CGF);
   auto IPriv = Privates.begin();  
@@ -5362,23 +5319,17 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
                                   /*Id=*/nullptr, C.IntTy , /*TInfo=*/nullptr,
                                   StorageClass::SC_None, nullptr );
   const VarDecl *VarNThreads = cast<VarDecl>(PVarNThreads);   
-  Scope.addPrivate(VarNThreads, [&CGF, RHSArray, RIdx, VarNThreads]() {
-    return emitAddrOfVarFromArray(CGF, RHSArray, RIdx, VarNThreads);
-  }); 
+  Scope.addPrivate(VarNThreads, emitAddrOfVarFromArray(CGF, RHSArray, RIdx, VarNThreads)); 
   RIdx++;
 
   for (unsigned I = 0, E = ReductionOps.size(); 
                                       I < E; ++I, ++IPriv, ++Idx, ++RIdx) {
     const auto *RHSArrayVar =
         cast<VarDecl>(cast<DeclRefExpr>(RHSExprs[I])->getDecl());        
-    Scope.addPrivate(RHSArrayVar, [&CGF, RHSArray, RIdx, RHSArrayVar]() {
-      return emitAddrOfVarFromArray(CGF, RHSArray, RIdx, RHSArrayVar);
-    });            
+    Scope.addPrivate(RHSArrayVar, emitAddrOfVarFromArray(CGF, RHSArray, RIdx, RHSArrayVar));            
     const auto *LHSVar =
         cast<VarDecl>(cast<DeclRefExpr>(LHSExprs[I])->getDecl());
-    Scope.addPrivate(LHSVar, [&CGF, LHS, Idx, LHSVar]() {
-      return emitAddrOfVarFromArray(CGF, LHS, Idx, LHSVar);
-    });
+    Scope.addPrivate(LHSVar, emitAddrOfVarFromArray(CGF, LHS, Idx, LHSVar));
   }  
   Scope.Privatize();
   //////////////////////////////////////////////////////
@@ -5641,7 +5592,7 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
   llvm::Function *ReductionFn;  
   if (CGM.getLangOpts().OpenMPUseVBR && CGM.getTriple().isRISCV()) {
     ReductionFn = emitVReductionFunctionRISCV(
-            Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(), 
+            Loc, CGF.ConvertTypeForMem(ReductionArrayTy), 
             Privates, LHSExprs, RHSExprs, ReductionOps);
   }
   else {
@@ -5714,12 +5665,13 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
       RL,                                    // void *RedList
       ReductionFn, // void (*) (void *, void *) <reduce_func>
       Lock         // kmp_critical_name *&<lock>
-  };
-  llvm::Value *Res = CGF.EmitRuntimeCall(
+    };
+    Res = CGF.EmitRuntimeCall(
       OMPBuilder.getOrCreateRuntimeFunction(
           CGM.getModule(),
           WithNowait ? OMPRTL___kmpc_reduce_nowait : OMPRTL___kmpc_reduce),
       Args);
+  }
 
   // 5. Build switch(res)
   llvm::BasicBlock *DefaultBB = CGF.createBasicBlock(".omp.reduction.default");
