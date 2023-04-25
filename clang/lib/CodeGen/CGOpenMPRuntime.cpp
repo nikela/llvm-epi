@@ -43,8 +43,8 @@
 #include <cassert>
 #include <numeric>
 #include <optional>
-
 #include "llvm/IR/IntrinsicsEPI.h"
+
 
 using namespace clang;
 using namespace CodeGen;
@@ -2297,7 +2297,7 @@ void CGOpenMPRuntime::emitTaskgroupRegion(CodeGenFunction &CGF,
 static Address emitAddrOfVarFromArray(CodeGenFunction &CGF, Address Array,
                                       unsigned Index, const VarDecl *Var) {
   // Pull out the pointer to the variable.
-  Address PtrAddr = CGF.Builder.CreateConstArrayGEP(Array, Index);
+  Address PtrAddr = CGF.Builder.CreateConstGEP(Array, Index);
   llvm::Value *Ptr = CGF.Builder.CreateLoad(PtrAddr);
 
   llvm::Type *ElemTy = CGF.ConvertTypeForMem(Var->getType());
@@ -5091,7 +5091,6 @@ llvm::Function *CGOpenMPRuntime::emitReductionFunction(
   return Fn;
 }
 
-
 llvm::Constant* getReductionOpIdentityVal( llvm::Type *SrcElemType,
                   const clang::BinaryOperator::Opcode ReductionOpCode) {
   llvm::Constant *IdentityVal = nullptr;
@@ -5158,7 +5157,7 @@ llvm::Intrinsic::ID getReductionOpVPIntrinsicID( bool isIntTy,
                         const clang::BinaryOperator::Opcode ReductionOpCode ){
 
   llvm::Intrinsic::ID VPOpCodeID = 0;    
-    switch (ReductionOpCode)
+   switch (ReductionOpCode)
     {
     case BinaryOperatorKind::BO_Add:
       VPOpCodeID = isIntTy? llvm::Intrinsic::vp_add : llvm::Intrinsic::vp_fadd;
@@ -5184,7 +5183,6 @@ llvm::Intrinsic::ID getReductionOpVPIntrinsicID( bool isIntTy,
     }
   return VPOpCodeID;
 }
-
 
 llvm::Value* emitReductionOpIntrinsic( clang::CodeGen::CodeGenFunction &CGF,
                     llvm::Value *SrcVector, llvm::Type *SrcVecElemType, 
@@ -5248,7 +5246,7 @@ uint32_t getSEWParam(llvm::Type* SrcElemType) {
   uint32_t SEW=0; 
   if(SrcElemType->isDoubleTy() || SrcElemType->isIntegerTy(64))
     SEW = 3;
-  else if(SrcElemType->isFloatTy() || SrcElemType->isIntegerTy(32))
+ else if(SrcElemType->isFloatTy() || SrcElemType->isIntegerTy(32))
     SEW = 2;
   else if(SrcElemType->isIntegerTy(16))
     SEW = 1;
@@ -5260,7 +5258,7 @@ uint32_t getSEWParam(llvm::Type* SrcElemType) {
 }
 
 llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
-    SourceLocation Loc, llvm::Type *ArgsType, ArrayRef<const Expr *> Privates,
+    SourceLocation Loc, llvm::Type *ArgsType, llvm::APInt ArraySize, ArrayRef<const Expr *> Privates,
     ArrayRef<const Expr *> LHSExprs, ArrayRef<const Expr *> RHSExprs,
     ArrayRef<const Expr *> ReductionOps) {
   ASTContext &C = CGM.getContext();
@@ -5293,8 +5291,12 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
   CodeGenFunction CGF(CGM);
   CGF.StartFunction(GlobalDecl(), C.VoidTy, Fn, CGFI, Args, Loc, Loc);
 
-  llvm::APInt RHSArraySize(/*unsigned int numBits=*/32, 
-                  ArgsType->getPointerTo()->getArrayNumElements()+1);
+  llvm::APInt RHSArraySize = ArraySize + 1;
+// llvm::APInt RHSArraySize(/*unsigned int numBits=*/32, 
+//     llvm::PointerType::getWithSamePointeeType(cast<llvm::PointerType>(ArgsType), 0)->getArrayNumElements()+1);
+//       ArgsType->getNonOpaquePointerElementType()->getArrayNumElements()+1);
+//     llvm::dyn_cast<llvm::PointerType>(ArgsType)->getArrayNumElements()+1);
+//        ArgsType->getElementType()->getArrayNumElements()+1);   
   QualType RHSArraySizeTy = C.getConstantArrayType(C.VoidPtrTy, RHSArraySize, 
                             nullptr, ArrayType::Normal, /*IndexTypeQuals=*/0);
   llvm::Type* ArgsTypeRHSArray = 
@@ -5308,8 +5310,8 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
       ArgsType->getPointerTo()), ArgsType, CGF.getPointerAlign());
   Address RHSArray(CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
       CGF.Builder.CreateLoad(CGF.GetAddrOfLocalVar(&RHSArrayArg)),
-      ArgsTypeRHSArray->getPointerTo()), ArgsTypeRHSArray, CGF.getPointerAlign()); 
-     
+     ArgsTypeRHSArray->getPointerTo()), ArgsTypeRHSArray, CGF.getPointerAlign()); 
+
   ///////////////////////////////////  
   CodeGenFunction::OMPPrivateScope Scope(CGF);
   auto IPriv = Privates.begin();  
@@ -5326,14 +5328,13 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
                                       I < E; ++I, ++IPriv, ++Idx, ++RIdx) {
     const auto *RHSArrayVar =
         cast<VarDecl>(cast<DeclRefExpr>(RHSExprs[I])->getDecl());        
-    Scope.addPrivate(RHSArrayVar, emitAddrOfVarFromArray(CGF, RHSArray, RIdx, RHSArrayVar));            
+    Scope.addPrivate(RHSArrayVar, emitAddrOfVarFromArray(CGF, RHSArray, RIdx, RHSArrayVar));
     const auto *LHSVar =
         cast<VarDecl>(cast<DeclRefExpr>(LHSExprs[I])->getDecl());
-    Scope.addPrivate(LHSVar, emitAddrOfVarFromArray(CGF, LHS, Idx, LHSVar));
+    Scope.addPrivate(LHSVar, emitAddrOfVarFromArray(CGF, LHS, Idx, LHSVar)); 
   }  
   Scope.Privatize();
   //////////////////////////////////////////////////////
-
 
   auto VarAddressNThreads = CGF.GetAddrOfLocalVar(VarNThreads);
   auto nThreads =  CGF.Builder.CreateLoad(VarAddressNThreads);
@@ -5385,7 +5386,7 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
     auto VecGEP = CGF.Builder.CreateGEP(RHSArrayVarAddress.getElementType(), 
                                   RHSArrayVarAddress.getPointer(), IndexVar);
     auto VecGEPCast = CGF.Builder.CreateBitCast(VecGEP, SrcVecPtrType);      
-
+    
     llvm::SmallVector<llvm::Type *> arg_vec;
     arg_vec.push_back(VecGEPCast->getType());
     llvm::ArrayRef<llvm::Type *> arg_type(arg_vec); 
@@ -5410,7 +5411,6 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
                                           {RVLArg, SEWArg, LMULArg});
     llvm::Value *GVL = CGF.Builder.CreateZExtOrTrunc( GVL64, 
                                                       IndexVar->getType());
-    
     auto vpLoadedVec = CGF.Builder.CreateCall(vpLoadDecl, 
                                       {VecGEPCast, BlockInMaskPart, GVL});
     SmallVector<llvm::Value*, 4> Ops;
@@ -5423,6 +5423,7 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
     Ops.push_back(GVL);    
     llvm::CallInst *VecHReduced = CGF.Builder.CreateIntrinsic(VPOpCodeID, 
                                                 vpLoadedVec->getType(), Ops);
+
     llvm::Value *EVLSplat = 
         CGF.Builder.CreateVectorSplat(vTy->getElementCount(), GVL64);
     llvm::Value *EVLMask = 
@@ -5449,10 +5450,10 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
   }
   Scope.ForceCleanup();    
   
+
   CGF.FinishFunction();
   return Fn;
 } // emitVReductionFunctionRISCV
-
 
 void CGOpenMPRuntime::emitSingleReductionCombiner(CodeGenFunction &CGF,
                                                   const Expr *ReductionOp,
@@ -5592,16 +5593,15 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
   llvm::Function *ReductionFn;  
   if (CGM.getLangOpts().OpenMPUseVBR && CGM.getTriple().isRISCV()) {
     ReductionFn = emitVReductionFunctionRISCV(
-            Loc, CGF.ConvertTypeForMem(ReductionArrayTy), 
-            Privates, LHSExprs, RHSExprs, ReductionOps);
+            Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(), 
+            ArraySize, Privates, LHSExprs, RHSExprs, ReductionOps);
   }
   else {
-    ReductionFn = emitReductionFunction(
-            Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(), 
-            Privates, LHSExprs, RHSExprs, ReductionOps);
-            //getPointerTo() may not be necessary
+    ReductionFn =
+        emitReductionFunction(Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(),
+                            Privates, LHSExprs, RHSExprs, ReductionOps);
   }
- 
+
   // 3. Create static kmp_critical_name lock = { 0 };
   std::string Name = getName({"reduction"});
   llvm::Value *Lock = getCriticalRegionLock(Name);
@@ -5614,7 +5614,7 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
   llvm::Value *RL = CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
       ReductionList.getPointer(), CGF.VoidPtrTy);
   llvm::Value *Res;  
-  if (CGM.getLangOpts().OpenMPUseVBR) {    
+  if (CGM.getLangOpts().OpenMPUseVBR && CGM.getTriple().isRISCV()) {    
     Address FirstElem = CGF.Builder.CreateConstArrayGEP(
                                             ReductionArrayTySizesList, 0);
     llvm::Value *RLsize = CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
@@ -5666,13 +5666,13 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
       ReductionFn, // void (*) (void *, void *) <reduce_func>
       Lock         // kmp_critical_name *&<lock>
     };
+  
     Res = CGF.EmitRuntimeCall(
       OMPBuilder.getOrCreateRuntimeFunction(
           CGM.getModule(),
           WithNowait ? OMPRTL___kmpc_reduce_nowait : OMPRTL___kmpc_reduce),
       Args);
   }
-
   // 5. Build switch(res)
   llvm::BasicBlock *DefaultBB = CGF.createBasicBlock(".omp.reduction.default");
   llvm::SwitchInst *SwInst =

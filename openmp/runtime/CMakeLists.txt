@@ -383,7 +383,7 @@ set(LIBOMP_INSTALL_ALIASES TRUE CACHE BOOL
   "Install libgomp and libiomp5 library aliases for backwards compatibility")
 
 # Hierarchical scheduling support
-set(LIBOMP_ENABLE_VBR FALSE CACHE BOOL
+set(LIBOMP_ENABLE_VBR TRUE CACHE BOOL
   "Enable vectorized barrier and reduction support?")
 
 # Print configuration after all variables are set.

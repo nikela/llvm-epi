@@ -2284,7 +2284,7 @@ void *__kmpc_copyprivate_light(ident_t *loc, kmp_int32 gtid, void *cpy_data) {
 #if USE_ITT_NOTIFY
   __kmp_threads[gtid]->th.th_ident = loc;
 #endif
-  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, NULL, NULL);
+  __kmp_barrier(bs_plain_barrier, gtid, FALSE, 0, 0, NULL, NULL);
 
   return *data_ptr;
 }

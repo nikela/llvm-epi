@@ -1200,6 +1200,7 @@ public:
 
   llvm::Function *emitVReductionFunctionRISCV(SourceLocation Loc,
                                          llvm::Type *ArgsType,
+                                         llvm::APInt ArraySize, 
                                          ArrayRef<const Expr *> Privates,
                                          ArrayRef<const Expr *> LHSExprs,
                                          ArrayRef<const Expr *> RHSExprs,
