@@ -2297,7 +2297,7 @@ void CGOpenMPRuntime::emitTaskgroupRegion(CodeGenFunction &CGF,
 static Address emitAddrOfVarFromArray(CodeGenFunction &CGF, Address Array,
                                       unsigned Index, const VarDecl *Var) {
   // Pull out the pointer to the variable.
-  Address PtrAddr = CGF.Builder.CreateConstGEP(Array, Index);
+  Address PtrAddr = CGF.Builder.CreateConstArrayGEP(Array, Index);
   llvm::Value *Ptr = CGF.Builder.CreateLoad(PtrAddr);
 
   llvm::Type *ElemTy = CGF.ConvertTypeForMem(Var->getType());
@@ -5300,7 +5300,7 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
   QualType RHSArraySizeTy = C.getConstantArrayType(C.VoidPtrTy, RHSArraySize, 
                             nullptr, ArrayType::Normal, /*IndexTypeQuals=*/0);
   llvm::Type* ArgsTypeRHSArray = 
-                    CGF.ConvertTypeForMem(RHSArraySizeTy)->getPointerTo();
+                    CGF.ConvertTypeForMem(RHSArraySizeTy); //->getPointerTo();
 
   llvm::BasicBlock *VectorReductionEntryBB = CGF.createBasicBlock("vec.entry");
 
@@ -5310,7 +5310,9 @@ llvm::Function *CGOpenMPRuntime::emitVReductionFunctionRISCV(
       ArgsType->getPointerTo()), ArgsType, CGF.getPointerAlign());
   Address RHSArray(CGF.Builder.CreatePointerBitCastOrAddrSpaceCast(
       CGF.Builder.CreateLoad(CGF.GetAddrOfLocalVar(&RHSArrayArg)),
-     ArgsTypeRHSArray->getPointerTo()), ArgsTypeRHSArray, CGF.getPointerAlign()); 
+      ArgsTypeRHSArray->getPointerTo()), ArgsTypeRHSArray, CGF.getPointerAlign()); 
+//     ArgsType->getPointerTo()), ArgsType, CGF.getPointerAlign()); 
+
 
   ///////////////////////////////////  
   CodeGenFunction::OMPPrivateScope Scope(CGF);
@@ -5593,12 +5595,12 @@ void CGOpenMPRuntime::emitReduction(CodeGenFunction &CGF, SourceLocation Loc,
   llvm::Function *ReductionFn;  
   if (CGM.getLangOpts().OpenMPUseVBR && CGM.getTriple().isRISCV()) {
     ReductionFn = emitVReductionFunctionRISCV(
-            Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(), 
+            Loc, CGF.ConvertTypeForMem(ReductionArrayTy), 
             ArraySize, Privates, LHSExprs, RHSExprs, ReductionOps);
   }
   else {
     ReductionFn =
-        emitReductionFunction(Loc, CGF.ConvertTypeForMem(ReductionArrayTy)->getPointerTo(),
+        emitReductionFunction(Loc, CGF.ConvertTypeForMem(ReductionArrayTy),
                             Privates, LHSExprs, RHSExprs, ReductionOps);
   }
 
