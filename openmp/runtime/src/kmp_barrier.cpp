@@ -589,7 +589,8 @@ static void __kmp_vector_barrier_gather(
                               ceil(log10(num_threads)/log10(branch_factor));
 
   void** reduce_data_arrays = team->t.t_bar[bt].reduction_arrays;
-  
+
+
   KA_TRACE(20,
       ("__kmp_vector_barrier_gather: T#%d(%d:%d) enter for barrier type %d\n",
        gtid, team->t.t_id, tid, bt));
@@ -626,62 +627,64 @@ static void __kmp_vector_barrier_gather(
                   tmp_rdata[i], reduce_data_sizes[i] );
 	      }
       }
+#ifdef KMP_ARCH_RISCV64
+      __asm__("fence iorw, iorw");
+    /*intrinsics to load and test vectors*/
+#else
+      KMP_MB();
+#endif
+
+
       break;
     }
     kmp_uint32 numflags_towait = num_threads < branch_factor ?  num_threads : 
                                                                 branch_factor;
     int flagstowait = numflags_towait * vflags_padding;
 
-    /*intrinsics to load and test vectors*/
-#ifdef __AVX512F__        
 
-    __m512i m512i_vflags;
-    __mmask16 load_mask=0xFFFF;
-
-    if(flagstowait < 64){
-      int mshift = (64-(flagstowait))/4; //64->Cache line, 4->load_epi32
-      load_mask = load_mask >> mshift;    
-    }    
-     __mmask8 cmp_mask;
-    do{
-        cmp_mask = 0x00;
-#pragma nounroll
-        for( int i = 0; i < flagstowait; i+=64 ) {          
-	        m512i_vflags = _mm512_maskz_loadu_epi32(load_mask, 
-                                &vflags[level][(lvl_tid*vflags_padding)+i]);
-          cmp_mask =  cmp_mask | 
-                      _mm512_test_epi64_mask(m512i_vflags, m512i_vflags);
-        }      
-    }while(cmp_mask);
-
-#elif defined __ARM_FEATURE_SVE
-
-	svuint8_t sve_vflags, sve_vcflags;
-	svbool_t cmp_pg;
 	
-	do {
-		sve_vcflags = svdup_n_u8(0);
-		for(int i = 0; i < flagstowait; i+=svcntb()) {
-			svbool_t pg = svwhilelt_b8(i, flagstowait);
-			sve_vflags = svld1_u8(pg, &vflags[level][(lvl_tid*vflags_padding)+i]);
-			sve_vcflags = svorr_u8_m(svptrue_b8(), sve_vcflags, sve_vflags);
-		}
-		cmp_pg = svcmpeq_n_u8(svptrue_b8(), sve_vcflags, 1);
-	} while( svptest_any(svptrue_b8(), cmp_pg) );
-	
-#elif defined KMP_ARCH_RISCV64
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid, vflags[level][lvl_tid*vflags_padding]));
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid+1, vflags[level][(lvl_tid+1)*vflags_padding]));
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid+2, vflags[level][(lvl_tid+2)*vflags_padding]));
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid+3, vflags[level][(lvl_tid+3)*vflags_padding]));
+
+
+#ifdef KMP_ARCH_RISCV64
 	
 	unsigned long int gvl, maxvl, maxgvl;
 	__epi_8xi8 acc_vflags, rvv_vflags;	
 		
-	signed char any_waiting_thread;
+	unsigned char any_waiting_thread;
 	maxvl = __builtin_epi_vsetvlmax( __epi_e8, __epi_m1); 
-	acc_vflags = __builtin_epi_vmv_v_x_8xi8( 0, maxvl);
+	#if __riscv_vector_version==800
+	    acc_vflags = __builtin_epi_vmv_v_x_8xi8( 0, maxvl);
+	#else
+	    acc_vflags = __builtin_epi_vbroadcast_8xi8(0, maxvl);
+	#endif
+
 	maxgvl = __builtin_epi_vsetvl( flagstowait, __epi_e8, __epi_m1);
 	do
-	  {
-	    acc_vflags = __builtin_epi_vmv_v_x_8xi8( 0, 1);
-	    for(int i = 0; i < flagstowait; i+=gvl) {
+	  {	  
+
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid, vflags[level][lvl_tid*vflags_padding]));
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid+1, vflags[level][(lvl_tid+1)*vflags_padding]));
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid+2, vflags[level][(lvl_tid+2)*vflags_padding]));
+    KA_TRACE(20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d trying to reduce vflag[%d][%d]=%d\n",
+			    gtid, team->t.t_id, tid, level, lvl_tid+3, vflags[level][(lvl_tid+3)*vflags_padding]));
+
+	#if __riscv_vector_version==800
+	    acc_vflags = __builtin_epi_vmv_v_x_8xi8( 0, maxvl);
+	#else
+	    acc_vflags = __builtin_epi_vbroadcast_8xi8(0, maxvl);
+	#endif
+	    for(int i = 0; i < flagstowait; ) {
 	      gvl = __builtin_epi_vsetvl(flagstowait - i, __epi_e8, __epi_m1);
 	      rvv_vflags = __builtin_epi_vload_unsigned_8xi8( 
                           &vflags[level][(lvl_tid*vflags_padding) + i], gvl);
@@ -689,7 +692,12 @@ static void __kmp_vector_barrier_gather(
 	      i+=gvl;
 	    }
 	    acc_vflags = __builtin_epi_vredor_8xi8( acc_vflags, acc_vflags, maxvl);
+	#if __riscv_vector_version==800
 	    any_waiting_thread = __builtin_epi_vmv_x_s_8xi8(acc_vflags);
+	#else
+	    any_waiting_thread = __builtin_epi_vextract_8xi8(acc_vflags, 0); 
+	#endif
+
 	  } while(any_waiting_thread);	
 	
 #else 
@@ -705,6 +713,13 @@ static void __kmp_vector_barrier_gather(
 
 #endif 
  
+    #ifdef KMP_ARCH_RISCV64
+    __asm__("fence iorw, iorw");
+    /*intrinsics to load and test vectors*/
+    #else
+    KMP_MB();
+    #endif
+
     KA_TRACE(20,
             ("__kmp_vector_barrier_gather: T#%d(%d:%d) lvl_tid %d arrived at "
             "vflags[%d][%d] - [%d]\n", gtid, team->t.t_id, tid, lvl_tid, level,
@@ -729,6 +744,7 @@ static void __kmp_vector_barrier_gather(
       }
   }
 
+  KMP_MB();
   KA_TRACE(
       20, ("__kmp_vector_barrier_gather: T#%d(%d:%d) exit for barrier type %d\n",
            gtid, team->t.t_id, tid, bt));
